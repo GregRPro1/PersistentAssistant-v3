@@ -5,9 +5,10 @@
 # Company: GR-Analysis
 # Description:
 #   Defines the PromptTab class which displays a formatted version
-#   of the user input. Will later support prompt templates and formatting logic.
+#   of the user input. Supports editable prompt preview, clipboard copy, and status feedback.
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTextEdit
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication
+from PyQt6.QtCore import QTimer
 
 class PromptTab(QWidget):
     """
@@ -17,6 +18,7 @@ class PromptTab(QWidget):
     """
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.status_label = QLabel("")
         self.init_ui()
 
     def init_ui(self):
@@ -32,7 +34,21 @@ class PromptTab(QWidget):
         self.prompt_edit.setPlaceholderText("Formatted version of input will appear here...")
         layout.addWidget(self.prompt_edit)
 
+        self.copy_button = QPushButton("Copy to Clipboard")
+        self.copy_button.clicked.connect(self.copy_to_clipboard)
+        layout.addWidget(self.copy_button)
+
+        layout.addWidget(self.status_label)
         self.setLayout(layout)
+
+    def get_prompt_text(self) -> str:
+        """
+        Returns the current prompt content.
+
+        Returns:
+            str: The formatted prompt text.
+        """
+        return self.prompt_edit.toPlainText()
 
     def set_prompt_text(self, text: str):
         """
@@ -43,11 +59,11 @@ class PromptTab(QWidget):
         """
         self.prompt_edit.setPlainText(text)
 
-    def get_prompt_text(self) -> str:
+    def copy_to_clipboard(self):
         """
-        Returns the current prompt content.
-
-        Returns:
-            str: The formatted prompt text.
+        Copies the current prompt text to the system clipboard.
         """
-        return self.prompt_edit.toPlainText()
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.get_prompt_text())
+        self.status_label.setText("Copied prompt to clipboard.")
+        QTimer.singleShot(3000, lambda: self.status_label.setText(""))

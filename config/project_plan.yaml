@@ -19,9 +19,15 @@ steps:
     status: completed
 
   - id: 1.1
-    title: Connect to ChatGPT and enable prompt exchange
+    title: Embed ChatGPT browser interface via QWebEngineView
+    feature_id: AI.1
+    status: in_progress
+
+  - id: 1.1.1
+    title: After structural analysis, transition from browser to OpenAI API
     feature_id: AI.1
     status: planned
+    tags: [API, post-introspection, memory]
 
   - id: 1.2
     title: Persist input, prompt, and response data to disk

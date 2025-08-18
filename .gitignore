@@ -1,8 +1,24 @@
+# Runtime env
+.venv/
 __pycache__/
 *.pyc
-.venv/
+
+# App logs & runs
 logs/
+*.log
+
+# Generated data
 data/interactions/
+data/tickets/
+data/insights/
 data/cache/
+
+project/structure/*.yaml
+project/structure/*.md
+
+# OS/editor
 .DS_Store
 Thumbs.db
+.vscode/
+
+

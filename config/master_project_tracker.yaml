@@ -12,12 +12,20 @@ features:
     origin: manual
 
   - id: AI.1
-    title: Connect to ChatGPT (via browser or API)
+    title: Connect to ChatGPT (initially via embedded browser)
     phase: 1
     priority: 1
-    status: planned
-    tags: [AI, MVP]
+    status: in_progress
+    tags: [AI, MVP, browser]
     origin: manual
+
+  - id: AI.2
+    title: Migrate to OpenAI API after legacy code analysis and memory integration
+    phase: 2
+    priority: 2
+    status: planned
+    tags: [AI, API, migration]
+    origin: roadmap
 
   - id: LOG.1
     title: Persist all interactions (raw input, prompt, response) to disk
