@@ -1,0 +1,15 @@
+# config/projects/persistent_assistant_v3.yaml
+project_name: "Persistent Assistant v3"
+project_root: 'C:\_Repos\PersistentAssistant'
+
+# Primary plan to track
+plan_path: 'project\plans\project_plan_v3.yaml'
+
+# Standard locations (relative to project_root unless absolute)
+paths:
+  logs_dir: "logs"
+  data_dir: "data"
+  interactions_dir: 'data\interactions'
+  insights_dir: 'data\insights'
+  tickets_dir: 'data\tickets'
+  provider_configs_dir: 'config\provider_configs'

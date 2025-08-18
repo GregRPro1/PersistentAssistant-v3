@@ -4,19 +4,30 @@
 # Author: G. Rapson
 # Company: GR-Analysis
 # Description:
-#   Entry point for the Persistent Assistant Qt application.
-#   Initializes the main window and starts the application loop.
+#   App entry point. Ensures a project session exists before launching main window.
 
 import sys
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QDialog
 from gui.main_window import MainWindow
+from core.project_session import load_session, save_session, make_default_session
+from gui.dialogs.project_selector import ProjectSelectorDialog
 
 def main():
-    """
-    Launches the Persistent Assistant Qt application.
-    """
     app = QApplication(sys.argv)
-    window = MainWindow()
+
+    # Ensure we have a valid session
+    session = load_session()
+    if session is None:
+        defaults = make_default_session()
+        dlg = ProjectSelectorDialog(defaults)
+        # PyQt6: use QDialog.DialogCode.Accepted
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            session = dlg.session_data()
+            save_session(session)
+        else:
+            sys.exit(0)
+
+    window = MainWindow(project_session=session)
     window.show()
     sys.exit(app.exec())
 

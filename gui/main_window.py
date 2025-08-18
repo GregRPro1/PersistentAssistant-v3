@@ -8,6 +8,9 @@
 #   for raw input, prompt formatting, AI response, and plan tracking.
 
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QPushButton, QVBoxLayout, QWidget, QApplication, QLabel
+from PyQt6.QtWidgets import QStatusBar, QMenuBar, QMenu, QMessageBox
+from PyQt6.QtGui import QAction
+
 from PyQt6.QtCore import QTimer
 from gui.tabs.input_tab import InputTab
 from gui.tabs.prompt_tab import PromptTab
@@ -17,6 +20,9 @@ from gui.tabs.chat_tab import ChatTab
 from core.prompt_formatter import format_prompt
 from core.introspection import generate_introspection_report
 from core.tasks import create_tasks_from_introspection
+from core.project_session import load_project_config, save_session, make_default_session
+from gui.dialogs.project_selector import ProjectSelectorDialog
+
 
 # New: for Copy-All-as-YAML and Structure Snapshot
 import os
@@ -41,12 +47,23 @@ class MainWindow(QMainWindow):
     - Embedded Chat tab
     - Tools tab (temporary) with workflow helpers
     """
-    def __init__(self):
+    def __init__(self, project_session: dict | None = None):
         super().__init__()
         self.logger = getattr(self, "logger", None) or (get_logger("gui") if "get_logger" in globals() else None)
 
 
         self.setWindowTitle("Persistent Assistant v3")
+        self.project_session = project_session or {}
+
+        # Merge project config (paths, plan)
+        self.project_config = load_project_config(self.project_session)
+
+        # Status bar shows project info
+        self.status = QStatusBar(self)
+        self.setStatusBar(self.status)
+        self._refresh_status_bar()
+
+
 
         self.tab_widget = QTabWidget()
         self.setCentralWidget(self.tab_widget)
@@ -58,7 +75,7 @@ class MainWindow(QMainWindow):
             input_tab=self.input_tab,
             prompt_tab=self.prompt_tab
         )
-        self.plan_tracker_tab = PlanTrackerTab()
+        self.plan_tracker_tab = PlanTrackerTab(plan_path=self.project_config.get("plan_path"))
         self.chat_tab = ChatTab()
 
         self.tab_widget.addTab(self.input_tab, "Input")
@@ -66,6 +83,9 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.response_tab, "Response")
         self.tab_widget.addTab(self.plan_tracker_tab, "Plan")
         self.tab_widget.addTab(self.chat_tab, "Chat")
+
+        # Menubar
+        self._build_menu()
 
         # Tools tab (temporary): format, simulated send, copy all as YAML, structure snapshot
         control_widget = QWidget()
@@ -102,6 +122,13 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(control_widget, "Tools")
 
         self.resize(1000, 700)
+
+    def _refresh_status_bar(self):
+        name = self.project_config.get("project_name", "(unnamed)")
+        root = self.project_config.get("project_root", "(root?)")
+        plan = self.project_config.get("plan_path", "(plan?)")
+        self.status.showMessage(f"Project: {name} • Root: {root} • Plan: {plan}")
+
 
     def apply_prompt_formatting(self):
         """
@@ -255,3 +282,51 @@ class MainWindow(QMainWindow):
                 self.logger.exception(err)
             except Exception:
                 pass
+
+    def _build_menu(self):
+        mb = self.menuBar() if self.menuBar() else QMenuBar(self)
+        self.setMenuBar(mb)
+
+        proj_menu = mb.addMenu("Project")
+
+        act_switch = QAction("Switch…", self)
+        act_switch.triggered.connect(self.switch_project)
+        proj_menu.addAction(act_switch)
+
+    def _refresh_status_bar(self):
+        name = self.project_config.get("project_name", "(unnamed)")
+        root = self.project_config.get("project_root", "(root?)")
+        plan = self.project_config.get("plan_path", "(plan?)")
+        self.status.showMessage(f"Project: {name} • Root: {root} • Plan: {plan}")
+
+    def switch_project(self):
+        """
+        Open the project selector dialog, save the session, reload config,
+        update Plan tab and status bar.
+        """
+        # Pre-fill dialog with current values
+        defaults = {
+            "project_name": self.project_config.get("project_name", "Persistent Assistant v3"),
+            "project_root": self.project_config.get("project_root", ""),
+            "plan_path":    self.project_config.get("plan_path", ""),
+        }
+
+        dlg = ProjectSelectorDialog(defaults, self)
+        from PyQt6.QtWidgets import QDialog
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        new_session = dlg.session_data()
+        try:
+            save_session(new_session)
+            # Reload merged config
+            self.project_session = new_session
+            self.project_config = load_project_config(self.project_session)
+            # Update Plan tab and status bar
+            self.plan_tracker_tab.set_plan_path(self.project_config.get("plan_path", "project/plans/project_plan_v3.yaml"))
+            self._refresh_status_bar()
+            QMessageBox.information(self, "Project switched",
+                                    "Project session saved and configuration reloaded.")
+        except Exception as e:
+            QMessageBox.critical(self, "Switch failed", f"Could not switch project:\n{e}")
+

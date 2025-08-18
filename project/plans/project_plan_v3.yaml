@@ -136,18 +136,23 @@ phases:
   - name: "Phase 2: Project Context + Selection"
     steps:
       - id: "2.1"
-        status: in_progress
+        status: done
         description: "Project selector at startup (multi-project support)"
         items:
           - title: "Persist last project choice"
-            status: planned
+            status: done
       - id: "2.2"
-        status: planned
+        status: done
         description: "Load project metadata (paths, plan path) from simple YAML"
         items:
           - title: "Show project name/path in status bar"
-            status: planned
-
+            status: done
+      - id: "2.3"
+        status: done
+        description: "Project switching entry point (menu)"
+        items:
+          - title: "Project → Switch… menu opens selector and persists session"
+            status: done
   - name: "Phase 3: OpenAI API Integration (post-introspection)"
     steps:
       - id: "3.1"

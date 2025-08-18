@@ -299,3 +299,11 @@ class PlanTrackerTab(QWidget):
             self.refresh_plan()
         except Exception as e:
             QMessageBox.critical(self, "Rollback Step", f"Error: {e}")
+    
+    def set_plan_path(self, plan_path: str):
+        """
+        Updates the plan file path and reloads the tree.
+        """
+        self.plan_path = plan_path
+        self.refresh_plan()
+
