@@ -1,0 +1,55 @@
+project: PersistentAssistant
+version: 3.0
+status: in_development
+
+features:
+  - id: GUI.1
+    title: Create minimal Qt GUI with tabbed input/output interface
+    phase: 1
+    priority: 1
+    status: completed
+    tags: [GUI, MVP]
+    origin: manual
+
+  - id: AI.1
+    title: Connect to ChatGPT (via browser or API)
+    phase: 1
+    priority: 1
+    status: planned
+    tags: [AI, MVP]
+    origin: manual
+
+  - id: LOG.1
+    title: Persist all interactions (raw input, prompt, response) to disk
+    phase: 1
+    priority: 1
+    status: planned
+    tags: [Logging, MVP]
+    origin: manual
+
+  - id: PLAN.1
+    title: Load and display a stepwise project plan in GUI
+    phase: 0
+    priority: 1
+    status: planned
+    tags: [Planning, GUI, MVP]
+    origin: manual
+
+  - id: TRACKER.1
+    title: Generate project plan from tracker file
+    phase: 0
+    priority: 1
+    status: planned
+    tags: [Planning, Tracker]
+    origin: manual
+
+  - id: INTROSPECT.1
+    title: List files and summarize function inputs/outputs
+    phase: 3
+    priority: 1
+    status: planned
+    tags: [MVP, Introspection]
+    origin: manual
+
+_introspection_suggestions: []
+recovered_modules: []

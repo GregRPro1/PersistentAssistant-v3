@@ -1,0 +1,8 @@
+{
+  "python.pythonPath": ".venv\\Scripts\\python.exe",
+  "files.exclude": {
+    "**/__pycache__": true
+  },
+  "python.formatting.provider": "black",
+  "editor.formatOnSave": true
+}

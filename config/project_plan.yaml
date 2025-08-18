@@ -1,0 +1,34 @@
+project: PersistentAssistant
+plan_version: 1
+current_step: 1.1
+
+steps:
+  - id: 0.0
+    title: Project scaffold and Git repo initialization
+    feature_id: PLAN.1
+    status: completed
+
+  - id: 0.1
+    title: Create master_project_tracker.yaml with MVP features
+    feature_id: TRACKER.1
+    status: completed
+
+  - id: 1.0
+    title: Build minimal Qt GUI with input/prompt/response tabs
+    feature_id: GUI.1
+    status: completed
+
+  - id: 1.1
+    title: Connect to ChatGPT and enable prompt exchange
+    feature_id: AI.1
+    status: planned
+
+  - id: 1.2
+    title: Persist input, prompt, and response data to disk
+    feature_id: LOG.1
+    status: planned
+
+  - id: 3.0
+    title: Perform basic self-introspection on project code
+    feature_id: INTROSPECT.1
+    status: planned
