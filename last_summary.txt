@@ -1,0 +1,27 @@
+=== Persistent Assistant Dev Summary ===
+Timestamp: 2025-08-23 10:09:37
+
+[INVENTORY]
+[DEEP INVENTORY OK]
+ - data/insights/deep_inventory.yaml
+ - data/insights/deep_calls.yaml
+ - data/insights/docstring_report.yaml
+ - data/insights/duplication_report.yaml
+ - data/insights/imports.yaml
+ - data/insights/deep_inventory.dot
+
+[PLAN STATUS]
+Current: 6.4.a - Add Windows CI workflow (GitHub Actions) [in_progress]
+Next:    6.4.b - Run CI smoke (tests minimal) and upload logs [planned]
+
+[SHA CHECK]
+[NOT IN INVENTORY] gui/tabs/chat_tab.py
+
+
+[LOGS]
+--- api_usage.log ---
+[MISSING] api_usage.log
+--- plan_updates.log ---
+[MISSING] plan_updates.log
+--- logs\tool_run_latest.log ---
+[MISSING] logs\tool_run_latest.log

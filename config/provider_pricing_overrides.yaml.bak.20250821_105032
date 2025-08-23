@@ -1,0 +1,27 @@
+# =============================================================================
+# File: config/provider_pricing_overrides.yaml
+# Persistent Assistant v3 - Pricing override scaffold (Step 3.8)
+# =============================================================================
+# Set numeric values to override cost; leave null to keep provider defaults
+# Costs are in USD per 1k tokens
+# =============================================================================
+
+openai:
+  gpt-4o-mini:
+    input_cost_per_1k: null
+    output_cost_per_1k: null
+
+google:
+  gemini-1.5-pro-latest:
+    input_cost_per_1k: null
+    output_cost_per_1k: null
+
+anthropic:
+  claude-3.5-sonnet:
+    input_cost_per_1k: null
+    output_cost_per_1k: null
+
+groq:
+  mixtral-8x7b:
+    input_cost_per_1k: null
+    output_cost_per_1k: null

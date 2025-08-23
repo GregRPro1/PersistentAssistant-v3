@@ -1,0 +1,66 @@
+from __future__ import annotations
+import os, yaml
+
+DEFAULT_LOCATIONS = [
+    os.path.join("config","ai_models.yaml"),
+    "ai_models.yaml"
+]
+
+def _load_yaml(path: str):
+    with open(path,"r",encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+def load_ai_models():
+    """
+    Returns schema:
+      {
+        "providers": {
+           "<provider>": {
+              "models": {
+                 "<model_id>": {
+                    "input_cost_per_1k": float|None,
+                    "output_cost_per_1k": float|None,
+                    "capabilities": list[str] | None
+                 }, ...
+              }
+           }, ...
+        }
+      }
+    """
+    found = None
+    for p in DEFAULT_LOCATIONS:
+        if os.path.exists(p):
+            found = p; break
+    if not found:
+        return {"providers": {}}
+
+    raw = _load_yaml(found)
+    providers = {}
+
+    # Accept two common shapes:
+    # A) { providers: { prov: { models: {id: {...}}}}}
+    # B) flat list under "models": [ {provider,id,input_cost_per_1k,...}, ... ]
+    if "providers" in raw:
+        for prov, pdata in (raw.get("providers") or {}).items():
+            models = {}
+            for mid, m in (pdata.get("models") or {}).items():
+                models[mid] = {
+                    "input_cost_per_1k": m.get("input_cost_per_1k"),
+                    "output_cost_per_1k": m.get("output_cost_per_1k"),
+                    "capabilities": m.get("capabilities") or m.get("tags") or []
+                }
+            providers[prov] = {"models": models}
+    else:
+        providers = {}
+        for m in (raw.get("models") or []):
+            prov = (m.get("provider") or "").lower()
+            mid  = m.get("model_id") or m.get("id")
+            if not prov or not mid:
+                continue
+            providers.setdefault(prov, {"models": {}})
+            providers[prov]["models"][mid] = {
+                "input_cost_per_1k": m.get("input_cost_per_1k"),
+                "output_cost_per_1k": m.get("output_cost_per_1k"),
+                "capabilities": m.get("capabilities") or m.get("tags") or []
+            }
+    return {"providers": providers}

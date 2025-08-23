@@ -1,0 +1,28 @@
+import json, yaml, os
+from importlib import reload
+import core.ai_client as m
+
+ov_path = os.path.join("config","provider_pricing_overrides.yaml")
+overrides = {}
+if os.path.exists(ov_path):
+    with open(ov_path,"r",encoding="utf-8") as f:
+        overrides = yaml.safe_load(f) or {}
+
+print("== Overrides present ==")
+print(json.dumps(overrides, indent=2))
+
+print("\n== Effective COSTS (selected) ==")
+sel = {}
+for prov, models in (overrides or {}).items():
+    sel[prov] = {}
+    for model in (models or {}).keys():
+        key = model
+        # try canonical and raw
+        v = m.COSTS.get(prov, {}).get(key)
+        if v is None:
+            # try normalized anthropic alias
+            key2 = key.replace("claude-3.5-sonnet", "claude-3-5-sonnet-20240620")
+            v = m.COSTS.get(prov, {}).get(key2)
+            key = key2 if v is not None else key
+        sel[prov][key] = v
+print(json.dumps(sel, indent=2))

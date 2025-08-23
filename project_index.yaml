@@ -1,0 +1,23 @@
+project_index:
+  name: Persistent Assistant
+  version: '3.2'
+  files:
+    project_plan:
+      path: project/plans/project_plan_v3.yaml
+      sha256: 38946B146E7DD6365E304405411DB64147F126A4EDEBDF3AE179D4552D2BF1D4
+      security: sensitive
+    project_plan_schema:
+      path: project/plans/project_plan_v3.schema.json
+      sha256: 9A288D0C00A8A4A1EDB2483FA1091D78846CD2C36CCA249DB03D52DC3F0144F2
+      security: free
+    master_tracker:
+      path: config/master_project_tracker.yaml
+      sha256: 4F804FA4E20A88CDB501636633FD84AA9C4A3BA738522F63546AE72835564A46
+      security: sensitive
+    project_definition:
+      path: config/projects/persistent_assistant_v3.yaml
+      sha256: 49971FE19A0E3EE87AF1BB1599EB7A923A8FF8E495E7BAC9A5DE74624BE85772
+      security: sensitive
+  rules:
+    forbid_duplicates: true
+    enforce_sha: true

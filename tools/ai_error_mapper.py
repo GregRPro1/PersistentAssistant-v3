@@ -1,0 +1,79 @@
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import traceback, sys, json
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, Tuple
+
+ROOT = Path(__file__).resolve().parents[1]
+LOG = ROOT / "logs" / "ai_errors.log"
+LOG.parent.mkdir(parents=True, exist_ok=True)
+
+def _ts():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def summarize(exc: BaseException) -> Tuple[str, str, Dict[str, Any]]:
+    """
+    Returns (summary, detail, meta)
+    summary: short one-liner for the UI (e.g. 'OpenAI 401 – Invalid API key')
+    detail: full stack trace and raw message
+    meta: provider/status_code/error_code if detected
+    """
+    etype = type(exc).__name__
+    raw = str(exc)
+    tb = "".join(traceback.format_exception(exc))
+
+    provider = "unknown"
+    status = None
+    code = None
+
+    # Heuristics for common SDKs without importing them (avoid hard deps)
+    txt = f"{etype}: {raw}".lower()
+
+    # OpenAI
+    if "openai" in txt:
+        provider = "openai"
+        if "401" in txt or "unauthorized" in txt: status = 401; code = "unauthorized"
+        elif "429" in txt or "rate" in txt or "quota" in txt: status = 429; code = "rate_limit"
+        elif "invalid api key" in txt: status = 401; code = "invalid_api_key"
+
+    # Anthropic
+    if "anthropic" in txt:
+        provider = "anthropic"
+        if "authentication" in txt or "401" in txt: status = 401; code = "unauthorized"
+        elif "429" in txt: status = 429; code = "rate_limit"
+
+    # Google / Gemini
+    if "google" in txt or "gemini" in txt:
+        provider = "google"
+        if "permission" in txt or "401" in txt: status = 401; code = "unauthorized"
+        elif "429" in txt: status = 429; code = "rate_limit"
+
+    # Groq
+    if "groq" in txt:
+        provider = "groq"
+        if "401" in txt: status = 401; code = "unauthorized"
+        elif "429" in txt: status = 429; code = "rate_limit"
+
+    # Network / generic
+    if status is None:
+        if "ssl" in txt or "connection" in txt or "timeout" in txt:
+            status = 503; code = "network"
+
+    # Compose concise summary
+    title = provider.capitalize() if isinstance(provider, str) else "Provider"
+    sc = f"{status}" if status is not None else "ERR"
+    reason = "Rate limit" if code == "rate_limit" else ("Invalid API key" if code == "invalid_api_key" else ("Unauthorized" if code=="unauthorized" else etype))
+    summary = f"{title} {sc} – {reason}"
+
+    meta = {"provider": provider, "status": status, "code": code, "etype": etype}
+    detail = f"[{_ts()}] {etype}: {raw}\n{tb}"
+    return summary, detail, meta
+
+def log_error(summary: str, detail: str, meta: Dict[str, Any]) -> None:
+    LOG.write_text(LOG.read_text(encoding="utf-8") + summary + "\n" + detail + "\n\n", encoding="utf-8") if LOG.exists() else LOG.write_text(summary + "\n" + detail + "\n\n", encoding="utf-8")

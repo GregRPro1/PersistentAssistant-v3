@@ -1,0 +1,20 @@
+import yaml
+PLAN = r"project\\plans\\project_plan_v3.yaml"
+with open(PLAN,"r",encoding="utf-8") as f: d=yaml.safe_load(f)
+
+p2 = None
+for ph in d.get("phases",[]):
+    if str(ph.get("name","")).startswith("Phase 2"):
+        p2 = ph; break
+
+if p2 is not None:
+    steps = p2.setdefault("steps",[])
+    if not any(s.get("id")=="2.10" for s in steps):
+        steps.append({
+          "id":"2.10",
+          "status":"planned",
+          "description":"Deep inventory includes dunder files (e.g., __init__.py) and reflects them in insights."
+        })
+
+with open(PLAN,"w",encoding="utf-8") as f: yaml.safe_dump(d,f,sort_keys=False)
+print("[PLAN OK] Added 2.10 (include dunder files in inventory).")

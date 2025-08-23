@@ -1,0 +1,206 @@
+last_updated: '2025-08-19T14:05:24.273619+00:00'
+providers:
+  openai:
+    models:
+      gpt-4o:
+        display_name: gpt-4o
+        pricing:
+          in: 5.0e-06
+          out: 2.0e-05
+        limits:
+          max_tokens: 128000
+        capabilities:
+          reasoning: 4
+          coding: 4
+          long_context: 3
+          multimodal: true
+          speed: 2
+        notes: baseline 2025-08-19
+        source: https://openai.com/api/pricing
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+      gpt-4o-mini:
+        display_name: gpt-4o-mini
+        pricing:
+          in: 6.0e-07
+          out: 2.4e-06
+        limits:
+          max_tokens: 128000
+        capabilities:
+          reasoning: 4
+          coding: 4
+          long_context: 3
+          multimodal: true
+          speed: 4
+        notes: baseline 2025-08-19
+        source: https://openai.com/api/pricing
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+      gpt-4.1:
+        display_name: gpt-4.1
+        pricing:
+          in: 5.0e-06
+          out: 1.5e-05
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 4
+          coding: 4
+          long_context: 5
+          multimodal: false
+          speed: 2
+        notes: baseline 2025-08-19
+        source: https://openai.com/api/pricing
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+      o3:
+        display_name: o3
+        pricing:
+          in: 2.2e-06
+          out: 8.8e-06
+        limits:
+          max_tokens: 200000
+        capabilities:
+          reasoning: 5
+          coding: 5
+          long_context: 4
+          multimodal: false
+          speed: 3
+        notes: baseline 2025-08-19
+        source: 'azure-pricing: indicative'
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+      o3-mini:
+        display_name: o3-mini
+        pricing:
+          in: 1.1e-06
+          out: 4.4e-06
+        limits:
+          max_tokens: 200000
+        capabilities:
+          reasoning: 5
+          coding: 5
+          long_context: 4
+          multimodal: false
+          speed: 3
+        notes: baseline 2025-08-19
+        source: 'azure-pricing: indicative'
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+  anthropic:
+    models:
+      claude-opus-4.1:
+        display_name: claude-opus-4.1
+        pricing:
+          in: 1.5e-05
+          out: 7.5e-05
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 4
+          coding: 4
+          long_context: 5
+          multimodal: false
+          speed: 1
+        notes: baseline 2025-08-19
+        source: https://www.anthropic.com/pricing
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+      claude-sonnet-4:
+        display_name: claude-sonnet-4
+        pricing:
+          in: 3.0e-06
+          out: 1.5e-05
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 4
+          coding: 4
+          long_context: 5
+          multimodal: false
+          speed: 3
+        notes: baseline 2025-08-19
+        source: https://www.anthropic.com/news/1m-context
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+      claude-haiku-3.5:
+        display_name: claude-haiku-3.5
+        pricing:
+          in: 8.0e-07
+          out: 4.0e-06
+        limits:
+          max_tokens: 200000
+        capabilities:
+          reasoning: 2
+          coding: 2
+          long_context: 4
+          multimodal: false
+          speed: 4
+        notes: baseline 2025-08-19
+        source: https://www.anthropic.com/claude/haiku
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+  google:
+    models:
+      gemini-2.5-pro:
+        display_name: gemini-2.5-pro
+        pricing:
+          in: 1.25e-06
+          out: 1.0e-05
+        limits:
+          max_tokens: 200000
+        capabilities:
+          reasoning: 3
+          coding: 3
+          long_context: 4
+          multimodal: true
+          speed: 3
+        notes: baseline 2025-08-19
+        source: https://ai.google.dev/gemini-api/docs/pricing
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+      gemini-2.5-flash:
+        display_name: gemini-2.5-flash
+        pricing:
+          in: 1.0e-07
+          out: 4.0e-07
+        limits:
+          max_tokens: 200000
+        capabilities:
+          reasoning: 3
+          coding: 3
+          long_context: 4
+          multimodal: true
+          speed: 5
+        notes: baseline 2025-08-19
+        source: https://ai.google.dev/gemini-api/docs/pricing
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'
+      gemini-2.5-flash-lite:
+        display_name: gemini-2.5-flash-lite
+        pricing:
+          in: 1.0e-07
+          out: 4.0e-07
+        limits:
+          max_tokens: 128000
+        capabilities:
+          reasoning: 3
+          coding: 3
+          long_context: 3
+          multimodal: true
+          speed: 5
+        notes: baseline 2025-08-19
+        source: https://ai.google.dev/gemini-api/docs/pricing
+        meta:
+          pricing_source: baseline
+          as_of: '2025-08-19'

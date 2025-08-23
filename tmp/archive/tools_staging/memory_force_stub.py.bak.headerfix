@@ -1,0 +1,44 @@
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+from __future__ import annotations
+from pathlib import Path
+from datetime import datetime, timezone
+import yaml, os
+
+ROOT = Path(__file__).resolve().parents[1]
+MEMDIR = ROOT / "memory"
+MEMDIR.mkdir(parents=True, exist_ok=True)
+
+today = datetime.now(timezone.utc).strftime("%Y%m%d")
+out = MEMDIR / f"summary_{today}.yaml"
+
+stub = [{
+  "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "tokens_in": 0,
+  "tokens_out": 0,
+  "cost_usd": 0.0,
+  "elapsed_sec": 0.0,
+  "prompt": "[stub] bootstrap memory",
+  "reply":  "[stub] pipeline check",
+  "topic":  "general",
+  "_source": "FORCED_STUB"
+}]
+
+existing = []
+if out.exists():
+    try:
+        existing = yaml.safe_load(out.read_text(encoding="utf-8")) or []
+    except Exception:
+        existing = []
+# avoid duplicate FORCED_STUB
+if not any((isinstance(x,dict) and x.get("_source")=="FORCED_STUB") for x in existing):
+    existing.extend(stub)
+
+out.write_text(yaml.safe_dump(existing, sort_keys=False), encoding="utf-8")
+print(f"[MEMORY STUB OK] -> {out}")

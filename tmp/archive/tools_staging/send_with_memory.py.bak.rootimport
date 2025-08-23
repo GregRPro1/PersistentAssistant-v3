@@ -1,0 +1,39 @@
+# tools/send_with_memory.py
+from __future__ import annotations
+import os, sys, json
+from core.ai_client import AIClient
+
+def main():
+    if len(sys.argv) < 2:
+        print("usage: python tools/send_with_memory.py \"<prompt>\" [provider=openai]")
+        return 2
+    prompt = sys.argv[1]
+    provider = (sys.argv[2] if len(sys.argv) > 2 else "openai").lower()
+    key = os.getenv("OPENAI_API_KEY")
+    if not key and provider=="openai":
+        try:
+            import yaml
+            with open("C:/Secure/api_keys/keys.yaml","r",encoding="utf-8") as f:
+                keys = yaml.safe_load(f) or {}
+            key = (((keys.get("keys") or {}).get("default") or {}).get(provider) or {}).get("paid")
+        except Exception:
+            pass
+    if not key:
+        print("ERROR: missing API key for provider:", provider)
+        return 3
+    cli = AIClient(provider=provider, key=key)
+    res = cli.send(prompt, include_memory=True)
+    print(json.dumps({
+        "provider": res.get("provider"),
+        "model": res.get("model"),
+        "context_used": res.get("context_used"),
+        "tokens_in": res.get("tokens_in"),
+        "tokens_out": res.get("tokens_out"),
+        "cost": res.get("cost"),
+        "time": round(res.get("time",0.0),3),
+        "reply_head": (res.get("reply") or "")[:240]
+    }, ensure_ascii=False, indent=2))
+    return 0
+
+if __name__=="__main__":
+    raise SystemExit(main())

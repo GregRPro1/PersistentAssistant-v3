@@ -1,0 +1,28 @@
+=== Reflection Summary ===
+GUI files: 22
+ChatTab present: True
+ensure_api_send_button: True
+on_send_api_clicked: True
+Send button text found: True
+
+Key GUI files:
+ - gui/dialogs/project_selector.py
+ - gui/main_window.py
+ - gui/tabs/chat_tab.py
+ - gui/tabs/input_tab.py
+ - gui/tabs/plan_tracker_tab.py
+ - gui/tabs/prompt_tab.py
+ - gui/tabs/response_tab.py
+ - gui/tabs/tools_tab.py
+ - main.py
+ - tmp/archive/candidates/chat_tab_fixed.py
+ - tmp/archive/candidates/chat_tab_v415_apply.py
+ - tmp/archive/candidates/chat_tab_v41_apply.py
+ - tmp/archive/candidates/chat_tab_v41_candidate.py
+ - tmp/archive/chat_tab_fixed.py
+ - tmp/chat_tab_fixed.py
+ - tmp/chat_tab_v415_apply.py
+ - tmp/chat_tab_v41_apply.py
+ - tmp/chat_tab_v41_candidate.py
+ - tmp/chat_tab_v42_apply.py
+ - tools/patch_chat_tab_send_api.py

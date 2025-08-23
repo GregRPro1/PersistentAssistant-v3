@@ -1,0 +1,32 @@
+[
+  {
+    "file": "C:\\_Repos\\PersistentAssistant\\config\\guidance\\interaction_guidance.override.yaml",
+    "pattern": "<<\\s*':?PY'",
+    "sample": "Do not emit snippets like:  python - << 'PY'  ...  PY"
+  },
+  {
+    "file": "C:\\_Repos\\PersistentAssistant\\config\\guidance\\interaction_guidance.yaml",
+    "pattern": "<<\\s*':?PY'",
+    "sample": "- \"Do NOT use bash-style heredocs in PowerShell (e.g., `python - << 'PY'`).\""
+  },
+  {
+    "file": "C:\\_Repos\\PersistentAssistant\\config\\guidance\\interaction_guidance.override.yaml",
+    "pattern": "python\\s*-\\s*<<",
+    "sample": "Do not emit snippets like:  python - << 'PY'  ...  PY"
+  },
+  {
+    "file": "C:\\_Repos\\PersistentAssistant\\config\\guidance\\interaction_guidance.yaml",
+    "pattern": "python\\s*-\\s*<<",
+    "sample": "- \"Do NOT use bash-style heredocs in PowerShell (e.g., `python - << 'PY'`).\""
+  },
+  {
+    "file": "C:\\_Repos\\PersistentAssistant\\tools\\ci_self_check.py",
+    "pattern": "python\\s*-\\s*<<",
+    "sample": "if \"python - <<\" in txt or re.search(r'<<\\\\s*\\\\'?PY\\\\'?', txt):"
+  },
+  {
+    "file": "C:\\_Repos\\PersistentAssistant\\tools\\ci_self_check.py",
+    "pattern": "python\\s+-c\\s+",
+    "sample": "# Forbidden patterns (no bash heredocs; no inline python -c in our repo – 3rd party allowed)"
+  }
+]

@@ -1,0 +1,109 @@
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+from pathlib import Path
+import re, shutil, sys
+import yaml
+
+TARGET = Path(sys.argv[1]).resolve() if len(sys.argv)>1 else None
+if not TARGET or not TARGET.exists():
+    print(f"[SAN FAIL] Missing path: {TARGET}")
+    raise SystemExit(2)
+
+def is_quoted(v: str) -> bool:
+    v=v.strip()
+    return (v.startswith("'") and v.endswith("'")) or (v.startswith('"') and v.endswith('"'))
+
+def quote(v: str) -> str:
+    s=v.strip()
+    # prefer double quotes if single quotes exist
+    if "'" in s and '"' not in s:
+        return '"' + s.replace('"','\\"') + '"'
+    # else single quotes are fine (yaml leaves backslashes literal)
+    return "'" + s + "'"
+
+# Heuristics of dangerous content in unquoted scalars
+DANGEROUS_PATTERNS = [
+    re.compile(r".*`.*"),                  # backticks
+    re.compile(r".*\*.*"),                 # globs or anchors
+    re.compile(r".*\\n.*"),                # literal backslash-n
+    re.compile(r".*\[.*\].*"),             # bracketed patterns like [*.py]
+    re.compile(r".*[<>!=]=\s*\d+.*"),      # comparators like >= 100
+    re.compile(r".*:\s*[^ \t].*:\S+.*"),   # stray colon in value
+]
+
+def looks_dangerous(val: str) -> bool:
+    s=val.strip()
+    if not s:
+        return False
+    # don't touch flow collections / explicit blocks
+    if s.startswith(('{','[')) or s in ('|','>'):
+        return False
+    return any(p.match(s) for p in DANGEROUS_PATTERNS)
+
+def sanitize_lines(lines: list[str]) -> tuple[list[str], list[str]]:
+    out=[]; fixes=[]
+    for i,line in enumerate(lines, start=1):
+        L=line.replace("\t","  ")  # tabs -> 2 spaces
+        # Rule 1: key: value lines
+        m = re.match(r"^(\s*[A-Za-z0-9_\-]+:\s*)([^#\s].*)(\s*(#.*)?)$", L)
+        if m:
+            pre, val, tail = m.group(1), m.group(2), m.group(3)
+            if not is_quoted(val) and looks_dangerous(val):
+                L = pre + quote(val) + tail
+                fixes.append(f"line {i}: quoted mapping scalar -> {val!r}")
+        else:
+            # Rule 2: sequence items "- value"
+            m2 = re.match(r"^(\s*-\s+)([^#].*)(\s*(#.*)?)$", L)
+            if m2:
+                pre, val, tail = m2.group(1), m2.group(2), m2.group(3)
+                if not is_quoted(val) and looks_dangerous(val):
+                    L = pre + quote(val) + tail
+                    fixes.append(f"line {i}: quoted sequence scalar -> {val!r}")
+        out.append(L)
+    return out, fixes
+
+def main():
+    raw = TARGET.read_text(encoding="utf-8").splitlines()
+    sanitized, fixes = sanitize_lines(raw)
+    if sanitized == raw:
+        # even if no edits, still run parse check
+        print("[SAN OK] No line edits; verifying parse...")
+    else:
+        bak = TARGET.with_suffix(TARGET.suffix + ".bak.sanitize")
+        shutil.copy2(str(TARGET), str(bak))
+        TARGET.write_text("\n".join(sanitized) + "\n", encoding="utf-8")
+        print("[SAN OK] Wrote sanitized YAML.")
+        for f in fixes[:50]:
+            print(" -", f)
+        if len(fixes) > 50:
+            print(f" - ... and {len(fixes)-50} more")
+
+    # Parse test
+    try:
+        with open(TARGET,"r",encoding="utf-8") as f:
+            yaml.safe_load(f)
+        print("[SAN PARSE OK] YAML loads cleanly.")
+        return 0
+    except yaml.YAMLError as e:
+        print("[SAN PARSE FAIL]", str(e).splitlines()[-1])
+        # Attempt to point the line number if available
+        try:
+            mark=getattr(e, 'problem_mark', None)
+            if mark:
+                print(f"[SAN HINT] line={mark.line+1} col={mark.column+1}")
+        except Exception:
+            pass
+        # If we created a backup, auto-restore to avoid broken state
+        bak = TARGET.with_suffix(TARGET.suffix + ".bak.sanitize")
+        if bak.exists():
+            shutil.copy2(str(bak), str(TARGET))
+            print("[SAN RESTORE] Restored original file due to parse failure.")
+        return 1
+
+if __name__=="__main__":
+    raise SystemExit(main())

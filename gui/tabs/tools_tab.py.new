@@ -1,0 +1,335 @@
+# =============================================================================
+# Expected-Target-Path: gui/tabs/tools_tab.py
+# Expected-SHA256: 7f82acc79a3df66b40501e48c7fa9f4e6446e10fa4ea4a1f97dd38905ca9b853
+# Previous-Lines: 451
+# Previous-Functions: 25
+# =============================================================================
+# File: gui/tabs/tools_tab.py
+# Persistent Assistant v3 – Tools Tab (robust runner + summaries + HUD)
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19
+# Update History:
+#   - 2025-08-19: Rebuilt with:
+#       * Busy HUD: explicit "running… / completed" status
+#       * Strong subprocess runner (per-run logs in logs/tool_run_*.log)
+#       * PYTHONPATH enforcement so `import tools.*` always works
+#       * JSON SUMMARY parsing from tool stdout
+#       * Pipelines for: Model Catalogue (fetch→enrich→validate)
+#       * Single-tool runners: Probe Models / Check API Keys / Self-Check
+#       * Open Logs quick action
+# Notes:
+#   - New line/function counts will be captured by tools/file_manifest.py on next run.
+# =============================================================================
+
+from __future__ import annotations
+
+import os
+import sys
+import json
+import logging
+import datetime
+import subprocess
+from typing import Optional, Tuple, List, Dict
+
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QMessageBox
+)
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QGuiApplication, QCursor
+
+# Optional helper env functions (keys, masking, env building)
+try:
+    from tools._env import build_env, load_keys, mask_key
+except Exception:
+    def build_env(base=None):  # type: ignore
+        return dict(base or os.environ)
+    def load_keys():  # type: ignore
+        return {}
+    def mask_key(_: str) -> str:  # type: ignore
+        return "MASKED"
+
+# -----------------------------------------------------------------------------#
+# Constants
+# -----------------------------------------------------------------------------#
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+# -----------------------------------------------------------------------------#
+# ToolsTab
+# -----------------------------------------------------------------------------#
+class ToolsTab(QWidget):
+    """
+    Operational tools hub.
+
+    Buttons:
+      - Format Prompt
+      - Send to AI (Simulated)
+      - Copy All as YAML
+      - Run Structure Snapshot
+      - Generate Introspection Report
+      - Create Improvement Tasks
+      - Update AI Models Catalogue (fetch → enrich → check)
+      - Probe Models (Ping)
+      - Check API Keys
+      - Verify Tools Wiring
+      - Open Logs Folder
+
+    The tab delegates editor/analysis actions to a `controller` (MainWindow) that
+    must expose:
+      - apply_prompt_formatting()
+      - dummy_ai_send()
+      - copy_all_as_yaml()
+      - run_structure_snapshot()
+      - run_introspection_report()
+      - create_improvement_tasks()
+    """
+    def __init__(self, controller, parent: Optional[QWidget] = None):
+        super().__init__(parent)
+        self.controller = controller
+        self._init_logger()
+        self._init_ui()
+
+    # --------------------------------------------------------------------- #
+    # UI
+    # --------------------------------------------------------------------- #
+    def _init_ui(self):
+        root = QVBoxLayout()
+
+        # Row 1 — prompt utilities
+        row1 = QHBoxLayout()
+        row1.addWidget(self._mk_ctrl_btn("Format Prompt", "apply_prompt_formatting"))
+        row1.addWidget(self._mk_ctrl_btn("Send to AI (Simulated)", "dummy_ai_send"))
+        row1.addWidget(self._mk_ctrl_btn("Copy All as YAML", "copy_all_as_yaml"))
+        root.addLayout(row1)
+
+        # Row 2 — analysis & tasks
+        row2 = QHBoxLayout()
+        row2.addWidget(self._mk_ctrl_btn("Run Structure Snapshot", "run_structure_snapshot"))
+        row2.addWidget(self._mk_ctrl_btn("Generate Introspection Report", "run_introspection_report"))
+        row2.addWidget(self._mk_ctrl_btn("Create Improvement Tasks", "create_improvement_tasks"))
+        root.addLayout(row2)
+
+        # Row 3 — model ops + keys/logs + self-check
+        row3 = QHBoxLayout()
+
+        self.btn_update_models = QPushButton("Update AI Models Catalogue")
+        self.btn_update_models.clicked.connect(lambda: self._run_pipeline(
+            label="AI Models pipeline",
+            steps=[
+                (["tools/fetch_ai_models.py"], {}),
+                (["tools/update_ai_models.py"], {"PA_ENRICH_DEBUG": "1"}),
+                (["tools/check_ai_models.py", "ai_models.yaml"], {}),
+            ],
+        ))
+        row3.addWidget(self.btn_update_models)
+
+        self.btn_probe = QPushButton("Probe Models (Ping)")
+        self.btn_probe.clicked.connect(lambda: self._run_tool_single("tools/probe_models.py", "Probe models"))
+        row3.addWidget(self.btn_probe)
+
+        self.btn_check_keys = QPushButton("Check API Keys")
+        self.btn_check_keys.clicked.connect(lambda: self._run_tool_single("tools/check_api_keys.py", "Check API keys"))
+        row3.addWidget(self.btn_check_keys)
+
+        self.btn_selfcheck = QPushButton("Verify Tools Wiring")
+        self.btn_selfcheck.clicked.connect(lambda: self._run_tool_single("tools/self_check.py", "Verify tools wiring"))
+        row3.addWidget(self.btn_selfcheck)
+
+        self.btn_open_logs = QPushButton("Open Logs Folder")
+        self.btn_open_logs.clicked.connect(self._on_open_logs)
+        row3.addWidget(self.btn_open_logs)
+
+        root.addLayout(row3)
+
+        # HUD / status
+        self.status_label = QLabel("Ready.")
+        self.status_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.status_label.setWordWrap(True)
+        root.addWidget(self.status_label)
+
+        self.setLayout(root)
+
+        # Track all buttons to disable during runs
+        self._all_buttons: List[QPushButton] = [w for w in self.findChildren(QPushButton)]
+
+    def _mk_ctrl_btn(self, text: str, handler_name: str) -> QPushButton:
+        btn = QPushButton(text)
+        fn = getattr(self.controller, handler_name, None)
+        if callable(fn):
+            btn.clicked.connect(fn)  # type: ignore[arg-type]
+        else:
+            btn.setDisabled(True)
+            btn.setToolTip(f"Missing controller hook: {handler_name}")
+            self.logger.warning(f"Controller missing hook: {handler_name}")
+        return btn
+
+    # --------------------------------------------------------------------- #
+    # Logging
+    # --------------------------------------------------------------------- #
+    def _init_logger(self):
+        logging.basicConfig(
+            filename=os.path.join(LOG_DIR, "persistent_assistant.log"),
+            level=logging.INFO,
+            format="%(asctime)s [%(levelname)s] %(message)s",
+            encoding="utf-8",
+        )
+        self.logger = logging.getLogger("PersistentAssistant.ToolsTab")
+
+    def set_status(self, text: str):
+        """Set HUD text and mirror to log (info level)."""
+        self.status_label.setText(text)
+        try:
+            self.logger.info(text)
+        except Exception:
+            pass
+
+    # --------------------------------------------------------------------- #
+    # Busy HUD
+    # --------------------------------------------------------------------- #
+    def _set_busy(self, running_text: str):
+        """Disable buttons and show wait cursor with a clear running message."""
+        self.set_status(running_text)
+        for b in self._all_buttons:
+            b.setEnabled(False)
+        QGuiApplication.setOverrideCursor(QCursor(Qt.CursorShape.WaitCursor))
+
+    def _clear_busy(self, done_text: str):
+        """Re-enable buttons, restore cursor, and show completion message."""
+        for b in self._all_buttons:
+            b.setEnabled(True)
+        QGuiApplication.restoreOverrideCursor()
+        self.set_status(done_text)
+
+    # --------------------------------------------------------------------- #
+    # Robust subprocess runner with per-run log
+    # --------------------------------------------------------------------- #
+    def _run_cmd(self, cmd: List[str], env_extra: Optional[Dict[str, str]] = None) -> Tuple[bool, str, str, int, str]:
+        """
+        Run a python tool in a controlled environment.
+        Returns: (ok, stdout, stderr, returncode, run_log_path)
+        """
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        env = build_env(os.environ.copy())
+        if env_extra:
+            env.update(env_extra)
+
+        # Ensure "import tools.*" works from any tool
+        old_pp = env.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = PROJECT_ROOT + (os.pathsep + old_pp if old_pp else "")
+
+        # Normalize a safe per-run log name
+        safe_name = "_".join(cmd).replace("\\", "_").replace("/", "_")
+        run_log_path = os.path.join(LOG_DIR, f"tool_run_{safe_name}_{ts}.log")
+
+        # Mask keys in log header
+        keys = load_keys() or {}
+        masked = {k: mask_key(v) for k, v in keys.items()}
+
+        # Write meta header
+        def _meta_write(fh):
+            try:
+                target_script = os.path.join(PROJECT_ROOT, cmd[0])
+                with open(target_script, "r", encoding="utf-8") as sf:
+                    src = sf.read()
+                line_count = src.count("\n") + 1
+                import ast
+                fn_count = sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) for n in ast.walk(ast.parse(src)))
+                fh.write(f"META: file={cmd[0]} lines={line_count} functions={fn_count}\n")
+            except Exception:
+                pass
+
+        try:
+            proc = subprocess.run([sys.executable] + cmd, capture_output=True, text=True, check=False,
+                                  cwd=PROJECT_ROOT, env=env)
+            with open(run_log_path, "w", encoding="utf-8") as f:
+                f.write(f"CWD: {PROJECT_ROOT}\n")
+                f.write(f"CMD: {sys.executable} {' '.join(cmd)}\n")
+                f.write(f"ENV_KEYS: {masked}\n")
+                _meta_write(f)
+                f.write(f"RETURNCODE: {proc.returncode}\n\n")
+                if proc.stdout:
+                    f.write("---- STDOUT ----\n")
+                    f.write(proc.stdout + "\n\n")
+                if proc.stderr:
+                    f.write("---- STDERR ----\n")
+                    f.write(proc.stderr + "\n")
+            ok = proc.returncode == 0
+            return ok, (proc.stdout or ""), (proc.stderr or ""), proc.returncode, run_log_path
+        except Exception as e:
+            with open(run_log_path, "w", encoding="utf-8") as f:
+                f.write(f"CWD: {PROJECT_ROOT}\n")
+                f.write(f"CMD: {sys.executable} {' '.join(cmd)}\n")
+                f.write(f"ENV_KEYS: {masked}\n")
+                _meta_write(f)
+                f.write(f"EXCEPTION: {e}\n")
+            return False, "", str(e), -1, run_log_path
+
+    @staticmethod
+    def _extract_summary(stdout: str) -> dict:
+        """
+        Parse the last 'SUMMARY: {...}' JSON line from stdout if present.
+        """
+        if not stdout:
+            return {}
+        lines = [ln.strip() for ln in stdout.splitlines() if ln.strip()]
+        for ln in reversed(lines):
+            if ln.startswith("SUMMARY:"):
+                try:
+                    return json.loads(ln[len("SUMMARY:"):].strip())
+                except Exception:
+                    return {}
+        return {}
+
+    # --------------------------------------------------------------------- #
+    # Actions
+    # --------------------------------------------------------------------- #
+    def _run_tool_single(self, script_rel: str, title: str):
+        """Run a single tool; show HUD + dialog with parsed SUMMARY."""
+        self._set_busy(f"{title} running… please wait")
+        ok, out, err, rc, log_path = self._run_cmd([script_rel])
+        summary = self._extract_summary(out)
+        if ok:
+            pretty = json.dumps(summary, indent=2) if summary else (out.strip() or "Done.")
+            self._clear_busy(f"{title} completed. Log: {log_path}")
+            QMessageBox.information(self, f"{title} – Summary", f"{pretty}\n\nLog:\n{log_path}")
+        else:
+            self._clear_busy(f"{title} failed. Log: {log_path}")
+            msg = err.strip() or out.strip() or "See log."
+            QMessageBox.warning(self, f"{title} – Failed", f"{msg}\n\nLog:\n{log_path}")
+
+    def _run_pipeline(self, label: str, steps: List[Tuple[List[str], Dict[str, str]]]):
+        """
+        Run a sequence of tools; break on first failure; show only last SUMMARY.
+        """
+        self._set_busy(f"{label} running… please wait")
+        last_log = ""
+        last_summary = {}
+        for cmd, envx in steps:
+            ok, out, err, rc, log_path = self._run_cmd(cmd, envx or None)
+            last_log = log_path
+            if out:
+                maybe = self._extract_summary(out)
+                if maybe:
+                    last_summary = maybe
+            if not ok:
+                self._clear_busy(f"{label} failed at: {' '.join(cmd)}. Log: {log_path}")
+                QMessageBox.warning(self, f"{label} – Failed Step",
+                                    f"Step failed: {' '.join(cmd)}\n\nSee log:\n{log_path}")
+                return
+        pretty = json.dumps(last_summary, indent=2) if last_summary else "Pipeline completed."
+        self._clear_busy(f"{label} completed. Log: {last_log}")
+        QMessageBox.information(self, f"{label} – Summary", f"{pretty}\n\nLog:\n{last_log}")
+
+    def _on_open_logs(self):
+        """Open the logs folder in the OS file explorer."""
+        path = os.path.abspath(LOG_DIR)
+        try:
+            if os.name == "nt":
+                os.startfile(path)  # type: ignore[attr-defined]
+            elif sys.platform == "darwin":
+                subprocess.run(["open", path])
+            else:
+                subprocess.run(["xdg-open", path])
+        except Exception as e:
+            QMessageBox.warning(self, "Open Logs Failed", f"Could not open:\n{path}\n\n{e}")

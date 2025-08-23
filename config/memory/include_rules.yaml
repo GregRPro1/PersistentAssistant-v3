@@ -1,0 +1,7 @@
+# config/memory/include_rules.yaml
+include_last_n_days: 7
+max_records: 12
+max_chars: 2000
+topics: []          # [] = any; e.g. ["cooling","suspension","ai_models"]
+dedupe_by_source: true
+prepend_header: "=== Project Memory (compact) ==="

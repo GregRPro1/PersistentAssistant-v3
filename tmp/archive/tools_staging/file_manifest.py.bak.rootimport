@@ -1,0 +1,112 @@
+# =============================================================================
+# File: tools/file_manifest.py
+# Persistent Assistant v3 – Project file manifest (SHA256, counts, mtime)
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19 15:20 BST
+# =============================================================================
+
+from __future__ import annotations
+import os, sys, hashlib, json, time, ast, argparse
+from typing import Dict, Any, List
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DEFAULT_OUT = os.path.join(PROJECT_ROOT, "project", "structure", "file_manifest.yaml")
+
+INCLUDE_EXT = {".py", ".yaml", ".yml", ".md", ".json", ".ui", ".toml"}
+EXCLUDE_DIRS = {".git", ".venv", "__pycache__", "logs", "data\\insights\\runs"}
+
+def sha256_of(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def py_counts(path: str) -> tuple[int, int]:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            src = f.read()
+        lines = src.count("\n") + 1
+        tree = ast.parse(src)
+        funcs = sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) for n in ast.walk(tree))
+        return lines, funcs
+    except Exception:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                lines = sum(1 for _ in f)
+            return lines, -1
+        except Exception:
+            return -1, -1
+
+def generic_counts(path: str) -> tuple[int, int]:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            lines = sum(1 for _ in f)
+        return lines, 0
+    except Exception:
+        return -1, 0
+
+def collect(root: str) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    for r, dirs, files in os.walk(root):
+        # prune excluded dirs
+        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
+        for fn in files:
+            ext = os.path.splitext(fn)[1].lower()
+            if ext not in INCLUDE_EXT:
+                continue
+            p = os.path.join(r, fn)
+            rel = os.path.relpath(p, root).replace("\\", "/")
+            try:
+                st = os.stat(p)
+                digest = sha256_of(p)
+                if ext == ".py":
+                    lines, funcs = py_counts(p)
+                else:
+                    lines, funcs = generic_counts(p)
+                out.append({
+                    "path": rel,
+                    "sha256": digest,
+                    "size": st.st_size,
+                    "mtime": int(st.st_mtime),
+                    "lines": lines,
+                    "functions": funcs
+                })
+            except Exception as e:
+                out.append({
+                    "path": rel,
+                    "error": str(e)
+                })
+    out.sort(key=lambda x: x["path"])
+    return out
+
+def save_yaml(data: Dict[str, Any], path: str):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    import yaml
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(data, f, sort_keys=False, allow_unicode=True)
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=DEFAULT_OUT)
+    args = ap.parse_args()
+
+    start = time.time()
+    items = collect(PROJECT_ROOT)
+    manifest = {
+        "root": PROJECT_ROOT,
+        "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "files": items
+    }
+    save_yaml(manifest, args.out)
+
+    summary = {
+        "file": args.out.replace("\\", "/"),
+        "count": len(items),
+        "elapsed_sec": round(time.time() - start, 2)
+    }
+    print("SUMMARY:", json.dumps(summary))
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

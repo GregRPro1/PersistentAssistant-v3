@@ -1,0 +1,110 @@
+# =============================================================================
+# File: tools/update_ai_models.py
+# Persistent Assistant v3 – Dynamic AI model catalogue builder (curated)
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19 15:55 BST
+# Update History:
+#   - 2025-08-19 15:30 BST: Path bootstrap for tools imports
+#   - 2025-08-19 15:55 BST: Use provider_docs 3-tier pipeline; strict validate→promote
+# =============================================================================
+
+from __future__ import annotations
+
+# --- bootstrap so 'import tools.*' works on direct runs -----------------------
+import os, sys
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+# -----------------------------------------------------------------------------
+
+import json, yaml, datetime, shutil, subprocess, ast
+
+OUT_FILE    = os.path.join(PROJECT_ROOT, "ai_models.yaml")
+TMP_FILE    = os.path.join(PROJECT_ROOT, "ai_models_tmp.yaml")
+BACKUP_FILE = os.path.join(PROJECT_ROOT, "ai_models.bak.yaml")
+PROBE_REPORT = os.path.join(PROJECT_ROOT, "data", "insights", "probe_report.json")  # optional
+
+def _file_stats(path: str) -> tuple[int, int]:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            src = f.read()
+        return src.count("\n") + 1, sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) for n in ast.walk(ast.parse(src)))
+    except Exception:
+        return -1, -1
+
+def _ascii_print(msg: str) -> None:
+    sys.stdout.write(msg.encode("ascii", "ignore").decode("ascii") + "\n")
+    sys.stdout.flush()
+
+def _load_probe_health() -> dict:
+    if os.path.exists(PROBE_REPORT):
+        try:
+            with open(PROBE_REPORT, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def _merge_health(node: dict, provider: str, model: str, health: dict) -> None:
+    key = f"{provider}/{model}"
+    h = health.get(key)
+    if not h: return
+    node.setdefault("health", {})
+    node["health"]["last_probe_ts"] = h.get("last_probe_ts")
+    node["health"]["last_probe_status"] = h.get("status")
+    if h.get("error"): node["health"]["error"] = h["error"]
+
+def _save_yaml(data: dict, path: str) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(data, f, sort_keys=False, allow_unicode=True)
+
+def _check_schema(path: str) -> tuple[bool, str]:
+    cmd = [sys.executable, os.path.join(PROJECT_ROOT, "tools", "check_ai_models.py"), path, "--summary-only"]
+    env = dict(os.environ)
+    old_pp = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = PROJECT_ROOT + (os.pathsep + old_pp if old_pp else "")
+    p = subprocess.run(cmd, capture_output=True, text=True, env=env, cwd=PROJECT_ROOT)
+    ok = p.returncode == 0
+    out = (p.stdout or "").encode("ascii", "ignore").decode("ascii")
+    err = (p.stderr or "").encode("ascii", "ignore").decode("ascii")
+    return ok, (out.strip() or err.strip())
+
+def build_final() -> dict:
+    from tools.provider_docs import fetch_curated_dynamic
+    health = _load_probe_health()
+    scraped = fetch_curated_dynamic()  # {prov: {"models": {id: {...}}}}
+
+    # attach probe health if available
+    for prov, pdata in scraped.items():
+        for mid, node in (pdata.get("models") or {}).items():
+            _merge_health(node, prov, mid, health)
+
+    return {
+        "last_updated": datetime.datetime.now(datetime.UTC).isoformat(),
+        "providers": scraped
+    }
+
+def main():
+    lines, fns = _file_stats(__file__)
+    _ascii_print(f"INFO: update_ai_models.py (lines={lines}, functions={fns})")
+
+    os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
+
+    final = build_final()
+    _save_yaml(final, TMP_FILE)
+
+    ok, summary = _check_schema(TMP_FILE)
+    _ascii_print(f"SUMMARY: {summary}")
+    if not ok:
+        _ascii_print("FAIL: schema check failed; kept previous ai_models.yaml")
+        sys.exit(1)
+
+    if os.path.exists(OUT_FILE):
+        shutil.copy2(OUT_FILE, BACKUP_FILE)
+    shutil.move(TMP_FILE, OUT_FILE)
+    _ascii_print(f"OK: promoted {OUT_FILE}")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+

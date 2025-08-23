@@ -1,0 +1,145 @@
+# =============================================================================
+# File: tools/check_ai_models.py
+# Persistent Assistant v3 – AI Model Catalogue Schema Checker
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19 03:10 BST
+# Updated: 2025-08-19 12:40 BST
+# Update History:
+#   - 2025-08-19 10:35 BST: Added JSON SUMMARY, runtime META (lines/functions/timestamp), ASCII-safe printing.
+#   - 2025-08-19 12:40 BST: Conditional strictness by interface (chat/responses strict; others lenient).
+# =============================================================================
+
+from __future__ import annotations
+import os, sys, ast, json, yaml, datetime
+from typing import Dict, Tuple, List, Any
+
+STRICT_IFACE = {"chat","responses"}
+
+REQUIRED = {
+    "pricing": {"in": float, "out": float},
+    "limits": {"max_tokens": int},
+    "capabilities": {
+        "reasoning": int,
+        "coding": int,
+        "long_context": int,
+        "multimodal": bool,
+        "speed": int,
+    },
+    "notes": str,
+    "source": str,
+}
+
+OPTIONAL_TOP = {"meta","health","interface","family","probe_route"}
+
+def _ascii(s: str) -> str:
+    return s.encode("ascii", errors="replace").decode("ascii")
+
+def _load_yaml(path: str) -> Dict[str, Any]:
+    if not os.path.exists(path): return {}
+    with open(path, "r", encoding="utf-8") as f: return yaml.safe_load(f) or {}
+
+def _validate_model(provider: str, model: str, node: Dict[str, Any]) -> List[str]:
+    errs: List[str] = []
+    if not isinstance(node, dict):
+        return [f"{provider}/{model} is not a mapping"]
+
+    iface = str(node.get("interface") or "").lower()
+    # Always require notes/source minimally
+    for k, typ in {"notes": str, "source": str}.items():
+        v = node.get(k)
+        if not isinstance(v, typ):
+            errs.append(f"{provider}/{model} {k} wrong type {type(v).__name__}")
+
+    # Strict only for chat/responses
+    if iface in STRICT_IFACE:
+        for section, fields in REQUIRED.items():
+            if section not in node:
+                errs.append(f"{provider}/{model} missing section {section}")
+                continue
+            value = node[section]
+            if section in ("notes", "source"):
+                if not isinstance(value, fields):
+                    errs.append(f"{provider}/{model} {section} wrong type {type(value).__name__}")
+                continue
+            if not isinstance(value, dict):
+                errs.append(f"{provider}/{model} {section} must be a mapping")
+                continue
+            for key, ftype in fields.items():
+                if key not in value:
+                    errs.append(f"{provider}/{model} missing {section}.{key}")
+                else:
+                    v = value[key]
+                    if ftype == float and isinstance(v, int):  # allow int for float
+                        continue
+                    if not isinstance(v, ftype):
+                        errs.append(f"{provider}/{model} {section}.{key} wrong type {type(v).__name__}")
+
+    # Unknown keys allowed
+    return errs
+
+def check_file(path: str) -> Tuple[bool, List[str], Dict[str, Any]]:
+    data = _load_yaml(path)
+    if not data:
+        return False, [f"{path} empty or unreadable"], {"providers": 0, "models": 0}
+
+    providers = data.get("providers") or {}
+    if not isinstance(providers, dict):
+        return False, ["'providers' must be a mapping"], {"providers": 0, "models": 0}
+
+    all_errs: List[str] = []
+    prov_count = 0
+    model_count = 0
+
+    for provider, pdata in providers.items():
+        prov_count += 1
+        models = (pdata or {}).get("models") or {}
+        if not isinstance(models, dict):
+            all_errs.append(f"{provider} 'models' must be a mapping")
+            continue
+        for model, node in models.items():
+            model_count += 1
+            all_errs.extend(_validate_model(provider, model, node))
+
+    return (len(all_errs) == 0), all_errs, {"providers": prov_count, "models": model_count}
+
+def _meta_stamp(self_path: str) -> Dict[str, Any]:
+    meta = {
+        "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
+        "file": self_path.replace("\\", "/"),
+        "lines": None,
+        "functions": None,
+    }
+    try:
+        with open(self_path, "r", encoding="utf-8") as f:
+            src = f.read()
+        meta["lines"] = src.count("\n") + 1
+        fn_count = sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) for n in ast.walk(ast.parse(src)))
+        meta["functions"] = fn_count
+    except Exception:
+        pass
+    return meta
+
+def main(argv: List[str]) -> int:
+    if len(argv) < 2:
+        print(_ascii("Usage: check_ai_models.py <file> [--summary-only]"))
+        return 2
+    target = argv[1]
+    summary_only = ("--summary-only" in argv[2:])
+
+    ok, errs, counts = check_file(target)
+    meta = _meta_stamp(os.path.abspath(__file__))
+
+    if not summary_only:
+        if ok: print(_ascii(f"OK: {target} is valid"))
+        else:
+            print(_ascii(f"FAIL: {target} has {len(errs)} errors:"))
+            for e in errs: print(_ascii(" - " + e))
+
+    print("SUMMARY: " + json.dumps({
+        "valid": ok, "error_count": len(errs), "errors": errs if not ok else [],
+        "counts": counts, "meta": meta, "target": target
+    }, separators=(",",":")))
+    return 0 if ok else 1
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

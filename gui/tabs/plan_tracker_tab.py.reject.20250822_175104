@@ -1,0 +1,80 @@
+# gui/tabs/plan_tracker_tab.py (compat build)
+# - Accepts plan_path=None to match main_window call site
+# - Displays simple plan summary + Memory list (read-only)
+from __future__ import annotations
+
+import os, json, pathlib, datetime
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QListWidget, QMessageBox
+from PyQt6.QtCore import Qt
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]  # .../PersistentAssistant
+DEFAULT_PLAN = ROOT/"project"/"plans"/"project_plan_v3.yaml"
+MEM_DIR = ROOT/"memory"
+
+def _safe_load_yaml(p: pathlib.Path):
+    import yaml
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except Exception as e:
+        return {"_error": str(e)}
+
+def _plan_counts(d: dict) -> str:
+    phases = d.get("phases", []) or []
+    total_steps = sum(len(ph.get("steps",[]) or []) for ph in phases)
+    done = sum(
+        1 for ph in phases for st in (ph.get("steps",[]) or [])
+        if str(st.get("status","")).lower()=="done"
+    )
+    cur = (d.get("meta") or {}).get("current_step","?")
+    return f"Phases={len(phases)}  Steps={total_steps}  Done={done}  Current={cur}"
+
+def _list_memory() -> list[str]:
+    out = []
+    if MEM_DIR.exists():
+        for p in sorted(MEM_DIR.glob("summary_*.yaml")):
+            out.append(p.name)
+    return out
+
+class PlanTrackerTab(QWidget):
+    def __init__(self, parent=None, plan_path: str | None = None, **kwargs):
+        super().__init__(parent)
+        self.plan_path = pathlib.Path(plan_path) if plan_path else DEFAULT_PLAN
+        self._init_ui()
+        self._refresh()
+
+    def _init_ui(self):
+        lay = QVBoxLayout(self)
+
+        self.lblTitle = QLabel("Project Plan (read-only summary)")
+        self.lblTitle.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        lay.addWidget(self.lblTitle)
+
+        self.lblSummary = QLabel("—")
+        lay.addWidget(self.lblSummary)
+
+        self.btnRefresh = QPushButton("Refresh Plan")
+        self.btnRefresh.clicked.connect(self._refresh)
+        lay.addWidget(self.btnRefresh)
+
+        self.lblMem = QLabel("Memory summaries:")
+        lay.addWidget(self.lblMem)
+
+        self.memList = QListWidget()
+        lay.addWidget(self.memList)
+
+        self.setLayout(lay)
+
+    def _refresh(self):
+        if not self.plan_path.exists():
+            self.lblSummary.setText(f"[missing] {self.plan_path}")
+            return
+        data = _safe_load_yaml(self.plan_path)
+        if "_error" in data:
+            self.lblSummary.setText(f"[error] {data['_error']}")
+        else:
+            self.lblSummary.setText(_plan_counts(data))
+
+        self.memList.clear()
+        for name in _list_memory():
+            self.memList.addItem(name)

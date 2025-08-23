@@ -1,0 +1,16 @@
+import sys, yaml, os
+INV = r"data/insights/deep_inventory.yaml"
+def main():
+    if len(sys.argv)<2:
+        print("usage: get_expected_sha.py <relative\\path>"); return 2
+    rel = sys.argv[1].replace("\\","/")
+    with open(INV,"r",encoding="utf-8") as f:
+        inv = yaml.safe_load(f) or {}
+    meta = (inv.get("files") or {}).get(rel)
+    if not meta:
+        print(f"[NOT IN INVENTORY] {rel}"); return 3
+    sha = meta.get("sha256")
+    if not sha:
+        print(f"[NO SHA] {rel}"); return 4
+    print(sha); return 0
+if __name__=="__main__": raise SystemExit(main())

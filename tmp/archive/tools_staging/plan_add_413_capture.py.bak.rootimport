@@ -1,0 +1,16 @@
+import yaml
+PLAN = r"project\\plans\\project_plan_v3.yaml"
+with open(PLAN,"r",encoding="utf-8") as f: d=yaml.safe_load(f)
+
+p4 = None
+for ph in d.get("phases",[]):
+    if str(ph.get("name","")).startswith("Phase 4"):
+        p4 = ph; break
+
+if p4 is not None:
+    steps = p4.setdefault("steps",[])
+    if not any(s.get("id")=="4.1.3" for s in steps):
+        steps.append({"id":"4.1.3","status":"done",
+                      "description":"Centralized error-capture runner integrated into inventory/reflection/model probe pipeline"})
+with open(PLAN,"w",encoding="utf-8") as f: yaml.safe_dump(d,f,sort_keys=False)
+print("[PLAN OK] Added 4.1.3 (error capture integrated).")

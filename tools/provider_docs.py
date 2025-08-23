@@ -1,0 +1,355 @@
+# =============================================================================
+# File: tools/provider_docs.py
+# Persistent Assistant v3 – Provider pricing/limits (override → scrape → baseline)
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19 15:55 BST
+# Update History:
+#   - 2025-08-19 15:55 BST: 3-tier pricing pipeline with explicit drop reasons,
+#     ASCII-safe logs, capability scoring, allow-list, and built-in baselines.
+# =============================================================================
+
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+
+import os, re, json, logging, datetime, ast
+from typing import Dict, Any, Optional, Tuple
+
+# Optional runtime deps for scraping; module still works with overrides/baselines
+try:
+    import requests
+    from bs4 import BeautifulSoup
+except Exception:
+    requests = None
+    BeautifulSoup = None
+
+# ---------- bootstrap logging (ASCII safe) ----------
+os.makedirs("logs", exist_ok=True)
+logging.basicConfig(
+    filename="logs/provider_docs.log",
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+log = logging.getLogger("ProviderDocs")
+
+def _file_stats(path: str) -> Tuple[int,int]:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            src = f.read()
+        lines = src.count("\n") + 1
+        fn = sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) for n in ast.walk(ast.parse(src)))
+        return lines, fn
+    except Exception:
+        return -1, -1
+
+_LINES, _FUNCS = _file_stats(__file__)
+log.info(f"provider_docs.py ready (lines={_LINES}, functions={_FUNCS})")
+
+# ---------- allow-list we will publish (kept small & reliable) ----------
+ALLOWLIST: Dict[str, list[str]] = {
+    "openai":    ["gpt-4o", "gpt-4o-mini", "gpt-4.1", "o3", "o3-mini"],
+    "anthropic": ["claude-opus-4.1", "claude-sonnet-4", "claude-haiku-3.5"],
+    "google":    ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite"],
+}
+
+# ---------- capability heuristics ----------
+def _bucket_long_context(max_tokens: Optional[int]) -> int:
+    if not max_tokens: return 2
+    if max_tokens <= 8_000: return 1
+    if max_tokens <= 32_000: return 2
+    if max_tokens <= 128_000: return 3
+    if max_tokens <= 512_000: return 4
+    return 5
+
+def _is_multimodal(name: str) -> bool:
+    n = name.lower()
+    return any(k in n for k in ["4o", "flash", "pro", "image", "vision", "omni", "tts", "audio"])
+
+def _speed_from_in_price_per_million(p: Optional[float]) -> int:
+    # cheaper → likely faster class for most providers
+    if p is None: return 3
+    if p <= 0.2: return 5
+    if p <= 1.0: return 4
+    if p <= 3.0: return 3
+    if p <= 10.0: return 2
+    return 1
+
+def _tier_from_name(name: str) -> Tuple[int,int]:
+    n = name.lower()
+    if "o3" in n: return (5, 5)
+    if "o4" in n: return (4, 4)
+    if "4.1" in n: return (4, 4)
+    if "4o" in n: return (4, 4)
+    if "mini" in n or "nano" in n: return (3, 3)
+    if "3.5" in n: return (2, 2)
+    if "opus" in n: return (5, 4)
+    if "sonnet" in n: return (4, 4)
+    if "haiku" in n: return (3, 3)
+    if "2.5 pro" in n or " 2.5 pro" in n: return (5, 4)
+    if "2.5 flash" in n: return (4, 3)
+    if "flash-lite" in n or "8b" in n: return (3, 3)
+    return (3, 3)
+
+def _capabilities(name: str, max_tokens: Optional[int], in_price_per_million: Optional[float]) -> Dict[str, Any]:
+    reasoning, coding = _tier_from_name(name)
+    return {
+        "reasoning": reasoning,
+        "coding": coding,
+        "long_context": _bucket_long_context(max_tokens),
+        "multimodal": _is_multimodal(name),
+        "speed": _speed_from_in_price_per_million(in_price_per_million),
+    }
+
+def _per_token(per_million: Optional[float]) -> Optional[float]:
+    return round(per_million / 1_000_000.0, 10) if per_million is not None else None
+
+# ---------- overrides (local YAML, optional) ----------
+def _load_overrides() -> Dict[str, Dict[str, Any]]:
+    candidates = [
+        os.path.join("config", "provider_pricing_overrides.yaml"),
+        os.path.join("data", "config", "provider_pricing_overrides.yaml"),
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            try:
+                import yaml
+                with open(p, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f) or {}
+                return data if isinstance(data, dict) else {}
+            except Exception as e:
+                log.error(f"Failed to load overrides {p}: {e}")
+    return {}
+
+# ---------- baselines (last known good, prevents empty catalogue) ----------
+# NOTE: These keep the system usable if scraping/overrides fail. Update periodically.
+BASELINES: Dict[str, Dict[str, Dict[str, Any]]] = {
+    "openai": {
+        "gpt-4o":      {"in_per_m": 5.00,  "out_per_m": 20.00, "max_tokens": 128_000, "source": "https://openai.com/api/pricing"},
+        "gpt-4o-mini": {"in_per_m": 0.60,  "out_per_m": 2.40,  "max_tokens": 128_000, "source": "https://openai.com/api/pricing"},
+        "gpt-4.1":     {"in_per_m": 5.00,  "out_per_m": 15.00, "max_tokens": 1_000_000, "source": "https://openai.com/api/pricing"},
+        "o3":          {"in_per_m": 2.20,  "out_per_m": 8.80,  "max_tokens": 200_000, "source": "azure-pricing: indicative"},
+        "o3-mini":     {"in_per_m": 1.10,  "out_per_m": 4.40,  "max_tokens": 200_000, "source": "azure-pricing: indicative"},
+    },
+    "anthropic": {
+        "claude-opus-4.1":  {"in_per_m": 15.00, "out_per_m": 75.00, "max_tokens": 1_000_000, "source": "https://www.anthropic.com/pricing"},
+        "claude-sonnet-4":  {"in_per_m": 3.00,  "out_per_m": 15.00, "max_tokens": 1_000_000, "source": "https://www.anthropic.com/news/1m-context"},
+        "claude-haiku-3.5": {"in_per_m": 0.80,  "out_per_m": 4.00,  "max_tokens": 200_000,  "source": "https://www.anthropic.com/claude/haiku"},
+    },
+    "google": {
+        "gemini-2.5-pro":       {"in_per_m": 1.25, "out_per_m": 10.00, "max_tokens": 200_000, "source": "https://ai.google.dev/gemini-api/docs/pricing"},
+        "gemini-2.5-flash":     {"in_per_m": 0.10, "out_per_m": 0.40,  "max_tokens": 200_000, "source": "https://ai.google.dev/gemini-api/docs/pricing"},
+        "gemini-2.5-flash-lite":{"in_per_m": 0.10, "out_per_m": 0.40,  "max_tokens": 128_000, "source": "https://ai.google.dev/gemini-api/docs/pricing"},
+    }
+}
+BASELINE_ASOF = "2025-08-19"
+
+# ---------- scraping (best effort; ok if blocked) ----------
+def _get(url: str) -> Optional[str]:
+    if requests is None:
+        log.warning("requests not installed; skipping scrape")
+        return None
+    try:
+        r = requests.get(url, headers={"User-Agent": "PA-v3/1.0"}, timeout=25)
+        if r.status_code == 200:
+            return r.text
+        log.warning(f"GET {url} -> HTTP {r.status_code}")
+    except Exception as e:
+        log.error(f"GET {url} failed: {e}")
+    return None
+
+def _scrape_openai() -> Dict[str, Dict[str, Any]]:
+    url = "https://openai.com/api/pricing"
+    html = _get(url)
+    results: Dict[str, Dict[str, Any]] = {}
+    if not html or BeautifulSoup is None:
+        return results
+    text = BeautifulSoup(html, "lxml").get_text(" ")
+    pat = re.compile(
+        r"(GPT[\-\s]?(?:4\.1|4o(?:\s*mini)?|o3(?:\s*mini)?))[^$]*?\$?\s*([0-9.]+)\s*/\s*(?:1M|1,?000,?000)\s*(?:input|in)[^$]*?\$?\s*([0-9.]+)\s*/\s*(?:1M|1,?000,?000)\s*(?:output|out)",
+        re.IGNORECASE
+    )
+    def norm(n: str) -> str:
+        n = n.lower().replace(" ", "")
+        if "4omini" in n: return "gpt-4o-mini"
+        if "4o" in n and "mini" not in n: return "gpt-4o"
+        if "4.1" in n: return "gpt-4.1"
+        if "o3mini" in n: return "o3-mini"
+        if "o3" in n: return "o3"
+        return n
+    for m in pat.finditer(text):
+        mid = norm(m.group(1))
+        in_m = float(m.group(2)); out_m = float(m.group(3))
+        results[mid] = {
+            "pricing": {"in": _per_token(in_m), "out": _per_token(out_m)},
+            "limits": {"max_tokens": 128_000 if "4o" in mid else (1_000_000 if "4.1" in mid else 200_000)},
+            "source": url,
+            "notes": "Scraped OpenAI pricing page"
+        }
+    return results
+
+def _scrape_anthropic() -> Dict[str, Dict[str, Any]]:
+    url = "https://www.anthropic.com/pricing"
+    html = _get(url)
+    res: Dict[str, Dict[str, Any]] = {}
+    if not html or BeautifulSoup is None:
+        return res
+    text = BeautifulSoup(html, "lxml").get_text("\n")
+    def parse_pair(block: str) -> Tuple[Optional[float], Optional[float]]:
+        m = re.search(r"Input\s*\$([0-9.]+)\s*/\s*MTok.*?Output\s*\$([0-9.]+)\s*/\s*MTok", block, re.IGNORECASE|re.DOTALL)
+        if m: return float(m.group(1)), float(m.group(2))
+        return None, None
+    def seg(kw: str, nxt: str|None=None) -> str:
+        s = text.lower().find(kw)
+        if s == -1: return ""
+        e = text.lower().find(nxt, s+1) if nxt else -1
+        return text[s:e] if e != -1 else text[s:]
+    pin,pout = parse_pair(seg("opus","sonnet"));   res["claude-opus-4.1"]  = {"pricing":{"in":_per_token(pin),"out":_per_token(pout)}, "limits":{"max_tokens":1_000_000}, "source":url, "notes":"Scraped Anthropic pricing"}
+    pin,pout = parse_pair(seg("sonnet","haiku"));  res["claude-sonnet-4"] = {"pricing":{"in":_per_token(pin),"out":_per_token(pout)}, "limits":{"max_tokens":1_000_000}, "source":url, "notes":"Scraped Anthropic pricing"}
+    pin,pout = parse_pair(seg("haiku",None));      res["claude-haiku-3.5"]= {"pricing":{"in":_per_token(pin),"out":_per_token(pout)}, "limits":{"max_tokens":200_000},  "source":url, "notes":"Scraped Anthropic pricing"}
+    return res
+
+def _scrape_google() -> Dict[str, Dict[str, Any]]:
+    url = "https://ai.google.dev/gemini-api/docs/pricing"
+    html = _get(url)
+    res: Dict[str, Dict[str, Any]] = {}
+    if not html or BeautifulSoup is None:
+        return res
+    text = BeautifulSoup(html, "lxml").get_text("\n")
+    def block(title: str) -> str:
+        i = text.lower().find(title.lower())
+        if i == -1: return ""
+        j = text.lower().find("gemini", i+6)
+        return text[i:j] if j != -1 else text[i:]
+    def parse_io(b: str) -> Tuple[Optional[float], Optional[float], Optional[int]]:
+        mi = re.search(r"Input price.*?\$([0-9.]+)\s*/\s*1M", b, re.IGNORECASE)
+        mo = re.search(r"Output price.*?\$([0-9.]+)\s*/\s*1M", b, re.IGNORECASE)
+        mc = re.search(r"(?:context window|prompts\s*[≤>]\s*)([^,\n]+)", b, re.IGNORECASE)
+        ctx = None
+        if mc:
+            s = mc.group(1)
+            mm = re.search(r"(\d+(?:\.\d+)?)\s*(K|M)", s, re.IGNORECASE)
+            if mm:
+                val = float(mm.group(1)); suf = mm.group(2).upper()
+                ctx = int(val * (1_000 if suf=="K" else 1_000_000))
+        return (float(mi.group(1)) if mi else None,
+                float(mo.group(1)) if mo else None,
+                ctx)
+    titles = {
+        "gemini-2.5-pro": "Gemini 2.5 Pro",
+        "gemini-2.5-flash": "Gemini 2.5 Flash",
+        "gemini-2.5-flash-lite": "Gemini 2.5 Flash-Lite",
+    }
+    for mid, title in titles.items():
+        b = block(title)
+        pin, pout, ctx = parse_io(b)
+        res[mid] = {
+            "pricing": {"in": _per_token(pin), "out": _per_token(pout)},
+            "limits": {"max_tokens": ctx or 200_000},
+            "source": url,
+            "notes": f"Scraped Google {title} pricing"
+        }
+    return res
+
+# ---------- assembly (override -> scrape -> baseline) ----------
+def _complete(node: Optional[Dict[str, Any]]) -> bool:
+    if not node: return False
+    p = node.get("pricing") or {}
+    lim = node.get("limits") or {}
+    cap = node.get("capabilities") or {}
+    if not isinstance(p.get("in"), float): return False
+    if not isinstance(p.get("out"), float): return False
+    if not isinstance(lim.get("max_tokens"), int): return False
+    for k in ("reasoning","coding","long_context","multimodal","speed"):
+        if k not in cap: return False
+    return True
+
+def _node_from_parts(model_id: str, display_name: str, in_m: Optional[float], out_m: Optional[float],
+                     ctx: Optional[int], source: str, notes: str, pricing_source: str) -> Dict[str, Any]:
+    node = {
+        "display_name": display_name,
+        "pricing": {"in": _per_token(in_m), "out": _per_token(out_m)},
+        "limits": {"max_tokens": ctx},
+        "capabilities": _capabilities(model_id, ctx, in_m),
+        "notes": notes,
+        "source": source,
+        "meta": {
+            "pricing_source": pricing_source,
+            "as_of": datetime.date.today().isoformat()
+        }
+    }
+    return node
+
+def _from_overrides(ov: Dict[str, Any], provider: str, model: str) -> Optional[Dict[str, Any]]:
+    try:
+        m = ((ov.get(provider) or {}).get("models") or {}).get(model)
+        if not m: return None
+        pin = m["pricing"]["in"]; pout = m["pricing"]["out"]; ctx = m["limits"]["max_tokens"]
+        src = m.get("source","(override)"); notes = m.get("notes","override")
+        disp = m.get("display_name", model)
+        node = _node_from_parts(model, disp, pin*1_000_000, pout*1_000_000, ctx, src, notes, "override")
+        return node if _complete(node) else None
+    except Exception as e:
+        log.error(f"Override parse failed {provider}/{model}: {e}")
+        return None
+
+def _from_scrape(scraped: Dict[str, Dict[str, Any]], provider: str, model: str) -> Optional[Dict[str, Any]]:
+    try:
+        m = scraped.get(model)
+        if not m: return None
+        pin = m["pricing"]["in"]; pout = m["pricing"]["out"]; ctx = m["limits"]["max_tokens"]
+        # m['pricing'] fields are already per-token; convert back to per-million for capability speed heuristic
+        pin_m = None if pin is None else pin * 1_000_000
+        disp = m.get("display_name", model)
+        node = {
+            "display_name": disp,
+            "pricing": {"in": pin, "out": pout},
+            "limits": {"max_tokens": ctx},
+            "capabilities": _capabilities(model, ctx, pin_m),
+            "notes": m.get("notes", "scraped"),
+            "source": m.get("source", ""),
+            "meta": {"pricing_source": "scrape", "as_of": datetime.date.today().isoformat()}
+        }
+        return node if _complete(node) else None
+    except Exception as e:
+        log.error(f"Scrape assemble failed {provider}/{model}: {e}")
+        return None
+
+def _from_baseline(provider: str, model: str) -> Optional[Dict[str, Any]]:
+    b = ((BASELINES.get(provider) or {}).get(model) or {})
+    if not b: return None
+    pin_m = b.get("in_per_m"); pout_m = b.get("out_per_m"); ctx = b.get("max_tokens")
+    src = b.get("source","(baseline)")
+    disp = model
+    node = _node_from_parts(model, disp, pin_m, pout_m, ctx, src, f"baseline {BASELINE_ASOF}", "baseline")
+    if not _complete(node):
+        return None
+    return node
+
+def fetch_curated_dynamic() -> Dict[str, Dict[str, Any]]:
+    """
+    Returns: { provider: {"models": {model_id: node}} } using:
+      1) overrides → 2) scrape → 3) baseline. Drops incomplete and logs reasons.
+    """
+    overrides = _load_overrides()
+    scraped_by_provider: Dict[str, Dict[str, Dict[str, Any]]] = {
+        "openai": _scrape_openai(),
+        "anthropic": _scrape_anthropic(),
+        "google": _scrape_google(),
+    }
+
+    out: Dict[str, Dict[str, Any]] = {}
+    for prov, model_list in ALLOWLIST.items():
+        out.setdefault(prov, {"models": {}})
+        for mid in model_list:
+            node = (_from_overrides(overrides, prov, mid) or
+                    _from_scrape(scraped_by_provider.get(prov, {}), prov, mid) or
+                    _from_baseline(prov, mid))
+            if node and _complete(node):
+                out[prov]["models"][mid] = node
+            else:
+                log.warning(f"Dropped {prov}/{mid}: incomplete fields (override/scrape/baseline all failed)")
+    return out

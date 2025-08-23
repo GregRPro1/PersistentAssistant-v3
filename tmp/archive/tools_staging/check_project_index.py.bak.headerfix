@@ -1,0 +1,77 @@
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+# check_project_index.py - 20/08/2025 06:00 BST  | G. Rapson, GR-Analysis
+import sys, os, json, hashlib, yaml
+
+SCHEMA_PATH = r"project\plans\project_index.schema.json"
+INDEX_PATH  = r"project_index.yaml"
+
+def sha256_file(p):
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(1<<20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def main():
+    # Load index
+    try:
+        idx = yaml.safe_load(open(INDEX_PATH, "r", encoding="utf-8"))
+    except Exception as e:
+        print(f"[INDEX ERROR] Cannot read {INDEX_PATH}: {e}", file=sys.stderr)
+        sys.exit(2)
+    root = idx.get("project_index") or {}
+    files = root.get("files") or {}
+    rules = root.get("rules") or {"forbid_duplicates": True, "enforce_sha": True}
+
+    # Basic presence checks
+    required = ["project_plan","project_plan_schema","master_tracker","project_definition"]
+    missing_keys = [k for k in required if k not in files]
+    if missing_keys:
+        print(f"[INDEX ERROR] Missing file entries: {missing_keys}", file=sys.stderr)
+        sys.exit(3)
+
+    # Duplicate filename detection (if enabled)
+    if rules.get("forbid_duplicates", True):
+        seen = {}
+        dups = []
+        for key, meta in files.items():
+            p = meta["path"]
+            name = os.path.basename(p).lower()
+            if name in seen and os.path.normpath(seen[name]) != os.path.normpath(p):
+                dups.append((name, seen[name], p))
+            else:
+                seen[name] = p
+        if dups:
+            for n,a,b in dups:
+                print(f"[INDEX ERROR] Duplicate filename '{n}' in different locations: '{a}' vs '{b}'", file=sys.stderr)
+            sys.exit(4)
+
+    # Path + SHA checks
+    errors = 0
+    for key, meta in files.items():
+        p = meta["path"]
+        if not os.path.exists(p):
+            print(f"[INDEX ERROR] Missing file for '{key}': {p}", file=sys.stderr)
+            errors += 1
+            continue
+        if rules.get("enforce_sha", True):
+            actual = sha256_file(p)
+            expected = (meta.get("sha256") or "").lower()
+            if len(expected) != 64 or any(c not in "0123456789abcdef" for c in expected):
+                print(f"[INDEX ERROR] Invalid/missing sha256 for '{key}' ({p})", file=sys.stderr)
+                errors += 1
+            elif actual != expected:
+                print(f"[INDEX ERROR] SHA mismatch for '{key}' ({p})\n  expected={expected}\n    actual={actual}", file=sys.stderr)
+                errors += 1
+    if errors:
+        sys.exit(5)
+    print("[INDEX OK] Project index paths + hashes validated.")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()

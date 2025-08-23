@@ -9,6 +9,12 @@
 #   Adds function/method signatures and first docstring lines (no bodies).
 
 from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
 import os
 import re
 import ast

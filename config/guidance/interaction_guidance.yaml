@@ -1,0 +1,15 @@
+interaction:
+  forbid_shell_heredoc: true
+  notes:
+    - "Do NOT use bash-style heredocs in PowerShell (e.g., `python - << 'PY'`)."
+    - "Use here-strings + full-file writes, then run `python file.py`."
+    - "Prefer full-file replaces via tools/safe_replace.py with expected SHA."
+    - "Run panel: `python gui/run_window.py` for supervised local runs."
+
+snippets:
+  include_in_pack: true
+  kinds:
+    - "safe_replace usage"
+    - "LEB runner usage"
+    - "Model probe runner"
+    - "Plan show current/next"

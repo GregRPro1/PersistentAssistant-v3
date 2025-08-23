@@ -1,0 +1,143 @@
+# =============================================================================
+# File: tools/manifest_query.py
+# Persistent Assistant v3 – Manifest Query (entry/verify/emit header)
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19 15:58 BST
+# Update History:
+#   - 2025-08-19 15:58 BST: Initial version (entry lookup, verify, emit header).
+# =============================================================================
+
+from __future__ import annotations
+
+import os
+import sys
+import json
+import argparse
+import hashlib
+import fnmatch
+import datetime
+from typing import Dict, Any, List, Optional
+
+# Paths
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DEFAULT_MANIFEST = os.path.join(PROJECT_ROOT, "project", "structure", "file_manifest.yaml")
+LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+RUN_LOG = os.path.join(LOG_DIR, f"manifest_query_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+
+def _log(msg: str) -> None:
+    try:
+        with open(RUN_LOG, "a", encoding="utf-8") as f:
+            f.write(msg + "\n")
+    except Exception:
+        pass
+
+def _sha256(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def _load_yaml(path: str) -> Dict[str, Any]:
+    import yaml
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+def _find_entries(manifest: Dict[str, Any], pattern: str) -> List[Dict[str, Any]]:
+    files = manifest.get("files", []) or []
+    # Normalize separators to forward-slash in both sides
+    pat = pattern.replace("\\", "/")
+    out: List[Dict[str, Any]] = []
+    for item in files:
+        p = (item.get("path") or "").replace("\\", "/")
+        if fnmatch.fnmatch(p, pat):
+            out.append(item)
+    return out
+
+def _emit_header(entry: Dict[str, Any]) -> str:
+    """
+    Produces comment header lines that can be pasted at the top of a replacement file,
+    documenting the expected SHA256/lines/functions of the CURRENT on-disk file.
+    """
+    sha = entry.get("sha256", "")
+    lines = entry.get("lines", -1)
+    funcs = entry.get("functions", -1)
+    path = entry.get("path", "")
+    hdr = []
+    hdr.append("# =============================================================================")
+    hdr.append(f"# Expected-Target-Path: {path}")
+    hdr.append(f"# Expected-SHA256: {sha}")
+    hdr.append(f"# Previous-Lines: {lines}")
+    hdr.append(f"# Previous-Functions: {funcs}")
+    hdr.append("# =============================================================================")
+    return "\n".join(hdr)
+
+def main(argv: List[str]) -> int:
+    ap = argparse.ArgumentParser(description="Query file_manifest.yaml for a file entry and optionally verify.")
+    ap.add_argument("--path", required=True, help="File path (relative) or glob to look up, e.g. gui/tabs/tools_tab.py")
+    ap.add_argument("--manifest", default=DEFAULT_MANIFEST, help="Path to file_manifest.yaml")
+    ap.add_argument("--verify", action="store_true", help="Re-hash the file on disk and compare to manifest SHA256")
+    ap.add_argument("--emit-header", action="store_true", help="Print a header block with Expected-SHA256 for safe replace")
+    ap.add_argument("--first-only", action="store_true", help="Only return the first match when using a glob")
+    args = ap.parse_args(argv)
+
+    _log(f"ARGS: {args}")
+
+    man_path = os.path.abspath(args.manifest)
+    if not os.path.exists(man_path):
+        print("SUMMARY:", json.dumps({"ok": False, "error": f"Manifest missing: {man_path}"}))
+        return 2
+
+    manifest = _load_yaml(man_path)
+    if not manifest:
+        print("SUMMARY:", json.dumps({"ok": False, "error": "Manifest unreadable or empty", "manifest": man_path}))
+        return 2
+
+    matches = _find_entries(manifest, args.path)
+    if not matches:
+        print("SUMMARY:", json.dumps({"ok": False, "error": "No entries matched", "pattern": args.path}))
+        return 1
+
+    if args.first_only and matches:
+        matches = [matches[0]]
+
+    # Build result list with optional verification
+    result: List[Dict[str, Any]] = []
+    for e in matches:
+        rel = e.get("path", "")
+        disk_path = os.path.join(PROJECT_ROOT, rel.replace("/", os.sep))
+        entry = dict(e)
+        if args.verify and os.path.exists(disk_path):
+            try:
+                actual = _sha256(disk_path)
+                entry["verify"] = {
+                    "disk_path": disk_path,
+                    "actual_sha256": actual,
+                    "match": (actual.lower() == str(e.get("sha256", "")).lower())
+                }
+            except Exception as ex:
+                entry["verify"] = {"disk_path": disk_path, "error": str(ex)}
+        result.append(entry)
+
+    payload: Dict[str, Any] = {
+        "ok": True,
+        "manifest": man_path.replace("\\", "/"),
+        "pattern": args.path,
+        "matches": result,
+    }
+
+    # Optional header output (for single target)
+    if args.emit_header and len(result) == 1:
+        header_text = _emit_header(result[0])
+        print(header_text)
+        print()  # blank line
+
+    print("SUMMARY:", json.dumps(payload))
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
+ 

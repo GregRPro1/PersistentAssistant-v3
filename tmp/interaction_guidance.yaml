@@ -1,0 +1,7 @@
+# config/guidance/interaction_guidance.yaml
+# Interaction rules (editable)
+rules:
+  - "Always include plan step number in the first line."
+  - "Always return a single cut-and-paste PowerShell package; no Bash heredocs or here-strings like: python - << 'PY'."
+  - "Never patch lines in-place; always full-file guarded replace via safe_replace.py."
+  - "If a guarded replace fails, still create a pack_*.zip with reasons + candidates."

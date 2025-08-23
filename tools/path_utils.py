@@ -1,0 +1,32 @@
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import os, sys
+from pathlib import Path
+
+def project_root() -> Path:
+    # tools/ is one level under root
+    here = Path(__file__).resolve()
+    return here.parents[1]
+
+ROOT = project_root()
+
+def abspath(*parts) -> str:
+    return str((ROOT.joinpath(*parts)).resolve())
+
+def norm(p: str) -> str:
+    return str(Path(p).resolve())
+
+def ensure_dirs(*paths: str) -> None:
+    for p in paths:
+        Path(p).parent.mkdir(parents=True, exist_ok=True)
+
+def chdir_root() -> None:
+    os.chdir(str(ROOT))
+
+def py() -> str:
+    return sys.executable or "python"

@@ -1,0 +1,46 @@
+name: Windows CI
+
+on:
+  push:
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+          pip install pytest pyyaml requests
+
+      - name: Run tests
+        shell: pwsh
+        run: |
+          pytest -q
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Archive logs and feedback
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa-logs
+          path: |
+            logs/**/*
+            tmp/feedback/**/*.zip

@@ -1,0 +1,52 @@
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+# =============================================================================
+# File: tools/verify_against_manifest.py
+# Persistent Assistant v3 – Verify working tree vs manifest
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19 15:20 BST
+# =============================================================================
+
+from __future__ import annotations
+import os, sys, yaml, hashlib, json
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+MANIFEST = os.path.join(PROJECT_ROOT, "project", "structure", "file_manifest.yaml")
+
+def sha256_of(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def main():
+    if not os.path.exists(MANIFEST):
+        print("FAIL: manifest missing:", MANIFEST)
+        return 2
+    with open(MANIFEST, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    root = data.get("root", PROJECT_ROOT)
+    files = data.get("files", [])
+    drift = []
+    for item in files:
+        rel = item["path"]
+        want = item.get("sha256")
+        p = os.path.join(root, rel)
+        if not os.path.exists(p):
+            drift.append({"path": rel, "status": "missing"})
+            continue
+        got = sha256_of(p)
+        if got.lower() != (want or "").lower():
+            drift.append({"path": rel, "status": "hash_mismatch", "expected": want, "actual": got})
+    ok = (len(drift) == 0)
+    print("SUMMARY:", json.dumps({"ok": ok, "drift_count": len(drift), "details": drift}))
+    return 0 if ok else 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+

@@ -1,0 +1,57 @@
+import os, re, ast, json, yaml, sys
+from datetime import datetime
+
+ROOT = os.getcwd()
+OUT_DIR = os.path.join("data","insights")
+os.makedirs(OUT_DIR, exist_ok=True)
+
+FEATURE_RE = re.compile(r"feature_id\s*:\s*([A-Za-z0-9\-_]+)", re.IGNORECASE)
+
+SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".ruff_cache"}
+
+def should_skip_dir(path):
+    parts = set(os.path.normpath(path).split(os.sep))
+    return bool(parts & SKIP_DIRS)
+
+def scan_py(path):
+    info = {"functions": [], "classes": [], "feature_ids": []}
+    try:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            src = f.read()
+        info["feature_ids"] = sorted(set(FEATURE_RE.findall(src)))
+        tree = ast.parse(src)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                info["functions"].append(node.name)
+            elif isinstance(node, ast.ClassDef):
+                info["classes"].append(node.name)
+    except Exception as e:
+        info["error"] = str(e)
+    return info
+
+def main():
+    inventory = {
+        "generated_at": datetime.utcnow().isoformat()+"Z",
+        "root": ROOT,
+        "files": {}
+    }
+    for dirpath, dirnames, filenames in os.walk(ROOT):
+        if should_skip_dir(dirpath):
+            continue
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+        for fn in filenames:
+            if fn.endswith(".py"):
+                p = os.path.join(dirpath, fn)
+                rel = os.path.relpath(p, ROOT)
+                inventory["files"][rel] = scan_py(p)
+
+    json_path = os.path.join(OUT_DIR, "code_inventory.json")
+    yaml_path = os.path.join(OUT_DIR, "code_inventory.yaml")
+    with open(json_path, "w", encoding="utf-8") as jf:
+        json.dump(inventory, jf, indent=2)
+    with open(yaml_path, "w", encoding="utf-8") as yf:
+        yaml.safe_dump(inventory, yf, sort_keys=False)
+    print(f"[INVENTORY OK] Wrote {json_path} and {yaml_path}")
+
+if __name__ == "__main__":
+    sys.exit(main() or 0)

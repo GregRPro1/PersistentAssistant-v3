@@ -1,0 +1,1 @@
+PLAN: 6.4.a -> next 2.4 | PACK: C:\_Repos\PersistentAssistant\tmp\feedback\pack_apply_pack_20250823_064308.zip

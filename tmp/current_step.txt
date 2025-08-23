@@ -1,0 +1,2 @@
+Current: 6.4.a - Add Windows CI workflow (GitHub Actions) [in_progress]
+Next:    6.4.b - Run CI smoke (tests minimal) and upload logs [planned]

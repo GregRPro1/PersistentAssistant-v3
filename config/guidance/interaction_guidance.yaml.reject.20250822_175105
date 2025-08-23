@@ -1,0 +1,16 @@
+# Guidance for interaction & packaging
+interaction:
+  forbid_shell_heredoc: true
+  notes:
+    - "Do NOT use bash-style heredocs in PowerShell (e.g., `python - << 'PY'`)."
+    - "Always use PowerShell here-strings to write files, then run `python file.py`."
+    - "Prefer full-file replacements + tools/safe_replace.py with expected SHA."
+    - "If a step fails, still export insights and produce a PACK zip."
+
+snippets:
+  include_in_pack: true
+  kinds:
+    - "safe_replace usage"
+    - "LEB ping & run)"
+    - "Model probe runner"
+    - "Plan show current/next"

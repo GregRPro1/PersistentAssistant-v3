@@ -1,0 +1,6 @@
+# Each non-empty, non-# line is a regex checked against file contents.
+# Absolute no-gos for our Windows/PowerShell environment:
+<<\s*':?PY'
+python\s*-\s*<<
+# Risky inline Python execution patterns we want to flag (not block yet):
+python\s+-c\s+

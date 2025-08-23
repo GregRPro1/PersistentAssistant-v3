@@ -1,0 +1,60 @@
+import subprocess, datetime, os, glob
+
+try:
+    import pyperclip
+except Exception:
+    pyperclip = None
+
+def run(cmd):
+    try:
+        return 0, subprocess.check_output(cmd, shell=True, text=True).strip()
+    except subprocess.CalledProcessError as e:
+        return e.returncode, (e.output or str(e))
+
+def tail(path, n=40):
+    if not os.path.exists(path):
+        return f"[MISSING] {path}"
+    try:
+        with open(path,"r",encoding="utf-8",errors="ignore") as f:
+            lines = f.readlines()
+        return "".join(lines[-n:])
+    except Exception as e:
+        return f"[ERROR reading {path}] {e}"
+
+def main():
+    ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    sections = []
+
+    # Always refresh deep inventory here too (belt & braces)
+    rc, inv = run("python tools\\deep_inventory.py")
+    sections.append("[INVENTORY]\n" + inv)
+
+    rc2, plan = run("python tools\\show_next_step.py")
+    sections.append("[PLAN STATUS]\n" + plan)
+
+    # Include SHA (current expected) for a canonical path
+    rc3, sha = run("python tools\\get_expected_sha.py gui\\tabs\\chat_tab.py")
+    sections.append("[SHA CHECK]\n" + sha)
+
+    # Log harvesting (extend as needed)
+    log_blocks = []
+    for log in ["api_usage.log", "plan_updates.log", "logs\\tool_run_latest.log"]:
+        log_blocks.append(f"--- {log} ---\n" + tail(log, 40))
+    sections.append("[LOGS]\n" + "\n".join(log_blocks))
+
+    summary = f"=== Persistent Assistant Dev Summary ===\nTimestamp: {ts}\n\n" + "\n\n".join(sections)
+
+    try:
+        if pyperclip:
+            pyperclip.copy(summary)
+            print("[OK] Summary copied to clipboard. Paste into ChatGPT.")
+        else:
+            print("[WARN] pyperclip not available; printing summary:")
+            print(summary)
+    finally:
+        with open("last_summary.txt","w",encoding="utf-8") as f:
+            f.write(summary)
+        print("[SAVED] last_summary.txt")
+
+if __name__ == "__main__":
+    main()

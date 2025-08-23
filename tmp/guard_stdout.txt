@@ -1,0 +1,8 @@
+[FORBIDDEN GUARD] VIOLATIONS FOUND:
+ - C:\_Repos\PersistentAssistant\config\guidance\interaction_guidance.override.yaml  :: <<\s*':?PY'  :: "<< 'PY'"
+ - C:\_Repos\PersistentAssistant\config\guidance\interaction_guidance.override.yaml  :: python\s*-\s*<<  :: 'python - <<'
+ - C:\_Repos\PersistentAssistant\config\guidance\interaction_guidance.yaml  :: <<\s*':?PY'  :: "<< 'PY'"
+ - C:\_Repos\PersistentAssistant\config\guidance\interaction_guidance.yaml  :: python\s*-\s*<<  :: 'python - <<'
+ - C:\_Repos\PersistentAssistant\.venv\Lib\site-packages\tqdm\utils.py  :: python\s+-c\s+  :: 'python -c '
+ - C:\_Repos\PersistentAssistant\.venv\Lib\site-packages\_pytest\pytester.py  :: python\s+-c\s+  :: 'python -c '
+Total violations: 6

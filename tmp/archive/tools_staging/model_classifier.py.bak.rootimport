@@ -1,0 +1,77 @@
+# =============================================================================
+# File: tools/model_classifier.py
+# Persistent Assistant v3 – Model Classifier
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19 12:40 BST
+# Update History:
+#   - 2025-08-19 12:40 BST: Initial version. Heuristic classification by provider/model id.
+# Description:
+#   Classifies provider/model into:
+#     - interface: one of {"chat","responses","embeddings","image","audio.speech","audio.stt","moderation","realtime","other"}
+#     - family: short label (e.g., "gpt-4o", "o3", "dalle", "embedding", "whisper", "tts", "gemini", "claude")
+#     - probe_route: which API to test for liveness: {"chat","responses",None}
+#   These are *heuristics* based on current naming conventions. Safe to extend.
+# =============================================================================
+
+from __future__ import annotations
+from typing import Dict
+
+def classify(provider: str, model: str) -> Dict[str, str | None]:
+    p = provider.lower().strip()
+    m = (model or "").lower().strip()
+
+    # -------- OPENAI --------
+    if p == "openai":
+        # Responses (reasoning) families (o1/o3/o4)
+        if m.startswith(("o1", "o3", "o4")):
+            return {"interface": "responses", "family": m.split("-")[0], "probe_route": "responses"}
+        # Chat families
+        if m.startswith(("gpt-4o", "gpt-4.1", "gpt-4", "gpt-3.5", "chatgpt")):
+            return {"interface": "chat", "family": m.split("-")[0], "probe_route": "chat"}
+        # Embeddings
+        if "embedding" in m or m.startswith("text-embedding"):
+            return {"interface": "embeddings", "family": "embedding", "probe_route": None}
+        # Audio
+        if m.startswith("whisper"):
+            return {"interface": "audio.stt", "family": "whisper", "probe_route": None}
+        if m.startswith("tts-"):
+            return {"interface": "audio.speech", "family": "tts", "probe_route": None}
+        # Image
+        if m.startswith(("dall-e", "gpt-image-")):
+            return {"interface": "image", "family": "dalle" if m.startswith("dall-e") else "gpt-image", "probe_route": None}
+        # Moderation
+        if "moderation" in m:
+            return {"interface": "moderation", "family": "moderation", "probe_route": None}
+        # Realtime, search, audio previews
+        if "realtime" in m or "search-preview" in m or "audio-preview" in m or "transcribe" in m:
+            return {"interface": "other", "family": "experimental", "probe_route": None}
+        # Default unknown → other
+        return {"interface": "other", "family": "other", "probe_route": None}
+
+    # -------- ANTHROPIC --------
+    if p == "anthropic":
+        # Claude messages API (chat-like)
+        return {"interface": "chat", "family": "claude", "probe_route": "chat"}
+
+    # -------- GOOGLE (Gemini) --------
+    if p == "google":
+        # Gemini families - many require their own SDK; we never probe via openai libs
+        if "embedding" in m:
+            return {"interface": "embeddings", "family": "gemini-embed", "probe_route": None}
+        if "flash" in m or "pro" in m or "gemini" in m:
+            return {"interface": "other", "family": "gemini", "probe_route": None}
+        return {"interface": "other", "family": "gemini", "probe_route": None}
+
+    # -------- GROQ --------
+    if p == "groq":
+        # Groq mirrors OpenAI-style chat for many llama/gemma models; but probing requires Groq SDK.
+        # We skip probing here (probe_route=None) until a Groq client is wired.
+        m0 = m.replace("/", "-")
+        if "llama" in m0 or "gemma" in m0 or "qwen" in m0:
+            return {"interface": "chat", "family": "groq-llm", "probe_route": None}
+        if "whisper" in m0:
+            return {"interface": "audio.stt", "family": "whisper", "probe_route": None}
+        return {"interface": "other", "family": "groq", "probe_route": None}
+
+    # Default
+    return {"interface": "other", "family": "other", "probe_route": None}

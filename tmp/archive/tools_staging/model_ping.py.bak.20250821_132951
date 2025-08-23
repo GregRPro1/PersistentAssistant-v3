@@ -1,0 +1,126 @@
+from __future__ import annotations
+import os, time, yaml, traceback
+from datetime import datetime, timezone
+
+INSIGHTS_DIR = os.path.join("data","insights")
+STATUS_YAML  = os.path.join(INSIGHTS_DIR, "model_probe_status.yaml")
+SUMMARY_YAML = os.path.join(INSIGHTS_DIR, "model_probe_summary.yaml")
+SUMMARY_TXT  = os.path.join("tmp", "model_probe_summary.txt")
+
+HELLO_PROMPT = "Hello from Persistent Assistant — model probe."
+OPENAI_ACTIVE = True  # Only OpenAI is active for now; others listed but disabled
+
+def now_iso():
+    return datetime.now(timezone.utc).isoformat()
+
+def ensure_dirs():
+    os.makedirs(INSIGHTS_DIR, exist_ok=True)
+    os.makedirs("tmp", exist_ok=True)
+
+def load_models():
+    from tools.model_loader import load_ai_models
+    return load_ai_models()
+
+def try_openai_ping(model_id: str):
+    """
+    Uses core.ai_client.AIClient to send a tiny prompt.
+    Relies on env OPENAI_API_KEY or the client fallback.
+    """
+    from core.ai_client import AIClient
+    key = os.getenv("OPENAI_API_KEY")  # optional; AIClient may fall back to file if configured
+    client = AIClient(provider="openai", key=key, model=model_id)
+    res = client.send(HELLO_PROMPT)
+    # Consider success if we got a non-empty reply
+    ok = bool(res.get("reply"))
+    return ok, res
+
+def main():
+    ensure_dirs()
+    models = load_models()
+    providers = models.get("providers", {})
+    status = {
+        "generated_at": now_iso(),
+        "notes": "OpenAI attempted; other providers visible but currently disabled (skipped).",
+        "providers": {}
+    }
+    failures = []
+    successes = []
+    skipped = []
+
+    for prov, pdata in providers.items():
+        prov_l = prov.lower()
+        pentry = {"models": {}}
+        for mid, meta in (pdata.get("models") or {}).items():
+            entry = {
+                "attempted": False,
+                "status": "skipped",
+                "error": None,
+                "ts": now_iso(),
+                "capabilities": meta.get("capabilities") or [],
+                "input_cost_per_1k": meta.get("input_cost_per_1k"),
+                "output_cost_per_1k": meta.get("output_cost_per_1k"),
+            }
+            if prov_l == "openai" and OPENAI_ACTIVE:
+                entry["attempted"] = True
+                try:
+                    ok, res = try_openai_ping(mid)
+                    entry["status"] = "success" if ok else "error"
+                    entry["error"] = None if ok else "empty_reply"
+                    entry["latency_s"] = float(res.get("time", 0.0))
+                    entry["tokens_in"] = int(res.get("tokens_in", 0))
+                    entry["tokens_out"] = int(res.get("tokens_out", 0))
+                    entry["computed_cost"] = float(res.get("cost", 0.0))
+                    if ok:
+                        successes.append((prov, mid))
+                    else:
+                        failures.append((prov, mid, "empty_reply"))
+                except Exception as e:
+                    entry["status"] = "error"
+                    entry["error"] = f"{type(e).__name__}: {e}"
+                    failures.append((prov, mid, entry["error"]))
+            else:
+                entry["status"] = "disabled"
+                entry["error"] = "provider_disabled_in_mvp"
+                skipped.append((prov, mid))
+            pentry["models"][mid] = entry
+        status["providers"][prov] = pentry
+
+    # Write status yaml
+    with open(STATUS_YAML, "w", encoding="utf-8") as f:
+        yaml.safe_dump(status, f, sort_keys=False)
+
+    # Summaries
+    summary = {
+        "generated_at": now_iso(),
+        "success_count": len(successes),
+        "error_count": len(failures),
+        "skipped_count": len(skipped),
+        "errors": [{"provider":p, "model":m, "reason":r} for (p,m,r) in failures],
+        "skipped": [{"provider":p, "model":m} for (p,m) in skipped],
+        "successful": [{"provider":p, "model":m} for (p,m) in successes],
+    }
+    with open(SUMMARY_YAML, "w", encoding="utf-8") as f:
+        yaml.safe_dump(summary, f, sort_keys=False)
+
+    # Human readable
+    lines = []
+    lines.append("=== Model Probe Summary ===")
+    lines.append(f"Success: {len(successes)} | Errors: {len(failures)} | Skipped: {len(skipped)}")
+    if failures:
+        lines.append("\n-- Errors --")
+        for p,m,r in failures[:50]:
+            lines.append(f"  {p}:{m} -> {r}")
+    if skipped:
+        lines.append("\n-- Skipped (provider disabled) --")
+        for p,m in skipped[:50]:
+            lines.append(f"  {p}:{m}")
+    if successes:
+        lines.append("\n-- Success --")
+        for p,m in successes[:50]:
+            lines.append(f"  {p}:{m}")
+    with open(SUMMARY_TXT, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    print("\n".join(lines))
+
+if __name__ == "__main__":
+    main()

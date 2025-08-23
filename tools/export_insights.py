@@ -1,0 +1,43 @@
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import os, yaml
+from pathlib import Path
+from datetime import datetime, timezone
+
+ROOT = Path(__file__).resolve().parents[1]
+def now(): return datetime.now(timezone.utc).isoformat()
+OUT = ROOT / "data" / "insights" / "insights_report.yaml"
+IN = {
+  "probe_status": ROOT/"data"/"insights"/"model_probe_status.yaml",
+  "probe_summary": ROOT/"data"/"insights"/"model_probe_summary.yaml",
+  "errors_log_tail": ROOT/"data"/"insights"/"errors.log",
+  "capture_errors": ROOT/"data"/"insights"/"capture_errors.yaml",
+  "plan": ROOT/"project"/"plans"/"project_plan_v3.yaml",
+  "replace_log": ROOT/"data"/"insights"/"replace_log.txt"
+}
+def load_yaml(p: Path):
+    if not p.exists(): return None
+    try: return yaml.safe_load(p.read_text(encoding="utf-8"))
+    except Exception: return {"_parse_error": str(p)}
+def tail(p: Path, nbytes=8192):
+    if not p.exists(): return None
+    try: return p.read_text(encoding="utf-8", errors="replace")[-nbytes:]
+    except Exception: return None
+def main():
+    report = {"generated_at": now()}
+    report["probe_status"] = load_yaml(IN["probe_status"])
+    report["probe_summary"] = load_yaml(IN["probe_summary"])
+    report["capture_errors"] = load_yaml(IN["capture_errors"])
+    report["plan_excerpt"] = load_yaml(IN["plan"])
+    report["replace_log_tail"] = tail(IN["replace_log"])
+    report["errors_log_tail"] = tail(IN["errors_log_tail"])
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(yaml.safe_dump(report, sort_keys=False), encoding="utf-8")
+    print("[INSIGHTS] insights_report.yaml written.")
+if __name__ == "__main__":
+    main()

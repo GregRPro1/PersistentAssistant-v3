@@ -1,0 +1,14 @@
+from __future__ import annotations
+import yaml, os
+CFG = r"config\\projects\\persistent_assistant_v3.yaml"
+with open(CFG,"r",encoding="utf-8") as f:
+    d = yaml.safe_load(f) or {}
+mi = d.get("memory_injection")
+if not isinstance(mi, dict):
+    d["memory_injection"] = {"enabled": True, "max_snippets": 5}
+else:
+    mi.setdefault("enabled", True)
+    mi.setdefault("max_snippets", 5)
+with open(CFG,"w",encoding="utf-8") as f:
+    yaml.safe_dump(d,f,sort_keys=False)
+print("[CFG OK] memory_injection enabled:", d["memory_injection"])

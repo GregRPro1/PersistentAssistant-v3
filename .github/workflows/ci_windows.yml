@@ -1,0 +1,41 @@
+name: CI (Windows)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        shell: cmd
+        run: |
+          python -m pip install --upgrade pip
+          if exist requirements.txt ( pip install -r requirements.txt ) else ( echo no requirements.txt )
+          pip install pytest
+
+      - name: Self-check
+        shell: cmd
+        run: python tools\ci_self_check.py
+
+      - name: Run tests (if present)
+        shell: cmd
+        run: python tools\ci_run_tests.py

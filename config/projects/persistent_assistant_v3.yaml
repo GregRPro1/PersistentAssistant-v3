@@ -1,15 +1,423 @@
-# config/projects/persistent_assistant_v3.yaml
-project_name: "Persistent Assistant v3"
-project_root: 'C:\_Repos\PersistentAssistant'
+project_name: Persistent Assistant v3
+version: 3.0.1
+description: 'Persistent Assistant is a modular, AI-driven software development platform
+  capable of evolving itself. It orchestrates code generation, introspection, testing,
+  Git integration, layout optimization, and persistent memory. All changes are tracked
+  with cost, context, and impact awareness, and feature-level traceability.
 
-# Primary plan to track
-plan_path: 'project\plans\project_plan_v3.yaml'
-
-# Standard locations (relative to project_root unless absolute)
+  '
+phases:
+- MVP
+- FunctionalPrototype
+- IntelligentAssistant
+- FullRelease
+type: self_development_ai_assistant
 paths:
-  logs_dir: "logs"
-  data_dir: "data"
-  interactions_dir: 'data\interactions'
-  insights_dir: 'data\insights'
-  tickets_dir: 'data\tickets'
-  provider_configs_dir: 'config\provider_configs'
+  project_root: C:\_Repos\PersistentAssistant
+  plan_path: project\plans\project_plan_v3.yaml
+  logs_dir: logs
+  data_dir: data
+  interactions_dir: data\interactions
+  insights_dir: data\insights
+  tickets_dir: data\tickets
+  provider_configs_dir: config\provider_configs
+core_agents:
+- ProjectIntrospectorAgent
+- CodeGenAgent
+- ValidationAgent
+- TestSuggesterAgent
+- GitInteractionAgent
+- CostTrackerAgent
+- StructuralAgent
+- SelfReflectionAgent
+- ReportWizardAgent
+- GUIBuilderAgent
+- AIContextManager
+- GUIFeedbackAgent
+- CodeExplainerAgent
+self_development:
+  enabled: true
+  process:
+    1: "Monitor project_tracker.yaml \u2192 future_features"
+    2: Trigger ProjectIntrospectorAgent for gap detection
+    3: Rank and queue features via SelfReflectionAgent
+    4: Execute feature plan via Orchestrator using agent DAG
+    5: Validate via Testing + Review
+    6: Commit via GitInteractionAgent if passed
+  feature_metadata:
+    source: project_tracker.yaml
+    tracked_fields:
+    - feature_id
+    - status
+    - agents_required
+    - estimated_cost
+    - estimated_duration
+  orchestrator_dag_templates:
+    stored_in: config/orchestration_templates/
+    naming: "feature_type \u2192 agent_sequence.yaml"
+execution_architecture:
+  scalability:
+    modes_supported:
+    - single_thread
+    - multi_thread
+    - multi_process
+    - distributed_cluster
+  orchestration_engine:
+    enabled: true
+    type: multi-level
+    config:
+      agent_priority_weights:
+        CodeGenAgent: 0.9
+        ValidationAgent: 0.8
+      task_retry_policy:
+        max_retries: 3
+        escalation_agent: SelfReflectionAgent
+    dag_templates: config/orchestration_templates/*.yaml
+  execution_metadata:
+    log_file: logs/task_execution_log.yaml
+    tracked_fields:
+    - task_id
+    - agent
+    - priority
+    - status
+    - duration
+    - model
+    - result_path
+testing_framework:
+  strategy: semi_automated_testing
+  test_sandbox:
+  - pytest
+  - flake8
+  - coverage
+  feedback_loop:
+    enabled: true
+    retry_limit: 2
+  test_generation: enabled
+  test_log: logs/test_feedback_log.yaml
+approval_workflow:
+  preview_mode: true
+  gui_review_required_for: '[*.py]'
+  auto_accept_if:
+  - tests_pass: true
+  - lint_score >= 100
+context_management:
+  enabled: true
+  ai_context_manager:
+    per_agent_buffers: true
+    store_path: context_store/{agent}/
+    supports_context_transfer: true
+  persistent_memory_layer:
+    store_path: memory_store/{project}/{agent}.yaml
+model_provider_flexibility:
+  dynamic_switching: true
+  reason_driven_routing: true
+  preserve_context_on_switch: true
+  fallback_strategy:
+  - if_cost_exceeds: 0.2
+  - if_provider_down: true
+  - use_fallback_model: gpt-3.5-turbo
+  - log_switch_event: true
+ai_model_catalog:
+  path: config/model_catalog.yaml
+  includes:
+  - model_id
+  - provider
+  - context_window
+  - input_cost_per_1k
+  - output_cost_per_1k
+  - capabilities
+  - use_case_tags
+ai_interaction_monitoring:
+  enabled: true
+  log_file: logs/ai_request_log.csv
+  eta_prediction:
+    enabled: true
+    shown_in: AI Monitor + CLI
+  escalator_policy:
+    timeout_trigger: 3x median
+    fallback_model_if_exceeded: gpt-3.5-turbo
+configuration_management:
+  principle: externalize_all_constants
+  config_files:
+  - config/parameters/default_parameters.yaml
+  - config/parameters/gui_layout_defaults.yaml
+  - config/parameters/testing_thresholds.yaml
+  - config/parameters/ai_retry_policy.yaml
+startup_initialization:
+  ensure_base_yaml_exists:
+    template_source: templates/base_yaml/
+    validate_schema: true
+    repair_corrupt: true
+    files_required:
+    - config/providers.yaml
+    - config/project_tracker.yaml
+    - tracking/feature_map.yaml
+    - logs/test_feedback_log.yaml
+feature_code_mapping:
+  enabled: true
+  annotation_required: true
+  annotation_format:
+  - comment_format: '# feature_id: FTR-xxxx'
+  - location: function, class, or file docstring
+  mapping_files:
+  - tracking/feature_map.yaml
+  - tracking/code_impact_map.yaml
+  extraction_agent: StructuralAgent
+  detection_methods:
+  - comment tag parsing
+  - AST structure + decorators
+  - YAML-linked function paths
+  - GUI-defined action-to-feature links
+  feature_map.yaml:
+    format:
+      FTR-xxxx:
+        files:
+        - main.py
+        - utils/foo.py
+        functions:
+        - process_data
+        - load_config
+        classes:
+        - DataManager
+        tags:
+        - gui
+        - validation
+        - agent
+        status:
+        - active
+        - deprecated
+        - in_progress
+    updated_by: StructuralAgent, CodeGenAgent
+  code_impact_map.yaml:
+    format:
+      file.py:
+        functions:
+        - name: process_data
+          feature_ids:
+          - FTR-1001
+          tested: true
+          last_modified: 2025-07-31 23:42
+  validation_rules:
+  - all functions must have a feature_id
+  - all features must appear in at least one file
+  - unlinked code blocks should be flagged
+gui_spec:
+  framework: PyQt6
+  tabs:
+  - Project Overview
+  - Code Review
+  - Self-Reflection
+  - GUI Builder
+  - Git Control
+  - AI Request Monitor
+  - Agent Context Viewer
+  - YAML Navigator
+  - Execution Monitor
+  - Feature Tracker
+  feature_tracker_tab:
+    components:
+    - feature_list_table
+    - code association viewer
+    - show_feature_id_in_code_button
+    - untagged_code_highlighter
+    - suggest_backlink_to_feature_button
+    - AI explain_feature_code_button
+    - filter functions by feature
+    visualization:
+    - optional heatmap of feature coverage
+    - diff view by feature_id
+  yaml_navigator_tab:
+    extended_features:
+    - highlight files with missing feature tags
+    - inline link to Feature Tracker tab
+  developer_tools:
+  - audit_feature_coverage: true
+  - detect_missing_tags: true
+  - test-link coverage viewer: true
+  - suggest tagging for new code via AI
+  embedded_ai_chat_interface:
+    context_scoped: true
+    location: sidebar or popup
+    actions_supported:
+    - Explain function/module
+    - Suggest fix
+    - Improve layout
+    - Trace decision to code
+gui_settings:
+  appearance:
+    theme_support: true
+    default_theme: light
+    theme_files:
+    - config/gui/themes/light_theme.yaml
+    - config/gui/themes/dark_theme.yaml
+    customizable_elements:
+    - font_family: default_sans
+    - font_size: 12pt
+    - text_color
+    - background_color
+    - accent_color
+    - widget_border_radius
+    live_preview: true
+    user_override: true
+    saved_per_user: true
+  layout_and_history:
+    project_specific_gui_state:
+      enabled: true
+      state_file_path: gui_state/{project_id}/layout_config.yaml
+      stores:
+      - open_tabs
+      - pane arrangement
+      - last_active_file
+      - theme
+      - scroll position
+      auto_save_on_exit: true
+      restore_on_startup: true
+      gui_tab_selector:
+      - choose layout from previous project
+      - apply layout to new project
+    usage_log:
+      enabled: true
+      path: logs/gui_usage/{project_id}_session_log.yaml
+      fields_logged:
+      - timestamp
+      - active_tab
+      - file_opened
+      - agent_invoked
+      - feature_inspected
+      - time_spent_per_tab
+      opt_out: true
+reporting_and_documentation:
+  enabled: true
+  executive_summary_reports:
+    purpose: 'Generate high-level overviews suitable for leadership, including progress
+      summaries, costs, time-to-completion, and visual representations of the roadmap
+      and accomplishments.
+
+      '
+    generated_by: ReportWizardAgent
+    output_formats:
+    - pptx
+    - pdf
+    - markdown
+    sources:
+    - project_tracker.yaml
+    - ai_request_log.csv
+    - feature_map.yaml
+    - task_execution_log.yaml
+    contents:
+    - project timeline + milestones
+    - cost breakdown charts
+    - AI usage summaries
+    - feature status summaries
+    - recommendation blocks
+    templates:
+    - templates/reports/executive_summary_template.pptx
+    - templates/reports/markdown_outline.md
+    gui_trigger:
+      tab: Self-Reflection
+      button: Generate Executive Summary
+  technical_spec_manuals:
+    purpose: 'Produce complete technical documentation, including feature specs, YAML
+      schemas, agent definitions, GUI layouts, code coverage, test results, and performance
+      logs.
+
+      '
+    generated_by: ReportWizardAgent
+    output_formats:
+    - pdf
+    - markdown
+    - html
+    contents:
+    - full `persistent_assistant_spec.yaml`
+    - full `project_tracker.yaml` with statuses
+    - '`agent_registry.yaml` and orchestration templates'
+    - GUI layout tree (from YAML)
+    - schema validation results
+    - feature-to-code mapping tables
+    - test coverage summary
+    generation_trigger:
+    - manual CLI or GUI action
+    - end-of-phase milestone
+    export_to: /reports/{timestamp}/full_manual.pdf
+  ai_presentation_support:
+    description: 'Use AI to assist in summarizing feature progress into slides, charts,
+      and overview text.
+
+      '
+    powered_by: ReportWizardAgent + CodeGenAgent
+    model_preferences:
+    - gpt-4o
+    - gemini-pro
+    - claude-3-sonnet
+    customization:
+    - 'audience tone: [executive, technical, mixed]'
+    - 'time window: [this week, this sprint, full project]'
+    - 'include visual content: [charts, tables, diagrams]'
+  gui_integration:
+    reports_tab:
+      components:
+      - generate_summary_button
+      - generate_manual_button
+      - select_audience_dropdown
+      - recent_report_history_list
+      - export_format_selector
+      - show_report_in_preview
+v3_definition:
+  project: Persistent Assistant
+  version: '3.2'
+  tags:
+    importance: high
+    priority: P1
+    security: sensitive
+  requirements:
+  - id: REQ-PA-001
+    title: Orchestrator-first
+    desc: Owns specs/plans/validation; delegates to external AI engines.
+  - id: REQ-PA-002
+    title: Autonomy control
+    desc: Per-project autonomy policy; self-upgrades always require explicit approval.
+  - id: REQ-PA-003
+    title: Research capture
+    desc: Store structured summaries + citations only; no full docs.
+  autonomy_policy:
+    default_level: review_required
+    levels:
+    - name: low
+      requires_confirmation: false
+    - name: medium
+      requires_confirmation: true
+    - name: high
+      requires_confirmation: true
+      always_block_without_engineer: true
+    self_upgrade_always_requires_explicit_approval: true
+  optimization_policy: {}
+  io_channels:
+    approvals:
+    - desktop_app
+    - web_app
+    - phone_web
+    notifications:
+    - desktop_app
+    - web_app
+    - phone_web
+    links_only:
+    - jira
+    - confluence
+  ai_providers:
+    default: openai_gpt5
+    dynamic_selection_unlocked: false
+  research_registry:
+    storage: central_registry_only
+    store_mode: summary_and_citations
+  data_access:
+    validation_data:
+      record_location_and_format_only: true
+  visuals:
+    default_output: markdown
+    slide_exports_on_request: true
+    data_driven_only: true
+  portfolio:
+    participates: true
+memory_injection:
+  enabled: true
+  max_snippets: 5

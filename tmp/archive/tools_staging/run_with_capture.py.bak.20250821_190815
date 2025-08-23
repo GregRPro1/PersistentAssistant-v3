@@ -1,0 +1,83 @@
+from __future__ import annotations
+import sys, os, subprocess, shlex, time, json
+from datetime import datetime, timezone
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+LOG  = os.path.join(ROOT, "data","insights","errors.log")
+
+def now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+def ensure_dir_for(path: str) -> None:
+    d = os.path.dirname(path)
+    if d and not os.path.exists(d):
+        os.makedirs(d, exist_ok=True)
+
+def exe() -> str:
+    return sys.executable or "python"
+
+def parse_cmd(argv: list[str]) -> list[str]:
+    # Modes:
+    #  - python tools/run_with_capture.py -- <args...>     (use args after -- exactly)
+    #  - python tools/run_with_capture.py '["python","tools/x.py"]' (JSON array)
+    #  - python tools/run_with_capture.py "python tools/x.py"       (split string)
+    #  - python tools/run_with_capture.py python tools/x.py         (argv[1:])
+    if not argv or len(argv) == 0:
+        raise SystemExit("usage: python tools/run_with_capture.py <command> or -- <args...>")
+
+    if argv[0] == "--":
+        cmd = argv[1:]
+    elif len(argv) > 1:
+        # treat remaining argv as the command (no shlex)
+        cmd = argv
+    else:
+        # single token; try JSON array first, fallback to shlex
+        arg = argv[0]
+        try:
+            if arg.strip().startswith("["):
+                cmd = json.loads(arg)
+            else:
+                cmd = shlex.split(arg)
+        except Exception:
+            # final fallback: run in shell form via Python -c if needed (rare)
+            cmd = shlex.split(arg)
+
+    if cmd and cmd[0].lower() in ("python","py"):
+        cmd[0] = exe()
+    return cmd
+
+def main():
+    # Normalize cwd to ROOT
+    os.chdir(ROOT)
+
+    if len(sys.argv) < 2:
+        print("usage: python tools/run_with_capture.py <command> or -- <args...>")
+        sys.exit(2)
+
+    # Build command
+    cmd = parse_cmd(sys.argv[1:])
+
+    t0 = time.time()
+    p = subprocess.run(cmd, capture_output=True, text=True)
+    dt = time.time() - t0
+
+    ensure_dir_for(LOG)
+    with open(LOG, "a", encoding="utf-8") as f:
+        f.write(f"=== RUN @ {now()} ===\n")
+        f.write("cmd: " + " ".join(cmd) + "\n")
+        f.write(f"exit: {p.returncode}, elapsed_s: {dt:.3f}\n")
+        if p.stdout:
+            f.write("--- stdout ---\n"); f.write(p.stdout)
+            if not p.stdout.endswith("\n"): f.write("\n")
+        if p.stderr:
+            f.write("--- stderr ---\n"); f.write(p.stderr)
+            if not p.stderr.endswith("\n"): f.write("\n")
+        f.write("=== END ===\n\n")
+
+    if p.stdout: print(p.stdout, end="")
+    if p.stderr: print(p.stderr, end="", file=sys.stderr)
+
+    sys.exit(p.returncode)
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,6 @@
+# provider_pricing_overrides.yaml
+# YAML file to override default API pricing metadata
+openai:
+  gpt-4:
+    input_cost_per_1k_tokens: null
+    output_cost_per_1k_tokens: null

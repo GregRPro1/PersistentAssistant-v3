@@ -1,0 +1,10 @@
+{
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "context_used": true,
+  "tokens_in": 59,
+  "tokens_out": 17,
+  "cost": 1.905e-08,
+  "time": 4.074,
+  "reply_head": "Hello! It seems like you're greeting from Pennsylvania. How can I assist you today?"
+}
