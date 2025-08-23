@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="manifest" href="/phone/pwa/manifest.webmanifest">
+  <meta name="theme-color" content="#111">
+  <title>PersistentAssistant — Phone Diagnostics</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 16px; }
+    header { display:flex; align-items:center; gap:12px; }
+    .card { border:1px solid #ccc; border-radius:12px; padding:12px 14px; margin:12px 0; }
+    button { padding:10px 14px; border-radius:10px; border:1px solid #333; background:#f6f6f6; cursor:pointer; }
+    input[type=text], input[type=password] { width:100%; padding:8px; border-radius:8px; border:1px solid #bbb; }
+    code { background:#f2f2f2; padding:2px 6px; border-radius:6px; }
+    .ok { color: #0a7a1b; }
+    .warn { color: #9c6a00; }
+    .err { color: #b00020; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .row > div { flex:1 1 280px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .small { font-size: 12px; opacity: 0.8; }
+    .logs { white-space: pre-wrap; max-height: 300px; overflow:auto; background: #0b0b0b; color:#e6e6e6; padding:8px; border-radius:10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>PersistentAssistant — Phone Diagnostics</h2>
+    <span class="small">PWA v0.1</span>
+  </header>
+
+  <section class="card">
+    <h3>Auth</h3>
+    <label>Bearer Token
+      <input id="token" type="password" placeholder="Enter token">
+    </label>
+    <div class="small">Stored locally on your device only.</div>
+    <button onclick="saveToken()">Save</button>
+  </section>
+
+  <section class="card">
+    <h3>One-tap Approval</h3>
+    <div class="row">
+      <div>
+        <button onclick="sendApprove()">Send NEXT approval</button>
+        <div id="approveResult" class="small mono"></div>
+      </div>
+      <div>
+        <label>Optional payload (JSON)
+          <input id="payload" type="text" placeholder='{"meta":"info"}'>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Live Checks</h3>
+    <div class="row">
+      <div>
+        <button onclick="doPing()">Ping</button>
+        <div id="pingOut" class="mono small"></div>
+      </div>
+      <div>
+        <button onclick="doHealth()">Health</button>
+        <div id="healthOut" class="mono small"></div>
+      </div>
+      <div>
+        <button onclick="checkBridge()">Test Local Exec Bridge</button>
+        <div id="bridgeOut" class="mono small"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>LAN URL / QR</h3>
+    <div class="row">
+      <div>
+        <button onclick="showLan()">Detect LAN</button>
+        <div id="lanOut" class="mono small"></div>
+      </div>
+      <div>
+        <div id="qr"></div>
+        <div class="small">If QR fails offline, just use the LAN URL above.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Logs tail</h3>
+    <button onclick="tailLogs()">Tail logs</button>
+    <div id="logs" class="logs"></div>
+  </section>
+
+<script>
+const state = {
+  token: localStorage.getItem("pa_phone_token") || "",
+  apiBase: "/phone"
+};
+
+function saveToken() {
+  const val = document.getElementById("token").value;
+  state.token = val;
+  localStorage.setItem("pa_phone_token", val);
+  alert("Token saved locally.");
+}
+
+function nowEpoch() { return Math.floor(Date.now() / 1000); }
+function nonce() { return (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2))); }
+
+async function sendApprove() {
+  const payloadTxt = document.getElementById("payload").value || "";
+  let dataVal = null;
+  try { dataVal = payloadTxt ? JSON.parse(payloadTxt) : null; } catch(e){ dataVal = {"raw": payloadTxt}; }
+  const body = {
+    action: "APPROVE_NEXT",
+    data: dataVal,
+    timestamp: nowEpoch(),
+    nonce: nonce()
+  };
+  const res = await fetch(state.apiBase + "/approve", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + state.token },
+    body: JSON.stringify(body)
+  });
+  const j = await res.json().catch(()=>({}));
+  document.getElementById("approveResult").textContent = JSON.stringify(j, null, 2);
+}
+
+async function doPing() {
+  const res = await fetch(state.apiBase + "/ping");
+  const j = await res.json();
+  document.getElementById("pingOut").textContent = JSON.stringify(j);
+}
+
+async function doHealth() {
+  const res = await fetch(state.apiBase + "/health");
+  const j = await res.json();
+  document.getElementById("healthOut").textContent = JSON.stringify(j, null, 2);
+}
+
+async function tailLogs() {
+  const res = await fetch("/logs/tail?n=200").catch(()=>null);
+  const txt = res && res.ok ? await res.text() : "No logs endpoint or failed to fetch.";
+  document.getElementById("logs").textContent = txt;
+}
+
+async function showLan() {
+  const res = await fetch(state.apiBase + "/health");
+  const j = await res.json();
+  const ips = j.lan_ips || [];
+  const origin = j.pwa_origin_hint || (location.origin + "/");
+  const hint = "Try: " + (ips[0] ? ("http://" + ips[0] + ":8770/phone/pwa/index.html") : origin);
+  document.getElementById("lanOut").textContent = hint;
+  // Fallback QR via external service (requires internet)
+  const qrel = document.createElement("img");
+  qrel.alt = "QR";
+  qrel.width = 180;
+  qrel.height = 180;
+  qrel.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(hint);
+  const qrDiv = document.getElementById("qr");
+  qrDiv.innerHTML = "";
+  qrDiv.appendChild(qrel);
+}
+
+async function checkBridge() {
+  try {
+    const loc = new URL(location.href);
+    // derive host only; assume bridge on same host at :8765
+    const host = loc.hostname;
+    const target = "http://" + host + ":8765/health";
+    const res = await fetch(target, {mode:"no-cors"}); // best-effort
+    document.getElementById("bridgeOut").textContent = "Requested " + target + " (no-cors). If no error popup, host reachable.";
+  } catch (e) {
+    document.getElementById("bridgeOut").textContent = "Bridge test error: " + e;
+  }
+}
+
+if (state.token) { document.getElementById("token").value = state.token; }
+</script>
+
+<script>
+// Register SW
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("/phone/pwa/service-worker.js");
+  });
+}
+</script>
+</body>
+</html>

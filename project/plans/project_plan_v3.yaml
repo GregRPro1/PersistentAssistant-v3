@@ -87,7 +87,7 @@ phases:
       status: done
   - id: '1.11'
     status: done
-    description: "Simulate AI send (Prompt \u2192 Response)"
+    description: Simulate AI send (Prompt → Response)
     items:
     - title: Dummy response writer working
       status: done
@@ -149,13 +149,13 @@ phases:
     status: done
     description: Project switching entry point (menu)
     items:
-    - title: "Project \u2192 Switch\u2026 menu opens selector and persists session"
+    - title: Project → Switch… menu opens selector and persists session
       status: done
   - id: '2.4'
     status: planned
     description: File-integrity protocol (manifest + safe replace + drift verify)
     items:
-    - title: "tools/file_manifest.py \u2192 project/structure/file_manifest.yaml"
+    - title: tools/file_manifest.py → project/structure/file_manifest.yaml
       status: planned
     - title: tools/safe_replace.py gated by expected sha256
       status: planned
@@ -194,7 +194,7 @@ phases:
     status: done
     description: Fetch raw provider models
     items:
-    - title: "tools/fetch_ai_models.py \u2192 ai_models_raw.yaml"
+    - title: tools/fetch_ai_models.py → ai_models_raw.yaml
       status: done
   - id: '3.3'
     status: done
@@ -212,13 +212,13 @@ phases:
     status: done
     description: Update & promote models safely
     items:
-    - title: "tools/update_ai_models.py \u2192 ai_models_tmp.yaml \u2192 ai_models.yaml"
+    - title: tools/update_ai_models.py → ai_models_tmp.yaml → ai_models.yaml
       status: done
   - id: '3.6'
     status: done
     description: Probe models (ping) and mark health
     items:
-    - title: "tools/probe_models.py \u2192 data/insights/probe_report.json"
+    - title: tools/probe_models.py → data/insights/probe_report.json
       status: done
   - id: '3.7'
     status: done
@@ -289,7 +289,7 @@ phases:
     status: done
     description: Wire ai_client to 'Send to AI (API)' button
     items:
-    - title: "Reply \u2192 Response tab; errors \u2192 Tools status/log"
+    - title: Reply → Response tab; errors → Tools status/log
       status: planned
     - title: OpenAI-only gate via UI toggle
       status: planned
@@ -315,7 +315,7 @@ phases:
   steps:
   - id: '5.1'
     status: done
-    description: "Persistent memory (summarize interactions \u2192 memory store)"
+    description: Persistent memory (summarize interactions → memory store)
     items:
     - title: memory/summary_*.yaml
       status: planned
@@ -405,7 +405,7 @@ phases:
     status: planned
     description: Apply patch (local) workflow via LEB using unified diff
     items:
-    - title: "Parse diff \u2192 per-file expected SHA \u2192 safe replace"
+    - title: Parse diff → per-file expected SHA → safe replace
       status: planned
     depends_on:
     - '2.4'
@@ -447,6 +447,15 @@ phases:
     - '7.1'
     tags:
     - deep_research
+  - id: '7.3'
+    description: Phone Digest microservice (LAN-only) with token header
+    status: in_progress
+  - id: '7.4'
+    description: PWA shell hits /phone/digest and renders cards
+    status: planned
+  - id: '7.5'
+    description: Action buttons (Approve/Reject Next Pack) with audit log
+    status: planned
 - name: 'Phase 8: Agentic Automation (Non-code chores)'
   steps:
   - id: '8.1'
@@ -480,3 +489,17 @@ meta:
   version: '3.2'
   current_step_policy: explicit
   current_step: 6.4.a
+state:
+  current: '8.1'
+  cursor: '8.1'
+active_step: '8.1'
+steps:
+- id: '7.8'
+  name: PWA Diagnostics v2 (secure, token prompt, buttons)
+  status: done
+- id: '7.9'
+  name: Approvals watchdog for 8781/8770 (LAN bind recovery)
+  status: done
+- id: '7.10'
+  name: Preflight runner uplift (countdowns, bind assert)
+  status: done

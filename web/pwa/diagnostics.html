@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnostics v2</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:12px}
+  .row{margin:8px 0} input[type=text]{width:100%;padding:8px} button{padding:8px 12px;margin-right:6px}
+  .log{font-family:ui-monospace,Consolas,monospace;background:#0b0b0b;color:#d9d9d9;padding:8px;border-radius:8px;max-height:50vh;overflow:auto}
+  .log .ok{color:#38b000}
+  .log .warn{color:#e6b800}
+  .log .err{color:#ff4d4f}
+</style>
+</head><body>
+<h1>Diagnostics v2</h1>
+<div class="row">Base: <code id="base"></code></div>
+<div class="row"><label>Bearer token:</label><input type="text" id="tok" placeholder="paste token" /></div>
+<div class="row"><button id="save">Save Token</button><button id="ping">Ping</button><button id="health">Health</button><button id="approve">Send NEXT approval</button></div>
+<div class="row"><button id="tail">Tail approvals</button> <small>(/logs/tail)</small></div>
+<div id="out" class="log" aria-live="polite"></div>
+<script>
+(function(){
+  const out=document.getElementById("out");
+  const line=(cls,text)=>{ const div=document.createElement("div"); if(cls) div.className=cls; div.textContent=text; out.appendChild(div); out.scrollTop=out.scrollHeight; };
+  const jline=(prefix,obj,ok=true)=>{ line(ok?"ok":"err", prefix+" "+JSON.stringify(obj,null,2)); };
+  let tok=localStorage.getItem("pa_token")||""; document.getElementById("tok").value=tok;
+  const baseFromConfig=async()=>{ try{ const j=await (await fetch("/pwa/config")).json(); return j.approvals_base||location.origin }catch{ return location.origin } };
+  let base=""; (async()=>{ base=await baseFromConfig(); document.getElementById("base").textContent=base; line("ok","BASE "+base); })();
+  document.getElementById("save").onclick=()=>{ tok=document.getElementById("tok").value.trim(); localStorage.setItem("pa_token",tok); line("ok", tok? "TOKEN set" : "TOKEN cleared"); };
+  document.getElementById("ping").onclick=async()=>{ try{ const j=await (await fetch(base+"/phone/ping")).json(); jline("PING",j,true);}catch(e){ line("err","PING ERR "+e.message);} };
+  document.getElementById("health").onclick=async()=>{ try{ const j=await (await fetch(base+"/phone/health")).json(); jline("HEALTH",j,true);}catch(e){ line("err","HEALTH ERR "+e.message);} };
+  document.getElementById("approve").onclick=async()=>{
+    try{ const body={action:"APPROVE_NEXT",data:null,timestamp:Math.floor(Date.now()/1000),nonce:crypto.randomUUID()};
+         const r=await fetch(base+"/phone/approve",{method:"POST",headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)});
+         const text=await r.text(); try{ jline("APPROVE "+r.status, JSON.parse(text), r.ok);}catch{ line(r.ok?"ok":"err","APPROVE "+r.status+" "+text); }
+    }catch(e){ line("err","APPROVE ERR "+e.message);} };
+  document.getElementById("tail").onclick=async()=>{ try{ const j=await (await fetch(base+"/logs/tail?limit=20")).json(); jline("TAIL",j,true);}catch(e){ line("err","TAIL ERR "+e.message);} };
+})();
+</script>
+</body></html>

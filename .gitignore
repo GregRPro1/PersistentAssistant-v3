@@ -25,3 +25,6 @@ Thumbs.db
 # Build/pack artifacts
 tmp/
 !tmp/feedback/
+*.pyo
+*.zip
+config/phone_approvals.yaml

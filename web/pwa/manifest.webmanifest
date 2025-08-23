@@ -1,0 +1,9 @@
+{
+  "name": "PersistentAssistant Phone Diagnostics",
+  "short_name": "PA Phone",
+  "start_url": "/phone/pwa/index.html",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": []
+}

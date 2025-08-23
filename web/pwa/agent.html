@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent Console</title>
+<style>body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:12px}.row{margin:8px 0}input,textarea{width:100%;padding:8px}button{padding:8px 12px;margin-right:6px}pre{background:#f5f5f5;padding:8px;white-space:pre-wrap}.grid{display:grid;grid-template-columns:1fr;gap:12px}.ok{color:#2e7d32}.err{color:#c62828}.chip{display:inline-block;padding:4px 8px;border-radius:999px;background:#eee;margin:2px 6px 2px 0}</style>
+</head><body>
+<h1>Agent Console</h1>
+<div class="row">UI Base: <code id="uibase"></code></div>
+<div class="row"><label>Bearer token:</label><input type="text" id="tok" placeholder="paste token" /></div>
+<div class="row"><button id="save">Save Token</button> <button id="next">Send NEXT approval</button> <button id="proc">Process approvals</button></div>
+<div class="grid">
+  <section><h2>Summary</h2><div class="row"><button id="refresh">Refresh summary</button></div><pre id="summary">[no data]</pre></section>
+  <section><h2>Next Suggestions</h2><div id="nextBox">[none yet]</div></section>
+  <section><h2>Choose Step</h2><div class="row"><input type="text" id="chooseStep" placeholder="e.g. 9.1" /><button id="chooseBtn">Set active step</button></div><pre id="chooseOut"></pre></section>
+  <section><h2>Ask</h2><div class="row"><textarea id="askText" rows="4" placeholder="Type a prompt for the assistant…"></textarea></div><div class="row"><button id="askBtn">Send ASK</button></div><pre id="askOut"></pre></section>
+</div>
+<script>(function(){
+  function uuidv4(){try{if(crypto && typeof crypto.randomUUID==='function')return crypto.randomUUID();}catch(e){}var a=(crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(16)):(function(){var x=new Uint8Array(16);for(var i=0;i<16;i++)x[i]=Math.floor(Math.random()*256);return x})();a[6]=(a[6]&15)|64;a[8]=(a[8]&63)|128;var h='';for(var i=0;i<16;i++){h+=a[i].toString(16).padStart(2,'0');}return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
+  const el=(id)=>document.getElementById(id), log=(id,cls,...a)=>{ const d=document.createElement('div'); d.className=cls||''; d.textContent=a.join(' '); el(id).appendChild(d); };
+  const uiBase=location.origin; el('uibase').textContent=uiBase;
+  let tok=localStorage.getItem('pa_token')||''; el('tok').value=tok; el('save').onclick=()=>{ tok=el('tok').value.trim(); localStorage.setItem('pa_token',tok); };
+  async function getSummary(){ try{ const r=await fetch(uiBase+'/agent/summary'); const j=await r.json(); el('summary').textContent=JSON.stringify(j,null,2);}catch(e){ el('summary').textContent='ERR '+e.message; } }
+  el('refresh').onclick=getSummary; getSummary();
+  async function chooseStep(step){ try{ const r=await fetch(uiBase+'/agent/choose',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({step_id:step,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)})}); const t=await r.text(); el('chooseOut').textContent=t; }catch(e){ el('chooseOut').textContent='ERR '+e.message; } }
+  function renderNextPayload(obj){ const box=el('nextBox'); box.innerHTML=''; if(!obj||!obj.summary){ box.textContent='[no summary]'; return; }
+    const s=obj.summary; const pre=document.createElement('pre'); pre.textContent=JSON.stringify(s,null,2); box.appendChild(pre);
+    const sug=obj.suggestions||[]; if(sug.length){ const wrap=document.createElement('div'); sug.forEach(x=>{ const b=document.createElement('button'); b.textContent=(x.kind==='step'?'Choose ':'')+(x.id||x.title); b.onclick=()=>{ if(x.kind==='step'){ chooseStep(x.id); } else { document.getElementById('askText').focus(); } }; wrap.appendChild(b); }); box.appendChild(wrap);} }
+  el('next').onclick=async()=>{
+    try{ const b={action:'APPROVE_NEXT',data:null,timestamp:Math.floor(Date.now()/1000),nonce:uuidv4()};
+         const r=await fetch(uiBase+'/agent/next2',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(b)});
+         const t=await r.text(); try{ const j=JSON.parse(t); renderNextPayload(j); }catch{ log('summary', r.ok?'ok':'err', 'NEXT', r.status, t); }
+    }catch(e){ log('summary','err','NEXT ERR',e.message);} };
+  el('proc').onclick=async()=>{ try{ const r=await fetch(uiBase+'/agent/process',{method:'POST',headers:{Authorization:'Bearer '+tok}}); const t=await r.text(); try{ const j=JSON.parse(t); log('summary', r.ok?'ok':'err', 'PROCESS', r.status, JSON.stringify(j)); }catch{ log('summary', r.ok?'ok':'err', 'PROCESS', r.status, t); } await getSummary(); }catch(e){ log('summary','err','PROCESS ERR',e.message);} };
+  el('chooseBtn').onclick=()=>{ const step=el('chooseStep').value.trim(); if(!step){ el('chooseOut').textContent='Enter a step id'; return; } chooseStep(step); };
+  el('askBtn').onclick=async()=>{ const text=el('askText').value.trim(); if(!text){ el('askOut').textContent='Enter a prompt'; return; } try{ const r=await fetch(uiBase+'/agent/ask',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({text,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)})}); const t=await r.text(); el('askOut').textContent=t; }catch(e){ el('askOut').textContent='ERR '+e.message; } };
+})();</script>
+</body></html>
