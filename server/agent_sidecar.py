@@ -219,8 +219,95 @@ def agent_next2():
     s,su=_next_suggestions()
     return jsonify({'ok':True,'file':name,'summary':s,'suggestions':su})
 
+
+def _recent(n:int=5):
+    try:
+        appr_dir = APPROVALS_DIR
+        files = []
+        if os.path.isdir(appr_dir):
+            for nm in os.listdir(appr_dir):
+                p = os.path.join(appr_dir, nm)
+                if os.path.isfile(p) and nm.endswith('.json'):
+                    files.append((nm, os.path.getmtime(p)))
+        files.sort(key=lambda x: x[1], reverse=True)
+        files = [f for f,_ in files[:max(1,n)]]
+    except Exception:
+        files = []
+    # notes tail
+    notes_path = os.path.join(REPO,'tmp','notes','notes.md')
+    notes_tail = ''
+    notes_len = 0
+    try:
+        if os.path.isfile(notes_path):
+            s = open(notes_path,'r',encoding='utf-8').read()
+            notes_len = len(s)
+            # last ~500 chars for quick view
+            notes_tail = s[-500:] if len(s) > 500 else s
+    except Exception:
+        pass
+    return {'approvals': files, 'notes_len': notes_len, 'notes_tail': notes_tail}
+
+@app.route('/agent/recent')
+def agent_recent():
+    return jsonify({'ok': True, 'recent': _recent(), 'summary': _read_plan_summary()})
+
+
+def _notes_path():
+    return os.path.join(REPO,'tmp','notes','notes.md')
+
+@app.route('/agent/notes', methods=['GET'])
+def agent_notes_get():
+    p=_notes_path(); os.makedirs(os.path.dirname(p), exist_ok=True)
+    s=''
+    try:
+        if os.path.isfile(p): s=open(p,'r',encoding='utf-8').read()
+    except Exception: pass
+    return jsonify({'ok':True,'len':len(s),'text':s})
+
+@app.route('/agent/notes', methods=['POST'])
+def agent_notes_set():
+    if not _auth_ok(request): return ('unauthorized',401)
+    j=request.get_json(force=True) or {}
+    mode=str(j.get('mode') or 'set')
+    text=str(j.get('text') or '')
+    p=_notes_path(); os.makedirs(os.path.dirname(p), exist_ok=True)
+    try:
+        if mode=='append':
+            with open(p,'a',encoding='utf-8') as f:
+                if text and not text.endswith('\\n'): text=text+'\\n'
+                f.write(text)
+        else:
+            with open(p,'w',encoding='utf-8') as f: f.write(text)
+        return jsonify({'ok':True})
+    except Exception as e:
+        return ('error: %s' % e, 500)
+
+def _make_brief_pack():
+    try:
+        import zipfile
+        ts=int(time.time())
+        os.makedirs(PACKS_DIR, exist_ok=True)
+        base=os.path.join(PACKS_DIR, 'brief_{0}.zip'.format(ts))
+        summary=_read_plan_summary()
+        recent=_recent() if ' _recent' in globals() or '_recent' in locals() else {'approvals':[],'notes_len':0,'notes_tail':''}
+        notes=_notes_path()
+        with zipfile.ZipFile(base,'w',compression=zipfile.ZIP_DEFLATED) as z:
+            z.writestr('summary.json', json.dumps({'summary':summary,'recent':recent}, ensure_ascii=False, indent=2))
+            if os.path.isfile(notes): z.write(notes, arcname='notes/notes.md')
+        return base
+    except Exception:
+        return None
+
+@app.route('/agent/brief', methods=['POST'])
+def agent_brief():
+    if not _auth_ok(request): return ('unauthorized',401)
+    p=_make_brief_pack()
+    if not p: return ('error creating brief', 500)
+    return jsonify({'ok':True,'file':os.path.basename(p)})
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=8782, debug=False)
+
+
 
 
 

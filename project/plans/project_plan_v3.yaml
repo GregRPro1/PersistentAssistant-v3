@@ -459,7 +459,7 @@ phases:
 - name: 'Phase 8: Agentic Automation (Non-code chores)'
   steps:
   - id: '8.1'
-    status: planned
+    status: done
     description: ChatGPT Agent for multistep non-code tasks (report/notes assembly)
     items:
     - title: Guarded by project autonomy policy
@@ -490,9 +490,9 @@ meta:
   current_step_policy: explicit
   current_step: 6.4.a
 state:
-  current: '8.1'
-  cursor: '8.1'
-active_step: '8.1'
+  current: '9.1'
+  cursor: '9.1'
+active_step: '9.1'
 steps:
 - id: '7.8'
   name: PWA Diagnostics v2 (secure, token prompt, buttons)

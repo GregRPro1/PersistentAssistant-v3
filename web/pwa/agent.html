@@ -4,31 +4,39 @@
 <h1>Agent Console</h1>
 <div class="row">UI Base: <code id="uibase"></code></div>
 <div class="row"><label>Bearer token:</label><input type="text" id="tok" placeholder="paste token" /></div>
-<div class="row"><button id="save">Save Token</button> <button id="next">Send NEXT approval</button> <button id="proc">Process approvals</button></div>
+<div class="row"><button id="save">Save Token</button> <button id="next">Send NEXT approval</button> <button id="proc">Process approvals</button> <button id="rrefresh">Refresh recent</button></div>
 <div class="grid">
   <section><h2>Summary</h2><div class="row"><button id="refresh">Refresh summary</button></div><pre id="summary">[no data]</pre></section>
   <section><h2>Next Suggestions</h2><div id="nextBox">[none yet]</div></section>
+  <section><h2>Recent</h2><div id="recentBox">[none yet]</div></section>
+  <section><h2>Notes</h2>
+    <div class="row"><textarea id="notesText" rows="8" placeholder="Project notes..."></textarea></div>
+    <div class="row"><button id="notesLoad">Load</button> <button id="notesSave">Save</button> <button id="notesAppend">Append</button> <button id="makeBrief">Assemble Brief</button></div>
+    <pre id="notesOut"></pre>
+  </section>
   <section><h2>Choose Step</h2><div class="row"><input type="text" id="chooseStep" placeholder="e.g. 9.1" /><button id="chooseBtn">Set active step</button></div><pre id="chooseOut"></pre></section>
   <section><h2>Ask</h2><div class="row"><textarea id="askText" rows="4" placeholder="Type a prompt for the assistant…"></textarea></div><div class="row"><button id="askBtn">Send ASK</button></div><pre id="askOut"></pre></section>
 </div>
 <script>(function(){
-  function uuidv4(){try{if(crypto && typeof crypto.randomUUID==='function')return crypto.randomUUID();}catch(e){}var a=(crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(16)):(function(){var x=new Uint8Array(16);for(var i=0;i<16;i++)x[i]=Math.floor(Math.random()*256);return x})();a[6]=(a[6]&15)|64;a[8]=(a[8]&63)|128;var h='';for(var i=0;i<16;i++){h+=a[i].toString(16).padStart(2,'0');}return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
+  function uuidv4(){try{if(crypto&&typeof crypto.randomUUID==='function')return crypto.randomUUID();}catch(e){}var a=(crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(16)):(function(){var x=new Uint8Array(16);for(var i=0;i<16;i++)x[i]=Math.floor(Math.random()*256);return x})();a[6]=(a[6]&15)|64;a[8]=(a[8]&63)|128;var h='';for(var i=0;i<16;i++){h+=a[i].toString(16).padStart(2,'0');}return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
   const el=(id)=>document.getElementById(id), log=(id,cls,...a)=>{ const d=document.createElement('div'); d.className=cls||''; d.textContent=a.join(' '); el(id).appendChild(d); };
   const uiBase=location.origin; el('uibase').textContent=uiBase;
   let tok=localStorage.getItem('pa_token')||''; el('tok').value=tok; el('save').onclick=()=>{ tok=el('tok').value.trim(); localStorage.setItem('pa_token',tok); };
   async function getSummary(){ try{ const r=await fetch(uiBase+'/agent/summary'); const j=await r.json(); el('summary').textContent=JSON.stringify(j,null,2);}catch(e){ el('summary').textContent='ERR '+e.message; } }
-  el('refresh').onclick=getSummary; getSummary();
+  async function getRecent(){ try{ const r=await fetch(uiBase+'/agent/recent'); const j=await r.json(); const box=el('recentBox'); box.innerHTML=''; const rec=j.recent||{}; const a=rec.approvals||[]; const ul=document.createElement('ul'); a.forEach(n=>{ const li=document.createElement('li'); li.textContent=n; ul.appendChild(li); }); const notes=document.createElement('pre'); notes.textContent=(rec.notes_tail||'').trim()||'[no notes]'; box.appendChild(document.createTextNode('Approvals (latest):')); box.appendChild(ul); box.appendChild(document.createTextNode('Notes tail:')); box.appendChild(notes); }catch(e){ el('recentBox').textContent='ERR '+e.message; } }
   async function chooseStep(step){ try{ const r=await fetch(uiBase+'/agent/choose',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({step_id:step,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)})}); const t=await r.text(); el('chooseOut').textContent=t; }catch(e){ el('chooseOut').textContent='ERR '+e.message; } }
-  function renderNextPayload(obj){ const box=el('nextBox'); box.innerHTML=''; if(!obj||!obj.summary){ box.textContent='[no summary]'; return; }
-    const s=obj.summary; const pre=document.createElement('pre'); pre.textContent=JSON.stringify(s,null,2); box.appendChild(pre);
-    const sug=obj.suggestions||[]; if(sug.length){ const wrap=document.createElement('div'); sug.forEach(x=>{ const b=document.createElement('button'); b.textContent=(x.kind==='step'?'Choose ':'')+(x.id||x.title); b.onclick=()=>{ if(x.kind==='step'){ chooseStep(x.id); } else { document.getElementById('askText').focus(); } }; wrap.appendChild(b); }); box.appendChild(wrap);} }
-  el('next').onclick=async()=>{
-    try{ const b={action:'APPROVE_NEXT',data:null,timestamp:Math.floor(Date.now()/1000),nonce:uuidv4()};
-         const r=await fetch(uiBase+'/agent/next2',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(b)});
-         const t=await r.text(); try{ const j=JSON.parse(t); renderNextPayload(j); }catch{ log('summary', r.ok?'ok':'err', 'NEXT', r.status, t); }
-    }catch(e){ log('summary','err','NEXT ERR',e.message);} };
-  el('proc').onclick=async()=>{ try{ const r=await fetch(uiBase+'/agent/process',{method:'POST',headers:{Authorization:'Bearer '+tok}}); const t=await r.text(); try{ const j=JSON.parse(t); log('summary', r.ok?'ok':'err', 'PROCESS', r.status, JSON.stringify(j)); }catch{ log('summary', r.ok?'ok':'err', 'PROCESS', r.status, t); } await getSummary(); }catch(e){ log('summary','err','PROCESS ERR',e.message);} };
-  el('chooseBtn').onclick=()=>{ const step=el('chooseStep').value.trim(); if(!step){ el('chooseOut').textContent='Enter a step id'; return; } chooseStep(step); };
-  el('askBtn').onclick=async()=>{ const text=el('askText').value.trim(); if(!text){ el('askOut').textContent='Enter a prompt'; return; } try{ const r=await fetch(uiBase+'/agent/ask',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({text,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)})}); const t=await r.text(); el('askOut').textContent=t; }catch(e){ el('askOut').textContent='ERR '+e.message; } };
+  function renderNextPayload(obj){ const box=el('nextBox'); box.innerHTML=''; if(!obj||!obj.summary){ box.textContent='[no summary]'; return; } const s=obj.summary; const pre=document.createElement('pre'); pre.textContent=JSON.stringify(s,null,2); box.appendChild(pre); const sug=obj.suggestions||[]; if(sug.length){ const wrap=document.createElement('div'); sug.forEach(x=>{ const b=document.createElement('button'); b.textContent=(x.kind==='step'?'Choose ':'')+(x.id||x.title); b.onclick=()=>{ if(x.kind==='step'){ chooseStep(x.id); } else { document.getElementById('askText').focus(); } }; wrap.appendChild(b); }); box.appendChild(wrap);} }
+  async function loadNotes(){ try{ const r=await fetch(uiBase+'/agent/notes'); const j=await r.json(); el('notesText').value=j.text||''; el('notesOut').textContent='Loaded '+(j.len||0)+' bytes'; }catch(e){ el('notesOut').textContent='ERR '+e.message; } }
+  async function saveNotes(mode){ try{ const body={mode,text:el('notesText').value}; const r=await fetch(uiBase+'/agent/notes',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)}); const t=await r.text(); el('notesOut').textContent=t; }catch(e){ el('notesOut').textContent='ERR '+e.message; } }
+  async function makeBrief(){ try{ const r=await fetch(uiBase+'/agent/brief',{method:'POST',headers:{Authorization:'Bearer '+tok}}); const t=await r.text(); el('notesOut').textContent=t; }catch(e){ el('notesOut').textContent='ERR '+e.message; } }
+  el('refresh').onclick=getSummary; getSummary();
+  el('rrefresh').onclick=getRecent; getRecent();
+  el('next').onclick=async()=>{ try{ const b={action:'APPROVE_NEXT',data:null,timestamp:Math.floor(Date.now()/1000),nonce:uuidv4()}; const r=await fetch(uiBase+'/agent/next2',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(b)}); const t=await r.text(); try{ renderNextPayload(JSON.parse(t)); }catch{ log('summary', r.ok?'ok':'err', 'NEXT', r.status, t); } }catch(e){ log('summary','err','NEXT ERR',e.message);} };
+  el('proc').onclick=async()=>{ try{ const r=await fetch(uiBase+'/agent/process',{method:'POST',headers:{Authorization:'Bearer '+tok}}); const t=await r.text(); try{ const j=JSON.parse(t); log('summary', r.ok?'ok':'err', 'PROCESS', r.status, JSON.stringify(j)); }catch{ log('summary', r.ok?'ok':'err', 'PROCESS', r.status, t); } await getSummary(); await getRecent(); }catch(e){ log('summary','err','PROCESS ERR',e.message);} };
+  el('chooseBtn').onclick=()=>{ const step=document.getElementById('chooseStep').value.trim(); if(!step){ el('chooseOut').textContent='Enter a step id'; return; } chooseStep(step); };
+  document.getElementById('notesLoad').onclick=loadNotes;
+  document.getElementById('notesSave').onclick=()=>saveNotes('set');
+  document.getElementById('notesAppend').onclick=()=>saveNotes('append');
+  document.getElementById('makeBrief').onclick=makeBrief;
 })();</script>
 </body></html>

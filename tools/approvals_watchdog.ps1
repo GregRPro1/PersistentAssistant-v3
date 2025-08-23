@@ -15,10 +15,11 @@ for($r=0;$r -le $MaxRestarts;$r++){
   if($pLocal -and -not $pLan){
     $owners = Owners -Port $Port
     ("  action: restart; owners={0}" -f ($owners -join ",")) | Tee-Object -FilePath $log -Append
-    foreach($pid in $owners){ try{ Stop-Process -Id $pid -Force }catch{}; try{ & taskkill /PID $pid /F /T | Out-Null }catch{} }
+    foreach($ownerPid in $owners){ try{ Stop-Process -Id $pid -Force }catch{}; try{ & taskkill /PID $pid /F /T | Out-Null }catch{} }
     Start-Sleep -Milliseconds 400
     try{ Start-Process -FilePath (Get-Command python).Source -ArgumentList ("server\serve_phone_clean.py {0}" -f $Port) -WorkingDirectory (Get-Location).Path -WindowStyle Hidden | Out-Null }catch{}
     Start-Sleep -Seconds 1
   }
   Start-Sleep -Seconds $Every
 }
+
