@@ -531,8 +531,144 @@ def _plan_tree():
 def agent_plan():
     return jsonify({'ok':True,'plan':_plan_tree()})
 # ==== end inject ====
+
+# ==== PA injected: worker metrics / counts ====
+import json, time, os, re, math, urllib.request
+try: import yaml
+except Exception: yaml=None
+REPO = globals().get('REPO', os.getcwd())
+APPROVALS_DIR = globals().get('APPROVALS_DIR', os.path.join(REPO,'tmp','phone','approvals'))
+PACKS_DIR = globals().get('PACKS_DIR', os.path.join(REPO,'tmp','feedback'))
+NOTES_PATH = os.path.join(REPO,'tmp','notes','notes.md')
+WORKER = globals().get('WORKER', {'calls':0,'tokens_in':0,'tokens_out':0,'cost_usd':0.0,'last_ts':0,'last_err':'','last_reply_len':0})
+def _cost_perk():
+    cin = float(os.environ.get('PA_COST_IN_PERK','0') or 0)
+    cout = float(os.environ.get('PA_COST_OUT_PERK','0') or 0)
+    return cin, cout
+def _approx_tokens(s):
+    if not isinstance(s,str): s=str(s)
+    # rough: 4 chars ~ 1 token
+    return int(math.ceil(len(s)/4.0))
+def _append_notes(text):
+    os.makedirs(os.path.dirname(NOTES_PATH), exist_ok=True)
+    with open(NOTES_PATH,'a',encoding='utf-8') as f:
+        if text and not text.endswith('\\n'): text=text+'\\n'
+        f.write(text)
+def _ai_bridge(text, base=None):
+    base = base or os.environ.get('PA_AI_BASE','http://127.0.0.1:8765')
+    paths = ['/ask','/v1/ask','/chat','/v1/chat']
+    body = json.dumps({'text':text}).encode('utf-8')
+    reply=None; err=''
+    for p in paths:
+        url = base.rstrip('/') + p
+        try:
+            req = urllib.request.Request(url,data=body,headers={'Content-Type':'application/json'},method='POST')
+            with urllib.request.urlopen(req,timeout=15) as r:
+                s = r.read().decode('utf-8','ignore')
+                try:
+                    j=json.loads(s)
+                    for k in ('reply','text','content','answer','message'):
+                        if isinstance(j,dict) and k in j and isinstance(j[k],str):
+                            reply=j[k]; break
+                    if reply is None: reply=s
+                except Exception:
+                    reply=s
+                break
+        except Exception as e:
+            err=str(e); continue
+    if reply is None:
+        reply='[SIMULATED REPLY] '+(text[:200] if isinstance(text,str) else str(text))
+    # track usage
+    ti=_approx_tokens(text); to=_approx_tokens(reply); cin,cout=_cost_perk()
+    WORKER['calls']=WORKER.get('calls',0)+1
+    WORKER['tokens_in']=WORKER.get('tokens_in',0)+ti
+    WORKER['tokens_out']=WORKER.get('tokens_out',0)+to
+    WORKER['cost_usd']=float(WORKER.get('cost_usd',0.0))+ (ti/1000.0*cin)+(to/1000.0*cout)
+    WORKER['last_ts']=int(time.time()); WORKER['last_err']=err; WORKER['last_reply_len']=len(reply or '')
+    return reply
+def _list_approvals():
+    items=[]
+    if os.path.isdir(APPROVALS_DIR):
+        for nm in os.listdir(APPROVALS_DIR):
+            if nm.endswith('.json'):
+                p=os.path.join(APPROVALS_DIR,nm)
+                try: items.append((p, os.path.getmtime(p)))
+                except Exception: pass
+    items.sort(key=lambda x:x[1])
+    return [p for p,_ in items]
+@app.route('/agent/approvals_count')
+def agent_approvals_count():
+    try: n=len(_list_approvals())
+    except Exception: n=0
+    return jsonify({'ok':True,'count':n})
+@app.route('/agent/worker_status')
+def agent_worker_status():
+    return jsonify({'ok':True,'worker':WORKER})
+def _find_plan_path():
+    for base,dirs,files in os.walk(REPO):
+        if 'project_plan_v3.yaml' in files: return os.path.join(base,'project_plan_v3.yaml')
+    return None
+def _classify(s):
+    s=(s or '').lower()
+    if s in ('done','complete','finished'): return 'done'
+    if s in ('in_progress','active','working','running'): return 'in_progress'
+    if s in ('blocked','error','fail','failed'): return 'blocked'
+    return 'todo'
+def _sum_counts(a,b):
+    for k in ('done','in_progress','blocked','todo'): a[k]=a.get(k,0)+b.get(k,0)
+    return a
+def _counts_for(node):
+    c={'done':0,'in_progress':0,'blocked':0,'todo':0}
+    st=_classify(node.get('status'))
+    if node.get('id'): c[st]+=1
+    for ch in node.get('children',[]) or []:
+        _sum_counts(c,_counts_for(ch))
+    node['counts']=c
+    return c
+def _plan_tree_build(doc):
+    # try nested first
+    def all_nodes(x):
+        st=[x]; out=[]
+        while st:
+            v=st.pop()
+            if isinstance(v,dict): out.append(v); st.extend(list(v.values()))
+            elif isinstance(v,list): st.extend(v)
+        return out
+    nodes=[]
+    for n in all_nodes(doc):
+        if not isinstance(n,dict): continue
+        _id=str(n.get('id') or n.get('step_id') or '').strip()
+        if not _id: continue
+        title=str(n.get('name') or n.get('title') or n.get('desc') or '').strip()
+        status=str(n.get('status') or n.get('state') or '').strip()
+        nodes.append({'id':_id,'title':title,'status':status,'children':[]})
+    if not nodes: return []
+    # group by major
+    groups={}
+    for nd in nodes:
+        major = nd['id'].split('.',1)[0] if '.' in nd['id'] else nd['id']
+        groups.setdefault(major,[]).append(nd)
+    tree=[]
+    for major in sorted(groups.keys(), key=lambda x:(len(x),x)):
+        tree.append({'id':str(major),'title':'Phase '+str(major),'status':'','children':sorted(groups[major], key=lambda x:x['id'])})
+    return tree
+@app.route('/agent/plan')
+def agent_plan():
+    p=_find_plan_path()
+    if not p: return jsonify({'ok':True,'plan':{'active':None,'tree':[],'totals':{}}})
+    try:
+        txt=open(p,'r',encoding='utf-8').read()
+        doc=yaml.safe_load(txt) if yaml else {}
+        tree=_plan_tree_build(doc or {})
+        totals={'done':0,'in_progress':0,'blocked':0,'todo':0}
+        for n in tree: _sum_counts(totals,_counts_for(n))
+        return jsonify({'ok':True,'plan':{'active':(doc or {}).get('active_step'),'tree':tree,'totals':totals}})
+    except Exception:
+        return jsonify({'ok':True,'plan':{'active':None,'tree':[],'totals':{}}})
+# ==== end inject ====
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=8782, debug=False)
+
 
 
 

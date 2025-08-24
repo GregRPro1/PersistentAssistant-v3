@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent Console</title>
 <style>
-  :root{ --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --muted:#9ca3af; --bg:#0b0b0c; --panel:#111214; --ink:#e5e7eb; --accent:#2563eb; }
+  :root{ --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --muted:#9ca3af; --bg:#0b0b0c; --panel:#111214; --ink:#e5e7eb; --accent:#2563eb }
   *{box-sizing:border-box} body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;background:#0b0b0c;color:#e5e7eb}
   header{padding:10px 12px;background:#111214;border-bottom:1px solid #1f2937}
   .hint{font-size:12px;color:#9ca3af}
@@ -10,27 +10,23 @@
   .grid{display:grid;grid-template-columns:1fr;gap:12px;padding:12px}
   section{background:#111214;border:1px solid #1f2937;border-radius:10px;padding:10px}
   h2{margin:4px 0 10px 0;font-size:16px}
-  .row{margin:8px 0}
-  input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #28303d;background:#0f1113;color:#e5e7eb}
-  button{padding:8px 12px;border-radius:8px;border:1px solid #28303d;background:#14161a;color:#e5e7eb;cursor:pointer}
-  button:disabled{opacity:.6;cursor:not-allowed}
+  .row{margin:8px 0} input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #28303d;background:#0f1113;color:#e5e7eb}
+  button{padding:8px 12px;border-radius:8px;border:1px solid #28303d;background:#14161a;color:#e5e7eb;cursor:pointer} button:disabled{opacity:.6}
   pre{background:#0f1113;border:1px solid #28303d;padding:10px;border-radius:8px;white-space:pre-wrap;max-height:260px;overflow:auto}
   .scroll{max-height:260px;overflow:auto}
   .badge{display:inline-block;padding:2px 6px;border-radius:999px;font-size:11px;margin-left:6px;border:1px solid #28303d}
   .wait{color:#f59e0b} .ok{color:var(--ok)} .err{color:var(--err)}
-  .hidden{display:none}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:8px;background:#14161a;border:1px solid #28303d}
+  .dot{width:8px;height:8px;border-radius:50%}.green{background:var(--ok)}.amber{background:var(--warn)}.grey{background:#6b7280}.red{background:var(--err)}
+  .tree ul{list-style:none;margin:0;padding-left:18px}.tree li{margin:4px 0}.caret{cursor:pointer;user-select:none}.caret::before{content:'\\25B6';color:#9ca3af;display:inline-block;margin-right:6px;transform:translateY(-1px)}.caret.down::before{transform:rotate(90deg)}
+  .rowflex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .statusbar{position:sticky;bottom:0;background:#0f1113;border-top:1px solid #1f2937;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
   .spinner{display:inline-block;width:12px;height:12px;border:2px solid #28303d;border-top-color:#e5e7eb;border-radius:50%;animation:spin 1s linear infinite;margin-right:6px}@keyframes spin{to{transform:rotate(360deg)}}
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:8px;background:#14161a;border:1px solid #28303d}
-  .dot{width:8px;height:8px;border-radius:50%}
-  .green{background:var(--ok)} .amber{background:var(--warn)} .grey{background:#6b7280} .red{background:var(--err)}
-  .tree ul{list-style:none;margin:0;padding-left:18px} .tree li{margin:4px 0}
-  .caret{cursor:pointer;user-select:none} .caret::before{content:'\\25B6';color:#9ca3af;display:inline-block;margin-right:6px;transform:translateY(-1px)} .caret.down::before{transform:rotate(90deg)}
 </style>
 </head><body>
 <header>
   <div><strong>Agent Console</strong> <span class="badge" id="uiBaseBadge"></span></div>
-  <div class="hint" id="hint">Token saved locally. Lock prevents accidental taps. Timer shows how long an action has been running.</div>
+  <div class="hint" id="hint">Safety: Comms OFF blocks sends; Lock requires hold-to-unlock; Timer shows elapsed while busy.</div>
 </header>
 <div class="tabs">
   <div class="tab active" data-tab="summary">Summary</div>
@@ -46,7 +42,7 @@
     <div class="row"><button id="refresh">Refresh summary</button></div>
     <pre id="summary">[no data]</pre>
   </section>
-  <section data-pane="plan" class="hidden"><h2>Plan <span id="planState" class="badge"></span></h2>
+  <section data-pane="plan" class="hidden"><h2>Plan <span id="planState" class="badge"></span> <span id="planCounts" class="badge"></span></h2>
     <div class="row"><button id="planRefresh">Refresh plan</button></div>
     <div id="planTree" class="tree scroll">[no data]</div>
   </section>
@@ -64,7 +60,7 @@
     <pre id="notesOut"></pre>
   </section>
   <section data-pane="actions" class="hidden"><h2>Actions <span id="actState" class="badge"></span></h2>
-    <div class="row"><textarea id="askText" rows="5" placeholder="Ask the assistant… (queued to notes for now)"></textarea></div>
+    <div class="row"><textarea id="askText" rows="5" placeholder="Ask the assistant…"></textarea></div>
     <div class="row"><button id="askBtn">Send ASK</button> <button id="proc">Process approvals</button></div>
     <pre id="askOut"></pre>
     <div class="row"><input type="text" id="chooseStep" placeholder="e.g. 9.2" /> <button id="chooseBtn">Set active step</button></div>
@@ -72,73 +68,77 @@
   </section>
   <section data-pane="settings" class="hidden"><h2>Settings</h2>
     <div class="row"><label>Bearer token:</label><input type="text" id="tok" placeholder="paste token" /></div>
-    <div class="row"><button id="save">Save Token</button></div>
-    <div class="row"><div class="chip"><span class="dot" id="lockDot"></span><span id="lockLbl">Locked</span> <button id="unlockHold">Hold to Unlock</button> <button id="lockBtn">Lock</button></div></div>
+    <div class="rowflex"><div class="chip"><span class="dot" id="commsDot"></span><span id="commsLbl">Comms: ON</span> <button id="commsToggle">Toggle</button></div><div class="chip"><span class="dot" id="lockDot"></span><span id="lockLbl">Locked</span> <button id="unlockHold">Hold to Unlock</button> <button id="lockBtn">Lock</button></div></div>
+    <div class="rowflex"><div class="chip"><span>Auto-process (sec):</span> <input id="autoSec" type="number" min="5" step="1" style="width:90px"/> <button id="autoToggle">Enable</button> <span id="autoState" class="badge"></span></div></div>
   </section>
 </div>
 <div class="statusbar"><div><span id="busyIcon" class="spinner hidden"></span><span id="statusLeft">Ready</span></div><div id="statusRight" class="hint"></div></div>
 <script>(function(){
-  // ===== utils =====
+  // utils
   function uuidv4(){try{if(crypto&&typeof crypto.randomUUID==='function')return crypto.randomUUID();}catch(e){}var a=(crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(16)):(function(){var x=new Uint8Array(16);for(var i=0;i<16;i++)x[i]=Math.floor(Math.random()*256);return x})();a[6]=(a[6]&15)|64;a[8]=(a[8]&63)|128;var h='';for(var i=0;i<16;i++){h+=a[i].toString(16).padStart(2,'0');}return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
-  const el=(id)=>document.getElementById(id), q=(s)=>document.querySelector(s), qa=(s)=>Array.from(document.querySelectorAll(s));
+  const el=(id)=>document.getElementById(id), qa=(s)=>Array.from(document.querySelectorAll(s));
   const uiBase=location.origin; el('uiBaseBadge').textContent=uiBase;
   let tok=localStorage.getItem('pa_token')||''; const tokIn=el('tok'); if(tokIn) tokIn.value=tok;
-  // Tabs
+  // tabs
   qa('.tab').forEach(t=>t.onclick=()=>{ qa('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); const name=t.getAttribute('data-tab'); qa('[data-pane]').forEach(p=>p.classList.toggle('hidden', p.getAttribute('data-pane')!==name)); el('statusLeft').textContent='Viewing '+name; });
-  // Busy + timer
-  let timer=null, startTs=0;
-  function setBusy(b,msg){ el('busyIcon').classList.toggle('hidden',!b); el('statusLeft').textContent=msg|| (b?'Working…':'Ready'); if(b){ startTs=Date.now(); if(timer) clearInterval(timer); timer=setInterval(()=>{ const s=Math.floor((Date.now()-startTs)/1000); el('statusRight').textContent='⏱ '+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },500);} else { if(timer) clearInterval(timer); el('statusRight').textContent=''; } }
+  // busy + timer
+  let timer=null, startTs=0, busy=false;
+  function setBusy(b,msg){ busy=b; el('busyIcon').classList.toggle('hidden',!b); el('statusLeft').textContent=msg|| (b?'Working…':'Ready'); if(b){ startTs=Date.now(); if(timer) clearInterval(timer); timer=setInterval(()=>{ const s=Math.floor((Date.now()-startTs)/1000); el('statusRight').textContent='⏱ '+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')+' · '+(workerStr||''); },500);} else { if(timer) clearInterval(timer); el('statusRight').textContent=workerStr||''; } }
   function badge(id,cls,txt){ const b=el(id); if(!b) return; b.className='badge '+(cls||''); b.textContent=txt||''; }
   function pretty(o){ try{return JSON.stringify(o,null,2);}catch(e){return String(o);} }
   function logPre(id,txt){ const p=el(id); if(!p) return; p.textContent=(typeof txt==='string')?txt:pretty(txt); }
-  function GET(path){ return fetch(uiBase+path,{cache:'no-store'}); }
-  function POST(path,body){ return fetch(uiBase+path,{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:body?JSON.stringify(body):'{}'});} 
-  // Safety Lock (prevents pocket taps)
-  function setLockUI(locked){ el('lockLbl').textContent = locked?'Locked':'Unlocked'; el('lockDot').className='dot '+(locked?'amber':'green'); }
+  // comms + lock + idle auto-off
+  function commsEnabled(){ return localStorage.getItem('pa_comms')!=='0'; }
+  function setComms(v){ localStorage.setItem('pa_comms', v?'1':'0'); el('commsLbl').textContent='Comms: '+(v?'ON':'OFF'); el('commsDot').className='dot '+(v?'green':'amber'); if(!v) el('statusLeft').textContent='Interaction locked (comms off)'; }
+  setComms(commsEnabled());
+  el('commsToggle').onclick=()=>setComms(!commsEnabled());
   function isLocked(){ return localStorage.getItem('pa_locked')==='1'; }
-  function setLocked(v){ localStorage.setItem('pa_locked', v?'1':'0'); setLockUI(v); }
-  setLockUI(isLocked());
-  el('lockBtn').onclick=()=>{ setLocked(true); };
-  // Hold-to-unlock 1.2s
+  function setLocked(v){ localStorage.setItem('pa_locked', v?'1':'0'); el('lockLbl').textContent = v?'Locked':'Unlocked'; el('lockDot').className='dot '+(v?'amber':'green'); }
+  setLocked(localStorage.getItem('pa_locked')==='1');
+  el('lockBtn').onclick=()=>setLocked(true);
   el('unlockHold').onpointerdown=()=>{ el('unlockHold')._t=setTimeout(()=>{ setLocked(false); },1200); };
   el('unlockHold').onpointerup=el('unlockHold').onpointerleave=()=>{ clearTimeout(el('unlockHold')._t); };
-  // Double-tap confirm for actions on touch devices
-  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints>0;
-  function armButton(btn){ if(!isTouch) return true; const now=Date.now(); const last=btn._lastTap||0; btn._lastTap=now; if(now-last<800){ return true } else { el('hint').textContent='Tap again to confirm…'; setTimeout(()=>{ if(el('hint').textContent.startsWith('Tap again')) el('hint').textContent=''; },1500); return false } }
-  // Global guard to block actions when locked or page not visible
-  function guard(btn){ if(document.hidden){ el('hint').textContent='Page hidden — action blocked'; return false } if(isLocked()){ el('hint').textContent='Locked — hold Unlock in Settings'; return false } if(!armButton(btn)) return false; return true }
-  // Summary
+  let lastUserTs=Date.now(); ['pointerdown','keydown','touchstart','scroll'].forEach(ev=>document.addEventListener(ev,()=>{ lastUserTs=Date.now(); },{passive:true}));
+  setInterval(()=>{ if(!busy && Date.now()-lastUserTs>300000 && commsEnabled()){ setComms(false); } },15000);
+  // fetch wrappers (respect comms + lock + visibility)
+  function canSend(){ if(document.hidden){ el('hint').textContent='Page hidden — blocked'; return false } if(isLocked()){ el('hint').textContent='Locked — hold Unlock in Settings'; return false } if(!commsEnabled()){ el('hint').textContent='Comms OFF — enable in Settings'; return false } return true }
+  function GET(path){ return fetch(uiBase+path,{cache:'no-store'}); }
+  function POST(path,body){ if(!canSend()) return Promise.reject(new Error('blocked')); return fetch(uiBase+path,{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:body?JSON.stringify(body):'{}'});} 
+  // summary
   async function refreshSummary(){ setBusy(true,'Loading summary…'); badge('sumState','wait','loading'); try{ const r=await GET('/agent/summary'); const j=await r.json(); logPre('summary',j); badge('sumState','ok','ok'); }catch(e){ badge('sumState','err','error'); } finally{ setBusy(false);} }
   el('refresh').onclick=refreshSummary; refreshSummary();
-  // Plan (tree)
-  function statusClass(s){ s=String(s||'').toLowerCase(); if(s==='done' || s==='complete') return 'green'; if(s==='in_progress' || s==='active' || s==='working') return 'amber'; if(s==='error' || s==='fail' || s==='blocked') return 'red'; return 'grey'; }
-  function makeNode(n){ const li=document.createElement('li'); const caret=document.createElement('span'); caret.className='caret'; const label=document.createElement('span'); const dot=document.createElement('span'); dot.className='dot '+statusClass(n.status); label.textContent=' '+(n.id||'')+(n.title?(' — '+n.title):''); const head=document.createElement('span'); head.appendChild(dot); head.appendChild(label);
-    if(n.children && n.children.length){ caret.onclick=()=>{ caret.classList.toggle('down'); ul.classList.toggle('hidden'); }; caret.classList.add('down'); } else { caret.style.visibility='hidden'; }
-    li.appendChild(caret); li.appendChild(head);
-    const ul=document.createElement('ul'); if(!(n.children && n.children.length)) ul.classList.add('hidden');
-    (n.children||[]).forEach(c=>ul.appendChild(makeNode(c)));
-    li.appendChild(ul); return li;
-  }
-  async function refreshPlan(){ setBusy(true,'Loading plan…'); badge('planState','wait','loading'); try{ const r=await GET('/agent/plan'); const j=await r.json(); const box=el('planTree'); box.innerHTML=''; const root=document.createElement('ul'); (j.plan.tree||[]).forEach(n=>root.appendChild(makeNode(n))); box.appendChild(root); badge('planState','ok','ok'); }catch(e){ badge('planState','err','error'); } finally{ setBusy(false);} }
+  // plan + counts
+  function statusClass(s){ s=String(s||'').toLowerCase(); if(s==='done'||s==='complete'||s==='finished')return 'green'; if(s==='in_progress'||s==='active'||s==='working'||s==='running')return 'amber'; if(s==='blocked'||s==='error'||s==='fail'||s==='failed')return 'red'; return 'grey'; }
+  function makeNode(n){ const li=document.createElement('li'); const caret=document.createElement('span'); caret.className='caret down'; const label=document.createElement('span'); const dot=document.createElement('span'); dot.className='dot '+statusClass(n.status); label.textContent=' '+(n.id||'')+(n.title?(' — '+n.title):''); li.appendChild(caret); li.appendChild(dot); li.appendChild(label); const ul=document.createElement('ul'); (n.children||[]).forEach(c=>ul.appendChild(makeNode(c))); li.appendChild(ul); caret.onclick=()=>{ caret.classList.toggle('down'); ul.classList.toggle('hidden'); }; return li; }
+  async function refreshPlan(){ setBusy(true,'Loading plan…'); badge('planState','wait','loading'); try{ const r=await GET('/agent/plan'); const j=await r.json(); const box=el('planTree'); box.innerHTML=''; const root=document.createElement('ul'); (j.plan.tree||[]).forEach(n=>root.appendChild(makeNode(n))); box.appendChild(root); const t=j.plan.totals||{}; el('planCounts').textContent='Done '+(t.done||0)+' • Working '+(t.in_progress||0)+' • Blocked '+(t.blocked||0)+' • Todo '+(t.todo||0); badge('planState','ok','ok'); }catch(e){ badge('planState','err','error'); } finally{ setBusy(false);} }
   el('planRefresh').onclick=refreshPlan; refreshPlan();
-  // Recent
-  async function refreshRecent(){ setBusy(true,'Loading recent…'); try{ const r=await GET('/agent/recent'); const j=await r.json(); const box=el('recentBox'); box.innerHTML=''; const rec=j.recent||{}; const a=rec.approvals||[]; const ul=document.createElement('ul'); a.forEach(n=>{ const li=document.createElement('li'); li.textContent=n; ul.appendChild(li); }); const notes=document.createElement('pre'); notes.textContent=(rec.notes_tail||'').trim()||'[no notes]'; box.appendChild(document.createTextNode('Approvals (latest):')); box.appendChild(ul); box.appendChild(document.createTextNode('Notes tail:')); box.appendChild(notes);}catch(e){ el('recentBox').textContent='ERR '+e.message;} finally{ setBusy(false);} }
+  // recent
+  async function refreshRecent(){ try{ const r=await GET('/agent/recent'); const j=await r.json(); const box=el('recentBox'); box.innerHTML=''; const rec=j.recent||{}; const a=rec.approvals||[]; const ul=document.createElement('ul'); a.forEach(n=>{ const li=document.createElement('li'); li.textContent=n; ul.appendChild(li); }); const notes=document.createElement('pre'); notes.textContent=(rec.notes_tail||'').trim()||'[no notes]'; box.appendChild(document.createTextNode('Approvals (latest):')); box.appendChild(ul); box.appendChild(document.createTextNode('Notes tail:')); box.appendChild(notes);}catch(e){ el('recentBox').textContent='ERR '+e.message;} }
   el('rrefresh').onclick=refreshRecent; refreshRecent();
   // NEXT
-  async function doNEXT(btn){ if(!guard(btn)) return; setBusy(true,'Requesting NEXT…'); badge('nextState','wait','waiting'); try{ const b={action:'APPROVE_NEXT',data:null,timestamp:Math.floor(Date.now()/1000),nonce:uuidv4()}; const r=await POST('/agent/next2',b); const t=await r.text(); try{ const j=JSON.parse(t); const box=el('nextBox'); box.innerHTML=''; const pre=document.createElement('pre'); pre.textContent=pretty(j.summary||j); box.appendChild(pre); const sug=j.suggestions||[]; if(sug.length){ const wrap=document.createElement('div'); sug.forEach(x=>{ const b=document.createElement('button'); b.textContent=(x.kind==='step'?'Choose ':'')+(x.id||x.title); b.onclick=()=>{ if(x.kind==='step'){ chooseStep(x.id); } }; wrap.appendChild(b); }); box.appendChild(wrap);} badge('nextState','ok','ok'); }catch{ badge('nextState','err','bad json'); } }catch(e){ badge('nextState','err','error'); } finally{ setBusy(false);} }
-  el('nextBtn').onclick=(e)=>doNEXT(e.target);
-  // Notes
-  async function notes(mode){ setBusy(true, (mode==='append'?'Appending…':'Saving…')); try{ const r=await POST('/agent/notes',{mode,text:el('notesText').value}); const t=await r.text(); logPre('notesOut',t); badge('notesState','ok',mode); }catch(e){ badge('notesState','err','error'); } finally{ setBusy(false);} }
+  el('nextBtn').onclick=async(e)=>{ if(!canSend()) return; setBusy(true,'Requesting NEXT…'); badge('nextState','wait','waiting'); try{ const b={action:'APPROVE_NEXT',data:null,timestamp:Math.floor(Date.now()/1000),nonce:uuidv4()}; const r=await POST('/agent/next2',b); const t=await r.text(); try{ const j=JSON.parse(t); const box=el('nextBox'); box.innerHTML=''; const pre=document.createElement('pre'); pre.textContent=pretty(j.summary||j); box.appendChild(pre); badge('nextState','ok','ok'); }catch{ badge('nextState','err','bad json'); } }catch(e2){ badge('nextState','err','error'); } finally{ setBusy(false);} };
+  // notes
   el('notesLoad').onclick=async()=>{ setBusy(true,'Loading notes…'); try{ const r=await GET('/agent/notes'); const j=await r.json(); el('notesText').value=j.text||''; badge('notesState','ok','loaded'); }catch(e){ badge('notesState','err','error'); } finally{ setBusy(false);} };
-  el('notesSave').onclick=()=>notes('set');
-  el('notesAppend').onclick=()=>notes('append');
-  el('makeBrief').onclick=async()=>{ if(!guard(el('makeBrief'))) return; setBusy(true,'Assembling brief…'); try{ const r=await POST('/agent/brief'); const t=await r.text(); logPre('notesOut',t); }catch(e){ logPre('notesOut','ERR '+e.message); } finally{ setBusy(false);} };
-  // Actions (ASK / Process / Choose)
-  el('askBtn').onclick=async(e)=>{ if(!guard(e.target)) return; const text=el('askText').value.trim(); if(!text){ logPre('askOut','Enter a prompt'); return } setBusy(true,'Sending ASK…'); try{ const r=await POST('/agent/ask',{text,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)}); const t=await r.text(); logPre('askOut',t); badge('actState','ok','queued'); }catch(e2){ badge('actState','err','error'); } finally{ setBusy(false);} };
-  async function chooseStep(step){ setBusy(true,'Choosing '+step+'…'); try{ const r=await POST('/agent/choose',{step_id:step,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)}); const t=await r.text(); logPre('chooseOut',t); }catch(e){ logPre('chooseOut','ERR '+e.message); } finally{ setBusy(false);} }
-  el('chooseBtn').onclick=(e)=>{ if(!guard(e.target)) return; const step=el('chooseStep').value.trim(); if(!step){ logPre('chooseOut','Enter a step id'); return } chooseStep(step); };
-  // Settings
-  el('save').onclick=()=>{ tok=(tokIn?tokIn.value:tok).trim(); localStorage.setItem('pa_token',tok); el('statusRight').textContent='Token saved'; };
+  function notes(mode){ return POST('/agent/notes',{mode,text:el('notesText').value}); }
+  el('notesSave').onclick=async()=>{ if(!canSend()) return; setBusy(true,'Saving notes…'); try{ const r=await notes('set'); const t=await r.text(); logPre('notesOut',t); badge('notesState','ok','saved'); }catch(e){ badge('notesState','err','error'); } finally{ setBusy(false);} };
+  el('notesAppend').onclick=async()=>{ if(!canSend()) return; setBusy(true,'Appending…'); try{ const r=await notes('append'); const t=await r.text(); logPre('notesOut',t); badge('notesState','ok','appended'); }catch(e){ badge('notesState','err','error'); } finally{ setBusy(false);} };
+  el('makeBrief').onclick=async()=>{ if(!canSend()) return; setBusy(true,'Assembling brief…'); try{ const r=await POST('/agent/brief'); const t=await r.text(); logPre('notesOut',t);}catch(e){ logPre('notesOut','ERR '+e.message);} finally{ setBusy(false);} };
+  // actions
+  el('askBtn').onclick=async()=>{ if(!canSend()) return; const text=el('askText').value.trim(); if(!text){ logPre('askOut','Enter a prompt'); return } setBusy(true,'Sending ASK…'); try{ const r=await POST('/agent/ask',{text,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)}); const t=await r.text(); logPre('askOut',t); badge('actState','ok','queued'); }catch(e){ badge('actState','err','error'); } finally{ setBusy(false);} };
+  el('chooseBtn').onclick=async()=>{ if(!canSend()) return; const step=el('chooseStep').value.trim(); if(!step){ logPre('chooseOut','Enter a step id'); return } setBusy(true,'Choosing '+step+'…'); try{ const r=await POST('/agent/choose',{step_id:step,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)}); const t=await r.text(); logPre('chooseOut',t);}catch(e){ logPre('chooseOut','ERR '+e.message);} finally{ setBusy(false);} };
+  // token save
+  el('save')?.addEventListener('click',()=>{ tok=(tokIn?tokIn.value:tok).trim(); localStorage.setItem('pa_token',tok); el('statusRight').textContent='Token saved'; });
+  // worker status + cost (auto-poll) + auto-process toggle
+  let workerStr='';
+  async function pollWorker(){ try{ const r=await GET('/agent/worker_status'); const j=await r.json(); const w=j.worker||{}; workerStr=calls  · tok / · Write-Host{(w.cost_usd||0).toFixed(4)}; if(!busy) el('statusRight').textContent=workerStr; }catch(e){} }
+  setInterval(pollWorker, 5000); pollWorker();
+  const autoSec=el('autoSec'); const autoToggle=el('autoToggle'); const autoState=el('autoState');
+  autoSec.value = localStorage.getItem('pa_auto_sec') || '15';
+  let autoTimer=null;
+  function setAuto(on){ if(autoTimer){ clearInterval(autoTimer); autoTimer=null; } if(on){ const ms=Math.max(5,parseInt(autoSec.value||'15',10))*1000; autoTimer=setInterval(async()=>{ if(!canSend()||busy||document.hidden) return; try{ await POST('/agent/process2'); }catch(e){} }, ms); autoState.textContent='on'; autoState.className='badge ok'; localStorage.setItem('pa_auto_on','1'); } else { autoState.textContent='off'; autoState.className='badge'; localStorage.setItem('pa_auto_on','0'); } }
+  autoToggle.onclick=()=>{ const on = !(localStorage.getItem('pa_auto_on')==='1'); setAuto(on); };
+  if(localStorage.getItem('pa_auto_on')==='1'){ setAuto(true); }
+  // show approvals count occasionally (non-intrusive)
+  setInterval(async()=>{ try{ const r=await GET('/agent/approvals_count'); const j=await r.json(); if(j&&j.count!=null){ el('hint').textContent='Approvals queued: '+j.count; } }catch(e){} }, 10000);
 })();</script>
 </body></html>
-
