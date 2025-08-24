@@ -1,42 +1,101 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent Console</title>
-<style>body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:12px}.row{margin:8px 0}input,textarea{width:100%;padding:8px}button{padding:8px 12px;margin-right:6px}pre{background:#f5f5f5;padding:8px;white-space:pre-wrap}.grid{display:grid;grid-template-columns:1fr;gap:12px}.ok{color:#2e7d32}.err{color:#c62828}.chip{display:inline-block;padding:4px 8px;border-radius:999px;background:#eee;margin:2px 6px 2px 0}</style>
+<style>
+  :root{ --ok:#2e7d32; --err:#c62828; --muted:#6b7280; --bg:#0b0b0c; --panel:#111214; --ink:#e5e7eb; --accent:#2563eb; }
+  body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;background:#0b0b0c;color:#e5e7eb}
+  header{padding:10px 12px;background:#111214;border-bottom:1px solid #1f2937}
+  .hint{font-size:12px;color:#9ca3af}
+  .tabs{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid #1f2937;background:#0f1113;position:sticky;top:0;z-index:2}
+  .tab{padding:8px 10px;border-radius:8px;background:#14161a;cursor:pointer;user-select:none}
+  .tab.active{background:#1d2430}
+  .grid{display:grid;grid-template-columns:1fr;gap:12px;padding:12px}
+  section{background:#111214;border:1px solid #1f2937;border-radius:10px;padding:10px}
+  h2{margin:4px 0 10px 0;font-size:16px}
+  .row{margin:8px 0}
+  input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #28303d;background:#0f1113;color:#e5e7eb}
+  button{padding:8px 12px;border-radius:8px;border:1px solid #28303d;background:#14161a;color:#e5e7eb;cursor:pointer}
+  button:disabled{opacity:.6;cursor:not-allowed}
+  pre{background:#0f1113;border:1px solid #28303d;padding:10px;border-radius:8px;white-space:pre-wrap;max-height:260px;overflow:auto}
+  .scroll{max-height:260px;overflow:auto}
+  .badge{display:inline-block;padding:2px 6px;border-radius:999px;font-size:11px;margin-left:6px;border:1px solid #28303d}
+  .wait{color:#ffd166} .ok{color:var(--ok)} .err{color:var(--err)}
+  .row .btns{display:flex;gap:6px;flex-wrap:wrap}
+  .hidden{display:none}
+  .statusbar{position:sticky;bottom:0;background:#0f1113;border-top:1px solid #1f2937;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
+  .spinner{display:inline-block;width:12px;height:12px;border:2px solid #28303d;border-top-color:#e5e7eb;border-radius:50%;animation:spin 1s linear infinite;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head><body>
-<h1>Agent Console</h1>
-<div class="row">UI Base: <code id="uibase"></code></div>
-<div class="row"><label>Bearer token:</label><input type="text" id="tok" placeholder="paste token" /></div>
-<div class="row"><button id="save">Save Token</button> <button id="next">Send NEXT approval</button> <button id="proc">Process approvals</button> <button id="rrefresh">Refresh recent</button></div>
+<header>
+  <div><strong>Agent Console</strong> <span class="badge" id="uiBaseBadge"></span></div>
+  <div class="hint" id="hint">Paste token, then tap a button. This page shows plan summary, next suggestions, recent approvals, notes, and actions.</div>
+</header>
+<div class="tabs">
+  <div class="tab active" data-tab="summary">Summary</div>
+  <div class="tab" data-tab="next">Next</div>
+  <div class="tab" data-tab="recent">Recent</div>
+  <div class="tab" data-tab="notes">Notes</div>
+  <div class="tab" data-tab="actions">Actions</div>
+  <div class="tab" data-tab="settings">Settings</div>
+</div>
 <div class="grid">
-  <section><h2>Summary</h2><div class="row"><button id="refresh">Refresh summary</button></div><pre id="summary">[no data]</pre></section>
-  <section><h2>Next Suggestions</h2><div id="nextBox">[none yet]</div></section>
-  <section><h2>Recent</h2><div id="recentBox">[none yet]</div></section>
-  <section><h2>Notes</h2>
-    <div class="row"><textarea id="notesText" rows="8" placeholder="Project notes..."></textarea></div>
-    <div class="row"><button id="notesLoad">Load</button> <button id="notesSave">Save</button> <button id="notesAppend">Append</button> <button id="makeBrief">Assemble Brief</button></div>
+  <section data-pane="summary"><h2>Summary <span id="sumState" class="badge"></span></h2>
+    <div class="row"><div class="btns"><button id="refresh">Refresh summary</button></div></div>
+    <pre id="summary">[no data]</pre>
+  </section>
+  <section data-pane="next" class="hidden"><h2>Next Suggestions</h2>
+    <div class="row"><div class="btns"><button id="next">Send NEXT</button> <span id="nextState" class="badge"></span></div></div>
+    <div id="nextBox" class="scroll">[none yet]</div>
+  </section>
+  <section data-pane="recent" class="hidden"><h2>Recent</h2>
+    <div class="row"><div class="btns"><button id="rrefresh">Refresh recent</button></div></div>
+    <div id="recentBox">[none yet]</div>
+  </section>
+  <section data-pane="notes" class="hidden"><h2>Notes</h2>
+    <div class="row"><textarea id="notesText" rows="10" placeholder="Project notes…"></textarea></div>
+    <div class="row btns"><button id="notesLoad">Load</button><button id="notesSave">Save</button><button id="notesAppend">Append</button><button id="makeBrief">Assemble Brief</button><span id="notesState" class="badge"></span></div>
     <pre id="notesOut"></pre>
   </section>
-  <section><h2>Choose Step</h2><div class="row"><input type="text" id="chooseStep" placeholder="e.g. 9.1" /><button id="chooseBtn">Set active step</button></div><pre id="chooseOut"></pre></section>
-  <section><h2>Ask</h2><div class="row"><textarea id="askText" rows="4" placeholder="Type a prompt for the assistant…"></textarea></div><div class="row"><button id="askBtn">Send ASK</button></div><pre id="askOut"></pre></section>
+  <section data-pane="actions" class="hidden"><h2>Actions</h2>
+    <div class="row"><textarea id="askText" rows="5" placeholder="Ask the assistant… (queued to notes for now)"></textarea></div>
+    <div class="row btns"><button id="askBtn">Send ASK</button><button id="proc">Process approvals</button><span id="actState" class="badge"></span></div>
+    <pre id="askOut"></pre>
+    <div class="row"><input type="text" id="chooseStep" placeholder="e.g. 9.2" /><button id="chooseBtn">Set active step</button></div>
+    <pre id="chooseOut"></pre>
+  </section>
+  <section data-pane="settings" class="hidden"><h2>Settings</h2>
+    <div class="row"><label>Bearer token:</label><input type="text" id="tok" placeholder="paste token" /></div>
+    <div class="row btns"><button id="save">Save Token</button></div>
+  </section>
 </div>
+<div class="statusbar"><div><span id="busyIcon" class="spinner hidden"></span><span id="statusLeft">Ready</span></div><div id="statusRight" class="hint"></div></div>
 <script>(function(){
   function uuidv4(){try{if(crypto&&typeof crypto.randomUUID==='function')return crypto.randomUUID();}catch(e){}var a=(crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(16)):(function(){var x=new Uint8Array(16);for(var i=0;i<16;i++)x[i]=Math.floor(Math.random()*256);return x})();a[6]=(a[6]&15)|64;a[8]=(a[8]&63)|128;var h='';for(var i=0;i<16;i++){h+=a[i].toString(16).padStart(2,'0');}return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
-  const el=(id)=>document.getElementById(id), log=(id,cls,...a)=>{ const d=document.createElement('div'); d.className=cls||''; d.textContent=a.join(' '); el(id).appendChild(d); };
-  const uiBase=location.origin; el('uibase').textContent=uiBase;
-  let tok=localStorage.getItem('pa_token')||''; el('tok').value=tok; el('save').onclick=()=>{ tok=el('tok').value.trim(); localStorage.setItem('pa_token',tok); };
-  async function getSummary(){ try{ const r=await fetch(uiBase+'/agent/summary'); const j=await r.json(); el('summary').textContent=JSON.stringify(j,null,2);}catch(e){ el('summary').textContent='ERR '+e.message; } }
-  async function getRecent(){ try{ const r=await fetch(uiBase+'/agent/recent'); const j=await r.json(); const box=el('recentBox'); box.innerHTML=''; const rec=j.recent||{}; const a=rec.approvals||[]; const ul=document.createElement('ul'); a.forEach(n=>{ const li=document.createElement('li'); li.textContent=n; ul.appendChild(li); }); const notes=document.createElement('pre'); notes.textContent=(rec.notes_tail||'').trim()||'[no notes]'; box.appendChild(document.createTextNode('Approvals (latest):')); box.appendChild(ul); box.appendChild(document.createTextNode('Notes tail:')); box.appendChild(notes); }catch(e){ el('recentBox').textContent='ERR '+e.message; } }
-  async function chooseStep(step){ try{ const r=await fetch(uiBase+'/agent/choose',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({step_id:step,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)})}); const t=await r.text(); el('chooseOut').textContent=t; }catch(e){ el('chooseOut').textContent='ERR '+e.message; } }
-  function renderNextPayload(obj){ const box=el('nextBox'); box.innerHTML=''; if(!obj||!obj.summary){ box.textContent='[no summary]'; return; } const s=obj.summary; const pre=document.createElement('pre'); pre.textContent=JSON.stringify(s,null,2); box.appendChild(pre); const sug=obj.suggestions||[]; if(sug.length){ const wrap=document.createElement('div'); sug.forEach(x=>{ const b=document.createElement('button'); b.textContent=(x.kind==='step'?'Choose ':'')+(x.id||x.title); b.onclick=()=>{ if(x.kind==='step'){ chooseStep(x.id); } else { document.getElementById('askText').focus(); } }; wrap.appendChild(b); }); box.appendChild(wrap);} }
-  async function loadNotes(){ try{ const r=await fetch(uiBase+'/agent/notes'); const j=await r.json(); el('notesText').value=j.text||''; el('notesOut').textContent='Loaded '+(j.len||0)+' bytes'; }catch(e){ el('notesOut').textContent='ERR '+e.message; } }
-  async function saveNotes(mode){ try{ const body={mode,text:el('notesText').value}; const r=await fetch(uiBase+'/agent/notes',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)}); const t=await r.text(); el('notesOut').textContent=t; }catch(e){ el('notesOut').textContent='ERR '+e.message; } }
-  async function makeBrief(){ try{ const r=await fetch(uiBase+'/agent/brief',{method:'POST',headers:{Authorization:'Bearer '+tok}}); const t=await r.text(); el('notesOut').textContent=t; }catch(e){ el('notesOut').textContent='ERR '+e.message; } }
-  el('refresh').onclick=getSummary; getSummary();
-  el('rrefresh').onclick=getRecent; getRecent();
-  el('next').onclick=async()=>{ try{ const b={action:'APPROVE_NEXT',data:null,timestamp:Math.floor(Date.now()/1000),nonce:uuidv4()}; const r=await fetch(uiBase+'/agent/next2',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(b)}); const t=await r.text(); try{ renderNextPayload(JSON.parse(t)); }catch{ log('summary', r.ok?'ok':'err', 'NEXT', r.status, t); } }catch(e){ log('summary','err','NEXT ERR',e.message);} };
-  el('proc').onclick=async()=>{ try{ const r=await fetch(uiBase+'/agent/process',{method:'POST',headers:{Authorization:'Bearer '+tok}}); const t=await r.text(); try{ const j=JSON.parse(t); log('summary', r.ok?'ok':'err', 'PROCESS', r.status, JSON.stringify(j)); }catch{ log('summary', r.ok?'ok':'err', 'PROCESS', r.status, t); } await getSummary(); await getRecent(); }catch(e){ log('summary','err','PROCESS ERR',e.message);} };
-  el('chooseBtn').onclick=()=>{ const step=document.getElementById('chooseStep').value.trim(); if(!step){ el('chooseOut').textContent='Enter a step id'; return; } chooseStep(step); };
-  document.getElementById('notesLoad').onclick=loadNotes;
-  document.getElementById('notesSave').onclick=()=>saveNotes('set');
-  document.getElementById('notesAppend').onclick=()=>saveNotes('append');
-  document.getElementById('makeBrief').onclick=makeBrief;
+  const el=(id)=>document.getElementById(id), qs=(s)=>document.querySelector(s), qsa=(s)=>Array.from(document.querySelectorAll(s));
+  const uiBase=location.origin; el('uiBaseBadge').textContent=uiBase;
+  let tok=localStorage.getItem('pa_token')||''; const tokInput=el('tok'); if(tokInput){ tokInput.value=tok; }
+  // Tabs
+  qsa('.tab').forEach(t=>t.onclick=()=>{ qsa('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); const name=t.getAttribute('data-tab'); qsa('[data-pane]').forEach(p=>{ p.classList.toggle('hidden', p.getAttribute('data-pane')!==name);}); el('statusLeft').textContent='Viewing '+name; });
+  // Helpers
+  function setBusy(b, msg){ el('busyIcon').classList.toggle('hidden', !b); el('statusLeft').textContent = msg || (b?'Working…':'Ready'); }
+  function setBadge(id, cls, text){ const b=el(id); if(!b) return; b.className='badge '+(cls||''); b.textContent=text||''; }
+  function pretty(o){ try{ return JSON.stringify(o,null,2);}catch(e){ return String(o);} }
+  function logPre(id,txt){ const p=el(id); if(!p) return; p.textContent = (typeof txt==='string') ? txt : pretty(txt); }
+  async function GET(path){ return fetch(uiBase+path); }
+  async function POST(path,body){ return fetch(uiBase+path,{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:body?JSON.stringify(body):'{}'});} 
+  async function refreshSummary(){ setBusy(true,'Loading summary…'); setBadge('sumState','wait','loading'); try{ const r=await GET('/agent/summary'); const j=await r.json(); logPre('summary', j); setBadge('sumState','ok','ok'); }catch(e){ setBadge('sumState','err','error'); } finally{ setBusy(false); } }
+  async function refreshRecent(){ setBusy(true,'Loading recent…'); try{ const r=await GET('/agent/recent'); const j=await r.json(); const box=el('recentBox'); box.innerHTML=''; const rec=j.recent||{}; const a=rec.approvals||[]; const ul=document.createElement('ul'); a.forEach(n=>{ const li=document.createElement('li'); li.textContent=n; ul.appendChild(li); }); const notes=document.createElement('pre'); notes.textContent=(rec.notes_tail||'').trim()||'[no notes]'; box.appendChild(document.createTextNode('Approvals (latest):')); box.appendChild(ul); box.appendChild(document.createTextNode('Notes tail:')); box.appendChild(notes); }catch(e){ el('recentBox').textContent='ERR '+e.message; } finally{ setBusy(false); } }
+  async function chooseStep(step){ setBusy(true,'Choosing step '+step+'…'); try{ const r=await POST('/agent/choose',{step_id:step,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)}); const t=await r.text(); logPre('chooseOut',t); }catch(e){ logPre('chooseOut','ERR '+e.message);} finally{ setBusy(false);} }
+  function renderNextPayload(obj){ const box=el('nextBox'); box.innerHTML=''; if(!obj||!obj.summary){ box.textContent='[no summary]'; return; } const s=obj.summary; const pre=document.createElement('pre'); pre.textContent=pretty(s); box.appendChild(pre); const sug=obj.suggestions||[]; if(sug.length){ const wrap=document.createElement('div'); wrap.style.marginTop='6px'; sug.forEach(x=>{ const b=document.createElement('button'); b.textContent=(x.kind==='step'?'Choose ':'')+(x.id||x.title); b.onclick=()=>{ if(x.kind==='step'){ chooseStep(x.id); } else { document.getElementById('askText').focus(); } }; wrap.appendChild(b); }); box.appendChild(wrap);} }
+  // Wire buttons
+  el('save').onclick=()=>{ tok=(tokInput?tokInput.value:tok).trim(); localStorage.setItem('pa_token',tok); el('statusRight').textContent='Token saved'; };
+  el('refresh').onclick=refreshSummary; refreshSummary();
+  el('rrefresh').onclick=refreshRecent; refreshRecent();
+  el('next').onclick=async()=>{ setBusy(true,'Requesting NEXT…'); setBadge('nextState','wait','waiting'); try{ const b={action:'APPROVE_NEXT',data:null,timestamp:Math.floor(Date.now()/1000),nonce:uuidv4()}; const r=await POST('/agent/next2',b); const t=await r.text(); try{ const j=JSON.parse(t); renderNextPayload(j); setBadge('nextState','ok','ok'); }catch{ setBadge('nextState','err','bad json'); } }catch(e){ setBadge('nextState','err','error'); } finally{ setBusy(false); } };
+  el('notesLoad').onclick=async()=>{ setBusy(true,'Loading notes…'); try{ const r=await GET('/agent/notes'); const j=await r.json(); el('notesText').value = j.text||''; setBadge('notesState','ok','loaded'); logPre('notesOut','Loaded '+(j.len||0)+' bytes'); }catch(e){ setBadge('notesState','err','error'); } finally{ setBusy(false); } };
+  el('notesSave').onclick=async()=>{ setBusy(true,'Saving notes…'); try{ const r=await POST('/agent/notes',{mode:'set',text:el('notesText').value}); const t=await r.text(); logPre('notesOut',t); setBadge('notesState','ok','saved'); }catch(e){ setBadge('notesState','err','error'); } finally{ setBusy(false); } };
+  el('notesAppend').onclick=async()=>{ setBusy(true,'Appending to notes…'); try{ const r=await POST('/agent/notes',{mode:'append',text:el('notesText').value}); const t=await r.text(); logPre('notesOut',t); setBadge('notesState','ok','appended'); }catch(e){ setBadge('notesState','err','error'); } finally{ setBusy(false); } };
+  el('makeBrief').onclick=async()=>{ setBusy(true,'Assembling brief…'); try{ const r=await POST('/agent/brief'); const t=await r.text(); logPre('notesOut',t); setBadge('notesState','ok','brief'); }catch(e){ setBadge('notesState','err','error'); } finally{ setBusy(false); } };
+  el('askBtn').onclick=async()=>{ const text=el('askText').value.trim(); if(!text){ logPre('askOut','Enter a prompt'); return; } setBusy(true,'Sending ASK…'); setBadge('actState','wait','waiting'); try{ const r=await POST('/agent/ask',{text,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)}); const t=await r.text(); logPre('askOut',t); setBadge('actState','ok','queued'); }catch(e){ setBadge('actState','err','error'); } finally{ setBusy(false); } };
+  el('chooseBtn').onclick=()=>{ const step=document.getElementById('chooseStep').value.trim(); if(!step){ logPre('chooseOut','Enter a step id'); return; } chooseStep(step); };
 })();</script>
 </body></html>
