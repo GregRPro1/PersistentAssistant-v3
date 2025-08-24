@@ -367,8 +367,173 @@ def _plan_tree():
 def agent_plan():
     return jsonify({'ok':True,'plan':_plan_tree()})
 
+
+# ==== PA injected: AI bridge + plan tree ====
+import json, time, os, re, urllib.request, urllib.error
+try:
+    import yaml  # PyYAML
+except Exception:
+    yaml = None
+REPO = globals().get('REPO', os.getcwd())
+APPROVALS_DIR = globals().get('APPROVALS_DIR', os.path.join(REPO,'tmp','phone','approvals'))
+PACKS_DIR = globals().get('PACKS_DIR', os.path.join(REPO,'tmp','feedback'))
+NOTES_PATH = os.path.join(REPO,'tmp','notes','notes.md')
+
+def _append_notes(text):
+    os.makedirs(os.path.dirname(NOTES_PATH), exist_ok=True)
+    with open(NOTES_PATH,'a',encoding='utf-8') as f:
+        if text and not text.endswith('\\n'): text=text+'\\n'
+        f.write(text)
+
+def _ai_bridge(text, base=None):
+    base = base or os.environ.get('PA_AI_BASE','http://127.0.0.1:8765')
+    paths = ['/ask','/v1/ask','/chat','/v1/chat']
+    data = {'text': text}
+    body = json.dumps(data).encode('utf-8')
+    for p in paths:
+        url = base.rstrip('/') + p
+        try:
+            req = urllib.request.Request(url, data=body, headers={'Content-Type':'application/json'}, method='POST')
+            with urllib.request.urlopen(req, timeout=15) as r:
+                b = r.read(); s = b.decode('utf-8','ignore')
+                try:
+                    j = json.loads(s)
+                    if isinstance(j,dict):
+                        for k in ('reply','text','content','answer','message'):
+                            if k in j and isinstance(j[k],str):
+                                return j[k]
+                    return s
+                except Exception:
+                    return s
+        except Exception:
+            continue
+    return '[SIMULATED REPLY] ' + (text[:200] if isinstance(text,str) else str(text))
+
+def _list_approvals(limit=100):
+    items=[]
+    if os.path.isdir(APPROVALS_DIR):
+        for nm in os.listdir(APPROVALS_DIR):
+            if nm.endswith('.json'):
+                p=os.path.join(APPROVALS_DIR,nm)
+                try: items.append((p, os.path.getmtime(p)))
+                except Exception: pass
+    items.sort(key=lambda x:x[1])
+    return [p for p,_ in items][-limit:]
+
+def _process_approvals_impl(limit=50):
+    processed=0; results=[]
+    for p in _list_approvals(limit=limit):
+        try:
+            j=json.loads(open(p,'r',encoding='utf-8').read())
+        except Exception:
+            continue
+        act=str(j.get('action') or '').upper()
+        if act=='ASK':
+            q=str(j.get('text') or '')
+            if not q: continue
+            reply=_ai_bridge(q)
+            ts=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(j.get('timestamp') or time.time()))
+            sep='\\n'+'-'*60+'\\n'
+            _append_notes(sep+'ASK @ '+ts+'\\nQ: '+q+'\\nA: '+reply+'\\n')
+            processed+=1; results.append({'file':os.path.basename(p),'action':'ASK','ok':True})
+        elif act in ('APPROVE_NEXT','SET_ACTIVE_STEP'):
+            # Leave to existing logic; still count as seen
+            results.append({'file':os.path.basename(p),'action':act,'ok':True})
+        else:
+            results.append({'file':os.path.basename(p),'action':act or 'UNKNOWN','ok':True})
+    return {'processed':processed,'details':results}
+
+@app.route('/agent/process2', methods=['POST'])
+def agent_process2():
+    if not _auth_ok(request): return ('unauthorized',401)
+    r=_process_approvals_impl(limit=50)
+    return jsonify({'ok':True, **r})
+
+def _find_plan_path():
+    for base,dirs,files in os.walk(REPO):
+        if 'project_plan_v3.yaml' in files:
+            return os.path.join(base,'project_plan_v3.yaml')
+    return None
+
+def _plan_tree_parse_yaml(doc):
+    def all_nodes(x):
+        st=[x]; out=[]
+        while st:
+            v=st.pop()
+            if isinstance(v,dict): out.append(v); st.extend(list(v.values()))
+            elif isinstance(v,list): st.extend(v)
+        return out
+    out=[]
+    for n in all_nodes(doc):
+        if not isinstance(n,dict): continue
+        _id=str(n.get('id') or n.get('step_id') or '').strip()
+        if not _id: continue
+        title=str(n.get('name') or n.get('title') or n.get('desc') or '').strip()
+        status=str(n.get('status') or n.get('state') or '').strip().lower()
+        childs=None
+        for key in ('steps','children','items','substeps'):
+            if key in n and isinstance(n[key], list):
+                childs=n[key]; break
+        out.append({'id':_id,'title':title,'status':status,'children':childs})
+    # Build hierarchy by natural nesting if present; otherwise group by major number
+    # First: filter leaf items (children as ids)
+    id2node={};
+    for e in out: id2node[e['id']]= {'id':e['id'],'title':e['title'],'status':e['status'],'children':[]}
+    # Attach children if they are dicts with ids
+    for e in out:
+        ch=e.get('children')
+        if isinstance(ch,list):
+            parent=id2node.get(e['id'])
+            for c in ch:
+                if isinstance(c,dict):
+                    cid=str(c.get('id') or c.get('step_id') or '')
+                    if cid and cid in id2node: parent['children'].append(id2node[cid])
+    # If no explicit tree, group by major
+    has_tree = any(n['children'] for n in id2node.values())
+    if not has_tree:
+        groups={}
+        for nid,node in id2node.items():
+            if '.' in nid: major=nid.split('.',1)[0]
+            else: major=nid
+            groups.setdefault(major,[]).append(node)
+        tree=[]
+        for major in sorted(groups.keys(), key=lambda x:(len(x),x)):
+            tree.append({'id':str(major),'title':'Phase '+str(major),'status':'','children':sorted(groups[major], key=lambda x:x['id'])})
+        return tree
+    # Otherwise return top-levels inferred by minimal major grouping
+    majors={}
+    for nid,node in id2node.items():
+        major = nid.split('.',1)[0] if '.' in nid else nid
+        majors.setdefault(major,[]).append(node)
+    tree=[]
+    for major in sorted(majors.keys(), key=lambda x:(len(x),x)):
+        tree.append({'id':str(major),'title':'Phase '+str(major),'status':'','children':sorted(majors[major], key=lambda x:x['id'])})
+    return tree
+
+def _plan_tree():
+    p=_find_plan_path()
+    if not p: return {'active':None,'tree':[]}
+    try:
+        txt=open(p,'r',encoding='utf-8').read()
+        if yaml:
+            doc=yaml.safe_load(txt) or {}
+            tree=_plan_tree_parse_yaml(doc)
+            active=doc.get('active_step')
+            return {'active':active,'tree':tree}
+        # fallback: regex from text
+        ids=re.findall(r'^[ \\t]*(?:id|step_id)\\s*:\\s*([\\w\\.-]+)', txt, flags=re.MULTILINE)
+        tree=[{'id':i,'title':'','status':''} for i in sorted(set(ids))]
+        return {'active':None,'tree':[{'id':'all','title':'All','status':'','children':tree}]}
+    except Exception:
+        return {'active':None,'tree':[]}
+
+@app.route('/agent/plan')
+def agent_plan():
+    return jsonify({'ok':True,'plan':_plan_tree()})
+# ==== end inject ====
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=8782, debug=False)
+
 
 
 
