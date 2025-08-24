@@ -9,3 +9,5 @@ self.addEventListener('fetch', (event)=>{
   }
   event.respondWith(fetch(event.request).catch(()=> caches.match(event.request)));
 });
+
+// cache-bust 2025-08-24T16:43:05.8380919+01:00
