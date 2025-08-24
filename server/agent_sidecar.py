@@ -304,8 +304,72 @@ def agent_brief():
     p=_make_brief_pack()
     if not p: return ('error creating brief', 500)
     return jsonify({'ok':True,'file':os.path.basename(p)})
+
+def _collect_steps_from_yaml(doc):
+    def all_nodes(x):
+        st=[x]; out=[]
+        while st:
+            v=st.pop()
+            if isinstance(v,dict): out.append(v); st.extend(list(v.values()))
+            elif isinstance(v,list): st.extend(v)
+        return out
+    items=[]
+    try:
+        for n in all_nodes(doc):
+            if not isinstance(n,dict): continue
+            _id=str(n.get('id') or n.get('step_id') or '').strip()
+            if not _id: continue
+            title=str(n.get('name') or n.get('title') or n.get('desc') or '').strip()
+            status=str(n.get('status') or n.get('state') or '').strip().lower()
+            items.append({'id':_id,'title':title,'status':status})
+    except Exception:
+        pass
+    return items
+
+def _group_tree_by_major(steps):
+    # '7.5b' -> major '7', child '5b'; '9.1' -> '9'/'1'
+    tree={}
+    for s in steps:
+        _id=s.get('id','')
+        if '.' in _id:
+            major=_id.split('.',1)[0]
+            minor=_id.split('.',1)[1]
+        else:
+            major=_id; minor=''
+        g=tree.setdefault(major,[])
+        g.append({'id':_id,'minor':minor,'title':s.get('title',''),'status':s.get('status','')})
+    # sort minors semantically
+    for k in tree:
+        tree[k].sort(key=lambda x: x['id'])
+    # build structured list
+    out=[]
+    for major in sorted(tree.keys(), key=lambda x: (len(x), x)):
+        out.append({'id':str(major),'title':'Phase '+str(major),'status':'',
+                    'children':[{'id':e['id'],'title':e['title'],'status':e['status']} for e in tree[major]]})
+    return out
+
+def _plan_tree():
+    try:
+        import yaml
+        plan=None
+        for base,dirs,files in os.walk(REPO):
+            if 'project_plan_v3.yaml' in files:
+                plan=os.path.join(base,'project_plan_v3.yaml'); break
+        if not plan: return {'active':None,'tree':[]}
+        doc=yaml.safe_load(open(plan,'r',encoding='utf-8').read()) or {}
+        steps=_collect_steps_from_yaml(doc)
+        tree=_group_tree_by_major(steps)
+        return {'active':doc.get('active_step'),'tree':tree}
+    except Exception:
+        return {'active':None,'tree':[]}
+
+@app.route('/agent/plan')
+def agent_plan():
+    return jsonify({'ok':True,'plan':_plan_tree()})
+
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=8782, debug=False)
+
 
 
 
