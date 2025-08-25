@@ -1,7 +1,17 @@
+from server.app_registry import register_extensions
+from server.agent_actions_v8 import actions_bp as _pa_actions_bp
 import os, time, json
 from typing import Any
 from flask import Flask, request, jsonify, send_file, make_response
-app = Flask('agent_sidecar')
+app = Flask('agent_sidecar')
+try:
+    register_extensions(app)
+except Exception:
+    pass
+try:
+    app.register_blueprint(_pa_actions_bp)
+except Exception:
+    pass
 ROOT = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(ROOT)
 PWA_DIR = os.path.join(REPO,'web','pwa')

@@ -1,0 +1,9 @@
+# PA Script Contract (v1)
+# 1) No inline "if(...)" or "try{...}" inside expressions; use full statement blocks.
+# 2) Do not use "$pid" as an iterator variable (use $procId).
+# 3) Write files via here-strings and UTF-8 (no BOM). No brittle quote-escaping.
+# 4) Always print: PACK: <path> and STATUS: <short summary>.
+# 5) Echo Script ID at top and bottom.
+# 6) Idempotent: safe to re-run; never block on interactive prompts.
+# 7) Use explicit parameters (-LiteralPath, no ambiguous -f, etc.).
+# 8) For endpoints/UI work, run tests\ui_wiretest.ps1 and include its PACK.

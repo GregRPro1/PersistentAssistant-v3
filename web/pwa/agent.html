@@ -141,75 +141,18 @@
   // show approvals count occasionally (non-intrusive)
   setInterval(async()=>{ try{ const r=await GET('/agent/approvals_count'); const j=await r.json(); if(j&&j.count!=null){ el('hint').textContent='Approvals queued: '+j.count; } }catch(e){} }, 10000);
 })();</script>
+
+  <link rel="stylesheet" href="/pwa/agent_ext_v2.css?v=2.1">
+  <script src="/pwa/agent_ext_v2.js?v=2.1"></script>
+  <link rel="stylesheet" href="/pwa/agent_tabs_v1.css?v=1">
+  <script src="/pwa/agent_tabs_v1.js?v=1"></script>
+  <link rel="stylesheet" href="/pwa/agent_actions_v1.css?v=1">
+  <script src="/pwa/agent_actions_v1.js?v=1"></script>
+  <script src="/pwa/agent_plan_v1.js?v=1"></script>
+<link rel="stylesheet" href="/pwa/agent_tabs_v1.css">
+<script src="/pwa/agent_tabs_v1.js"></script>
+<script src="/pwa/agent_actions_v1.js"></script>
+<script src="/pwa/agent_plan_v1.js"></script>
 </body></html>
 
 
-<!-- PA UI EXT v1 -->
-<style>
-  .pa-bar { font: 12px/1.4 system-ui,Segoe UI,Roboto,Arial; padding:6px 8px; display:flex; gap:12px; align-items:center; border-top:1px solid #eee; }
-  .pa-pill { padding:2px 8px; border-radius:999px; background:#f1f5f9; display:inline-block; }
-  .pa-badge { padding:1px 6px; border-radius:9px; font-size:11px; color:#fff; }
-  .b-done{background:#16a34a;} .b-prog{background:#2563eb;} .b-blk{background:#dc2626;} .b-todo{background:#64748b;}
-  .pa-panel { max-height:240px; overflow:auto; border:1px solid #eee; border-radius:8px; padding:8px; }
-  .pa-tree ul{ list-style:none; padding-left:14px; margin:0; }
-  .pa-tree li{ margin:2px 0; }
-</style>
-<div id="paBar" class="pa-bar" style="display:none">
-  <span id="paStatus" class="pa-pill">agent: …</span>
-  <span id="paTotals" class="pa-pill">totals: …</span>
-  <span id="paWorker" class="pa-pill">worker: …</span>
-  <span id="paApprovals" class="pa-pill">approvals: …</span>
-</div>
-<div id="paPlan" class="pa-panel" style="display:none">
-  <div class="pa-tree" id="paTree"></div>
-</div>
-<script>
-(function(){
-  const Q = (s)=>document.querySelector(s);
-  function badge(status){
-    const s=(status||"").toLowerCase();
-    if(s==="done") return '<span class="pa-badge b-done">done</span>';
-    if(["in_progress","active","working","running"].includes(s)) return '<span class="pa-badge b-prog">in-progress</span>';
-    if(["blocked","error","fail","failed"].includes(s)) return '<span class="pa-badge b-blk">blocked</span>';
-    return '<span class="pa-badge b-todo">todo</span>';
-  }
-  function renderTree(nodes){
-    const r=(arr)=>'<ul>'+arr.map(n=>(
-      '<li><strong>'+ (n.id||'') +'</strong>'
-      + (n.title? ' — '+n.title.replace(/[<>&]/g,'') : '')
-      + ' '+badge(n.status)
-      + (n.children && n.children.length? r(n.children) : '')
-      + '</li>'
-    )).join('')+'</ul>';
-    return r(nodes||[]);
-  }
-  async function GET(path){
-    const h={cache:'no-store',headers:{}};
-    try{ if(window.tok && window.tok.trim()){ h.headers.Authorization='Bearer '+window.tok.trim(); } }catch(e){}
-    return fetch(path, h);
-  }
-  async function refresh(){
-    try{
-      const [pl, ws, ac] = await Promise.all([
-        GET('/agent/plan'), GET('/agent/worker_status'), GET('/agent/approvals_count')
-      ]);
-      const ok = pl.ok && ws.ok && ac.ok;
-      Q('#paBar').style.display = 'flex';
-      Q('#paPlan').style.display = 'block';
-      Q('#paStatus').textContent = 'agent: '+(ok?'OK':'…');
-      let tree=[], totals={done:0,in_progress:0,blocked:0,todo:0};
-      if(pl.ok){ const j=await pl.json(); tree=j.plan?.tree||[]; totals=j.plan?.totals||totals; }
-      Q('#paTotals').textContent = `totals: ✓${totals.done||0} • ▶︎${totals.in_progress||0} • !${totals.blocked||0} • ○${totals.todo||0}`;
-      let worker='calls 0 · tok 0/0 · $0.0000';
-      if(ws.ok){ const j=await ws.json(); const w=j.worker||{}; worker=`calls ${w.calls||0} · tok ${(w.tokens_in||0)}/${(w.tokens_out||0)} · $${(w.cost_usd||0).toFixed(4)}`; }
-      Q('#paWorker').textContent = worker;
-      let approvals='0 files';
-      if(ac.ok){ const j=await ac.json(); approvals=`${j.count||0} files`; }
-      Q('#paApprovals').textContent = 'approvals: '+approvals;
-      Q('#paTree').innerHTML = renderTree(tree);
-    }catch(e){}
-  }
-  // kick off + poll
-  document.addEventListener('DOMContentLoaded', ()=>{ refresh(); setInterval(refresh, 5000); });
-})();
-</script>

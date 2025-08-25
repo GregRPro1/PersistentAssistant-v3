@@ -490,9 +490,9 @@ meta:
   current_step_policy: explicit
   current_step: 6.4.a
 state:
-  current: '9.1'
+  current: '9.5'
   cursor: '9.1'
-active_step: '9.1'
+active_step: '9.5'
 steps:
 - id: '7.8'
   name: PWA Diagnostics v2 (secure, token prompt, buttons)

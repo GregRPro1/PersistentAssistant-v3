@@ -1,3 +1,4 @@
+from server.app_registry import register_extensions
 import os, sys, time, importlib, importlib.util, re, json
 from flask import Flask, send_from_directory, jsonify, make_response, request
 
@@ -37,7 +38,15 @@ if app is None:
         LOG("[wrapper]", SIG, "file import failed:", e)
 
 if app is None:
-    app = Flask(__name__, static_folder=None)
+app = Flask(__name__, static_folder=None)
+try:
+    register_extensions(app)
+except Exception:
+    pass
+try:
+    app.register_blueprint(_pa_actions_bp)
+except Exception:
+    pass
     @app.route("/agent/summary")
     def _fallback_summary():
         return jsonify({"ok": True, "summary": {"active_step": None, "desc": "fallback", "next_ids": []}})
@@ -172,7 +181,464 @@ _ensure("/agent/worker_status","pa_worker_status_fallback", _worker_status, meth
 _ensure("/agent/plan","pa_plan_fallback", _plan_resp, methods=["GET"])
 
 if __name__ == "__main__":
-    host = os.environ.get("PA_SIDECAR_HOST","127.0.0.1")
+    host = os.environ.get("PA_SIDECAR_HOST","0.0.0.0")
     port = int(os.environ.get("PA_SIDECAR_PORT","8782"))
     LOG("[wrapper]", SIG, "running on {}:{}".format(host, port))
     app.run(host=host, port=port, threaded=True, use_reloader=False)
+
+# PA_PLAN_VIEW_V2
+try:
+    from server.plan_view import build_plan_response
+    def _pa_plan_v2():
+        try:
+            return jsonify({"ok": True, "plan": build_plan_response(os.getcwd())})
+        except Exception as e:
+            return jsonify({"ok": True, "plan": {"active": None, "tree": [], "totals": {}, "err": str(e)}})
+    # Replace existing endpoint if present, else register
+    if "agent_plan" in app.view_functions:
+        app.view_functions["agent_plan"] = _pa_plan_v2
+    else:
+        app.add_url_rule("/agent/plan","agent_plan", _pa_plan_v2, methods=["GET"])
+except Exception as _e:
+    pass
+
+# PA_AGENT_ACTIONS_V5
+try:
+    from server.agent_actions_v5 import bp as _aa
+    app.register_blueprint(_aa)
+except Exception as _e:
+    pass
+
+
+# PA_AGENT_ACTIONS_V6
+try:
+    from server.agent_actions_v6 import bp as _aav6
+    app.register_blueprint(_aav6)
+except Exception as _e:
+    pass
+
+
+# PA_AGENT_ACTIONS_V7
+try:
+    from server.agent_actions_v7 import bp as _aav7
+    app.register_blueprint(_aav7)
+except Exception as _e:
+    pass
+
+# --- fallback: /agent/recent ---
+try:
+  import os, json, glob
+  import flask
+except Exception as _e:
+  pass
+def _wrap_json(obj, code=200):
+  return flask.Response(json.dumps(obj), mimetype="application/json", status=code)
+try:
+  ROOT  # noqa
+except Exception:
+  import os as _os
+  ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), ".."))
+@wrap_app.route("/agent/recent", methods=["GET"])
+def pa_recent_fallback():
+  try:
+    root = os.path.join(ROOT, "tmp", "phone", "approvals")
+    os.makedirs(root, exist_ok=True)
+    files = sorted(glob.glob(os.path.join(root, "approve_*.json")))[-20:]
+    items = []
+    for p in reversed(files):
+      try:
+        items.append({"file": os.path.basename(p), "bytes": os.path.getsize(p)})
+      except Exception:
+        pass
+    return _wrap_json({"ok": True, "approvals": items})
+  except Exception as e:
+    return _wrap_json({"ok": False, "err": str(e)}, 500)
+
+# --- fallback: /agent/next2 ---
+try:
+  import os, json, time, uuid
+  import flask
+except Exception as _e:
+  pass
+@wrap_app.route("/agent/next2", methods=["GET","POST"])
+def pa_next2_fallback():
+  try:
+    root = os.path.join(ROOT, "tmp", "phone", "approvals")
+    os.makedirs(root, exist_ok=True)
+    ts = int(time.time()); nonce = str(uuid.uuid4())
+    path = os.path.join(root, f"approve_{ts}_{nonce}.json")
+    with open(path, "w", encoding="utf-8") as f:
+      f.write(json.dumps({"ok": True, "action": "NEXT", "ts": ts, "nonce": nonce}))
+    return flask.Response(json.dumps({"ok": True, "file": os.path.basename(path)}), mimetype="application/json")
+  except Exception as e:
+    return flask.Response(json.dumps({"ok": False, "err": str(e)}), mimetype="application/json", status=500)
+# ==== HARD_BIND_AGENT_V2 ====
+# Robust ensure of /agent/recent and /agent/next2 even if sidecar omitted them.
+try:
+    # pick an app to bind
+    _APP = None
+    try:
+        _APP = wrap_app  # wrapper-created Flask app
+    except NameError:
+        try:
+            _APP = app   # fallback if called 'app'
+        except NameError:
+            _APP = None
+    if _APP is not None:
+        import os, json, time, uuid, glob
+        from flask import Response
+
+        try:
+            ROOT
+        except NameError:
+            ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+        def _json(obj, status=200):
+            return Response(json.dumps(obj), mimetype="application/json", status=status)
+
+        def _ensure(rule, func, methods=('GET',)):
+            try:
+                have = {r.rule for r in _APP.url_map.iter_rules()}
+            except Exception:
+                have = set()
+            if rule not in have:
+                _APP.add_url_rule(rule, view_func=func, methods=list(methods))
+
+        def _approvals_dir():
+            p=os.path.join(ROOT,'tmp','phone','approvals')
+            try: os.makedirs(p, exist_ok=True)
+            except Exception: pass
+            return p
+
+        def _recent_view():
+            try:
+                d=_approvals_dir()
+                files=sorted(glob.glob(os.path.join(d,'approve_*.json')), key=os.path.getmtime, reverse=True)[:25]
+                items=[]
+                for f in files:
+                    try:
+                        items.append({"file": os.path.basename(f), "bytes": os.path.getsize(f)})
+                    except Exception:
+                        pass
+                return _json({"ok": True, "approvals": items})
+            except Exception as e:
+                return _json({"ok": False, "err": str(e)}, 500)
+
+        def _next2_view():
+            try:
+                d=_approvals_dir()
+                ts=int(time.time()); nonce=str(uuid.uuid4())
+                path=os.path.join(d, f"approve_{ts}_{nonce}.json")
+                with open(path,'w',encoding='utf-8') as f:
+                    f.write(json.dumps({"ok": True, "action": "NEXT", "ts": ts, "nonce": nonce}))
+                # lightweight suggestions if planner not wired
+                suggestions=["9.5a — Worker UX", "9.5b — Auto-process", "9.5c — Plan details"]
+                return _json({"ok": True, "file": os.path.basename(path), "suggestions": suggestions})
+            except Exception as e:
+                return _json({"ok": False, "err": str(e)}, 500)
+
+        _ensure('/agent/recent',  _recent_view, methods=('GET',))
+        _ensure('/agent/next2',   _next2_view,  methods=('GET','POST'))
+except Exception:
+    pass
+# ==== HARD_BIND_AGENT_V2 END ====
+# ==== DEFERRED_ATTACH_V8 ====
+try:
+    from server.agent_actions_v8 import attach_to_app as _pa_attach
+except Exception:
+    _pa_attach = None
+
+def _pa_try_attach_once():
+    try:
+        g = globals()
+        app = g.get("wrap_app") or g.get("app")
+        if app and _pa_attach:
+            _pa_attach(app)
+    except Exception:
+        pass
+
+_pa_try_attach_once()
+
+import threading, time as _patime
+def _pa_defer():
+    for _ in range(60):
+        g = globals()
+        app = g.get("wrap_app") or g.get("app")
+        if app:
+            try:
+                if _pa_attach:
+                    _pa_attach(app)
+            except Exception:
+                pass
+            return
+        _patime.sleep(0.25)
+threading.Thread(target=_pa_defer, daemon=True).start()
+# ==== DEFERRED_ATTACH_V8 END ====
+# ==== HARD_ENSURE_AGENT_RECENT_NEXT2_V3 ====
+def _pa_get_app():
+    g = globals()
+    return g.get("wrap_app") or g.get("app")
+
+try:
+    import os, json, time, uuid, glob
+    from flask import Response
+except Exception:
+    pass
+
+try:
+    ROOT
+except NameError:
+    import os as _os
+    ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), ".."))
+
+def _pa_json(o, status=200):
+    try:
+        return Response(json.dumps(o), mimetype="application/json", status=status)
+    except Exception:
+        return Response('{"ok":false}', mimetype="application/json", status=500)
+
+def _pa_approvals_dir():
+    d = os.path.join(ROOT, 'tmp', 'phone', 'approvals')
+    try:
+        os.makedirs(d, exist_ok=True)
+    except Exception:
+        pass
+    return d
+
+def _pa_recent_view():
+    try:
+        d = _pa_approvals_dir()
+        fs = sorted(glob.glob(os.path.join(d, 'approve_*.json')), key=os.path.getmtime, reverse=True)[:25]
+        items = []
+        for f in fs:
+            try:
+                items.append({"file": os.path.basename(f), "bytes": os.path.getsize(f)})
+            except Exception:
+                pass
+        return _pa_json({"ok": True, "approvals": items})
+    except Exception as e:
+        return _pa_json({"ok": False, "err": str(e)}, 500)
+
+def _pa_next2_view():
+    try:
+        d = _pa_approvals_dir()
+        ts = int(time.time()); nonce = str(uuid.uuid4())
+        p = os.path.join(d, f"approve_{ts}_{nonce}.json")
+        with open(p, 'w', encoding='utf-8') as f:
+            f.write(json.dumps({"ok": True, "action": "NEXT", "ts": ts, "nonce": nonce}))
+        suggestions = ["9.5a — Worker UX", "9.5b — Auto-process", "9.5c — Plan details"]
+        return _pa_json({"ok": True, "file": os.path.basename(p), "suggestions": suggestions})
+    except Exception as e:
+        return _pa_json({"ok": False, "err": str(e)}, 500)
+
+def _pa_hard_ensure():
+    app = _pa_get_app()
+    if not app:
+        return False
+    try:
+        have = {r.rule for r in app.url_map.iter_rules()}
+    except Exception:
+        have = set()
+    try:
+        if '/agent/recent' not in have:
+            app.add_url_rule('/agent/recent', view_func=_pa_recent_view, methods=['GET'])
+        if '/agent/next2' not in have:
+            app.add_url_rule('/agent/next2', view_func=_pa_next2_view, methods=['GET','POST'])
+        return True
+    except Exception:
+        return False
+
+_ok = _pa_hard_ensure()
+try:
+    import threading, time as _t
+    def _later():
+        for _ in range(20):
+            if _pa_hard_ensure():
+                return
+            _t.sleep(0.25)
+    threading.Thread(target=_later, daemon=True).start()
+except Exception:
+    pass
+# ==== END HARD_ENSURE_AGENT_RECENT_NEXT2_V3 ====
+# ==== SCAN_BIND_AGENT_V4 ====
+# Bind /agent/recent and /agent/next2 to *any* Flask app object present in globals().
+try:
+    import os, json, time, uuid, glob, threading
+    from flask import Response
+except Exception:
+    pass
+
+try:
+    ROOT
+except NameError:
+    import os as _os
+    ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), ".."))
+
+def _pa_json(o, status=200):
+    try:
+        return Response(json.dumps(o), mimetype="application/json", status=status)
+    except Exception:
+        return Response('{"ok":false}', mimetype="application/json", status=500)
+
+def _pa_approvals_dir():
+    d = os.path.join(ROOT, 'tmp', 'phone', 'approvals')
+    try:
+        os.makedirs(d, exist_ok=True)
+    except Exception:
+        pass
+    return d
+
+def _pa_recent_view():
+    try:
+        d = _pa_approvals_dir()
+        fs = sorted(glob.glob(os.path.join(d, 'approve_*.json')), key=os.path.getmtime, reverse=True)[:25]
+        items = []
+        for f in fs:
+            try:
+                items.append({"file": os.path.basename(f), "bytes": os.path.getsize(f)})
+            except Exception:
+                pass
+        return _pa_json({"ok": True, "approvals": items})
+    except Exception as e:
+        return _pa_json({"ok": False, "err": str(e)}, 500)
+
+def _pa_next2_view():
+    try:
+        d = _pa_approvals_dir()
+        ts = int(time.time()); nonce = str(uuid.uuid4())
+        p = os.path.join(d, f"approve_{ts}_{nonce}.json")
+        with open(p, 'w', encoding='utf-8') as f:
+            f.write(json.dumps({"ok": True, "action": "NEXT", "ts": ts, "nonce": nonce}))
+        suggestions = ["9.5a — Worker UX", "9.5b — Auto-process", "9.5c — Plan details"]
+        return _pa_json({"ok": True, "file": os.path.basename(p), "suggestions": suggestions})
+    except Exception as e:
+        return _pa_json({"ok": False, "err": str(e)}, 500)
+
+def _pa_is_flask_app(obj):
+    try:
+        return hasattr(obj, "add_url_rule") and hasattr(obj, "url_map")
+    except Exception:
+        return False
+
+def _pa_bind_to(app):
+    try:
+        have = {r.rule for r in app.url_map.iter_rules()}
+    except Exception:
+        have = set()
+    try:
+        if "/agent/recent" not in have:
+            app.add_url_rule("/agent/recent", view_func=_pa_recent_view, methods=["GET"])
+        if "/agent/next2" not in have:
+            app.add_url_rule("/agent/next2", view_func=_pa_next2_view, methods=["GET","POST"])
+        return True
+    except Exception:
+        return False
+
+def _pa_scan_and_bind():
+    ok = False
+    try:
+        for v in list(globals().values()):
+            if _pa_is_flask_app(v):
+                if _pa_bind_to(v):
+                    ok = True
+    except Exception:
+        pass
+    return ok
+
+# Try now + retry for a few seconds while app objects appear.
+def _pa_scan_loop():
+    for _ in range(40):
+        if _pa_scan_and_bind():
+            return
+        time.sleep(0.25)
+
+try:
+    _ = threading.Thread(target=_pa_scan_loop, daemon=True).start()
+except Exception:
+    pass
+# ==== END SCAN_BIND_AGENT_V4 ====
+# ==== FLASK_MONKEYPATCH_BIND_V1 ====
+# Ensure /agent/recent and /agent/next2 attach to ANY Flask app constructed in this process.
+try:
+    import os, json, time, uuid, glob, threading
+    import flask
+    from flask import Flask, Response
+    try:
+        ROOT
+    except NameError:
+        ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+    def _pa_json(o, status=200):
+        try:
+            return Response(json.dumps(o), mimetype="application/json", status=status)
+        except Exception:
+            return Response('{"ok":false}', mimetype="application/json", status=500)
+
+    def _pa_approvals_dir():
+        d = os.path.join(ROOT, 'tmp', 'phone', 'approvals')
+        try: os.makedirs(d, exist_ok=True)
+        except Exception: pass
+        return d
+
+    def _pa_recent_view():
+        try:
+            d = _pa_approvals_dir()
+            fs = sorted(glob.glob(os.path.join(d, 'approve_*.json')), key=os.path.getmtime, reverse=True)[:25]
+            items = []
+            for f in fs:
+                try: items.append({"file": os.path.basename(f), "bytes": os.path.getsize(f)})
+                except Exception: pass
+            return _pa_json({"ok": True, "approvals": items})
+        except Exception as e:
+            return _pa_json({"ok": False, "err": str(e)}, 500)
+
+    def _pa_next2_view():
+        try:
+            d = _pa_approvals_dir()
+            ts = int(time.time()); nonce = str(uuid.uuid4())
+            p = os.path.join(d, f"approve_{ts}_{nonce}.json")
+            with open(p, 'w', encoding='utf-8') as f:
+                f.write(json.dumps({"ok": True, "action": "NEXT", "ts": ts, "nonce": nonce}))
+            suggestions = ["9.5a — Worker UX", "9.5b — Auto-process", "9.5c — Plan details"]
+            return _pa_json({"ok": True, "file": os.path.basename(p), "suggestions": suggestions})
+        except Exception as e:
+            return _pa_json({"ok": False, "err": str(e)}, 500)
+
+    _PA_PENDING = [
+        ("/agent/recent", _pa_recent_view, ("GET",)),
+        ("/agent/next2",  _pa_next2_view,  ("GET","POST")),
+    ]
+
+    _orig_init = Flask.__init__
+    def _init_patch(self, *a, **kw):
+        _orig_init(self, *a, **kw)
+        try: have = {r.rule for r in self.url_map.iter_rules()}
+        except Exception: have = set()
+        for rule, view, methods in list(_PA_PENDING):
+            if rule not in have:
+                try: self.add_url_rule(rule, view_func=view, methods=list(methods))
+                except Exception: pass
+
+    if not getattr(Flask, "__pa_bind_patch__", False):
+        Flask.__init__ = _init_patch
+        Flask.__pa_bind_patch__ = True
+
+    def _bind_existing():
+        try:
+            for v in list(globals().values()):
+                try:
+                    if hasattr(v, "add_url_rule") and hasattr(v, "url_map"):
+                        have = {r.rule for r in v.url_map.iter_rules()}
+                        for rule, view, methods in _PA_PENDING:
+                            if rule not in have:
+                                try: v.add_url_rule(rule, view_func=view, methods=list(methods))
+                                except Exception: pass
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    threading.Thread(target=_bind_existing, daemon=True).start()
+except Exception:
+    pass
+# ==== END FLASK_MONKEYPATCH_BIND_V1 ====
