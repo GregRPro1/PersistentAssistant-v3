@@ -1,0 +1,68 @@
+{
+  "communication": {
+    "reply_contract_version": "v3",
+    "require_pack": true,
+    "require_final_lines": [
+      "PACK:",
+      "STATUS:"
+    ],
+    "post_run_auto_health": true,
+    "ui_health_hook": "tools/auto_health.ps1"
+  },
+  "powershell_rules": {
+    "no_inline_if_expr": true,
+    "ascii_only_punct": true,
+    "no_interactive_prompts": true,
+    "set_erroraction_stop": true,
+    "idempotent_on_rerun": true,
+    "no_unicode_gt127": true,
+    "json_prop_safe": true
+  },
+  "version": "v3.4",
+  "updated_utc": "2025-08-26T16:10:12.1801206Z",
+  "script_structure": {
+    "show_explicit_ok_fail_lists": true,
+    "header_id_required": true,
+    "footer_id_required": true,
+    "print_endpoint_statuses": true
+  },
+  "plan_alignment": {
+    "ensure_active_step_consistent": true,
+    "pack_plan_snapshot_each_run": true
+  },
+  "schema_modifications": {
+    "process": [
+      "On failure or suggestion: propose rule; record lesson; bump schema; update contract; enforce via gate prehook; pack summary."
+    ],
+    "lessons": [
+      {
+        "id": "ps_no_inline_if_expr",
+        "added_utc": "2025-08-26T16:10:12.1801206Z",
+        "summary": "No inline if(...) in expressions",
+        "details": "Use if/else blocks and prior assignment.",
+        "active": true
+      },
+      {
+        "id": "ps_ascii_only_punct",
+        "added_utc": "2025-08-26T16:10:12.1801206Z",
+        "summary": "ASCII-only punctuation",
+        "details": "No smart quotes or em dashes in .ps1.",
+        "active": true
+      },
+      {
+        "id": "ps_json_prop_safe",
+        "added_utc": "2025-08-26T16:10:12.1801206Z",
+        "summary": "JSON safe setters in PS",
+        "details": "Support Hashtable and PSCustomObject (no dot on hashtables).",
+        "active": true
+      }
+    ],
+    "log": [
+      {
+        "time_utc": "2025-08-26T16:10:12.1801206Z",
+        "change": "v3.4 schema: ASCII-only + no inline if + JSON prop safety",
+        "version": "v3.4"
+      }
+    ]
+  }
+}

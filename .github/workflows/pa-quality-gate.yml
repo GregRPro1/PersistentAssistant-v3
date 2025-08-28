@@ -1,0 +1,43 @@
+name: PA Quality Gate
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: windows-latest
+    env:
+      PYTHONWARNINGS: "error::SyntaxWarning"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps (best-effort)
+        shell: pwsh
+        run: |
+          if (Test-Path requirements.txt) {
+            python -m pip install -r requirements.txt
+          } else {
+            python -m pip install pyyaml flask
+          }
+
+      - name: Run CI gate
+        shell: pwsh
+        run: |
+          python tools\py\ci\ci_check.py
+
+      - name: Upload latest pack (if present)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: project-snapshot-pack
+          path: |
+            tmp\feedback\pack_project_snapshot_*.zip
+          if-no-files-found: ignore

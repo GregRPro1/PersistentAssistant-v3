@@ -27,3 +27,5 @@ self.addEventListener('fetch', (event)=>{
 // cache-bust tabs-v1.4 + actions-v7 + plan-v1 2025-08-25T07:41:05.9233704+01:00
 
 // cache-bust 2025-08-25T08:01:52.6840536+01:00
+
+// cache-bust compose 2025-08-26T08:53:55.7078445+01:00

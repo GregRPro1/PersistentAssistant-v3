@@ -1,0 +1,29 @@
+agent:
+  host: "127.0.0.1"
+  port: 8782
+  health_path: "/health"
+  start_timeout_sec: 25
+  start_command: "python tools/py/pa_agent_bringup.py --host {host} --port {port} --timeout 25"
+policy:
+  heartbeat_every_sec: 120
+  max_restarts_per_hour: 3
+  give_up_min_backoff_sec: 900
+notify:
+  email:
+    enabled: true
+    to: "grapson_pro1@outlook.com"
+    smtp_host: ""
+    smtp_port: 587
+    username: ""
+    password_env: "PA_SMTP_PASS"
+    from: "pa-watchdog@localhost"
+  slack_webhook:
+    enabled: false
+    url: ""
+  whatsapp:
+    enabled: false
+    provider: "twilio"
+    from: ""
+    to: "+447894798589"
+    account_sid_env: "TWILIO_SID"
+    auth_token_env: "TWILIO_TOKEN"

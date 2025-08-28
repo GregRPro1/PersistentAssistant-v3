@@ -39,3 +39,9 @@ if($Run){
   if(-not $ok){ Write-Error "Gate refused: $($issues -join ', ')" ; exit 2 }
   & powershell -ExecutionPolicy Bypass -File $Out
 }
+# PA_GATE POSTHOOK START
+try{
+  $auto = Join-Path (Get-Location).Path "tools\auto_health.ps1"
+  if(Test-Path $auto){ & powershell -ExecutionPolicy Bypass -File $auto }
+}catch{}
+# PA_GATE POSTHOOK END

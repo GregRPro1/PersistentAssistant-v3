@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+"""
+PA CI gate — local + GitHub Actions
+Runs (in order):
+  1) reply_lint on markdown (prefers selective helper to skip tmp/ etc.)
+  2) duplicate-guard test for add_tool (if present)
+  3) pa_std_summary --level standard
+  4) pack/enrich_pack.py
+  5) pack/verify_pack.py --include-meta --check-insights
+
+Exit non-zero on first failure.
+"""
+from __future__ import annotations
+import os, sys, subprocess
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]  # .../PersistentAssistant
+PY   = sys.executable
+
+def run(cmd: list[str], cwd: Path) -> int:
+    print(f"[RUN] {' '.join(cmd)}")
+    p = subprocess.Popen(cmd, cwd=str(cwd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    out, _ = p.communicate()
+    sys.stdout.write(out)
+    sys.stdout.flush()
+    return p.returncode
+
+def main() -> int:
+    os.environ.setdefault("PYTHONWARNINGS", "error::SyntaxWarning")
+
+    steps: list[list[str]] = []
+
+    # 1) Markdown reply-lint (prefer selective helper if available)
+    rl_selected = ROOT / "tools" / "py" / "ci" / "reply_lint_selected.py"
+    if rl_selected.exists():
+        steps.append([PY, "tools/py/ci/reply_lint_selected.py"])
+    else:
+        # Fallback: lint all markdown (may catch tmp/ & example docs)
+        steps.append([PY, "tools/py/lint/reply_lint.py", "--glob", "**/*.md"])
+
+    # 2) Optional duplicate-guard test (only if the test script exists)
+    guard_test = ROOT / "tools" / "py" / "registry" / "test_add_tool_guard.py"
+    if guard_test.exists():
+        steps.append([PY, "tools/py/registry/test_add_tool_guard.py"])
+
+    # 3) Summary
+    steps.append([PY, "tools/py/pa_std_summary.py", "--level", "standard"])
+    # 4) Build tool catalog (needed for pack verification)
+    steps.append([PY, "tools/py/registry/build_tool_catalog.py", "--host", "127.0.0.1", "--port", "8782"])
+    # 5) Enrich
+    steps.append([PY, "tools/py/pack/enrich_pack.py"])
+    # 6) Verify
+    steps.append([PY, "tools/py/pack/verify_pack.py", "--include-meta", "--check-insights"])
+
+    total = len(steps)
+    for i, cmd in enumerate(steps, 1):
+        print(f"\n=== STEP {i}/{total} ===")
+        rc = run(cmd, ROOT)
+        if rc != 0:
+            print(f"[FAIL] step {i} rc={rc}")
+            return rc
+
+    # Convenience: show the most recent pack
+    feedback = ROOT / "tmp" / "feedback"
+    if feedback.exists():
+        zips = sorted(feedback.glob("pack_project_snapshot_*.zip"), key=lambda p: p.stat().st_mtime, reverse=True)
+        if zips:
+            print(f"[OK] Pack: {zips[0]}")
+    print("[OK] CI gate clean.")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

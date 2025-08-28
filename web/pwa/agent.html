@@ -153,6 +153,48 @@
 <script src="/pwa/agent_tabs_v1.js"></script>
 <script src="/pwa/agent_actions_v1.js"></script>
 <script src="/pwa/agent_plan_v1.js"></script>
+<!-- === COMPOSE PANEL (auto) === -->
+<section id="paComposePanel" style="border:1px solid #ccc;padding:8px;margin:8px 0;border-radius:8px">
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+    <strong>Compose Prompt</strong>
+    <button id="btnCompose">Build</button>
+    <button id="btnComposeCopy">Copy</button>
+    <span id="composeStatus" style="font-size:12px;opacity:.8"></span>
+  </div>
+  <textarea id="composeText" style="width:100%;min-height:200px;font-family:monospace"></textarea>
+</section>
+<script>
+(function(){
+  function q(s){ return document.querySelector(s) }
+  function token(){ const el=q('#paToken'); return el ? (el.value||'').trim() : '' }
+  async function compose(){
+    const t = token();
+    const hdr = t ? { 'Authorization': 'Bearer '+t } : {}
+    q('#composeStatus').textContent = 'building...'
+    try{
+      const r = await fetch((window.uiBase||'') + '/agent/compose', {method:'POST', headers: hdr});
+      if(!r.ok){ q('#composeStatus').textContent = 'HTTP '+r.status; q('#composeText').value=''; return }
+      const j = await r.json();
+      if(!j.ok){ q('#composeStatus').textContent = j.err||'failed'; q('#composeText').value=''; return }
+      q('#composeText').value = j.prompt || '';
+      q('#composeStatus').textContent = 'ok ('+(j.path||'')+')';
+    }catch(e){
+      q('#composeStatus').textContent = 'error';
+      q('#composeText').value = String(e||'');
+    }
+  }
+  function copy(){
+    const ta = document.querySelector('#composeText');
+    if(!ta) return;
+    ta.select(); try{ document.execCommand('copy') }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const b = q('#btnCompose'); if(b) b.addEventListener('click', compose);
+    const c = q('#btnComposeCopy'); if(c) c.addEventListener('click', copy);
+  });
+})();
+</script>
 </body></html>
+
 
 

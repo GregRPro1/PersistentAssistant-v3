@@ -1,0 +1,65 @@
+from __future__ import annotations
+import sys, pathlib, argparse, json
+from typing import Any, Dict
+
+try:
+    import yaml
+except Exception:
+    yaml = None
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+OVERLAY = ROOT / "tools" / "tool_catalog.overlay.yaml"
+
+def load_overlay() -> Dict[str, Any]:
+    if not OVERLAY.exists() or not yaml:
+        return {"overrides": {}}
+    try:
+        data = yaml.safe_load(OVERLAY.read_text(encoding="utf-8"))
+        if not isinstance(data, dict): return {"overrides": {}}
+        data.setdefault("overrides", {})
+        return data
+    except Exception:
+        return {"overrides": {}}
+
+def save_overlay(obj: Dict[str, Any]) -> None:
+    OVERLAY.parent.mkdir(parents=True, exist_ok=True)
+    if not yaml:
+        raise SystemExit("PyYAML required to write overlay (pip install pyyaml).")
+    OVERLAY.write_text(yaml.safe_dump(obj, sort_keys=False, allow_unicode=True), encoding="utf-8")
+
+def norm_id(kind: str, path_or_rule: str) -> str:
+    if kind == "endpoint":
+        return f"endpoint:{path_or_rule}"
+    if kind in ("ps","py"):
+        return f"{kind}:{path_or_rule.replace('\\','/')}"
+    return f"{kind}:{path_or_rule}"
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--kind", required=True, choices=["ps","py","endpoint"])
+    ap.add_argument("--ref", required=True, help="Path (ps/py) relative to repo or endpoint rule")
+    ap.add_argument("--title", default="")
+    ap.add_argument("--description", default="")
+    ap.add_argument("--usage", default="")
+    ap.add_argument("--tags", default="", help="comma-separated")
+    ap.add_argument("--contact", default="", help="email or slack handle")
+    args = ap.parse_args()
+# enforce unique kind+ref before writing overlay
+ensure_unique(args.kind, args.ref)
+
+    oid = norm_id(args.kind, args.ref)
+    ov = load_overlay()
+    meta: Dict[str, Any] = ov["overrides"].get(oid, {}) if isinstance(ov.get("overrides"), dict) else {}
+    if args.title: meta["name"] = args.title
+    if args.description: meta["description"] = args.description
+    if args.usage: meta["usage"] = args.usage
+    if args.tags: meta["tags"] = [t.strip() for t in args.tags.split(",") if t.strip()]
+    if args.contact: meta["contact"] = args.contact
+    meta["source"] = (meta.get("source") or "overlay")
+    ov["overrides"][oid] = meta
+    save_overlay(ov)
+    print(json.dumps({"ok": True, "id": oid, "overlay": str(OVERLAY)}, indent=2))
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
