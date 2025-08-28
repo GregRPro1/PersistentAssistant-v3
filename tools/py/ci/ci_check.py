@@ -44,7 +44,7 @@ def main() -> int:
         steps.append([PY, "tools/py/registry/test_add_tool_guard.py"])
 
     # 3) Summary
-    steps.append([PY, "tools/py/pa_std_summary.py", "--level", "standard"])
+    steps.append([PY, "tools/py/pa_std_summary.py", "--level", "deep"])
     # 4) Build tool catalog (needed for pack verification)
     steps.append([PY, "tools/py/registry/build_tool_catalog.py", "--host", "127.0.0.1", "--port", "8782"])
     # 5) Enrich
