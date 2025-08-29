@@ -486,8 +486,8 @@ phases:
     status: planned
     title: Headers with Feature-ID enforced in outputs
   - id: '6.2'
-    status: planned
-    title: Local Exec Bridge (LEB) service for local run & safe patch apply
+    status: done
+    title: Local Exec Bridge (LEB) service online
     description: Local Exec Bridge (LEB) service for local run & safe patch apply
     files:
     - leb/main.py
@@ -497,12 +497,22 @@ phases:
     success:
     - /run-tests returns json {returncode, stdout, stderr}
     - /apply-patch enforces SHA + backup + atomic write
+    desc: 'Stdlib HTTP service on 127.0.0.1:8765; endpoints: /ping, /run, /logs; allowlist+timeouts
+      via config\\leb.yaml.'
   - id: 6.2.a
     status: planned
     title: 'leb/main.py FastAPI: /run-tests, /apply-patch'
   - id: 6.2.b
     status: planned
     title: Token auth; localhost bind only
+  - id: 6.2.c
+    title: LEB smoketest passes
+    status: done
+    desc: Ping OK; run 'python --version' rc=0; logs accessible.
+  - id: 6.2.d
+    title: LEB pytest smoke passes
+    status: planned
+    desc: Allowlist 'pytest -q -k smoke'; run via /run and surface green/red in UI.
   - id: '6.3'
     status: done
     title: GUI Run tab wired to LEB with live logs and status
