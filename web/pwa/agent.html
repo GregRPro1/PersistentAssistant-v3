@@ -1,200 +1,421 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent Console</title>
-<style>
-  :root{ --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --muted:#9ca3af; --bg:#0b0b0c; --panel:#111214; --ink:#e5e7eb; --accent:#2563eb }
-  *{box-sizing:border-box} body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;background:#0b0b0c;color:#e5e7eb}
-  header{padding:10px 12px;background:#111214;border-bottom:1px solid #1f2937}
-  .hint{font-size:12px;color:#9ca3af}
-  .tabs{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid #1f2937;background:#0f1113;position:sticky;top:0;z-index:2}
-  .tab{padding:8px 10px;border-radius:8px;background:#14161a;cursor:pointer;user-select:none}
-  .tab.active{background:#1d2430}
-  .grid{display:grid;grid-template-columns:1fr;gap:12px;padding:12px}
-  section{background:#111214;border:1px solid #1f2937;border-radius:10px;padding:10px}
-  h2{margin:4px 0 10px 0;font-size:16px}
-  .row{margin:8px 0} input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #28303d;background:#0f1113;color:#e5e7eb}
-  button{padding:8px 12px;border-radius:8px;border:1px solid #28303d;background:#14161a;color:#e5e7eb;cursor:pointer} button:disabled{opacity:.6}
-  pre{background:#0f1113;border:1px solid #28303d;padding:10px;border-radius:8px;white-space:pre-wrap;max-height:260px;overflow:auto}
-  .scroll{max-height:260px;overflow:auto}
-  .badge{display:inline-block;padding:2px 6px;border-radius:999px;font-size:11px;margin-left:6px;border:1px solid #28303d}
-  .wait{color:#f59e0b} .ok{color:var(--ok)} .err{color:var(--err)}
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:8px;background:#14161a;border:1px solid #28303d}
-  .dot{width:8px;height:8px;border-radius:50%}.green{background:var(--ok)}.amber{background:var(--warn)}.grey{background:#6b7280}.red{background:var(--err)}
-  .tree ul{list-style:none;margin:0;padding-left:18px}.tree li{margin:4px 0}.caret{cursor:pointer;user-select:none}.caret::before{content:'\\25B6';color:#9ca3af;display:inline-block;margin-right:6px;transform:translateY(-1px)}.caret.down::before{transform:rotate(90deg)}
-  .rowflex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .statusbar{position:sticky;bottom:0;background:#0f1113;border-top:1px solid #1f2937;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
-  .spinner{display:inline-block;width:12px;height:12px;border:2px solid #28303d;border-top-color:#e5e7eb;border-radius:50%;animation:spin 1s linear infinite;margin-right:6px}@keyframes spin{to{transform:rotate(360deg)}}
-</style>
-</head><body>
-<header>
-  <div><strong>Agent Console</strong> <span class="badge" id="uiBaseBadge"></span></div>
-  <div class="hint" id="hint">Safety: Comms OFF blocks sends; Lock requires hold-to-unlock; Timer shows elapsed while busy.</div>
-</header>
-<div class="tabs">
-  <div class="tab active" data-tab="summary">Summary</div>
-  <div class="tab" data-tab="plan">Plan</div>
-  <div class="tab" data-tab="next">Next</div>
-  <div class="tab" data-tab="recent">Recent</div>
-  <div class="tab" data-tab="notes">Notes</div>
-  <div class="tab" data-tab="actions">Actions</div>
-  <div class="tab" data-tab="settings">Settings</div>
-</div>
-<div class="grid">
-  <section data-pane="summary"><h2>Summary <span id="sumState" class="badge"></span></h2>
-    <div class="row"><button id="refresh">Refresh summary</button></div>
-    <pre id="summary">[no data]</pre>
-  </section>
-  <section data-pane="plan" class="hidden"><h2>Plan <span id="planState" class="badge"></span> <span id="planCounts" class="badge"></span></h2>
-    <div class="row"><button id="planRefresh">Refresh plan</button></div>
-    <div id="planTree" class="tree scroll">[no data]</div>
-  </section>
-  <section data-pane="next" class="hidden"><h2>Next Suggestions <span id="nextState" class="badge"></span></h2>
-    <div class="row"><button id="nextBtn">Send NEXT</button></div>
-    <div id="nextBox" class="scroll">[none yet]</div>
-  </section>
-  <section data-pane="recent" class="hidden"><h2>Recent</h2>
-    <div class="row"><button id="rrefresh">Refresh recent</button></div>
-    <div id="recentBox">[none yet]</div>
-  </section>
-  <section data-pane="notes" class="hidden"><h2>Notes <span id="notesState" class="badge"></span></h2>
-    <div class="row"><textarea id="notesText" rows="8" placeholder="Project notes…"></textarea></div>
-    <div class="row"><button id="notesLoad">Load</button> <button id="notesSave">Save</button> <button id="notesAppend">Append</button> <button id="makeBrief">Assemble Brief</button></div>
-    <pre id="notesOut"></pre>
-  </section>
-  <section data-pane="actions" class="hidden"><h2>Actions <span id="actState" class="badge"></span></h2>
-    <div class="row"><textarea id="askText" rows="5" placeholder="Ask the assistant…"></textarea></div>
-    <div class="row"><button id="askBtn">Send ASK</button> <button id="proc">Process approvals</button></div>
-    <pre id="askOut"></pre>
-    <div class="row"><input type="text" id="chooseStep" placeholder="e.g. 9.2" /> <button id="chooseBtn">Set active step</button></div>
-    <pre id="chooseOut"></pre>
-  </section>
-  <section data-pane="settings" class="hidden"><h2>Settings</h2>
-    <div class="row"><label>Bearer token:</label><input type="text" id="tok" placeholder="paste token" /></div>
-    <div class="rowflex"><div class="chip"><span class="dot" id="commsDot"></span><span id="commsLbl">Comms: ON</span> <button id="commsToggle">Toggle</button></div><div class="chip"><span class="dot" id="lockDot"></span><span id="lockLbl">Locked</span> <button id="unlockHold">Hold to Unlock</button> <button id="lockBtn">Lock</button></div></div>
-    <div class="rowflex"><div class="chip"><span>Auto-process (sec):</span> <input id="autoSec" type="number" min="5" step="1" style="width:90px"/> <button id="autoToggle">Enable</button> <span id="autoState" class="badge"></span></div></div>
-  </section>
-</div>
-<div class="statusbar"><div><span id="busyIcon" class="spinner hidden"></span><span id="statusLeft">Ready</span></div><div id="statusRight" class="hint"></div></div>
-<script>(function(){
-  // utils
-  function uuidv4(){try{if(crypto&&typeof crypto.randomUUID==='function')return crypto.randomUUID();}catch(e){}var a=(crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(16)):(function(){var x=new Uint8Array(16);for(var i=0;i<16;i++)x[i]=Math.floor(Math.random()*256);return x})();a[6]=(a[6]&15)|64;a[8]=(a[8]&63)|128;var h='';for(var i=0;i<16;i++){h+=a[i].toString(16).padStart(2,'0');}return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
-  const el=(id)=>document.getElementById(id), qa=(s)=>Array.from(document.querySelectorAll(s));
-  const uiBase=location.origin; el('uiBaseBadge').textContent=uiBase;
-  let tok=localStorage.getItem('pa_token')||''; const tokIn=el('tok'); if(tokIn) tokIn.value=tok;
-  // tabs
-  qa('.tab').forEach(t=>t.onclick=()=>{ qa('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); const name=t.getAttribute('data-tab'); qa('[data-pane]').forEach(p=>p.classList.toggle('hidden', p.getAttribute('data-pane')!==name)); el('statusLeft').textContent='Viewing '+name; });
-  // busy + timer
-  let timer=null, startTs=0, busy=false;
-  function setBusy(b,msg){ busy=b; el('busyIcon').classList.toggle('hidden',!b); el('statusLeft').textContent=msg|| (b?'Working…':'Ready'); if(b){ startTs=Date.now(); if(timer) clearInterval(timer); timer=setInterval(()=>{ const s=Math.floor((Date.now()-startTs)/1000); el('statusRight').textContent='⏱ '+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')+' · '+(workerStr||''); },500);} else { if(timer) clearInterval(timer); el('statusRight').textContent=workerStr||''; } }
-  function badge(id,cls,txt){ const b=el(id); if(!b) return; b.className='badge '+(cls||''); b.textContent=txt||''; }
-  function pretty(o){ try{return JSON.stringify(o,null,2);}catch(e){return String(o);} }
-  function logPre(id,txt){ const p=el(id); if(!p) return; p.textContent=(typeof txt==='string')?txt:pretty(txt); }
-  // comms + lock + idle auto-off
-  function commsEnabled(){ return localStorage.getItem('pa_comms')!=='0'; }
-  function setComms(v){ localStorage.setItem('pa_comms', v?'1':'0'); el('commsLbl').textContent='Comms: '+(v?'ON':'OFF'); el('commsDot').className='dot '+(v?'green':'amber'); if(!v) el('statusLeft').textContent='Interaction locked (comms off)'; }
-  setComms(commsEnabled());
-  el('commsToggle').onclick=()=>setComms(!commsEnabled());
-  function isLocked(){ return localStorage.getItem('pa_locked')==='1'; }
-  function setLocked(v){ localStorage.setItem('pa_locked', v?'1':'0'); el('lockLbl').textContent = v?'Locked':'Unlocked'; el('lockDot').className='dot '+(v?'amber':'green'); }
-  setLocked(localStorage.getItem('pa_locked')==='1');
-  el('lockBtn').onclick=()=>setLocked(true);
-  el('unlockHold').onpointerdown=()=>{ el('unlockHold')._t=setTimeout(()=>{ setLocked(false); },1200); };
-  el('unlockHold').onpointerup=el('unlockHold').onpointerleave=()=>{ clearTimeout(el('unlockHold')._t); };
-  let lastUserTs=Date.now(); ['pointerdown','keydown','touchstart','scroll'].forEach(ev=>document.addEventListener(ev,()=>{ lastUserTs=Date.now(); },{passive:true}));
-  setInterval(()=>{ if(!busy && Date.now()-lastUserTs>300000 && commsEnabled()){ setComms(false); } },15000);
-  // fetch wrappers (respect comms + lock + visibility)
-  function canSend(){ if(document.hidden){ el('hint').textContent='Page hidden — blocked'; return false } if(isLocked()){ el('hint').textContent='Locked — hold Unlock in Settings'; return false } if(!commsEnabled()){ el('hint').textContent='Comms OFF — enable in Settings'; return false } return true }
-  function GET(path){ const h={cache:"no-store",headers:{}}; try{ if(typeof tok!=="undefined" && tok && tok.trim()){ h.headers.Authorization="Bearer "+tok.trim(); } }catch(e){} return fetch(uiBase+path,h); }); }
-  function POST(path,body){ if(!canSend()) return Promise.reject(new Error('blocked')); return fetch(uiBase+path,{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:body?JSON.stringify(body):'{}'});} 
-  // summary
-  async function refreshSummary(){ setBusy(true,'Loading summary…'); badge('sumState','wait','loading'); try{ const r=await GET('/agent/summary'); const j=await r.json(); logPre('summary',j); badge('sumState','ok','ok'); }catch(e){ badge('sumState','err','error'); } finally{ setBusy(false);} }
-  el('refresh').onclick=refreshSummary; refreshSummary();
-  // plan + counts
-  function statusClass(s){ s=String(s||'').toLowerCase(); if(s==='done'||s==='complete'||s==='finished')return 'green'; if(s==='in_progress'||s==='active'||s==='working'||s==='running')return 'amber'; if(s==='blocked'||s==='error'||s==='fail'||s==='failed')return 'red'; return 'grey'; }
-  function makeNode(n){ const li=document.createElement('li'); const caret=document.createElement('span'); caret.className='caret down'; const label=document.createElement('span'); const dot=document.createElement('span'); dot.className='dot '+statusClass(n.status); label.textContent=' '+(n.id||'')+(n.title?(' — '+n.title):''); li.appendChild(caret); li.appendChild(dot); li.appendChild(label); const ul=document.createElement('ul'); (n.children||[]).forEach(c=>ul.appendChild(makeNode(c))); li.appendChild(ul); caret.onclick=()=>{ caret.classList.toggle('down'); ul.classList.toggle('hidden'); }; return li; }
-  async function refreshPlan(){ setBusy(true,'Loading plan…'); badge('planState','wait','loading'); try{ const r=await GET('/agent/plan'); const j=await r.json(); const box=el('planTree'); box.innerHTML=''; const root=document.createElement('ul'); (j.plan.tree||[]).forEach(n=>root.appendChild(makeNode(n))); box.appendChild(root); const t=j.plan.totals||{}; el('planCounts').textContent='Done '+(t.done||0)+' • Working '+(t.in_progress||0)+' • Blocked '+(t.blocked||0)+' • Todo '+(t.todo||0); badge('planState','ok','ok'); }catch(e){ badge('planState','err','error'); } finally{ setBusy(false);} }
-  el('planRefresh').onclick=refreshPlan; refreshPlan();
-  // recent
-  async function refreshRecent(){ try{ const r=await GET('/agent/recent'); const j=await r.json(); const box=el('recentBox'); box.innerHTML=''; const rec=j.recent||{}; const a=rec.approvals||[]; const ul=document.createElement('ul'); a.forEach(n=>{ const li=document.createElement('li'); li.textContent=n; ul.appendChild(li); }); const notes=document.createElement('pre'); notes.textContent=(rec.notes_tail||'').trim()||'[no notes]'; box.appendChild(document.createTextNode('Approvals (latest):')); box.appendChild(ul); box.appendChild(document.createTextNode('Notes tail:')); box.appendChild(notes);}catch(e){ el('recentBox').textContent='ERR '+e.message;} }
-  el('rrefresh').onclick=refreshRecent; refreshRecent();
-  // NEXT
-  el('nextBtn').onclick=async(e)=>{ if(!canSend()) return; setBusy(true,'Requesting NEXT…'); badge('nextState','wait','waiting'); try{ const b={action:'APPROVE_NEXT',data:null,timestamp:Math.floor(Date.now()/1000),nonce:uuidv4()}; const r=await POST('/agent/next2',b); const t=await r.text(); try{ const j=JSON.parse(t); const box=el('nextBox'); box.innerHTML=''; const pre=document.createElement('pre'); pre.textContent=pretty(j.summary||j); box.appendChild(pre); badge('nextState','ok','ok'); }catch{ badge('nextState','err','bad json'); } }catch(e2){ badge('nextState','err','error'); } finally{ setBusy(false);} };
-  // notes
-  el('notesLoad').onclick=async()=>{ setBusy(true,'Loading notes…'); try{ const r=await GET('/agent/notes'); const j=await r.json(); el('notesText').value=j.text||''; badge('notesState','ok','loaded'); }catch(e){ badge('notesState','err','error'); } finally{ setBusy(false);} };
-  function notes(mode){ return POST('/agent/notes',{mode,text:el('notesText').value}); }
-  el('notesSave').onclick=async()=>{ if(!canSend()) return; setBusy(true,'Saving notes…'); try{ const r=await notes('set'); const t=await r.text(); logPre('notesOut',t); badge('notesState','ok','saved'); }catch(e){ badge('notesState','err','error'); } finally{ setBusy(false);} };
-  el('notesAppend').onclick=async()=>{ if(!canSend()) return; setBusy(true,'Appending…'); try{ const r=await notes('append'); const t=await r.text(); logPre('notesOut',t); badge('notesState','ok','appended'); }catch(e){ badge('notesState','err','error'); } finally{ setBusy(false);} };
-  el('makeBrief').onclick=async()=>{ if(!canSend()) return; setBusy(true,'Assembling brief…'); try{ const r=await POST('/agent/brief'); const t=await r.text(); logPre('notesOut',t);}catch(e){ logPre('notesOut','ERR '+e.message);} finally{ setBusy(false);} };
-  // actions
-  el('askBtn').onclick=async()=>{ if(!canSend()) return; const text=el('askText').value.trim(); if(!text){ logPre('askOut','Enter a prompt'); return } setBusy(true,'Sending ASK…'); try{ const r=await POST('/agent/ask',{text,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)}); const t=await r.text(); logPre('askOut',t); badge('actState','ok','queued'); }catch(e){ badge('actState','err','error'); } finally{ setBusy(false);} };
-  el('chooseBtn').onclick=async()=>{ if(!canSend()) return; const step=el('chooseStep').value.trim(); if(!step){ logPre('chooseOut','Enter a step id'); return } setBusy(true,'Choosing '+step+'…'); try{ const r=await POST('/agent/choose',{step_id:step,nonce:uuidv4(),timestamp:Math.floor(Date.now()/1000)}); const t=await r.text(); logPre('chooseOut',t);}catch(e){ logPre('chooseOut','ERR '+e.message);} finally{ setBusy(false);} };
-  // token save
-  el('save')?.addEventListener('click',()=>{ tok=(tokIn?tokIn.value:tok).trim(); localStorage.setItem('pa_token',tok); el('statusRight').textContent='Token saved'; });
-  // worker status + cost (auto-poll) + auto-process toggle
-  let workerStr='';
-  async function pollWorker(){ try{ const r=await GET('/agent/worker_status'); const j=await r.json(); const w=j.worker||{}; workerStr=calls  · tok / · Write-Host{(w.cost_usd||0).toFixed(4)}; if(!busy) el('statusRight').textContent=workerStr; }catch(e){} }
-  setInterval(pollWorker, 5000); pollWorker();
-  const autoSec=el('autoSec'); const autoToggle=el('autoToggle'); const autoState=el('autoState');
-  autoSec.value = localStorage.getItem('pa_auto_sec') || '15';
-  let autoTimer=null;
-  function setAuto(on){ if(autoTimer){ clearInterval(autoTimer); autoTimer=null; } if(on){ const ms=Math.max(5,parseInt(autoSec.value||'15',10))*1000; autoTimer=setInterval(async()=>{ if(!canSend()||busy||document.hidden) return; try{ await POST('/agent/process2'); }catch(e){} }, ms); autoState.textContent='on'; autoState.className='badge ok'; localStorage.setItem('pa_auto_on','1'); } else { autoState.textContent='off'; autoState.className='badge'; localStorage.setItem('pa_auto_on','0'); } }
-  autoToggle.onclick=()=>{ const on = !(localStorage.getItem('pa_auto_on')==='1'); setAuto(on); };
-  if(localStorage.getItem('pa_auto_on')==='1'){ setAuto(true); }
-  // show approvals count occasionally (non-intrusive)
-  setInterval(async()=>{ try{ const r=await GET('/agent/approvals_count'); const j=await r.json(); if(j&&j.count!=null){ el('hint').textContent='Approvals queued: '+j.count; } }catch(e){} }, 10000);
-})();</script>
+<!doctype html>
+<html>
 
-  <link rel="stylesheet" href="/pwa/agent_ext_v2.css?v=2.1">
-  <script src="/pwa/agent_ext_v2.js?v=2.1"></script>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Agent Console</title>
+
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- tiny inline favicon to avoid 404 -->
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%232563eb'/%3E%3C/svg%3E">
+
+  <link rel="stylesheet" href="/pwa/agent_ui_v3.css?v=3.2">
   <link rel="stylesheet" href="/pwa/agent_tabs_v1.css?v=1">
-  <script src="/pwa/agent_tabs_v1.js?v=1"></script>
-  <link rel="stylesheet" href="/pwa/agent_actions_v1.css?v=1">
-  <script src="/pwa/agent_actions_v1.js?v=1"></script>
-  <script src="/pwa/agent_plan_v1.js?v=1"></script>
-<link rel="stylesheet" href="/pwa/agent_tabs_v1.css">
-<script src="/pwa/agent_tabs_v1.js"></script>
-<script src="/pwa/agent_actions_v1.js"></script>
-<script src="/pwa/agent_plan_v1.js"></script>
-<!-- === COMPOSE PANEL (auto) === -->
-<section id="paComposePanel" style="border:1px solid #ccc;padding:8px;margin:8px 0;border-radius:8px">
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
-    <strong>Compose Prompt</strong>
-    <button id="btnCompose">Build</button>
-    <button id="btnComposeCopy">Copy</button>
-    <span id="composeStatus" style="font-size:12px;opacity:.8"></span>
-  </div>
-  <textarea id="composeText" style="width:100%;min-height:200px;font-family:monospace"></textarea>
-</section>
-<script>
-(function(){
-  function q(s){ return document.querySelector(s) }
-  function token(){ const el=q('#paToken'); return el ? (el.value||'').trim() : '' }
-  async function compose(){
-    const t = token();
-    const hdr = t ? { 'Authorization': 'Bearer '+t } : {}
-    q('#composeStatus').textContent = 'building...'
-    try{
-      const r = await fetch((window.uiBase||'') + '/agent/compose', {method:'POST', headers: hdr});
-      if(!r.ok){ q('#composeStatus').textContent = 'HTTP '+r.status; q('#composeText').value=''; return }
-      const j = await r.json();
-      if(!j.ok){ q('#composeStatus').textContent = j.err||'failed'; q('#composeText').value=''; return }
-      q('#composeText').value = j.prompt || '';
-      q('#composeStatus').textContent = 'ok ('+(j.path||'')+')';
-    }catch(e){
-      q('#composeStatus').textContent = 'error';
-      q('#composeText').value = String(e||'');
+  <link rel="stylesheet" href="/pwa/agent_ext_v2.css?v=2.1">
+  <style>
+    .gutter {
+      width: 6px;
+      min-width: 6px;
+      cursor: col-resize;
+      background: #0c1117;
+      border: 1px solid #28303d;
+      border-radius: 6px
     }
-  }
-  function copy(){
-    const ta = document.querySelector('#composeText');
-    if(!ta) return;
-    ta.select(); try{ document.execCommand('copy') }catch(e){}
-  }
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const b = q('#btnCompose'); if(b) b.addEventListener('click', compose);
-    const c = q('#btnComposeCopy'); if(c) c.addEventListener('click', copy);
-  });
-})();
-</script>
-</body></html>
 
+    #planDetails.nowrap pre {
+      white-space: pre
+    }
 
+    .sel {
+      appearance: none;
+      background: #0f1113;
+      border: 1px solid #28303d;
+      color: #e5e7eb;
+      border-radius: 10px;
+      padding: 6px 10px
+    }
 
+    .sel.small {
+      padding: 5px 8px;
+      font-size: 13px
+    }
+
+    .hdr-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .hdr-row .label {
+      opacity: .85
+    }
+  </style>
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <strong>Agent Console</strong>
+      <span class="badge" id="uiBaseBadge"></span>
+    </div>
+    <div class="header-right hdr-row">
+      <span class="chip">
+        <span class="label">status:</span>
+        <span id="hudDot" class="dot green"></span>
+        <span id="hudTime">—</span>
+      </span>
+
+      <!-- Project selector (restored) -->
+      <div class="chip">
+        <span class="label">Project:</span>
+        <select id="projSel" class="sel small"></select>
+        <button id="projNew" class="btn" style="padding:6px 10px">New</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="summary">Summary</button>
+    <button class="tab" data-tab="plan">Plan</button>
+    <button class="tab" data-tab="next">Next</button>
+    <button class="tab" data-tab="recent">Recent</button>
+    <button class="tab" data-tab="notes">Notes</button>
+    <button class="tab" data-tab="actions">Actions</button>
+    <button class="tab" data-tab="settings">Settings</button>
+  </nav>
+
+  <main class="grid">
+    <!-- Summary -->
+    <section data-pane="summary">
+      <div class="section-head">
+        <h2>Summary <span id="sumState" class="badge"></span></h2>
+        <button class="help" data-help="summary" aria-label="Help">?</button>
+      </div>
+      <div id="help-summary" class="help-panel hidden">
+        Reads <code>/agent/summary</code> from the sidecar. Use this for a quick OK/fallback check.
+      </div>
+      <div class="row"><button id="refresh" class="btn">Refresh summary</button></div>
+      <pre id="summary" class="codebox">[no data]</pre>
+    </section>
+
+    <!-- Plan -->
+    <section data-pane="plan" class="hidden">
+      <div class="section-head">
+        <h2>
+          Plan
+          <span id="planState" class="badge"></span>
+          <span id="planCounts" class="badge"></span>
+          <span id="planSource" class="badge"></span>
+        </h2>
+        <button class="help" data-help="plan" aria-label="Help">?</button>
+      </div>
+      <div id="help-plan" class="help-panel hidden">
+        Shows <code>/agent/plan</code>. Left: foldable tree (Phase → Step → Sub-step). Right: selected details.
+        Status colours: <span class="dot green"></span> Done · <span class="dot amber"></span> In-progress ·
+        <span class="dot blue"></span> Planned · <span class="dot red"></span> Blocked.
+        Use A± to change font size (affects both panes), “Wrap” toggles details wrapping. Drag the gutter to resize.
+        “Go active” jumps to the current step (uses <code>plan.active</code> or the first <i>in_progress</i> step).
+      </div>
+
+      <div class="row" style="display:flex;gap:8px;align-items:center">
+        <button id="planRefresh" class="btn">Refresh plan</button>
+        <button id="planGoActive" class="btn" title="Jump to current step">Go active</button>
+        <div class="spacer"></div>
+        <button id="fsMinus" class="btn" title="Smaller text">A−</button>
+        <button id="fsPlus" class="btn" title="Larger text">A+</button>
+        <button id="fsReset" class="btn" title="Reset size">A</button>
+        <button id="toggleWrap" class="btn" title="Toggle wrapping in details">Wrap</button>
+      </div>
+
+      <div class="split" id="planSplit" style="grid-template-columns:minmax(260px, 0.55fr) 6px 1fr;">
+        <div id="planTree" class="tree scroll card">[no data]</div>
+        <div class="gutter" id="planGutter" aria-label="Resize"></div>
+        <div class="card">
+          <div id="planDetails" class="scroll" style="min-height:240px">[select a step to see details]</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Next -->
+    <section data-pane="next" class="hidden">
+      <div class="section-head">
+        <h2>Next <span id="nextState" class="badge"></span></h2>
+      </div>
+      <div class="row"><button id="nextBtn" class="btn">Send NEXT</button></div>
+      <div id="nextBox" class="card scroll">[none yet]</div>
+    </section>
+
+    <!-- Recent -->
+    <section data-pane="recent" class="hidden">
+      <div class="section-head">
+        <h2>Recent</h2>
+      </div>
+      <div class="row"><button id="rrefresh" class="btn">Refresh recent</button></div>
+      <div id="recentBox" class="card scroll">[none yet]</div>
+    </section>
+
+    <!-- Notes -->
+    <section data-pane="notes" class="hidden">
+      <div class="section-head">
+        <h2>Notes <span id="notesState" class="badge"></span></h2>
+      </div>
+      <textarea id="notesText" class="ta" rows="8" placeholder="Project notes…"></textarea>
+      <div class="rowflex">
+        <button id="notesLoad" class="btn">Load</button>
+        <button id="notesSave" class="btn">Save</button>
+        <button id="notesAppend" class="btn">Append</button>
+      </div>
+      <pre id="notesOut" class="codebox"></pre>
+    </section>
+
+    <!-- Actions -->
+    <section data-pane="actions" class="hidden">
+      <div class="section-head">
+        <h2>Actions <span id="actState" class="badge"></span></h2>
+      </div>
+      <textarea id="askText" class="ta" rows="5" placeholder="Ask the assistant…"></textarea>
+      <div class="rowflex"><button id="askBtn" class="btn">Send ASK</button></div>
+      <pre id="askOut" class="codebox"></pre>
+      <div class="rowflex">
+        <input id="chooseStep" class="inp" placeholder="e.g. 6.4.c">
+        <button id="chooseBtn" class="btn">Set active step</button>
+      </div>
+      <pre id="chooseOut" class="codebox"></pre>
+    </section>
+
+    <!-- Settings -->
+    <section data-pane="settings" class="hidden">
+      <div class="section-head">
+        <h2>Settings</h2>
+      </div>
+      <div class="rowflex">
+        <label>Bearer token:</label>
+        <input type="text" id="tok" class="inp" placeholder="paste token">
+        <button id="tokSave" class="btn">Save</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="statusbar">
+    <div><span id="busyIcon" class="spinner hidden"></span><span id="statusLeft">Ready</span></div>
+    <div id="statusRight" class="muted"></div>
+  </div>
+
+  <div id="agent-hud"><b>Agent HUD</b>
+    <div id="hudLines" class="muted"></div>
+  </div>
+
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const qa = (sel) => Array.from(document.querySelectorAll(sel));
+      const uiBase = location.origin; $('uiBaseBadge').textContent = uiBase;
+
+      // ===== Project wiring (global) =====
+      function curProject() { return (localStorage.getItem('pa_project') || '').trim(); }
+      function setProject(p) {
+        localStorage.setItem('pa_project', p || '');
+        const sel = $('projSel'); if (sel) { sel.value = p || ''; }
+        // refresh visible pane if it cares (Plan)
+        if (!document.querySelector('[data-pane="plan"]').classList.contains('hidden')) {
+          window.PA_PLAN?.refresh();
+        }
+      }
+      function listProjectsLocal() {
+        try { return JSON.parse(localStorage.getItem('pa_projects') || '[]'); } catch { return []; }
+      }
+      function storeProjectsLocal(arr) {
+        try { localStorage.setItem('pa_projects', JSON.stringify(arr || [])); } catch { }
+      }
+      async function fetchProjects() {
+        // Try server endpoint; fallback to local list
+        try {
+          const r = await fetch(uiBase + '/agent/projects', { cache: 'no-store' });
+          if (r.ok) {
+            const j = await r.json();
+            const arr = (j && (j.projects || j.list || j)) || [];
+            if (Array.isArray(arr) && arr.length) {
+              storeProjectsLocal(arr);
+              return arr;
+            }
+          }
+        } catch (e) { }
+        return listProjectsLocal();
+      }
+      async function initProjects() {
+        const sel = $('projSel'); if (!sel) return;
+        sel.innerHTML = '';
+        const list = await fetchProjects();
+        const current = curProject() || (list[0] || '');
+        [...new Set([current, ...list])].filter(Boolean).forEach(p => {
+          const o = document.createElement('option'); o.value = p; o.textContent = p; sel.appendChild(o);
+        });
+        sel.value = current || '';
+        setProject(sel.value || '');
+      }
+      $('projSel').addEventListener('change', () => setProject($('projSel').value), { passive: true });
+      $('projNew').addEventListener('click', async () => {
+        const name = (prompt('New project name?') || '').trim();
+        if (!name) return;
+        // optimistic local add
+        const list = listProjectsLocal(); if (!list.includes(name)) { list.push(name); storeProjectsLocal(list); }
+        await initProjects();
+        setProject(name);
+        // best-effort server notify
+        try { await fetch(uiBase + '/agent/project/select?project=' + encodeURIComponent(name), { method: 'POST' }); } catch (e) { }
+      });
+
+      // ===== JSON pretty colours =====
+      function jfmt(x) {
+        try {
+          const s = JSON.stringify(x, null, 2);
+          return s.replace(/"(.*?)":/g, '"<span class="j-key">$1</span>":')
+            .replace(/"(.*?)"/g, '"<span class="j-str">$1</span>"')
+            .replace(/\b(true|false)\b/g, '<span class="j-bool">$1</span>')
+            .replace(/\b(null)\b/g, '<span class="j-null">$1</span>')
+            .replace(/\b(-?\d+(?:\.\d+)?)\b/g, '<span class="j-num">$1</span>');
+        } catch { return String(x); }
+      }
+
+      // ===== Busy HUD =====
+      let busy = false, timer = null, start = 0;
+      function setBusy(b, msg) {
+        busy = b; $('busyIcon').classList.toggle('hidden', !b);
+        $('statusLeft').textContent = msg || (b ? 'Working…' : 'Ready');
+        if (b) {
+          start = Date.now(); if (timer) clearInterval(timer);
+          timer = setInterval(() => {
+            const s = Math.floor((Date.now() - start) / 1000);
+            $('statusRight').textContent = '⏱ ' + String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+          }, 500);
+        } else { if (timer) clearInterval(timer); $('statusRight').textContent = ''; }
+      }
+
+      // ===== Global PA helpers (attach project to every request) =====
+      function tokenHdr() { const t = (localStorage.getItem('pa_token') || '').trim(); return t ? { Authorization: 'Bearer ' + t } : {}; }
+      function reqURL(path) {
+        const url = new URL(path, uiBase);
+        const p = curProject();
+        if (p) url.searchParams.set('project', p);
+        return url.toString();
+      }
+      window.PA = {
+        uiBase, setBusy,
+        setBadge: (id, cls, txt) => { const b = $(id); if (b) { b.className = 'badge ' + (cls || ''); b.textContent = txt || ''; } },
+        GET: (path) => fetch(reqURL(path), { cache: 'no-store', headers: tokenHdr() }),
+        POST: (path, body) => fetch(reqURL(path), { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, tokenHdr()), body: body ? JSON.stringify(body) : '{}' })
+      };
+
+      // ===== Token quick save =====
+      $('tokSave').onclick = () => { localStorage.setItem('pa_token', ($('tok')?.value || '').trim()); $('statusRight').textContent = 'Token saved'; };
+
+      // ===== Tabs =====
+      function showTab(name) {
+        Array.from(document.querySelectorAll('.tab')).forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+        Array.from(document.querySelectorAll('[data-pane]')).forEach(p => p.classList.toggle('hidden', p.getAttribute('data-pane') !== name));
+        localStorage.setItem('pa_tab', name);
+      }
+      Array.from(document.querySelectorAll('.tab')).forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab), { passive: true }));
+      const initTab = new URL(location.href).hash.match(/tab=([^&]+)/)?.[1] || localStorage.getItem('pa_tab') || 'summary';
+      showTab(initTab);
+
+      // ===== Help toggles =====
+      document.querySelectorAll('.help').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = 'help-' + btn.dataset.help; const p = document.getElementById(id); if (p) p.classList.toggle('hidden');
+        }, { passive: true });
+      });
+
+      // ===== Summary =====
+      async function refreshSummary() {
+        PA.setBusy(true, 'Loading summary…'); PA.setBadge('sumState', 'wait', 'loading');
+        try {
+          const r = await PA.GET('/agent/summary'); const j = await r.json();
+          const el = $('summary'); el.innerHTML = jfmt(j);
+          PA.setBadge('sumState', 'ok', 'ok');
+        } catch { PA.setBadge('sumState', 'err', 'error'); }
+        finally { PA.setBusy(false); }
+      }
+      $('refresh').onclick = refreshSummary; refreshSummary();
+
+      // ===== Recent / Next / Actions =====
+      $('rrefresh').onclick = async () => {
+        try {
+          const r = await PA.GET('/agent/recent'); const j = await r.json();
+          $('recentBox').textContent = JSON.stringify(j, null, 2);
+        } catch (e) { $('recentBox').textContent = 'ERR ' + e.message; }
+      };
+      $('nextBtn').onclick = async () => {
+        PA.setBusy(true, 'Requesting NEXT…');
+        try {
+          const r = await PA.POST('/agent/next2', { action: 'APPROVE_NEXT', timestamp: Math.floor(Date.now() / 1000) });
+          $('nextBox').textContent = await r.text(); PA.setBadge('nextState', 'ok', 'ok');
+        } catch { PA.setBadge('nextState', 'err', 'error'); }
+        finally { PA.setBusy(false); }
+      };
+      $('askBtn').onclick = async () => {
+        const text = (document.getElementById('askText').value || '').trim(); if (!text) return;
+        PA.setBusy(true, 'Sending ASK…');
+        try {
+          const r = await PA.POST('/agent/ask', { text, timestamp: Math.floor(Date.now() / 1000) });
+          document.getElementById('askOut').textContent = await r.text(); PA.setBadge('actState', 'ok', 'queued');
+        } catch { PA.setBadge('actState', 'err', 'error'); }
+        finally { PA.setBusy(false); }
+      };
+      $('chooseBtn').onclick = async () => {
+        const step = (document.getElementById('chooseStep').value || '').trim(); if (!step) return;
+        try { const r = await PA.POST('/agent/choose', { step_id: step }); document.getElementById('chooseOut').textContent = await r.text(); } catch (e) { document.getElementById('chooseOut').textContent = String(e); }
+      };
+
+      // ===== HUD lite =====
+      async function hud() {
+        try {
+          const [pw, pa] = await Promise.all([PA.GET('/agent/worker_status'), PA.GET('/agent/approvals_count')]);
+          const w = await pw.json(); const a = await pa.json();
+          const lines = []; if (w && w.worker) lines.push(`worker: ${w.worker.status || 'ok'}`); if (a && typeof a.count === 'number') lines.push(`approvals: ${a.count}`);
+          document.getElementById('hudLines').innerText = lines.join('\n');
+        } catch (e) { }
+      }
+      setInterval(hud, 5000); hud();
+
+      // ===== Plan font-size & wrap (both panes) =====
+      let fs = parseFloat(localStorage.getItem('plan_fs') || '1.0');
+      function applyFs() {
+        document.getElementById('planDetails').style.fontSize = fs.toFixed(2) + 'em';
+        document.getElementById('planTree').style.fontSize = fs.toFixed(2) + 'em';
+      }
+      document.getElementById('fsPlus').onclick = () => { fs = Math.min(2.0, fs + 0.1); localStorage.setItem('plan_fs', fs); applyFs(); };
+      document.getElementById('fsMinus').onclick = () => { fs = Math.max(0.7, fs - 0.1); localStorage.setItem('plan_fs', fs); applyFs(); };
+      document.getElementById('fsReset').onclick = () => { fs = 1.0; localStorage.setItem('plan_fs', fs); applyFs(); };
+      document.getElementById('toggleWrap').onclick = () => { document.getElementById('planDetails').classList.toggle('nowrap'); };
+      applyFs();
+
+      // ===== Plan splitter =====
+      (function () {
+        const split = document.getElementById('planSplit'), gut = document.getElementById('planGutter'); if (!split || !gut) return;
+        const saved = localStorage.getItem('plan_split_px'); if (saved) { split.style.gridTemplateColumns = `${saved}px 6px 1fr`; }
+        let drag = false;
+        gut.addEventListener('mousedown', () => { drag = true; document.body.style.userSelect = 'none'; });
+        window.addEventListener('mouseup', () => { drag = false; document.body.style.userSelect = ''; });
+        window.addEventListener('mousemove', (e) => {
+          if (!drag) return;
+          const rect = split.getBoundingClientRect(); const x = Math.max(220, Math.min(e.clientX - rect.left, rect.width - 240));
+          split.style.gridTemplateColumns = `${x}px 6px 1fr`; localStorage.setItem('plan_split_px', x);
+        });
+      })();
+
+      // ===== Init projects after DOM is ready =====
+      initProjects();
+    })();
+  </script>
+
+  <script src="/pwa/agent_plan_v3.js?v=3.3"></script>
+</body>
+
+</html>

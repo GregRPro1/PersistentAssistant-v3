@@ -3,577 +3,532 @@ phases:
   steps:
   - id: '0.1'
     status: done
-    title: Define root project directory layout (C:\_Repos\PersistentAssistant)
     description: Define root project directory layout (C:\_Repos\PersistentAssistant)
-  - id: 0.1.a
-    status: done
-    title: Confirm base folders created
-  - id: 0.1.b
-    status: done
-    title: Confirm Windows + VSCode env
+    items:
+    - title: Confirm base folders created
+      status: done
+    - title: Confirm Windows + VSCode env
+      status: done
   - id: '0.2'
     status: done
-    title: Initialize new Git repository and first commit
     description: Initialize new Git repository and first commit
-  - id: 0.2.a
-    status: done
-    title: .gitignore and README present
+    items:
+    - title: .gitignore and README present
+      status: done
   - id: '0.3'
     status: done
-    title: Create venv, requirements, and lock PyQt6 environment
     description: Create venv, requirements, and lock PyQt6 environment
-  - id: 0.3.a
-    status: done
-    title: PyQt6 + PyQt6-WebEngine installed
+    items:
+    - title: PyQt6 + PyQt6-WebEngine installed
+      status: done
   - id: '7.0'
-    status: in_progress
     title: MVP v0.1 Sprint
-    description: Lock scope; smoke-testable agent; pack+CI green.
-  - id: '7.6'
-    status: planned
-    title: LLM provider adapter (stub→API by config)
-    description: File stub now; API later; same interface.
-  - id: '12.0'
     status: in_progress
-    title: 'Project: Suspension Optimization'
-    description: Initialize workspace, baseline calc, smoke.
-  - id: '13.0'
+    desc: Lock scope; smoke-testable agent; pack+CI green.
+  - id: '7.6'
+    title: LLM provider adapter (stub→API by config)
     status: planned
+    desc: File stub now; API later; same interface.
+  - id: '12.0'
+    title: 'Project: Suspension Optimization'
+    status: in_progress
+    desc: Initialize workspace, baseline calc, smoke.
+  - id: '13.0'
     title: 'Project: BarSim'
-    description: Initialize workspace, minimal loop, smoke.
+    status: planned
+    desc: Initialize workspace, minimal loop, smoke.
 - name: 'Phase 1: MVP Interface Foundations'
   steps:
   - id: '1.1'
     status: done
-    title: Create main
     description: Create main.py with minimal startup logic
-  - id: 1.1.a
-    status: done
-    title: App boots
+    items:
+    - title: App boots
+      status: done
   - id: '1.2'
     status: done
-    title: Create main_window
     description: Create main_window.py with tabbed layout
-  - id: 1.2.a
-    status: done
-    title: Tabs mount without errors
+    items:
+    - title: Tabs mount without errors
+      status: done
   - id: '1.3'
     status: done
-    title: Create input_tab
     description: Create input_tab.py with editable text + copy button
-  - id: 1.3.a
-    status: done
-    title: Copy to clipboard works
+    items:
+    - title: Copy to clipboard works
+      status: done
   - id: '1.4'
     status: done
-    title: Create prompt_tab
     description: Create prompt_tab.py with editable prompt + copy button
-  - id: 1.4.a
-    status: done
-    title: Copy to clipboard works
+    items:
+    - title: Copy to clipboard works
+      status: done
   - id: '1.5'
     status: done
-    title: Create chat_tab
     description: Create chat_tab.py with embedded ChatGPT browser pane
-  - id: 1.5.a
-    status: done
-    title: Loads chat.openai.com (manual login)
+    items:
+    - title: Loads chat.openai.com (manual login)
+      status: done
   - id: '1.6'
     status: done
-    title: Create response_tab
     description: Create response_tab.py with paste + log
-  - id: 1.6.a
-    status: done
-    title: Paste from clipboard works
-  - id: 1.6.b
-    status: done
-    title: Manual log to YAML works
+    items:
+    - title: Paste from clipboard works
+      status: done
+    - title: Manual log to YAML works
+      status: done
   - id: '1.7'
     status: done
-    title: Implement autosave on paste to YAML
     description: Implement autosave on paste to YAML
-  - id: 1.7.a
-    status: done
-    title: Auto-write to data/interactions/
+    items:
+    - title: Auto-write to data/interactions/
+      status: done
   - id: '1.8'
     status: done
-    title: Add visual confirmation (status label) for saves/copies
     description: Add visual confirmation (status label) for saves/copies
-  - id: 1.8.a
-    status: done
-    title: Timed status messages visible
+    items:
+    - title: Timed status messages visible
+      status: done
   - id: '1.9'
     status: done
-    title: Enforce file headers and docstrings
     description: Enforce file headers and docstrings
-  - id: 1.9.a
-    status: done
-    title: Headers present in all GUI/core files
+    items:
+    - title: Headers present in all GUI/core files
+      status: done
   - id: '1.10'
     status: done
-    title: Create core/prompt_formatter
     description: Create core/prompt_formatter.py and hook Format button
-  - id: 1.10.a
-    status: done
-    title: Minimal structured prompt wrapper
+    items:
+    - title: Minimal structured prompt wrapper
+      status: done
   - id: '1.11'
     status: done
-    title: Simulate AI send (Prompt → Response)
     description: Simulate AI send (Prompt → Response)
-  - id: 1.11.a
-    status: done
-    title: Dummy response writer working
+    items:
+    - title: Dummy response writer working
+      status: done
   - id: '1.12'
     status: done
-    title: Copy All as YAML (Input+Prompt+Response)
     description: Copy All as YAML (Input+Prompt+Response)
-  - id: 1.12.a
-    status: done
-    title: Writes combined YAML and copies to clipboard
+    items:
+    - title: Writes combined YAML and copies to clipboard
+      status: done
   - id: '1.13'
     status: done
-    title: Plan tab (read-only) loads plan YAML and shows current
     description: Plan tab (read-only) loads plan YAML and shows current
-  - id: 1.13.a
-    status: done
-    title: Show phases/steps with statuses
-  - id: 1.13.b
-    status: done
-    title: Show progress string (Phase/Step/Items)
+    items:
+    - title: Show phases/steps with statuses
+      status: done
+    - title: Show progress string (Phase/Step/Items)
+      status: done
   - id: '1.14'
     status: done
-    title: Plan controls (Advance / Rollback)
     description: Plan controls (Advance / Rollback)
-  - id: 1.14.a
-    status: done
-    title: Update plan YAML in place
-  - id: 1.14.b
-    status: done
-    title: Immediate UI refresh
+    items:
+    - title: Update plan YAML in place
+      status: done
+    - title: Immediate UI refresh
+      status: done
   - id: '1.15'
     status: done
-    title: Structure Runner (launch tools/structure_sync
     description: Structure Runner (launch tools/structure_sync.py from UI)
-  - id: 1.15.a
-    status: done
-    title: Show file counts and link to snapshot
+    items:
+    - title: Show file counts and link to snapshot
+      status: done
   - id: '1.16'
     status: done
-    title: Self-Introspection v1 (write insights report from snapshot)
     description: Self-Introspection v1 (write insights report from snapshot)
-  - id: 1.16.a
-    status: done
-    title: data/insights/introspection_report.yaml
+    items:
+    - title: data/insights/introspection_report.yaml
+      status: done
   - id: '1.17'
     status: done
-    title: Self-Development Loop v1 (open improvement tasks)
     description: Self-Development Loop v1 (open improvement tasks)
-  - id: 1.17.a
-    status: done
-    title: data/tickets/task_*.yaml (created via UI)
+    items:
+    - title: data/tickets/task_*.yaml (created via UI)
+      status: done
 - name: 'Phase 2: Project Context + Selection'
   steps:
   - id: '2.1'
     status: done
-    title: Project selector at startup (multi-project support)
     description: Project selector at startup (multi-project support)
-  - id: 2.1.a
-    status: done
-    title: Persist last project choice
+    items:
+    - title: Persist last project choice
+      status: done
   - id: '2.2'
     status: done
-    title: Load project metadata (paths, plan path) from simple YAML
     description: Load project metadata (paths, plan path) from simple YAML
-  - id: 2.2.a
-    status: done
-    title: Show project name/path in status bar
+    items:
+    - title: Show project name/path in status bar
+      status: done
   - id: '2.3'
     status: done
-    title: Project switching entry point (menu)
     description: Project switching entry point (menu)
-  - id: 2.3.a
-    status: done
-    title: Project → Switch… menu opens selector and persists session
+    items:
+    - title: Project → Switch… menu opens selector and persists session
+      status: done
   - id: '2.4'
     status: planned
-    title: File-integrity protocol (manifest + safe replace + drift verify)
     description: File-integrity protocol (manifest + safe replace + drift verify)
-  - id: 2.4.a
-    status: planned
-    title: tools/file_manifest.py → project/structure/file_manifest.yaml
-  - id: 2.4.b
-    status: planned
-    title: tools/safe_replace.py gated by expected sha256
-  - id: 2.4.c
-    status: planned
-    title: tools/verify_against_manifest.py drift checker
+    items:
+    - title: tools/file_manifest.py → project/structure/file_manifest.yaml
+      status: planned
+    - title: tools/safe_replace.py gated by expected sha256
+      status: planned
+    - title: tools/verify_against_manifest.py drift checker
+      status: planned
   - id: '2.8'
     status: done
-    title: Deep inventory + dependency audit in place
     description: Deep inventory + dependency audit in place
-  - id: 2.8.a
-    status: done
-    title: tools/deep_inventory.py generates reports
-  - id: 2.8.b
-    status: done
-    title: 'Reports present: deep_inventory, deep_calls, docstring, imports, duplication'
+    items:
+    - title: tools/deep_inventory.py generates reports
+      status: done
+    - title: 'Reports present: deep_inventory, deep_calls, docstring, imports, duplication'
+      status: done
   - id: '2.9'
     status: done
-    title: Snapshot-aware safe replace (use existing tools/safe_replace
-    description: Snapshot-aware safe replace (use existing tools/safe_replace.py + get_expected_sha.py)
-  - id: 2.9.a
-    status: done
-    title: tools/get_expected_sha.py created
-  - id: 2.9.b
-    status: planned
-    title: (optional) git pre-commit regenerates deep inventory
+    description: Snapshot-aware safe replace (use existing tools/safe_replace.py +
+      get_expected_sha.py)
+    items:
+    - title: tools/get_expected_sha.py created
+      status: done
+    - title: (optional) git pre-commit regenerates deep inventory
+      status: planned
   - id: '2.10'
     status: planned
-    title: Deep inventory includes dunder files (e
-    description: Deep inventory includes dunder files (e.g., __init__.py) and reflects them in insights.
+    description: Deep inventory includes dunder files (e.g., __init__.py) and reflects
+      them in insights.
 - name: 'Phase 3: Model Catalogue & Providers'
   steps:
   - id: '3.1'
     status: done
-    title: Keys loader + sanity checks
     description: Keys loader + sanity checks
-  - id: 3.1.a
-    status: done
-    title: tools/_env.py + tools/check_api_keys.py
+    items:
+    - title: tools/_env.py + tools/check_api_keys.py
+      status: done
   - id: '3.2'
     status: done
-    title: Fetch raw provider models
     description: Fetch raw provider models
-  - id: 3.2.a
-    status: done
-    title: tools/fetch_ai_models.py → ai_models_raw.yaml
+    items:
+    - title: tools/fetch_ai_models.py → ai_models_raw.yaml
+      status: done
   - id: '3.3'
     status: done
-    title: Schema validator with JSON SUMMARY
     description: Schema validator with JSON SUMMARY
-  - id: 3.3.a
-    status: done
-    title: tools/check_ai_models.py validates ai_models.yaml
+    items:
+    - title: tools/check_ai_models.py validates ai_models.yaml
+      status: done
   - id: '3.4'
     status: done
-    title: Provider docs + curated pricing/caps (override/scrape/baseline)
     description: Provider docs + curated pricing/caps (override/scrape/baseline)
-  - id: 3.4.a
-    status: done
-    title: tools/provider_docs.py produces curated dynamic entries
+    items:
+    - title: tools/provider_docs.py produces curated dynamic entries
+      status: done
   - id: '3.5'
     status: done
-    title: Update & promote models safely
     description: Update & promote models safely
-  - id: 3.5.a
-    status: done
-    title: tools/update_ai_models.py → ai_models_tmp.yaml → ai_models.yaml
+    items:
+    - title: tools/update_ai_models.py → ai_models_tmp.yaml → ai_models.yaml
+      status: done
   - id: '3.6'
     status: done
-    title: Probe models (ping) and mark health
     description: Probe models (ping) and mark health
-  - id: 3.6.a
-    status: done
-    title: tools/probe_models.py → data/insights/probe_report.json
+    items:
+    - title: tools/probe_models.py → data/insights/probe_report.json
+      status: done
   - id: '3.7'
     status: done
-    title: 'GUI tools tab: busy cursor, per-run logs, summaries'
     description: 'GUI tools tab: busy cursor, per-run logs, summaries'
-  - id: 3.7.a
-    status: done
-    title: Update/Probe/Check Keys buttons wired
-  - id: 3.7.b
-    status: done
-    title: Per-run logs logs/tool_run_*.log
+    items:
+    - title: Update/Probe/Check Keys buttons wired
+      status: done
+    - title: Per-run logs logs/tool_run_*.log
+      status: done
   - id: '3.8'
     status: planned
-    title: Optional pricing overrides file
     description: Optional pricing overrides file
-  - id: 3.8.a
-    status: planned
-    title: config/provider_pricing_overrides.yaml supported
+    items:
+    - title: config/provider_pricing_overrides.yaml supported
+      status: planned
 - name: 'Phase 4: OpenAI-first API Send Path'
   steps:
+  - id: 4.0R
+    status: done
+    description: 'Reflection Gate: verify existing GUI capability and handlers before
+      any UI change'
+    items:
+    - title: deep_inventory refreshed
+      status: done
+    - title: reflection_report.yaml created
+      status: done
+    - title: pack_reflection created
+      status: done
   - id: '4.1'
     status: in_progress
-    title: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown from ai_models'
-    description: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown from ai_models.yaml,
-      Browser/API toggle'
-  - id: 4.1.1
-    status: in_progress
-    title: 'Model probe matrix (parallel): ping status per model; summarize failures for parallel fixes'
-    description: 'Model probe matrix (parallel): ping status per model; summarize failures for parallel
-      fixes'
-  - id: 4.1.2
-    status: in_progress
-    title: 'Capability cataloging: record model capability tags after successful ping'
-    description: 'Capability cataloging: record model capability tags after successful ping'
-  - id: 4.1.3
-    status: done
-    title: Centralized error-capture runner integrated into inventory/reflection/model probe pipeline
-    description: Centralized error-capture runner integrated into inventory/reflection/model probe pipeline
-  - id: 4.1.4
-    status: in_progress
-    title: UI shows traffic-light status for models from probe matrix
-    description: UI shows traffic-light status for models from probe matrix
-  - id: 4.1.5
-    status: done
-    title: Wire Browser/API toggle; persist provider/model/mode to project_session
-    description: Wire Browser/API toggle; persist provider/model/mode to project_session.yaml
+    description: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown
+      from ai_models.yaml, Browser/API toggle'
+    items:
+    - title: Filter to chat-capable & healthy models
+      status: planned
+    - title: Persist selection in project_session.yaml
+      status: planned
   - id: 4.1.3b
     status: done
-    title: Path normalization + cwd-agnostic execution across runner/probe
     description: Path normalization + cwd-agnostic execution across runner/probe
   - id: 4.1.3c
     status: done
-    title: Hardened runner with robust argv parsing + insights export
     description: Hardened runner with robust argv parsing + insights export
   - id: 4.1.3d
     status: done
-    title: UI traffic-light models safe-replaced; SKIP logging explicit
     description: UI traffic-light models safe-replaced; SKIP logging explicit
-  - id: 4.1.a
-    status: planned
-    title: Filter to chat-capable & healthy models
-  - id: 4.1.b
-    status: planned
-    title: Persist selection in project_session.yaml
+  - id: 4.1.1
+    status: in_progress
+    description: 'Model probe matrix (parallel): ping status per model; summarize
+      failures for parallel fixes'
+    items: []
+  - id: 4.1.2
+    status: in_progress
+    description: 'Capability cataloging: record model capability tags after successful
+      ping'
+    items: []
+  - id: 4.1.3
+    status: done
+    description: Centralized error-capture runner integrated into inventory/reflection/model
+      probe pipeline
+  - id: 4.1.4
+    status: in_progress
+    description: UI shows traffic-light status for models from probe matrix
+  - id: 4.1.5
+    status: done
+    description: Wire Browser/API toggle; persist provider/model/mode to project_session.yaml
   - id: '4.2'
     status: done
-    title: Wire ai_client to 'Send to AI (API)' button
     description: Wire ai_client to 'Send to AI (API)' button
-  - id: 4.2.a
-    status: planned
-    title: Reply → Response tab; errors → Tools status/log
-  - id: 4.2.b
-    status: planned
-    title: OpenAI-only gate via UI toggle
+    items:
+    - title: Reply → Response tab; errors → Tools status/log
+      status: planned
+    - title: OpenAI-only gate via UI toggle
+      status: planned
   - id: '4.3'
     status: done
-    title: Auto-log token usage and cost to interaction YAML
     description: Auto-log token usage and cost to interaction YAML
-  - id: 4.3.a
-    status: planned
-    title: Append provider/model/tokens/cost
+    items:
+    - title: Append provider/model/tokens/cost
+      status: planned
   - id: '4.4'
     status: done
-    title: Robust error surfacing (keys/quota/4xx/5xx) with succinct user summary
     description: Robust error surfacing (keys/quota/4xx/5xx) with succinct user summary
-  - id: 4.4.a
-    status: planned
-    title: One-line UI summary + detailed log file
+    items:
+    - title: One-line UI summary + detailed log file
+      status: planned
   - id: '4.5'
     status: done
-    title: Unit tests for ai_client pricing and selection
     description: Unit tests for ai_client pricing and selection
-  - id: 4.5.a
-    status: planned
-    title: tests/test_ai_client_costs.py
-  - id: 4.0R
-    status: done
-    title: 'Reflection Gate: verify existing GUI capability and handlers before any UI change'
-    description: 'Reflection Gate: verify existing GUI capability and handlers before any UI change'
-  - id: 4.0R.a
-    status: done
-    title: deep_inventory refreshed
-  - id: 4.0R.b
-    status: done
-    title: reflection_report.yaml created
-  - id: 4.0R.c
-    status: done
-    title: pack_reflection created
+    items:
+    - title: tests/test_ai_client_costs.py
+      status: planned
 - name: 'Phase 5: Memory & Persistence'
   steps:
   - id: '5.1'
     status: done
-    title: Persistent memory (summarize interactions → memory store)
     description: Persistent memory (summarize interactions → memory store)
-  - id: 5.1.a
-    status: planned
-    title: memory/summary_*.yaml
+    items:
+    - title: memory/summary_*.yaml
+      status: planned
   - id: '5.2'
     status: done
-    title: Retrieve memory into prompt_formatter context window
     description: Retrieve memory into prompt_formatter context window
-  - id: 5.2.a
-    status: planned
-    title: Configurable include rules
+    items:
+    - title: Configurable include rules
+      status: planned
   - id: '5.3'
     status: done
-    title: Memory viewer in Plan tab (read-only first)
     description: Memory viewer in Plan tab (read-only first)
-  - id: 5.3.a
-    status: planned
-    title: List & open summaries
+    items:
+    - title: List & open summaries
+      status: planned
 - name: 'Phase 6: Orchestration Roles & Local Execution'
   steps:
   - id: '6.1'
     status: done
-    title: Enable Role GPTs (Architect / CodeGen / Reviewer) with pinned policies
     description: Enable Role GPTs (Architect / CodeGen / Reviewer) with pinned policies
+    items:
+    - title: docs/gpt/architect.md, codegen.md, reviewer.md created
+      status: planned
+    - title: Headers with Feature-ID enforced in outputs
+      status: planned
+    success:
+    - Architect emits module.yaml + acceptance tests + Feature-ID
+    - CodeGen emits full files + tests + unified diff
+    - Reviewer returns checklist + schema validation notes
     files:
     - docs/gpt/architect.md
     - docs/gpt/codegen.md
     - docs/gpt/reviewer.md
     tags:
     - role_gpts
-    success:
-    - Architect emits module.yaml + acceptance tests + Feature-ID
-    - CodeGen emits full files + tests + unified diff
-    - Reviewer returns checklist + schema validation notes
-  - id: 6.1.a
-    status: planned
-    title: docs/gpt/architect.md, codegen.md, reviewer.md created
-  - id: 6.1.b
-    status: planned
-    title: Headers with Feature-ID enforced in outputs
+    autonomy_level: review_required
+    security: sensitive
   - id: '6.2'
     status: planned
-    title: Local Exec Bridge (LEB) service for local run & safe patch apply
     description: Local Exec Bridge (LEB) service for local run & safe patch apply
+    items:
+    - title: 'leb/main.py FastAPI: /run-tests, /apply-patch'
+      status: planned
+    - title: Token auth; localhost bind only
+      status: planned
+    success:
+    - /run-tests returns json {returncode, stdout, stderr}
+    - /apply-patch enforces SHA + backup + atomic write
     files:
     - leb/main.py
     - gui/core/leb_client.py
     tags:
     - local_exec_bridge
-    success:
-    - /run-tests returns json {returncode, stdout, stderr}
-    - /apply-patch enforces SHA + backup + atomic write
-  - id: 6.2.a
-    status: planned
-    title: 'leb/main.py FastAPI: /run-tests, /apply-patch'
-  - id: 6.2.b
-    status: planned
-    title: Token auth; localhost bind only
+    autonomy_level: medium
+    security: sensitive
   - id: '6.3'
     status: done
-    title: GUI Run tab wired to LEB with live logs and status
     description: GUI Run tab wired to LEB with live logs and status
-    files:
-    - gui/tabs/run_tab.py
-    tags:
-    - local_exec_bridge
+    items:
+    - title: One-click local test; red/green badge
+      status: planned
     success:
     - Timeout handled; logs scroll
     - Non-zero exit flips UI to red
-  - id: 6.3.a
-    status: planned
-    title: One-click local test; red/green badge
+    files:
+    - gui/tabs/run_tab.py
+    depends_on:
+    - '6.2'
+    tags:
+    - local_exec_bridge
   - id: 6.3.c
     status: done
-    title: Wire Run tab to LEB (GUI verified)
     description: Wire Run tab to LEB (GUI verified)
   - id: '6.4'
     status: in_progress
-    title: CI parity (GitHub Actions on windows-latest)
     description: CI parity (GitHub Actions on windows-latest)
+    items:
+    - title: .github/workflows/ci.yml mirrors local command
+      status: planned
+    - title: 'Artifacts: logs, JUnit XML, coverage HTML'
+      status: planned
     files:
     - .github/workflows/ci.yml
-    tags:
-    - repo_ci_integration
     success:
     - PRs blocked on failing tests
     - Local and CI results match for baseline suite
+    tags:
+    - repo_ci_integration
   - id: 6.4.a
-    status: planned
-    title: .github/workflows/ci.yml mirrors local command
-  - id: 6.4.a
-    status: in_progress
-    title: Add Windows CI workflow (GitHub Actions)
     description: Add Windows CI workflow (GitHub Actions)
+    status: in_progress
   - id: 6.4.b
-    status: planned
-    title: 'Artifacts: logs, JUnit XML, coverage HTML'
-  - id: 6.4.b
-    status: planned
-    title: Run CI smoke (tests minimal) and upload logs
     description: Run CI smoke (tests minimal) and upload logs
+    status: planned
   - id: 6.4.c
+    description: 'Gate on main: CI must pass'
     status: planned
     title: Add Agent Watchdog + Alerting
-    description: 'Gate on main: CI must pass'
+    desc: Install watchdog, schedule every 2 min, YAML-configured notifications; enter
+      backoff if flapping.
   - id: 6.4.e
-    status: planned
     title: Consolidate inventory/report tools
-    description: 'Keep: file_manifest + deep_inventory (+reporters). Deprecate: audit_inventory & structure_sync
-      (soft). Add report_index.py; extend deep_inventory with extras. Wire tool_catalog + CI check.'
-  - id: 6.4.f
-    status: done
-    title: Standardize project summary pipeline
-    description: Create reporters; add pa_std_summary orchestrator; ensure pack contains index+headers;
-      wire into tool catalog.
-  - id: 6.4.g
     status: planned
+    desc: 'Keep: file_manifest + deep_inventory (+reporters). Deprecate: audit_inventory
+      & structure_sync (soft). Add report_index.py; extend deep_inventory with extras.
+      Wire tool_catalog + CI check.'
+  - id: 6.4.f
+    title: Standardize project summary pipeline
+    status: done
+    desc: Create reporters; add pa_std_summary orchestrator; ensure pack contains
+      index+headers; wire into tool catalog.
+  - id: 6.4.g
     title: CI gate + verify in Actions
-    description: GH Actions mirrors local ci_check.py and blocks PRs if pack incomplete.
+    status: planned
+    desc: GH Actions mirrors local ci_check.py and blocks PRs if pack incomplete.
   - id: '6.5'
     status: planned
-    title: Apply patch (local) workflow via LEB using unified diff
     description: Apply patch (local) workflow via LEB using unified diff
+    items:
+    - title: Parse diff → per-file expected SHA → safe replace
+      status: planned
+    depends_on:
+    - '2.4'
+    - '6.2'
     tags:
     - local_exec_bridge
     - file_integrity
-  - id: 6.5.a
-    status: planned
-    title: Parse diff → per-file expected SHA → safe replace
 - name: 'Phase 7: Research & Registry (Enable later)'
   steps:
   - id: '7.1'
     status: done
-    title: Agent endpoints up (fallback acceptable)
     description: Central research registry (store structured summaries + citations)
+    items:
+    - title: No full-document storage
+      status: planned
     tags:
     - research_registry
-  - id: 7.1.a
-    status: planned
-    title: No full-document storage
+    autonomy_level: review_required
+    security: free
+    title: Agent endpoints up (fallback acceptable)
+    desc: Health/plan/summary/recent/next2/ui return 200, minimal payload.
   - id: '7.2'
     status: done
-    title: MVP Smoke Test tool
     description: Deep Research integration (cited digests on demand)
+    items:
+    - title: Wire ingest to registry entries
+      status: planned
+    depends_on:
+    - '7.1'
     tags:
     - deep_research
-  - id: 7.2.a
-    status: planned
-    title: Wire ingest to registry entries
+    title: MVP Smoke Test tool
+    desc: One .py script hits core endpoints, prints table, nonzero on fail.
   - id: '7.3'
+    description: Phone Digest microservice (LAN-only) with token header
     status: done
     title: 'UI: Plan viewer reachable'
-    description: Phone Digest microservice (LAN-only) with token header
+    desc: Open /pwa/agent; renders plan summary and health chip.
   - id: '7.4'
+    description: PWA shell hits /phone/digest and renders cards
     status: planned
     title: Watchdog schedule + backoff
-    description: PWA shell hits /phone/digest and renders cards
+    desc: YAML config; email/slack/phone from config; backoff if flapping.
   - id: '7.5'
+    description: Action buttons (Approve/Reject Next Pack) with audit log
     status: done
     title: CI + Pack completeness
-    description: Action buttons (Approve/Reject Next Pack) with audit log
+    desc: Catalog rebuilt, enrich pack, verify passes in CI.
 - name: 'Phase 8: Agentic Automation (Non-code chores)'
   steps:
   - id: '8.1'
     status: done
-    title: ChatGPT Agent for multistep non-code tasks (report/notes assembly)
     description: ChatGPT Agent for multistep non-code tasks (report/notes assembly)
+    items:
+    - title: Guarded by project autonomy policy
+      status: planned
     tags:
     - agent_automation
-  - id: 8.1.a
-    status: planned
-    title: Guarded by project autonomy policy
+    autonomy_level: medium
 - name: 'Phase 9: Repo-aware PR Flow'
   steps:
   - id: '9.1'
     status: planned
-    title: Codex Agent for repo edits/tests/PRs (human approval required)
     description: Codex Agent for repo edits/tests/PRs (human approval required)
+    items:
+    - title: PR template with Feature-ID and checklist
+      status: planned
+    - title: CI must pass
+      status: planned
+    depends_on:
+    - '6.4'
+    - '6.5'
     tags:
     - codex_prs
     - repo_ci_integration
-  - id: 9.1.a
-    status: planned
-    title: PR template with Feature-ID and checklist
-  - id: 9.1.b
-    status: planned
-    title: CI must pass
+    autonomy_level: high
+    security: sensitive
 meta:
   version: '3.2'
   current_step_policy: explicit
@@ -596,8 +551,8 @@ steps:
   status: done
 - id: '9.7'
   name: Lessons loop and schema modification process
-  desc: Install schema_modifications and lessons process. Gate prehook linter. Lessons captured from failures
-    and enforced.
+  desc: Install schema_modifications and lessons process. Gate prehook linter. Lessons
+    captured from failures and enforced.
   status: planned
   tags:
   - quality
@@ -614,8 +569,9 @@ steps:
     status: planned
 - id: '9.8'
   name: Inbound AI processing pipeline v1
-  desc: 'PA pipeline when receiving AI input: UI notify start; update schemas; update lessons; parse scripts;
-    run; system diagnostics; code tests; UI endpoint tests; summary per schema; push status to UIs.'
+  desc: 'PA pipeline when receiving AI input: UI notify start; update schemas; update
+    lessons; parse scripts; run; system diagnostics; code tests; UI endpoint tests;
+    summary per schema; push status to UIs.'
   status: planned
   tags:
   - pipeline
@@ -647,16 +603,17 @@ steps:
     status: planned
 - id: '9.9'
   name: UI signals and traffic lights
-  desc: Status bar with thinking timer and traffic lights (green ready, yellow waiting, red error). Re-run
-    Health button and per-endpoint panel.
+  desc: Status bar with thinking timer and traffic lights (green ready, yellow waiting,
+    red error). Re-run Health button and per-endpoint panel.
   status: planned
   tags:
   - ux
   - observability
 - id: '9.10'
   name: Tooling consolidation policy (Python primary)
-  desc: Prefer Python for logic, parsing, tests. Use PowerShell only for Windows-native ops (firewall,
-    netsh, processes, services). Document tool registry and avoid duplicate tools.
+  desc: Prefer Python for logic, parsing, tests. Use PowerShell only for Windows-native
+    ops (firewall, netsh, processes, services). Document tool registry and avoid duplicate
+    tools.
   status: planned
   tags:
   - tooling
@@ -670,7 +627,8 @@ steps:
     status: planned
 - id: '9.11'
   name: Outbound prompt contractor v2
-  desc: Outbound prompt includes schemas, lessons, tool catalog, plan snapshot and contract reminders.
+  desc: Outbound prompt includes schemas, lessons, tool catalog, plan snapshot and
+    contract reminders.
   status: planned
   tags:
   - prompt
@@ -947,11 +905,13 @@ milestones:
   children:
   - id: 9.6-P4
     name: Centralize plan path (remove hard-coded references)
-    desc: Introduce a single source for plan path and refactor all consumers to use it.
+    desc: Introduce a single source for plan path and refactor all consumers to use
+      it.
     status: planned
     acceptance:
     - 'config/project.yaml contains: plan_path: project/plans/project_plan_v3.yaml'
-    - 'Helper: core.project_session.get_plan_path() resolves ENV PLAN_PATH → config → discovery'
+    - 'Helper: core.project_session.get_plan_path() resolves ENV PLAN_PATH → config
+      → discovery'
     - All listed callers use helper (0 hard-coded mentions remain)
     - Wire test verifies /agent/plan and UI Plan tab still load
     - 'Pack includes: grep before/after, refactor map, tests/ui_wiretest.json'
@@ -975,7 +935,8 @@ milestones:
     acceptance:
     - /agent/tools returns OK
     - gate blocks duplicate ids/titles
-    - every pack carries schemas_current.yaml + plan snapshot + catalog + wiretest JSON
+    - every pack carries schemas_current.yaml + plan snapshot + catalog + wiretest
+      JSON
   - id: 9.6-P1
     name: Docs (TOOLS.md, PROCESS.md)
     status: planned
