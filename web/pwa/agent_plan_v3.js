@@ -1,13 +1,11 @@
-// Agent Plan v3 — tree renderer + status editor + path badge + Go Active.
-// Prefers plan.phases; falls back to plan.tree. Adds ?project= to all PA.GET/POST.
+// Agent Plan v3 — self-contained renderer + editor.
+// - No external deps: uses window.PA {GET,POST,setBusy,badge} from agent.html inline core.
+// - Reads /agent/plan, shows path, color-coded totals, tree with fold, details pane,
+//   status apply (POST /agent/plan/update if available), jump-to-active, tree font size.
 
 (function (win, doc) {
-    const PA = win.PA || {};
     const $ = (id) => doc.getElementById(id);
-    const GET = PA.GET ? PA.GET.bind(PA) :
-        (path) => fetch((PA.uiBase || location.origin) + path, { cache: "no-store" });
-    const setBusy = PA.setBusy || function (b, msg) { const s = $("statusLeft"); if (s) s.textContent = msg || (b ? "Working…" : "Ready"); };
-    const badge = PA.setBadge || function (id, cls, txt) { const b = $(id); if (b) { b.className = "badge " + (cls || ""); b.textContent = txt || ""; } };
+    const PA = win.PA || { GET: (p) => fetch(p), POST: (p, b) => fetch(p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }), setBusy: () => { }, badge: () => { } };
 
     // ---- status helpers ----
     const norm = (s) => String(s || "").toLowerCase()
@@ -24,12 +22,10 @@
         return parts.slice(0, parts.length - 1).join(".");
     }
     function natKey(sid) {
-        const out = [];
-        String(sid || "").split(".").forEach(p => {
+        const out = []; String(sid || "").split(".").forEach(p => {
             if (/^\d+$/.test(p)) out.push({ k: 0, v: parseInt(p, 10) });
             else out.push({ k: 1, v: String(p).toLowerCase() });
-        });
-        return out;
+        }); return out;
     }
     function cmpId(a, b) {
         const A = natKey(a), B = natKey(b), n = Math.max(A.length, B.length);
@@ -37,8 +33,7 @@
             const ax = A[i] || { k: 0, v: -1 }, bx = B[i] || { k: 0, v: -1 };
             if (ax.k !== bx.k) return ax.k - bx.k;
             if (ax.v < bx.v) return -1; if (ax.v > bx.v) return 1;
-        }
-        return 0;
+        } return 0;
     }
 
     // ---- text helpers ----
@@ -46,10 +41,13 @@
     const titleOf = (n) => (n.title && n.title.trim()) || firstSentence(n.description || n.desc) || String(n.id || "");
     const bodyOf = (n) => (n.description || n.desc || "").trim();
 
-    // ---- collect model ----
+    // ---- collect model from either phases[*].steps[*] or server tree
     function fromPhases(doc) {
         const steps = [];
         (Array.isArray(doc.phases) ? doc.phases : []).forEach(ph => {
+            const ptitle = ph.name || ph.title || ("Phase " + (ph.id || ""));
+            const pid = String(ph.id != null ? ph.id : "").trim();
+            if (pid) steps.push({ id: pid, title: ptitle, status: norm(ph.status || ""), description: "", children: [] });
             (ph.steps || []).forEach(s => {
                 steps.push({
                     id: String(s.id || "").trim(),
@@ -71,8 +69,7 @@
             if (!n || !n.id) return;
             out.push({
                 id: String(n.id),
-                title: n.title,
-                description: n.description || n.desc || "",
+                title: n.title, description: n.description || n.desc || "",
                 status: norm(n.status),
                 items: Array.isArray(n.items) ? n.items : [],
                 files: Array.isArray(n.files) ? n.files : [],
@@ -92,193 +89,73 @@
         steps.forEach(s => { if (s.id) map[s.id] = Object.assign({ children: [] }, s); });
 
         const roots = [];
-        Object.keys(map).sort(cmpId).forEach(sid => {
-            const pid = parentId(sid);
-            if (pid && map[pid]) map[pid].children.push(map[sid]);
-            else roots.push(map[sid]);
+        Object.keys(map).sort(cmpId).forEach(id => {
+            const pid = parentId(id);
+            if (pid && map[pid]) map[pid].children.push(map[id]);
+            else roots.push(map[id]);
         });
-        (function sortRec(list) {
-            list.sort((a, b) => cmpId(a.id, b.id));
-            list.forEach(n => sortRec(n.children));
-        })(roots);
+        (function sortRec(lst) { lst.sort((a, b) => cmpId(a.id, b.id)); lst.forEach(n => sortRec(n.children)); })(roots);
 
         const totals = { done: 0, in_progress: 0, blocked: 0, planned: 0 };
-        Object.keys(map).forEach(k => { totals[map[k].status] = (totals[map[k].status] || 0) + 1; });
+        Object.keys(map).forEach(k => { totals[norm(map[k].status)] = (totals[norm(map[k].status)] || 0) + 1; });
 
-        // first in_progress node for "Go active"
-        let firstActive = null;
-        Object.keys(map).sort(cmpId).some(id => { if (map[id].status === 'in_progress') { firstActive = id; return true; } return false; });
-
-        return {
-            tree: roots,
-            totals: { done: totals.done || 0, in_progress: totals.in_progress || 0, blocked: totals.blocked || 0, todo: totals.planned || 0 },
-            source,
-            map
-        };
+        return { tree: roots, totals: { done: totals.done || 0, in_progress: totals.in_progress || 0, blocked: totals.blocked || 0, todo: totals.planned || 0 }, source };
     }
 
     // ---- rendering ----
-    let selectedLi = null;
-    let idToLi = Object.create(null);
-    let lastModel = null;
-
-    async function tryApplyStatus(stepId, newStatus, n) {
-        // Best-effort server update; otherwise show CLI for manual run.
-        try {
-            const r = await (PA.POST ? PA.POST('/agent/plan/update', { id: stepId, status: newStatus, title: n.title || '', desc: bodyOf(n) }) : Promise.reject(new Error('no POST')));
-            if (r && r.ok) {
-                const j = await r.json().catch(() => ({ ok: true }));
-                if (j && j.ok !== false) return true;
-            }
-        } catch (_) { }
-        // fallback: leave CLI in the details pre
-        return false;
-    }
-
-    function renderCounts(t) {
+    let selected = null;
+    function showCounts(t) {
         const el = $("planCounts"); if (!el) return;
-        el.innerHTML = [
-            `<span class="badge green">Done ${t.done || 0}</span>`,
-            `<span class="badge amber">Working ${t.in_progress || 0}</span>`,
-            `<span class="badge red">Blocked ${t.blocked || 0}</span>`,
-            `<span class="badge blue">Todo ${t.todo || 0}</span>`
-        ].join(" · ");
+        el.innerHTML =
+            '<span class="dot green"></span>Done ' + (t.done || 0) + ' &nbsp; ' +
+            '<span class="dot amber"></span>Working ' + (t.in_progress || 0) + ' &nbsp; ' +
+            '<span class="dot red"></span>Blocked ' + (t.blocked || 0) + ' &nbsp; ' +
+            '<span class="dot blue"></span>Todo ' + (t.todo || 0);
     }
-
     function showDetails(n) {
         const box = $("planDetails"); if (!box) return;
         box.innerHTML = "";
-
         const head = doc.createElement("div");
-        head.innerHTML = `<b>${n.id}${titleOf(n) ? ' — ' + titleOf(n) : ''}</b> <span class="badge ${statusClass(n.status)}">${norm(n.status)}</span>`;
+        head.innerHTML = "<b>" + n.id + (titleOf(n) ? (" — " + titleOf(n)) : "") + "</b> " +
+            '<span class="badge ' + statusClass(n.status) + '">' + norm(n.status) + '</span>';
         box.appendChild(head);
 
-        // quick status controls
-        const bar = doc.createElement("div");
-        bar.style.cssText = "display:flex;gap:6px;align-items:center;margin:6px 0 8px 0";
-        ["planned", "in_progress", "done", "blocked"].forEach(st => {
-            const b = doc.createElement("button");
-            b.className = "btn"; b.textContent = st.replace("_", " ");
-            b.onclick = async () => {
-                setBusy(true, `Set ${n.id} → ${st}…`);
-                const applied = await tryApplyStatus(n.id, st, n);
-                if (applied) { await refreshPlan(); setBusy(false); return; }
-                // fallback: regenerate CLI
-                const cli = `python tools\\py\\plan_step_add.py --id "${n.id}" --status ${st}${n.title ? ` --title "${n.title.replace(/"/g, '\\"')}"` : ''}${bodyOf(n) ? ` --desc "${bodyOf(n).replace(/"/g, '\\"')}"` : ''}`;
-                pre.textContent = cli;
-                msg.textContent = "Server update route not available; CLI generated.";
-                setBusy(false);
-            };
-            bar.appendChild(b);
-        });
-        box.appendChild(bar);
-
         const body = bodyOf(n);
-        if (body) {
-            const pre = doc.createElement("pre"); pre.className = "codebox"; pre.textContent = body; box.appendChild(pre);
-        }
+        if (body) { const pre = doc.createElement("pre"); pre.className = "codebox"; pre.textContent = body; box.appendChild(pre); }
 
         const addList = (label, arr, fmt) => {
             if (!arr || !arr.length) return;
-            const t = doc.createElement("div"); t.className = "muted"; t.style.margin = "6px 0 2px 0"; t.textContent = label;
-            box.appendChild(t);
+            const t = doc.createElement("div"); t.className = "hint"; t.style.margin = "6px 0 2px 0"; t.textContent = label; box.appendChild(t);
             const ul = doc.createElement("ul"); ul.className = "plain";
-            arr.forEach(x => {
-                const li = doc.createElement("li");
-                li.textContent = fmt ? fmt(x) : (typeof x === "string" ? x : JSON.stringify(x));
-                ul.appendChild(li);
-            });
+            arr.forEach(x => { const li = doc.createElement("li"); li.textContent = fmt ? fmt(x) : (typeof x === "string" ? x : JSON.stringify(x)); ul.appendChild(li); });
             box.appendChild(ul);
         };
         addList("Files", n.files);
-        addList("Success criteria", n.success);
+        addList("Success", n.success);
         addList("Tags", n.tags);
-        addList("Subtasks", n.items, (it) => `${statusIcon(it.status)} ${it.title || ""}`);
+        addList("Subtasks", n.items, it => (statusIcon(it.status) + " " + (it.title || "")).trim());
 
-        // Edit helper (CLI)
-        const ed = doc.createElement("div"); ed.style.marginTop = "10px";
-        ed.innerHTML = `
-      <button id="planEditBtn" class="btn">Edit…</button>
-      <span class="hint">Generates a CLI for tools\\py\\plan_step_add.py (adds or updates in place).</span>
-      <div id="edMsg" class="muted" style="margin-top:6px"></div>
-      <pre id="edCli" class="codebox"></pre>`;
-        box.appendChild(ed);
-        const msg = ed.querySelector("#edMsg");
-        const pre = ed.querySelector("#edCli");
-
-        const openEditor = () => {
-            const modal = doc.createElement("div");
-            modal.className = "modal";
-            modal.innerHTML = `
-        <div class="modal-card">
-          <div class="modal-head"><b>Edit step ${n.id}</b></div>
-          <div class="row"><label>Title</label><input id="edTitle" type="text" value="${(n.title || "").replace(/"/g, '&quot;')}"></div>
-          <div class="row"><label>Status</label>
-            <select id="edStatus">
-              <option value="planned">planned</option>
-              <option value="in_progress">in_progress</option>
-              <option value="done">done</option>
-              <option value="blocked">blocked</option>
-            </select>
-          </div>
-          <div class="row"><label>Description</label><textarea id="edDesc" rows="6">${(body || "")}</textarea></div>
-          <div class="row">
-            <button id="edApply" class="btn">Apply</button>
-            <button id="edCopy" class="btn">Copy CLI</button>
-            <button id="edClose" class="btn">Close</button>
-            <span id="edMsg2" class="hint"></span>
-          </div>
-        </div>`;
-            doc.body.appendChild(modal);
-            modal.querySelector("#edStatus").value = norm(n.status);
-            const genCli = () => {
-                const t = modal.querySelector("#edTitle").value.trim();
-                const s = modal.querySelector("#edStatus").value.trim();
-                const d = modal.querySelector("#edDesc").value.trim().replace(/\r\n/g, "\n");
-                return `python tools\\py\\plan_step_add.py --id "${n.id}"${t ? ` --title "${t.replace(/"/g, '\\"')}"` : ''} --status ${s}${d ? ` --desc "${d.replace(/"/g, '\\"')}"` : ""}`;
-            };
-            modal.querySelector("#edCopy").onclick = () => {
-                const cli = genCli(); navigator.clipboard.writeText(cli).then(() => { modal.querySelector("#edMsg2").textContent = "Copied"; });
-            };
-            modal.querySelector("#edApply").onclick = async () => {
-                const t = modal.querySelector("#edTitle").value.trim();
-                const s = modal.querySelector("#edStatus").value.trim();
-                const d = modal.querySelector("#edDesc").value.trim().replace(/\r\n/g, "\n");
-                setBusy(true, `Apply ${n.id}…`);
-                let ok = false;
-                try {
-                    const r = await (PA.POST ? PA.POST('/agent/plan/update', { id: n.id, title: t, status: s, desc: d }) : Promise.reject());
-                    if (r && r.ok) { const jj = await r.json().catch(() => ({ ok: true })); ok = (jj.ok !== false); }
-                } catch (_) { }
-                if (ok) { modal.remove(); await refreshPlan(); setBusy(false); return; }
-                // fallback to CLI
-                const cli = genCli(); pre.textContent = cli; msg.textContent = "Server update route not available; CLI generated.";
-                setBusy(false);
-            };
-            modal.querySelector("#edClose").onclick = () => modal.remove();
-        };
-        ed.querySelector("#planEditBtn").onclick = openEditor;
+        // sync status selector
+        const sel = $("edStatusSel"); if (sel) sel.value = norm(n.status || "planned");
+        // remember selected
+        selected = n;
     }
-
     function makeNode(n) {
-        const li = doc.createElement("li"); li.className = "tree-item"; li.dataset.id = n.id;
+        const li = doc.createElement("li"); li.className = "tree-item";
         const kids = Array.isArray(n.children) ? n.children : [];
-        const caret = doc.createElement("span"); caret.className = kids.length ? "caret down" : "caret leaf";
+        const caret = doc.createElement("span"); caret.className = kids.length ? "caret down" : "caret";
+        const ico = doc.createElement("span"); ico.className = "ico"; ico.textContent = statusIcon(n.status);
         const dot = doc.createElement("span"); dot.className = "dot " + statusClass(n.status);
-        const label = doc.createElement("span"); label.className = "lbl"; label.textContent = ` ${n.id}${titleOf(n) ? ' — ' + titleOf(n) : ''}`;
-        li.appendChild(caret); li.appendChild(dot); li.appendChild(label);
+        const lbl = doc.createElement("span"); lbl.className = "lbl"; lbl.textContent = " " + n.id + (titleOf(n) ? (" — " + titleOf(n)) : "");
+        li.appendChild(caret); li.appendChild(ico); li.appendChild(dot); li.appendChild(lbl);
 
         const ul = doc.createElement("ul"); ul.className = "plain";
         kids.forEach(c => ul.appendChild(makeNode(c)));
         if (!kids.length) ul.classList.add("hidden");
         li.appendChild(ul);
 
-        const select = () => {
-            if (selectedLi) selectedLi.classList.remove("selected");
-            selectedLi = li; selectedLi.classList.add("selected");
-            showDetails(n);
-        };
-        [label, dot].forEach(el => el.addEventListener("click", select, { passive: true }));
+        const select = () => { showDetails(n); };
+        [lbl, ico, dot].forEach(el => el.addEventListener("click", select, { passive: true }));
 
         if (kids.length) {
             caret.addEventListener("click", () => {
@@ -286,97 +163,132 @@
                 else { caret.classList.add("down"); ul.classList.remove("hidden"); }
             }, { passive: true });
         }
-
-        idToLi[n.id] = li;
         return li;
     }
-
     function render(model) {
-        lastModel = model;
-        idToLi = Object.create(null);
-        const tree = $("planTree"); const det = $("planDetails");
+        const tree = $("planTree"), det = $("planDetails");
         if (tree) tree.innerHTML = "";
         if (det) det.textContent = "[select a step to see details]";
         const root = doc.createElement("ul"); root.className = "plain";
         (model.tree || []).forEach(n => root.appendChild(makeNode(n)));
         tree.appendChild(root);
-        renderCounts(model.totals || {});
+        showCounts(model.totals || {});
     }
 
-    async function refreshPlan() {
-        setBusy(true, "Loading plan…"); badge("planState", "wait", "loading");
+    // ---- fetch + wire ----
+    let lastModel = null;
+    async function refresh() {
+        PA.setBusy(true, "Loading plan…"); PA.badge("planState", "wait", "loading");
         try {
-            const r = await GET("/agent/plan");
-            const planHeaders = r.headers || null;
+            const r = await PA.GET("/agent/plan");
             const j = await r.json();
             const plan = (j && j.plan) ? j.plan : j;
-            const model = buildModel(plan);
+            lastModel = buildModel(plan);
 
-            // plan path badge
-            let path = plan.plan_path || j.plan_path || "";
-            if (!path && planHeaders && planHeaders.get) { path = planHeaders.get("X-Plan-Path") || ""; }
-            $("planSource").textContent = path ? path : `(${model.source})`;
+            const src = plan.plan_path || plan.path || j.plan_path || j.path || "server/tree";
+            const ps = $("planSource"); if (ps) ps.textContent = src;
 
-            render(model);
-            badge("planState", "ok", "ok");
+            render(lastModel);
+            PA.badge("planState", "ok", "ok");
         } catch (e) {
-            console.error("[plan] refresh error:", e);
-            badge("planState", "err", "error");
+            console.error("plan refresh error", e);
+            PA.badge("planState", "err", "error");
         } finally {
-            setBusy(false);
+            PA.setBusy(false);
         }
     }
 
-    function goActive() {
+    function jumpToActive() {
         if (!lastModel) return;
-        // prefer explicit active if present in payload
-        let targetId = null;
-        // scan a visible data attribute if server provided it through Summary — not guaranteed
-        // otherwise pick first in_progress
-        (function scan(nlist) {
-            for (const n of nlist) {
-                if (!targetId && norm(n.status) === 'in_progress') { targetId = n.id; }
-                if (n.children && n.children.length) scan(n.children);
-            }
-        })(lastModel.tree || []);
-        if (!targetId) return;
-
-        const li = idToLi[targetId]; if (!li) return;
-        // expand all parents
-        let p = li.parentElement; // UL
-        while (p && p !== doc) {
-            const holder = p.parentElement; // LI
-            const caret = holder?.querySelector?.(':scope > .caret');
-            const ul = holder?.querySelector?.(':scope > ul');
-            if (caret && ul && ul.classList.contains('hidden')) { caret.classList.add('down'); ul.classList.remove('hidden'); }
-            p = holder?.parentElement;
+        // pick first in_progress else first planned
+        let pick = null;
+        function scan(list) {
+            for (const n of list) {
+                if (!pick && norm(n.status) === "in_progress") { pick = n; return true; }
+                if (scan(n.children || [])) return true;
+            } return false;
         }
-        const tree = $("planTree");
-        li.scrollIntoView({ block: 'center' });
-        tree.scrollTop = tree.scrollTop - 40;
-        li.querySelector('.lbl')?.click();
+        if (!scan(lastModel.tree || [])) {
+            function scan2(list) {
+                for (const n of list) {
+                    if (!pick && norm(n.status) === "planned") { pick = n; return true; }
+                    if (scan2(n.children || [])) return true;
+                } return false;
+            }
+            scan2(lastModel.tree || []);
+        }
+        if (pick) {
+            showDetails(pick);
+            // try to scroll into view: find the label text
+            const want = pick.id + (titleOf(pick) ? (" — " + titleOf(pick)) : "");
+            const labels = Array.from(doc.querySelectorAll("#planTree .lbl"));
+            const found = labels.find(l => l.textContent && l.textContent.trim().startsWith(" " + want));
+            if (found) { found.scrollIntoView({ block: "center" }); }
+        }
     }
 
-    // expose for header script
-    win.PA_PLAN = { refresh: refreshPlan, goActive };
-
-    doc.addEventListener("DOMContentLoaded", () => {
-        $("planRefresh")?.addEventListener("click", refreshPlan, { passive: true });
-        $("planGoActive")?.addEventListener("click", goActive, { passive: true });
-
-        // font size controls affect BOTH panes (tree + details)
-        let fs = parseFloat(localStorage.getItem('plan_fs') || '1.0');
-        function applyFs() {
-            $("planDetails").style.fontSize = fs.toFixed(2) + 'em';
-            $("planTree").style.fontSize = fs.toFixed(2) + 'em';
+    async function applyStatus() {
+        if (!selected) return;
+        const s = $("edStatusSel").value || "planned";
+        PA.setBusy(true, "Updating…");
+        try {
+            // try write endpoint
+            const r = await PA.POST("/agent/plan/update", { id: selected.id, status: s });
+            const j = await r.json().catch(() => ({ ok: false }));
+            if (j && j.ok) {
+                await refresh();
+                $("planDetails").insertAdjacentHTML("beforeend", '<div class="hint" style="margin-top:6px">Updated via /agent/plan/update</div>');
+            } else {
+                // fallback: show CLI for manual run
+                const cli = 'python tools\\py\\plan_step_add.py --id "' + selected.id + '" --status ' + s;
+                const pre = doc.createElement("pre"); pre.className = "codebox"; pre.textContent = cli;
+                $("planDetails").appendChild(pre);
+            }
+        } catch (e) {
+            const pre = doc.createElement("pre"); pre.className = "codebox"; pre.textContent = String(e || "error");
+            $("planDetails").appendChild(pre);
+        } finally {
+            PA.setBusy(false);
         }
-        $("fsPlus")?.addEventListener("click", () => { fs = Math.min(2.0, fs + 0.1); localStorage.setItem('plan_fs', fs); applyFs(); });
-        $("fsMinus")?.addEventListener("click", () => { fs = Math.max(0.7, fs - 0.1); localStorage.setItem('plan_fs', fs); applyFs(); });
-        $("fsReset")?.addEventListener("click", () => { fs = 1.0; localStorage.setItem('plan_fs', fs); applyFs(); });
-        $("toggleWrap")?.addEventListener("click", () => { $("planDetails").classList.toggle("nowrap"); });
-        applyFs();
+    }
 
-        // splitter persistence (already wired in HTML page script)
-        setTimeout(refreshPlan, 50);
+    // tree font-size controls
+    (function () {
+        const t = $("planTree");
+        const minus = $("treeFsMinus"), plus = $("treeFsPlus"), reset = $("treeFsReset");
+        function setSize(cls) { t.classList.remove("small", "base", "large"); t.classList.add(cls); }
+        minus.addEventListener("click", () => setSize("small"), { passive: true });
+        reset.addEventListener("click", () => setSize("base"), { passive: true });
+        plus.addEventListener("click", () => setSize("large"), { passive: true });
+    })();
+
+    // resizable split (simple)
+    (function () {
+        const split = $("planSplit"), gut = $("planGutter");
+        let drag = false, x0 = 0, leftW = 0, total = 0;
+        gut.addEventListener("mousedown", (e) => {
+            drag = true; x0 = e.clientX; const cs = getComputedStyle(split);
+            const cols = (cs.gridTemplateColumns || "1fr 10px 1fr").split(" ");
+            const left = $("planTree").getBoundingClientRect().width;
+            leftW = left; total = split.getBoundingClientRect().width; doc.body.style.userSelect = "none";
+        });
+        doc.addEventListener("mousemove", (e) => {
+            if (!drag) return;
+            const dx = e.clientX - x0; const w = Math.max(180, Math.min(total - 240, leftW + dx));
+            split.style.gridTemplateColumns = w + "px 10px 1fr";
+        });
+        doc.addEventListener("mouseup", () => { drag = false; doc.body.style.userSelect = ""; });
+    })();
+
+    // wire buttons
+    doc.addEventListener("DOMContentLoaded", () => {
+        const b = $("planRefresh"); if (b) b.addEventListener("click", refresh, { passive: true });
+        const j = $("jumpActive"); if (j) j.addEventListener("click", jumpToActive, { passive: true });
+        const a = $("applyStatus"); if (a) a.addEventListener("click", applyStatus, { passive: true });
+        // auto-load when Plan is present
+        setTimeout(refresh, 60);
     });
+
+    // expose for diag
+    win.PA_PLAN = { refresh, jumpToActive };
 })(window, document);

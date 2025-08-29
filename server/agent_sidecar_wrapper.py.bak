@@ -1,5 +1,6 @@
 # server/agent_sidecar_wrapper.py
-# Robust sidecar wrapper that guarantees required /agent/* endpoints exist.
+# Robust sidecar wrapper that guarantees required /agent/* endpoints exist
+# and delegates to the real sidecar app if present.
 
 import os
 import sys
@@ -10,6 +11,7 @@ import re
 import importlib
 import importlib.util
 import subprocess
+
 from flask import Flask, jsonify, make_response, send_from_directory, request, Response
 
 # ---------------------------------------------------------------------
@@ -19,6 +21,7 @@ REPO = os.path.abspath(os.getcwd())
 PWA_DIR = os.path.join(REPO, "web", "pwa")
 SIG = "wrap-stable-v1"
 
+# Robust repo root probe (kept alongside REPO to avoid churn)
 def _repo_root():
     cur = os.path.abspath(os.path.dirname(__file__))
     for _ in range(8):
@@ -30,10 +33,11 @@ def _repo_root():
         cur = nxt
     return cur
 
+# Plan/tool locations (used for UI badge + Apply)
 _REPO = _repo_root()
 _PLAN_PATH = os.path.join(_REPO, "project", "plans", "project_plan_v3.yaml")
 
-# existing plan tool may be in either location
+# existing plan tool is in one of these two spots in your repo
 _PLAN_ADD = os.path.join(_REPO, "tools", "py", "plan", "plan_step_add.py")
 if not os.path.exists(_PLAN_ADD):
     _PLAN_ADD = os.path.join(_REPO, "tools", "py", "plan_step_add.py")
@@ -122,7 +126,7 @@ if app is None:
 
     # Optional: extension registry (no-op if absent)
     try:
-        from server.app_registry import register_extensions  # type: ignore
+        from server.app_registry import register_extensions
         try:
             register_extensions(app)  # type: ignore[misc]
         except Exception:
@@ -149,6 +153,7 @@ def ep_health():
     return jsonify({"ok": True, "sig": SIG})
 
 def ep_agent_routes():
+    # Alias expected by your auto-health
     try:
         rules = [str(r) for r in app.url_map.iter_rules()]
     except Exception:
@@ -187,16 +192,13 @@ def build_plan_fallback():
         try:
             import yaml  # optional
         except Exception:
-            yaml = None  # type: ignore
+            yaml = None  # type: ignore[assignment]
 
         plan_path = None
-        # be permissive (keeps working if path moves under repo)
         for base, _dirs, files in os.walk(REPO):
             if "project_plan_v3.yaml" in files:
                 plan_path = os.path.join(base, "project_plan_v3.yaml")
                 break
-        if not plan_path:
-            plan_path = _PLAN_PATH
 
         active = None
         tree = []
@@ -274,50 +276,35 @@ def build_plan_fallback():
             dsum(totals, count(phase))
             tree.append(phase)
 
-        return {"active": active, "tree": tree, "totals": totals}
+        return {"active": None, "tree": tree, "totals": totals}
     except Exception as e:
         log("[wrapper]", SIG, "plan fallback error:", e)
         return {"active": None, "tree": [], "totals": {}, "err": str(e)}
 
 def ep_agent_plan():
-    # Prefer server.plan_view if present
+    # Build via real view if available; else fallback
     try:
-        from server.plan_view import build_plan_response  # type: ignore
+        from server.plan_view import build_plan_response  # type: ignore[import]
         try:
             plan = build_plan_response(REPO)
-            return jsonify({"ok": True, "plan": plan, "plan_path": _PLAN_PATH})
         except Exception as e:
-            return jsonify({"ok": True, "plan": {"active": None, "tree": [], "totals": {}, "err": str(e)}, "plan_path": _PLAN_PATH})
+            plan = {"active": None, "tree": [], "totals": {}, "err": str(e)}
     except Exception:
         plan = build_plan_fallback()
-        return jsonify({"ok": True, "plan": plan, "plan_path": _PLAN_PATH})
 
-def ep_plan_update():
-    """
-    Best-effort wrapper to update a single step using plan_step_add.py.
-    Falls back to CLI generation on the client if this route is not present.
-    """
-    data = request.get_json(force=True, silent=True) or {}
-    sid = (data.get("id") or "").strip()
-    if not sid:
-        return jsonify(ok=False, err="missing id"), 400
-    args = [sys.executable, _PLAN_ADD, "--id", sid]
-    title = (data.get("title") or "").strip()
-    status = (data.get("status") or "").strip()
-    desc = (data.get("desc") or "").strip()
-    if title:
-        args += ["--title", title]
-    if status:
-        args += ["--status", status]
-    if desc:
-        args += ["--desc", desc]
-    cp = subprocess.run(args, cwd=_REPO, capture_output=True, text=True)
-    return jsonify(ok=(cp.returncode == 0), rc=cp.returncode, out=cp.stdout, err=cp.stderr, plan_path=_PLAN_PATH)
+    # Always include plan_path for UI badge + tooling
+    out = {"ok": True, "plan": plan, "plan_path": _PLAN_PATH}
+    resp = jsonify(out)
+    resp.headers["X-Plan-Path"] = _PLAN_PATH  # optional header
+    return resp
 
 def ep_agent_summary():
     return jsonify({"ok": True, "summary": {"active_step": None, "desc": "fallback", "next_ids": []}})
 
 def ep_daily_status_fallback():
+    """
+    Return data/status/daily_status.json if present; else a minimal OK stub.
+    """
     try:
         path = os.path.join(REPO, "data", "status", "daily_status.json")
         if os.path.isfile(path):
@@ -339,6 +326,7 @@ def ep_agent_ac():
     return jsonify({"ok": True, "count": n})
 
 def ep_worker_status():
+    # Minimal stub; adapt to your worker if present
     worker = {"calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0, "last_ts": 0, "last_err": "", "last_reply_len": 0}
     return jsonify({"ok": True, "worker": worker})
 
@@ -380,6 +368,24 @@ def ep_agent_ws():
     return jsonify({"ok": True, "ws": "stub"})
 
 # ---------------------------------------------------------------------
+# Plan UPDATE endpoint (UI "Apply" uses this)
+# ---------------------------------------------------------------------
+@app.post("/agent/plan/update")
+def ep_agent_plan_update():
+    data = request.get_json(silent=True) or {}
+    sid = (data.get("id") or data.get("step_id") or "").strip()
+    if not sid:
+        return jsonify(ok=False, err="missing id"), 400
+
+    args = [sys.executable, _PLAN_ADD, "--id", sid]
+    if data.get("title"):  args += ["--title",  data["title"]]
+    if data.get("status"): args += ["--status", data["status"]]
+    if data.get("desc"):   args += ["--desc",   data["desc"]]
+
+    cp = subprocess.run(args, cwd=REPO, capture_output=True, text=True)
+    return jsonify(ok=(cp.returncode == 0), rc=cp.returncode, out=cp.stdout, err=cp.stderr)
+
+# ---------------------------------------------------------------------
 # Optional blueprints (best-effort)
 # ---------------------------------------------------------------------
 def try_register_blueprints(flask_app):
@@ -393,19 +399,24 @@ def try_register_blueprints(flask_app):
         except Exception:
             pass
     try:
-        from server.agent_compose import bp as compose_bp  # type: ignore
+        from server.agent_compose import bp as compose_bp  # type: ignore[import]
         flask_app.register_blueprint(compose_bp)
         log("[wrapper]", SIG, "registered compose blueprint")
     except Exception:
         pass
+
+    # optional daily status micro-endpoint
     try:
-        from server.micro_daily_status import bp as daily_bp  # type: ignore
+        from server.micro_daily_status import bp as daily_bp
         flask_app.register_blueprint(daily_bp)
         log("[wrapper] bound /agent/daily_status -> daily_status")
-    except Exception:
+    except Exception as _e:
+        # keep wrapper robust if the optional micro is missing or broken
         pass
+
+    # optional new-project micro-endpoint
     try:
-        from server.micro_projects import bp as projects_bp  # type: ignore
+        from server.micro_projects import bp as projects_bp  # type: ignore[import]
         flask_app.register_blueprint(projects_bp)
         log("[wrapper] bound /agent/project/new -> micro_projects")
     except Exception:
@@ -414,30 +425,37 @@ def try_register_blueprints(flask_app):
 try_register_blueprints(app)
 
 # ---------------------------------------------------------------------
-# Bind routes
+# Bind routes (only if missing) so we do not collide with a real sidecar
 # ---------------------------------------------------------------------
+# Diagnostics
 ensure_rule(app, "/__routes__",      "pa_routes_list",       ep___routes__)
 ensure_rule(app, "/health",          "pa_health",            ep_health)
 ensure_rule(app, "/agent_routes",    "pa_agent_routes",      ep_agent_routes)
 ensure_rule(app, "/agent/_sig",      "pa_sig",               ep_agent_sig)
 
+# PWA
 ensure_rule(app, "/pwa/agent",       "pa_pwa_agent",         ep_pwa_agent)
 ensure_rule(app, "/pwa/<path:filename>", "pa_pwa_static",    ep_pwa_static)
 ensure_rule(app, "/static/<path:filename>", "pa_static",     ep_static_passthru)
 
+# Plan / summary
 ensure_rule(app, "/agent/plan",      "pa_plan_fallback",     ep_agent_plan)
-ensure_rule(app, "/agent/plan/update","pa_plan_update",      ep_plan_update, methods=("POST",))  # NEW
 ensure_rule(app, "/agent/summary",   "pa_summary_fallback",  ep_agent_summary)
-ensure_rule(app, "/agent/daily_status", "pa_daily_status_fallback", ep_daily_status_fallback, methods=("GET",))
+ensure_rule(app, "/agent/daily_status", "pa_daily_status_fallback", ep_daily_status_fallback)
+ensure_rule(app, "/agent/plan/update", "pa_plan_update",     ep_agent_plan_update, methods=("POST",))
 
+# Approvals / worker / recent / next2
 ensure_rule(app, "/agent/approvals_count", "pa_approvals_count", ep_agent_ac)
 ensure_rule(app, "/agent/ac",              "pa_ac_short",        ep_agent_ac)
 ensure_rule(app, "/agent/worker_status",   "pa_worker_status",   ep_worker_status)
 ensure_rule(app, "/agent/recent",          "pa_recent",          ep_agent_recent, methods=("GET",))
 ensure_rule(app, "/agent/next2",           "pa_next2",           ep_agent_next2,  methods=("GET","POST"))
 
+# UI / WS
 ensure_rule(app, "/agent/ui",          "pa_ui",            ep_agent_ui)
 ensure_rule(app, "/agent/ws",          "pa_ws",            ep_agent_ws)
+
+ensure_rule(app, "/agent/daily_status", "pa_daily_status_fallback", ep_daily_status_fallback, methods=("GET",))
 
 # ---------------------------------------------------------------------
 # Main
@@ -446,4 +464,5 @@ if __name__ == "__main__":
     host = os.environ.get("PA_SIDECAR_HOST", "0.0.0.0")
     port = int(os.environ.get("PA_SIDECAR_PORT", "8782"))
     log("[wrapper]", SIG, "running on %s:%d" % (host, port))
+    # threaded=True for lightweight concurrency; disable reloader for wrapper use
     app.run(host=host, port=port, threaded=True, use_reloader=False)

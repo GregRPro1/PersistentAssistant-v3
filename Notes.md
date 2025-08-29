@@ -140,3 +140,6 @@ python tools\py\inventory\report_index.py
 
 # 3) Extract headers + MD headings (read-only; fast)
 python tools\py\inventory\report_headers.py
+
+# Basic structure
+Web app is at web/pwa - main javascript is agent.html
