@@ -1,0 +1,26 @@
+# Assistant Reply Contract v3 (STRICT — PowerShell-safe)
+# Reply using ONLY this exact block (no extra prose above/below):
+
+PACK: <absolute path to a created pack zip, or [NOT CREATED]>
+STATUS: <OK|WARN|FAIL> (<short reason>)
+NEXT: ["<next-id or action>", "..."]         # optional, ≤5 items, strings only
+BRIEF: <1–4 short lines total>               # optional; concise summary
+FS: <≤5 ASCII-only lines of file/dir hints>  # optional; ASCII only
+
+Hard rules for scripts you output:
+- **No inline `if(...)` in expressions**: PowerShell `if` is a statement, not an expression. Assign to a variable with a prior `if/else` block (e.g., `$flag='FAIL'; if($ok){ $flag='OK' }`).
+
+- **Windows PowerShell–safe**: no heredocs, no inline `if(...)` inside expressions; assign to a variable first then use it.
+- **Non-interactive**: never call `Read-Host` or wait for stdin; never leave trailing partial commands that hang the terminal.
+- **Deterministic end**: always print `PACK:` and `STATUS:` lines and exit.
+- **No ambiguous parameters**: never rely on positional `-f`/format in cmdlet parameter lists; keep `Set-Content`/`Compress-Archive` explicit.
+- **Quoting**: when embedding Python code in here-strings, prefer single quotes for the outer PowerShell string; avoid backtick-heavy escapes.
+- **No misuse of pipeline keywords**: avoid `... | ForEach-Object { ... } -notcontains ...`; evaluate first, then compare in a separate statement.
+
+Also include a one-line “HEALTH: ok/warn/fail …” in BRIEF summarising UI endpoint checks if your script touched the UI.
+
+
+Lessons enforced (v3.4):
+- ASCII-only punctuation in .ps1 (no smart quotes / em-dash).
+- No inline if(...) expressions; use explicit if/else.
+- JSON prop safety: support Hashtable and PSCustomObject in PowerShell.

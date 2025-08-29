@@ -1,0 +1,154 @@
+# tools/py/pack/enrich_pack.py
+# Add plan snapshot, tool catalog, and reporter artifacts into an existing pack zip.
+from __future__ import annotations
+import argparse, json, os, sys, time, zipfile, shutil
+from pathlib import Path
+from datetime import datetime, UTC  # at the top, add UTC import
+
+ROOT = Path(__file__).resolve().parents[3]  # .../PersistentAssistant
+FB   = ROOT / "tmp" / "feedback"
+
+def need_tool_catalog(root: Path) -> bool:
+    tools_dir = root / "tools" / "tools"
+    return not all((tools_dir / n).exists() for n in ("tool_catalog.json","tool_catalog.yaml","tool_catalog.md"))
+
+def ensure_catalog(root: Path) -> None:
+    if not need_tool_catalog(root):
+        return
+    try:
+        import subprocess
+        cmd = [
+            sys.executable,
+            str((root / "tools" / "py" / "registry" / "build_tool_catalog.py").as_posix()),
+            "--host","127.0.0.1","--port","8782"
+        ]
+        subprocess.run(cmd, check=True, cwd=str(root))
+    except Exception:
+        pass
+
+def _latest_pack() -> Path | None:
+    if not FB.exists():
+        return None
+    cands = list(FB.glob("pack_*.zip"))
+    if not cands:
+        return None
+    return max(cands, key=lambda p: p.stat().st_mtime)
+
+def _posix(p: Path) -> str:
+    return str(p.as_posix())
+
+def _add_file(zout: zipfile.ZipFile, src: Path, dest_inside_zip: str, added: list[dict]):
+    try:
+        data = src.read_bytes()
+        zout.writestr(dest_inside_zip, data)
+        added.append({
+            "zip_path": dest_inside_zip,
+            "src": str(src),
+            "bytes": len(data),
+            "mtime": datetime.fromtimestamp(src.stat().st_mtime).isoformat()
+        })
+    except Exception as e:
+        added.append({
+            "zip_path": dest_inside_zip,
+            "src": str(src),
+            "error": str(e)
+        })
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--in", dest="pack_in", help="Path to existing pack zip. If omitted, use latest in tmp/feedback")
+    ap.add_argument("--add", default="all", help="Comma list: plan,catalog,reporters or all")
+    ap.add_argument("--verbose", action="store_true")
+    args = ap.parse_args(argv)
+
+    # ensure tool catalog exists (self-heal if missing)
+    ensure_catalog(ROOT)
+
+    pack_path = Path(args.pack_in) if args.pack_in else _latest_pack()
+    if not pack_path or not pack_path.exists():
+        print("ERROR: no pack found. Use --in to specify a zip, or create one first.", file=sys.stderr)
+        return 2
+
+    add_set = {x.strip().lower() for x in args.add.split(",")}
+    if "all" in add_set: add_set = {"plan","catalog","reporters"}
+
+    # Gather sources
+    files_to_add: list[tuple[Path,str]] = []
+
+    if "plan" in add_set:
+        plan_src = ROOT / "project" / "plans" / "project_plan_v3.yaml"
+        if plan_src.exists():
+            files_to_add.append((plan_src, "plan_snapshot.yaml"))
+
+    if "catalog" in add_set:
+        tc_dir = ROOT / "tools" / "tools"
+        for name in ("tool_catalog.json","tool_catalog.yaml","tool_catalog.md"):
+            p = tc_dir / name
+            if p.exists():
+                files_to_add.append((p, f"tools/{name}"))
+
+    if "reporters" in add_set:
+        # structure
+        fm = ROOT / "project" / "structure" / "file_manifest.yaml"
+        idx= ROOT / "project" / "structure" / "project_structure_snapshot_index.md"
+        if fm.exists():
+            files_to_add.append((fm, "project_structure/file_manifest.yaml"))
+        if idx.exists():
+            files_to_add.append((idx, "project_structure/project_structure_snapshot_index.md"))
+
+        # insights (optional, add if present)
+        ins = ROOT / "data" / "insights"
+        insight_names = [
+            "file_headers.yaml", "md_headings.yaml",
+            "deep_inventory.yaml","deep_calls.yaml","docstring_report.yaml",
+            "duplication_report.yaml","imports.yaml","deep_inventory.dot",
+        ]
+        for nm in insight_names:
+            p = ins / nm
+            if p.exists():
+                files_to_add.append((p, f"insights/{nm}"))
+
+    if not files_to_add:
+        print("WARN: nothing to add (sources missing).")
+        print(f"PACK: {pack_path}")
+        print("STATUS: WARN nothing_to_add")
+        print("python ./tools/show_next_step.py")
+        return 0
+
+    # Rebuild zip to avoid duplicate entries
+    tmp_zip = pack_path.with_suffix(".tmp.zip")
+    added: list[dict] = []
+    try:
+        with zipfile.ZipFile(pack_path, "r") as zin, zipfile.ZipFile(tmp_zip, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+            # copy existing, skipping any paths we will overwrite
+            overwrite = {dest for _, dest in files_to_add}
+            for info in zin.infolist():
+                if info.filename in overwrite:
+                    continue
+                data = zin.read(info.filename)
+                zout.writestr(info, data)
+            # add new files
+            for src, dest in files_to_add:
+                _add_file(zout, src, dest, added)
+            # extras manifest
+            meta = {
+                "enriched_at": datetime.now(UTC).isoformat(),
+                "pack": str(pack_path),
+                "added": added,
+            }
+            zout.writestr("extras_manifest.json", json.dumps(meta, ensure_ascii=False, indent=2))
+        shutil.move(str(tmp_zip), str(pack_path))
+    finally:
+        if tmp_zip.exists():
+            tmp_zip.unlink(missing_ok=True)
+
+    status = "OK"
+    if any("error" in a for a in added): status = "WARN some_adds_failed"
+
+    print(f"PACK: {pack_path}")
+    print(f"STATUS: {status}")
+    print("python ./tools/show_next_step.py")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

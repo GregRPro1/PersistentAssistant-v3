@@ -1,0 +1,245 @@
+version: 1
+generated_at: 1756332940
+tools:
+- name: Audit Inventory (legacy)
+  description: '[DEPRECATE] Thin Python-only inventory (func/class names, feature_id
+    tags). Superseded by Deep Inventory.'
+  usage: python tools/audit_inventory.py
+  source: overlay
+  id: py:tools/audit_inventory.py
+- name: Deep Inventory
+  description: 'Rich Python AST scan: imports, funcs/classes, call-exprs, call-graph
+    DOT, docstring gaps, duplication reports; writes data/insights/*.'
+  usage: python tools/deep_inventory.py
+  source: overlay
+  id: py:tools/deep_inventory.py
+- name: Dev Summary
+  description: Refresh deep inventory, show plan status, tail logs, write last_summary.txt
+    (clipboard if available).
+  usage: python tools/make_summary.py
+  source: overlay
+  id: py:tools/make_summary.py
+- name: File Manifest
+  description: Canonical repo manifest across code/docs; SHA256, size, mtime, LOC,
+    funcs; writes project/structure/file_manifest.yaml.
+  usage: python tools/file_manifest.py
+  source: overlay
+  id: py:tools/file_manifest.py
+- name: Find Callers
+  description: List callers of a symbol using deep_calls.yaml from Deep Inventory.
+  usage: python tools/find_callers.py <symbol>
+  source: overlay
+  id: py:tools/find_callers.py
+- name: Find File by Name
+  description: Locate file by basename using deep_inventory.yaml, else glob fallback.
+  usage: python tools/find_file.py <name>
+  source: overlay
+  id: py:tools/find_file.py
+- name: Manifest Query
+  description: Query/verify file_manifest.yaml; optional Expected-SHA256 header emit.
+  usage: python tools/manifest_query.py --path <glob> --verify --emit-header
+  source: overlay
+  id: py:tools/manifest_query.py
+- name: PA Bootstrap
+  description: Create YAML, install Scheduled Task, start agent, print status.
+  usage: python tools/py/pa_bootstrap.py --host 127.0.0.1 --port 8782 --minutes 2
+  source: overlay
+  id: py:tools/py/pa_bootstrap.py
+- name: Pack Enrich
+  description: Inject plan snapshot, tool catalog, and reporters into a pack.
+  usage: python tools/py/pack/enrich_pack.py
+  source: overlay
+  id: py:tools/py/pack/enrich_pack.py
+- name: Pack Verify
+  description: Verify pack contains plan/catalog/reporters; auto-picks latest.
+  usage: python tools/py/pack/verify_pack.py --include-meta
+  source: overlay
+  id: py:tools/py/pack/verify_pack.py
+- name: Project Snapshot Pack
+  description: 'One-shot snapshot: env, server compile, wrapper import, auto_health
+    (if present), log tails, repo manifest, and pack zip.'
+  usage: python tools/py/pa_project_snapshot.py
+  source: overlay
+  id: py:tools/py/pa_project_snapshot.py
+- name: Reply Lint
+  description: Scan text for heredocs/here-strings and banned constructs; fail fast.
+  usage: python tools/py/lint/reply_lint.py --path <file>
+  source: overlay
+  id: py:tools/py/lint/reply_lint.py
+- name: Report Headers
+  description: Extract header comments (.py/.yml/.yaml) and top MD headings; write
+    insights YAMLs.
+  usage: python tools/py/inventory/report_headers.py
+  source: overlay
+  id: py:tools/py/inventory/report_headers.py
+- name: Report Index
+  description: Emit project_structure_snapshot_index.md from file_manifest.yaml.
+  usage: python tools/py/inventory/report_index.py
+  source: overlay
+  id: py:tools/py/inventory/report_index.py
+- name: Standard Summary Orchestrator
+  description: 'One-shot: manifest -> reporters -> (optional) deep inventory -> snapshot
+    pack; prints PACK/STATUS.'
+  usage: python tools/py/pa_std_summary.py --level standard
+  source: overlay
+  id: py:tools/py/pa_std_summary.py
+- name: Structure Snapshot (legacy)
+  description: '[DEPRECATE] Light structure pass (headers, md headings, python sigs).
+    Fold into deep_inventory extras + report_index.'
+  usage: python tools/structure_sync.py
+  source: overlay
+  id: py:tools/structure_sync.py
+- id: endpoint:/agent/_sig
+  name: /agent/_sig
+  kind: endpoint
+  path: /agent/_sig
+  usage: GET /agent/_sig
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/ac
+  name: /agent/ac
+  kind: endpoint
+  path: /agent/ac
+  usage: GET /agent/ac
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/approvals_count
+  name: /agent/approvals_count
+  kind: endpoint
+  path: /agent/approvals_count
+  usage: GET /agent/approvals_count
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/next2
+  name: /agent/next2
+  kind: endpoint
+  path: /agent/next2
+  usage: GET /agent/next2
+  description: Flask route (GET,HEAD,OPTIONS,POST)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/recent
+  name: /agent/recent
+  kind: endpoint
+  path: /agent/recent
+  usage: GET /agent/recent
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/summary
+  name: /agent/summary
+  kind: endpoint
+  path: /agent/summary
+  usage: GET /agent/summary
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/ui
+  name: /agent/ui
+  kind: endpoint
+  path: /agent/ui
+  usage: GET /agent/ui
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/worker_status
+  name: /agent/worker_status
+  kind: endpoint
+  path: /agent/worker_status
+  usage: GET /agent/worker_status
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/ws
+  name: /agent/ws
+  kind: endpoint
+  path: /agent/ws
+  usage: GET /agent/ws
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent_routes
+  name: /agent_routes
+  kind: endpoint
+  path: /agent_routes
+  usage: GET /agent_routes
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/health
+  name: /health
+  kind: endpoint
+  path: /health
+  usage: GET /health
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/pwa/agent
+  name: /pwa/agent
+  kind: endpoint
+  path: /pwa/agent
+  usage: GET /pwa/agent
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/plan
+  name: Agent Plan API
+  kind: endpoint
+  path: /agent/plan
+  usage: GET /agent/plan
+  description: Returns structured plan state (JSON).
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: overlay+overlay
+- id: py:tools/apply_simple_patches.py
+  name: Simple Patcher
+  kind: py
+  path: tools/apply_simple_patches.py
+  usage: python tools/apply_simple_patches.py --patch tmp\\llm\\patch.json
+  description: Apply literal, JSON-defined text patches with backups (all/nth support).
+  params: []
+  last_modified: 1756329819
+  bytes: 3875
+  sha1: 619dd3e0e8e8794dfbde21a814a248038d86163f
+  source: overlay+overlay

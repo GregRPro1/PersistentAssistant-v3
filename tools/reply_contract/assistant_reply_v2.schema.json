@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assistant_reply_v2",
+  "type": "object",
+  "required": ["PACK", "STATUS"],
+  "additionalProperties": false,
+  "properties": {
+    "PACK":   { "type": "string", "pattern": "^PACK:\\s+.+$" },
+    "STATUS": { "type": "string", "pattern": "^STATUS:\\s+(OK|WARN|FAIL)\\b.*$" },
+    "NEXT": { "type": "array", "items": { "type": "string" }, "maxItems": 5 },
+    "BRIEF": { "type": "string" },
+    "FS":    { "type": "string" }
+  }
+}

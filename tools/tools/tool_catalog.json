@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "generated_at": 1756391751,
+  "tools": [
+    {
+      "name": "Agent Bringup",
+      "description": "Probe/launch sidecar; now with --force-kill to free port.",
+      "usage": "python tools/py/pa_agent_bringup.py --host 127.0.0.1 --port 8783 --timeout 20 --force-kill",
+      "source": "overlay",
+      "id": "py:tools/py/pa_agent_bringup.py"
+    },
+    {
+      "name": "Daily Dev Loop",
+      "description": "reply-lint \u2192 smoke \u2192 summary \u2192 catalog \u2192 enrich \u2192 verify; writes data/status/daily_status.json",
+      "usage": "python tools/py/daily/daily_dev_loop.py --mode brief",
+      "source": "overlay",
+      "id": "py:tools/py/daily/daily_dev_loop.py"
+    },
+    {
+      "name": "Daily Status API",
+      "description": "Returns data/status/daily_status.json (ok,data|error).",
+      "source": "overlay",
+      "id": "endpoint:/agent/daily_status"
+    },
+    {
+      "name": "Port Kill",
+      "description": "Kill Windows listeners on a port (netstat/taskkill).",
+      "usage": "python tools/py/net/port_kill.py --port 8783",
+      "source": "overlay",
+      "id": "py:tools/py/net/port_kill.py"
+    }
+  ]
+}

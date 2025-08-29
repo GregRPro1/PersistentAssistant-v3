@@ -1,0 +1,100 @@
+overrides:
+  py:tools/py/pa_bootstrap.py:
+    name: PA Bootstrap
+    description: Create YAML, install Scheduled Task, start agent, print status.
+    usage: python tools/py/pa_bootstrap.py --host 127.0.0.1 --port 8782 --minutes
+      2
+    source: overlay
+  endpoint:/agent/plan:
+    name: Agent Plan API
+    description: Returns structured plan state (JSON).
+    source: overlay
+  py:tools/file_manifest.py:
+    name: File Manifest
+    description: Canonical repo manifest across code/docs; SHA256, size, mtime, LOC,
+      funcs; writes project/structure/file_manifest.yaml.
+    usage: python tools/file_manifest.py
+    source: overlay
+  py:tools/deep_inventory.py:
+    name: Deep Inventory
+    description: 'Rich Python AST scan: imports, funcs/classes, call-exprs, call-graph
+      DOT, docstring gaps, duplication reports; writes data/insights/*.'
+    usage: python tools/deep_inventory.py
+    source: overlay
+  py:tools/manifest_query.py:
+    name: Manifest Query
+    description: Query/verify file_manifest.yaml; optional Expected-SHA256 header
+      emit.
+    usage: python tools/manifest_query.py --path <glob> --verify --emit-header
+    source: overlay
+  py:tools/find_callers.py:
+    name: Find Callers
+    description: List callers of a symbol using deep_calls.yaml from Deep Inventory.
+    usage: python tools/find_callers.py <symbol>
+    source: overlay
+  py:tools/find_file.py:
+    name: Find File by Name
+    description: Locate file by basename using deep_inventory.yaml, else glob fallback.
+    usage: python tools/find_file.py <name>
+    source: overlay
+  py:tools/make_summary.py:
+    name: Dev Summary
+    description: Refresh deep inventory, show plan status, tail logs, write last_summary.txt
+      (clipboard if available).
+    usage: python tools/make_summary.py
+    source: overlay
+  py:tools/audit_inventory.py:
+    name: Audit Inventory (legacy)
+    description: '[DEPRECATE] Thin Python-only inventory (func/class names, feature_id
+      tags). Superseded by Deep Inventory.'
+    usage: python tools/audit_inventory.py
+    source: overlay
+  py:tools/structure_sync.py:
+    name: Structure Snapshot (legacy)
+    description: '[DEPRECATE] Light structure pass (headers, md headings, python sigs).
+      Fold into deep_inventory extras + report_index.'
+    usage: python tools/structure_sync.py
+    source: overlay
+  py:tools/py/inventory/report_index.py:
+    name: Report Index
+    description: Emit project_structure_snapshot_index.md from file_manifest.yaml.
+    usage: python tools/py/inventory/report_index.py
+    source: overlay
+  py:tools/py/inventory/report_headers.py:
+    name: Report Headers
+    description: Extract header comments (.py/.yml/.yaml) and top MD headings; write
+      insights YAMLs.
+    usage: python tools/py/inventory/report_headers.py
+    source: overlay
+  py:tools/py/pa_project_snapshot.py:
+    name: Project Snapshot Pack
+    description: 'One-shot snapshot: env, server compile, wrapper import, auto_health
+      (if present), log tails, repo manifest, and pack zip.'
+    usage: python tools/py/pa_project_snapshot.py
+    source: overlay
+  py:tools/py/pa_std_summary.py:
+    name: Standard Summary Orchestrator
+    description: 'One-shot: manifest -> reporters -> (optional) deep inventory ->
+      snapshot pack; prints PACK/STATUS.'
+    usage: python tools/py/pa_std_summary.py --level standard
+    source: overlay
+  py:tools/apply_simple_patches.py:
+    name: Simple Patcher
+    description: Apply literal, JSON-defined text patches with backups (all/nth support).
+    usage: python tools/apply_simple_patches.py --patch tmp\\llm\\patch.json
+    source: overlay
+  py:tools/py/lint/reply_lint.py:
+    name: Reply Lint
+    description: Scan text for heredocs/here-strings and banned constructs; fail fast.
+    usage: python tools/py/lint/reply_lint.py --path <file>
+    source: overlay
+  py:tools/py/pack/verify_pack.py:
+    name: Pack Verify
+    description: Verify pack contains plan/catalog/reporters; auto-picks latest.
+    usage: python tools/py/pack/verify_pack.py --include-meta
+    source: overlay
+  py:tools/py/pack/enrich_pack.py:
+    name: Pack Enrich
+    description: Inject plan snapshot, tool catalog, and reporters into a pack.
+    usage: python tools/py/pack/enrich_pack.py
+    source: overlay

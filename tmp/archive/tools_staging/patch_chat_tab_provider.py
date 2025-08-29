@@ -32,7 +32,7 @@ NEW_HANDLER = r"""
         key = None
         try:
             import yaml
-            keys_path = r"C:\Secure\api_keys\keys.yaml"
+            keys_path = r"C:\\Secure\api_keys\\keys.yaml"
             with open(keys_path, "r", encoding="utf-8") as f:
                 keys = yaml.safe_load(f)
             key = ((keys or {}).get("keys") or {}).get("default", {}).get(provider, {}).get("paid")
