@@ -14,7 +14,7 @@
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%232563eb'/%3E%3C/svg%3E">
 
-  <link rel="stylesheet" href="/pwa/agent_ui_v3.css?v=3.2">
+  <link rel="stylesheet" href="/pwa/agent_ui_v3.css?v=3.3">
   <link rel="stylesheet" href="/pwa/agent_tabs_v1.css?v=1">
   <link rel="stylesheet" href="/pwa/agent_ext_v2.css?v=2.1">
   <style>
@@ -55,6 +55,23 @@
     .hdr-row .label {
       opacity: .85
     }
+
+    /* counts colouring */
+    .badge.green {
+      color: #22c55e
+    }
+
+    .badge.amber {
+      color: #f59e0b
+    }
+
+    .badge.red {
+      color: #ef4444
+    }
+
+    .badge.blue {
+      color: #60a5fa
+    }
   </style>
 </head>
 
@@ -71,7 +88,7 @@
         <span id="hudTime">—</span>
       </span>
 
-      <!-- Project selector (restored) -->
+      <!-- Project selector -->
       <div class="chip">
         <span class="label">Project:</span>
         <select id="projSel" class="sel small"></select>
@@ -98,7 +115,7 @@
         <button class="help" data-help="summary" aria-label="Help">?</button>
       </div>
       <div id="help-summary" class="help-panel hidden">
-        Reads <code>/agent/summary</code> from the sidecar. Use this for a quick OK/fallback check.
+        Reads <code>/agent/summary</code> from the sidecar.
       </div>
       <div class="row"><button id="refresh" class="btn">Refresh summary</button></div>
       <pre id="summary" class="codebox">[no data]</pre>
@@ -116,11 +133,11 @@
         <button class="help" data-help="plan" aria-label="Help">?</button>
       </div>
       <div id="help-plan" class="help-panel hidden">
-        Shows <code>/agent/plan</code>. Left: foldable tree (Phase → Step → Sub-step). Right: selected details.
-        Status colours: <span class="dot green"></span> Done · <span class="dot amber"></span> In-progress ·
-        <span class="dot blue"></span> Planned · <span class="dot red"></span> Blocked.
-        Use A± to change font size (affects both panes), “Wrap” toggles details wrapping. Drag the gutter to resize.
-        “Go active” jumps to the current step (uses <code>plan.active</code> or the first <i>in_progress</i> step).
+        Left: foldable tree (Phase → Step → Sub-step). Right: selected details.<br>
+        Status: <span class="dot green"></span> Done · <span class="dot amber"></span> In-progress ·
+        <span class="dot blue"></span> Planned · <span class="dot red"></span> Blocked.<br>
+        A± changes font for <em>both</em> panes. “Wrap” toggles details wrapping. Drag the gutter to resize.<br>
+        “Go active” jumps to the current step (uses <code>plan.active</code> or the first in_progress).
       </div>
 
       <div class="row" style="display:flex;gap:8px;align-items:center">
@@ -211,211 +228,8 @@
     <div id="hudLines" class="muted"></div>
   </div>
 
-  <script>
-    (function () {
-      const $ = (id) => document.getElementById(id);
-      const qa = (sel) => Array.from(document.querySelectorAll(sel));
-      const uiBase = location.origin; $('uiBaseBadge').textContent = uiBase;
-
-      // ===== Project wiring (global) =====
-      function curProject() { return (localStorage.getItem('pa_project') || '').trim(); }
-      function setProject(p) {
-        localStorage.setItem('pa_project', p || '');
-        const sel = $('projSel'); if (sel) { sel.value = p || ''; }
-        // refresh visible pane if it cares (Plan)
-        if (!document.querySelector('[data-pane="plan"]').classList.contains('hidden')) {
-          window.PA_PLAN?.refresh();
-        }
-      }
-      function listProjectsLocal() {
-        try { return JSON.parse(localStorage.getItem('pa_projects') || '[]'); } catch { return []; }
-      }
-      function storeProjectsLocal(arr) {
-        try { localStorage.setItem('pa_projects', JSON.stringify(arr || [])); } catch { }
-      }
-      async function fetchProjects() {
-        // Try server endpoint; fallback to local list
-        try {
-          const r = await fetch(uiBase + '/agent/projects', { cache: 'no-store' });
-          if (r.ok) {
-            const j = await r.json();
-            const arr = (j && (j.projects || j.list || j)) || [];
-            if (Array.isArray(arr) && arr.length) {
-              storeProjectsLocal(arr);
-              return arr;
-            }
-          }
-        } catch (e) { }
-        return listProjectsLocal();
-      }
-      async function initProjects() {
-        const sel = $('projSel'); if (!sel) return;
-        sel.innerHTML = '';
-        const list = await fetchProjects();
-        const current = curProject() || (list[0] || '');
-        [...new Set([current, ...list])].filter(Boolean).forEach(p => {
-          const o = document.createElement('option'); o.value = p; o.textContent = p; sel.appendChild(o);
-        });
-        sel.value = current || '';
-        setProject(sel.value || '');
-      }
-      $('projSel').addEventListener('change', () => setProject($('projSel').value), { passive: true });
-      $('projNew').addEventListener('click', async () => {
-        const name = (prompt('New project name?') || '').trim();
-        if (!name) return;
-        // optimistic local add
-        const list = listProjectsLocal(); if (!list.includes(name)) { list.push(name); storeProjectsLocal(list); }
-        await initProjects();
-        setProject(name);
-        // best-effort server notify
-        try { await fetch(uiBase + '/agent/project/select?project=' + encodeURIComponent(name), { method: 'POST' }); } catch (e) { }
-      });
-
-      // ===== JSON pretty colours =====
-      function jfmt(x) {
-        try {
-          const s = JSON.stringify(x, null, 2);
-          return s.replace(/"(.*?)":/g, '"<span class="j-key">$1</span>":')
-            .replace(/"(.*?)"/g, '"<span class="j-str">$1</span>"')
-            .replace(/\b(true|false)\b/g, '<span class="j-bool">$1</span>')
-            .replace(/\b(null)\b/g, '<span class="j-null">$1</span>')
-            .replace(/\b(-?\d+(?:\.\d+)?)\b/g, '<span class="j-num">$1</span>');
-        } catch { return String(x); }
-      }
-
-      // ===== Busy HUD =====
-      let busy = false, timer = null, start = 0;
-      function setBusy(b, msg) {
-        busy = b; $('busyIcon').classList.toggle('hidden', !b);
-        $('statusLeft').textContent = msg || (b ? 'Working…' : 'Ready');
-        if (b) {
-          start = Date.now(); if (timer) clearInterval(timer);
-          timer = setInterval(() => {
-            const s = Math.floor((Date.now() - start) / 1000);
-            $('statusRight').textContent = '⏱ ' + String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-          }, 500);
-        } else { if (timer) clearInterval(timer); $('statusRight').textContent = ''; }
-      }
-
-      // ===== Global PA helpers (attach project to every request) =====
-      function tokenHdr() { const t = (localStorage.getItem('pa_token') || '').trim(); return t ? { Authorization: 'Bearer ' + t } : {}; }
-      function reqURL(path) {
-        const url = new URL(path, uiBase);
-        const p = curProject();
-        if (p) url.searchParams.set('project', p);
-        return url.toString();
-      }
-      window.PA = {
-        uiBase, setBusy,
-        setBadge: (id, cls, txt) => { const b = $(id); if (b) { b.className = 'badge ' + (cls || ''); b.textContent = txt || ''; } },
-        GET: (path) => fetch(reqURL(path), { cache: 'no-store', headers: tokenHdr() }),
-        POST: (path, body) => fetch(reqURL(path), { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, tokenHdr()), body: body ? JSON.stringify(body) : '{}' })
-      };
-
-      // ===== Token quick save =====
-      $('tokSave').onclick = () => { localStorage.setItem('pa_token', ($('tok')?.value || '').trim()); $('statusRight').textContent = 'Token saved'; };
-
-      // ===== Tabs =====
-      function showTab(name) {
-        Array.from(document.querySelectorAll('.tab')).forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-        Array.from(document.querySelectorAll('[data-pane]')).forEach(p => p.classList.toggle('hidden', p.getAttribute('data-pane') !== name));
-        localStorage.setItem('pa_tab', name);
-      }
-      Array.from(document.querySelectorAll('.tab')).forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab), { passive: true }));
-      const initTab = new URL(location.href).hash.match(/tab=([^&]+)/)?.[1] || localStorage.getItem('pa_tab') || 'summary';
-      showTab(initTab);
-
-      // ===== Help toggles =====
-      document.querySelectorAll('.help').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = 'help-' + btn.dataset.help; const p = document.getElementById(id); if (p) p.classList.toggle('hidden');
-        }, { passive: true });
-      });
-
-      // ===== Summary =====
-      async function refreshSummary() {
-        PA.setBusy(true, 'Loading summary…'); PA.setBadge('sumState', 'wait', 'loading');
-        try {
-          const r = await PA.GET('/agent/summary'); const j = await r.json();
-          const el = $('summary'); el.innerHTML = jfmt(j);
-          PA.setBadge('sumState', 'ok', 'ok');
-        } catch { PA.setBadge('sumState', 'err', 'error'); }
-        finally { PA.setBusy(false); }
-      }
-      $('refresh').onclick = refreshSummary; refreshSummary();
-
-      // ===== Recent / Next / Actions =====
-      $('rrefresh').onclick = async () => {
-        try {
-          const r = await PA.GET('/agent/recent'); const j = await r.json();
-          $('recentBox').textContent = JSON.stringify(j, null, 2);
-        } catch (e) { $('recentBox').textContent = 'ERR ' + e.message; }
-      };
-      $('nextBtn').onclick = async () => {
-        PA.setBusy(true, 'Requesting NEXT…');
-        try {
-          const r = await PA.POST('/agent/next2', { action: 'APPROVE_NEXT', timestamp: Math.floor(Date.now() / 1000) });
-          $('nextBox').textContent = await r.text(); PA.setBadge('nextState', 'ok', 'ok');
-        } catch { PA.setBadge('nextState', 'err', 'error'); }
-        finally { PA.setBusy(false); }
-      };
-      $('askBtn').onclick = async () => {
-        const text = (document.getElementById('askText').value || '').trim(); if (!text) return;
-        PA.setBusy(true, 'Sending ASK…');
-        try {
-          const r = await PA.POST('/agent/ask', { text, timestamp: Math.floor(Date.now() / 1000) });
-          document.getElementById('askOut').textContent = await r.text(); PA.setBadge('actState', 'ok', 'queued');
-        } catch { PA.setBadge('actState', 'err', 'error'); }
-        finally { PA.setBusy(false); }
-      };
-      $('chooseBtn').onclick = async () => {
-        const step = (document.getElementById('chooseStep').value || '').trim(); if (!step) return;
-        try { const r = await PA.POST('/agent/choose', { step_id: step }); document.getElementById('chooseOut').textContent = await r.text(); } catch (e) { document.getElementById('chooseOut').textContent = String(e); }
-      };
-
-      // ===== HUD lite =====
-      async function hud() {
-        try {
-          const [pw, pa] = await Promise.all([PA.GET('/agent/worker_status'), PA.GET('/agent/approvals_count')]);
-          const w = await pw.json(); const a = await pa.json();
-          const lines = []; if (w && w.worker) lines.push(`worker: ${w.worker.status || 'ok'}`); if (a && typeof a.count === 'number') lines.push(`approvals: ${a.count}`);
-          document.getElementById('hudLines').innerText = lines.join('\n');
-        } catch (e) { }
-      }
-      setInterval(hud, 5000); hud();
-
-      // ===== Plan font-size & wrap (both panes) =====
-      let fs = parseFloat(localStorage.getItem('plan_fs') || '1.0');
-      function applyFs() {
-        document.getElementById('planDetails').style.fontSize = fs.toFixed(2) + 'em';
-        document.getElementById('planTree').style.fontSize = fs.toFixed(2) + 'em';
-      }
-      document.getElementById('fsPlus').onclick = () => { fs = Math.min(2.0, fs + 0.1); localStorage.setItem('plan_fs', fs); applyFs(); };
-      document.getElementById('fsMinus').onclick = () => { fs = Math.max(0.7, fs - 0.1); localStorage.setItem('plan_fs', fs); applyFs(); };
-      document.getElementById('fsReset').onclick = () => { fs = 1.0; localStorage.setItem('plan_fs', fs); applyFs(); };
-      document.getElementById('toggleWrap').onclick = () => { document.getElementById('planDetails').classList.toggle('nowrap'); };
-      applyFs();
-
-      // ===== Plan splitter =====
-      (function () {
-        const split = document.getElementById('planSplit'), gut = document.getElementById('planGutter'); if (!split || !gut) return;
-        const saved = localStorage.getItem('plan_split_px'); if (saved) { split.style.gridTemplateColumns = `${saved}px 6px 1fr`; }
-        let drag = false;
-        gut.addEventListener('mousedown', () => { drag = true; document.body.style.userSelect = 'none'; });
-        window.addEventListener('mouseup', () => { drag = false; document.body.style.userSelect = ''; });
-        window.addEventListener('mousemove', (e) => {
-          if (!drag) return;
-          const rect = split.getBoundingClientRect(); const x = Math.max(220, Math.min(e.clientX - rect.left, rect.width - 240));
-          split.style.gridTemplateColumns = `${x}px 6px 1fr`; localStorage.setItem('plan_split_px', x);
-        });
-      })();
-
-      // ===== Init projects after DOM is ready =====
-      initProjects();
-    })();
-  </script>
-
-  <script src="/pwa/agent_plan_v3.js?v=3.3"></script>
+  <script src="/pwa/agent_core_header_v1.js?v=1.0"></script>
+  <script src="/pwa/agent_plan_v3.js?v=3.4"></script>
 </body>
 
 </html>
