@@ -33,6 +33,55 @@ phases:
     status: planned
     title: LLM provider adapter (stub→API by config)
     description: File stub now; API later; same interface.
+  - id: '10'
+    title: Phase 10
+    status: planned
+    desc: Agentic development loop (MCP-lite).
+  - id: '10.0'
+    title: Agentic development loop (MCP-lite)
+    status: in_progress
+    desc: 'End-to-end: pick plan step → build context → propose patch → micro-test
+      → human approval → safe apply → commit/PR → CI gate.'
+  - id: '10.1'
+    title: Tool registry export for AI
+    status: planned
+    desc: Unify tools into discoverable registry (commands, endpoints, scripts) so
+      the agent can query/run them. Build on tool_catalog.
+  - id: '10.2'
+    title: Local Exec Bridge (LEB) service
+    status: planned
+    desc: 'FastAPI on localhost: /run-tests, /apply-patch, /lint, /smoke. Token auth.
+      Mirrors CI locally for fast feedback.'
+  - id: '10.3'
+    title: Context pack builder for selected step
+    status: planned
+    desc: 'Given a step id: collect plan text, referenced files, structure/index reports,
+      recent commits, and diagnostics into a prompt pack.'
+  - id: '10.4'
+    title: Change proposal + diff (human approval)
+    status: planned
+    desc: Generate a minimal plan-of-change and unified diff; surface alternatives/risk;
+      require explicit approval before touching disk.
+  - id: '10.5'
+    title: Executor + micro-tests via LEB
+    status: planned
+    desc: Apply patch in a temp workspace, run targeted micro-tests/smokes, capture
+      logs/artifacts, implement backoff/retry rules.
+  - id: '10.6'
+    title: Git branch/commit/PR + CI gate
+    status: planned
+    desc: Safe replace with expected SHA, create feature branch, commit with Feature-ID,
+      open PR, block until CI green.
+  - id: '10.7'
+    title: 'Plan UI: Develop selected step'
+    status: planned
+    desc: 'Button in Plan details: build context → run proposer → show diff → approve
+      → execute via LEB; live logs/status.'
+  - id: '10.8'
+    title: 'Safety: approvals, tokens, dry-runs'
+    status: planned
+    desc: Human-in-the-loop approval, token/time budgets, dry-run mode, red/green
+      status surfacing in UI.
   - id: '12.0'
     status: in_progress
     title: 'Project: Suspension Optimization'
@@ -220,7 +269,8 @@ phases:
   - id: '2.9'
     status: done
     title: Snapshot-aware safe replace (use existing tools/safe_replace
-    description: Snapshot-aware safe replace (use existing tools/safe_replace.py + get_expected_sha.py)
+    description: Snapshot-aware safe replace (use existing tools/safe_replace.py +
+      get_expected_sha.py)
   - id: 2.9.a
     status: done
     title: tools/get_expected_sha.py created
@@ -230,7 +280,8 @@ phases:
   - id: '2.10'
     status: planned
     title: Deep inventory includes dunder files (e
-    description: Deep inventory includes dunder files (e.g., __init__.py) and reflects them in insights.
+    description: Deep inventory includes dunder files (e.g., __init__.py) and reflects
+      them in insights.
 - name: 'Phase 3: Model Catalogue & Providers'
   steps:
   - id: '3.1'
@@ -296,22 +347,27 @@ phases:
   steps:
   - id: '4.1'
     status: in_progress
-    title: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown from ai_models'
-    description: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown from ai_models.yaml,
-      Browser/API toggle'
+    title: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown from
+      ai_models'
+    description: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown
+      from ai_models.yaml, Browser/API toggle'
   - id: 4.1.1
     status: in_progress
-    title: 'Model probe matrix (parallel): ping status per model; summarize failures for parallel fixes'
-    description: 'Model probe matrix (parallel): ping status per model; summarize failures for parallel
-      fixes'
+    title: 'Model probe matrix (parallel): ping status per model; summarize failures
+      for parallel fixes'
+    description: 'Model probe matrix (parallel): ping status per model; summarize
+      failures for parallel fixes'
   - id: 4.1.2
     status: in_progress
     title: 'Capability cataloging: record model capability tags after successful ping'
-    description: 'Capability cataloging: record model capability tags after successful ping'
+    description: 'Capability cataloging: record model capability tags after successful
+      ping'
   - id: 4.1.3
     status: done
-    title: Centralized error-capture runner integrated into inventory/reflection/model probe pipeline
-    description: Centralized error-capture runner integrated into inventory/reflection/model probe pipeline
+    title: Centralized error-capture runner integrated into inventory/reflection/model
+      probe pipeline
+    description: Centralized error-capture runner integrated into inventory/reflection/model
+      probe pipeline
   - id: 4.1.4
     status: in_progress
     title: UI shows traffic-light status for models from probe matrix
@@ -371,8 +427,10 @@ phases:
     title: tests/test_ai_client_costs.py
   - id: 4.0R
     status: done
-    title: 'Reflection Gate: verify existing GUI capability and handlers before any UI change'
-    description: 'Reflection Gate: verify existing GUI capability and handlers before any UI change'
+    title: 'Reflection Gate: verify existing GUI capability and handlers before any
+      UI change'
+    description: 'Reflection Gate: verify existing GUI capability and handlers before
+      any UI change'
   - id: 4.0R.a
     status: done
     title: deep_inventory refreshed
@@ -495,13 +553,14 @@ phases:
   - id: 6.4.e
     status: planned
     title: Consolidate inventory/report tools
-    description: 'Keep: file_manifest + deep_inventory (+reporters). Deprecate: audit_inventory & structure_sync
-      (soft). Add report_index.py; extend deep_inventory with extras. Wire tool_catalog + CI check.'
+    description: 'Keep: file_manifest + deep_inventory (+reporters). Deprecate: audit_inventory
+      & structure_sync (soft). Add report_index.py; extend deep_inventory with extras.
+      Wire tool_catalog + CI check.'
   - id: 6.4.f
     status: done
     title: Standardize project summary pipeline
-    description: Create reporters; add pa_std_summary orchestrator; ensure pack contains index+headers;
-      wire into tool catalog.
+    description: Create reporters; add pa_std_summary orchestrator; ensure pack contains
+      index+headers; wire into tool catalog.
   - id: 6.4.g
     status: planned
     title: CI gate + verify in Actions
@@ -596,8 +655,8 @@ steps:
   status: done
 - id: '9.7'
   name: Lessons loop and schema modification process
-  desc: Install schema_modifications and lessons process. Gate prehook linter. Lessons captured from failures
-    and enforced.
+  desc: Install schema_modifications and lessons process. Gate prehook linter. Lessons
+    captured from failures and enforced.
   status: planned
   tags:
   - quality
@@ -614,8 +673,9 @@ steps:
     status: planned
 - id: '9.8'
   name: Inbound AI processing pipeline v1
-  desc: 'PA pipeline when receiving AI input: UI notify start; update schemas; update lessons; parse scripts;
-    run; system diagnostics; code tests; UI endpoint tests; summary per schema; push status to UIs.'
+  desc: 'PA pipeline when receiving AI input: UI notify start; update schemas; update
+    lessons; parse scripts; run; system diagnostics; code tests; UI endpoint tests;
+    summary per schema; push status to UIs.'
   status: planned
   tags:
   - pipeline
@@ -647,16 +707,17 @@ steps:
     status: planned
 - id: '9.9'
   name: UI signals and traffic lights
-  desc: Status bar with thinking timer and traffic lights (green ready, yellow waiting, red error). Re-run
-    Health button and per-endpoint panel.
+  desc: Status bar with thinking timer and traffic lights (green ready, yellow waiting,
+    red error). Re-run Health button and per-endpoint panel.
   status: planned
   tags:
   - ux
   - observability
 - id: '9.10'
   name: Tooling consolidation policy (Python primary)
-  desc: Prefer Python for logic, parsing, tests. Use PowerShell only for Windows-native ops (firewall,
-    netsh, processes, services). Document tool registry and avoid duplicate tools.
+  desc: Prefer Python for logic, parsing, tests. Use PowerShell only for Windows-native
+    ops (firewall, netsh, processes, services). Document tool registry and avoid duplicate
+    tools.
   status: planned
   tags:
   - tooling
@@ -670,7 +731,8 @@ steps:
     status: planned
 - id: '9.11'
   name: Outbound prompt contractor v2
-  desc: Outbound prompt includes schemas, lessons, tool catalog, plan snapshot and contract reminders.
+  desc: Outbound prompt includes schemas, lessons, tool catalog, plan snapshot and
+    contract reminders.
   status: planned
   tags:
   - prompt
@@ -947,11 +1009,13 @@ milestones:
   children:
   - id: 9.6-P4
     name: Centralize plan path (remove hard-coded references)
-    desc: Introduce a single source for plan path and refactor all consumers to use it.
+    desc: Introduce a single source for plan path and refactor all consumers to use
+      it.
     status: planned
     acceptance:
     - 'config/project.yaml contains: plan_path: project/plans/project_plan_v3.yaml'
-    - 'Helper: core.project_session.get_plan_path() resolves ENV PLAN_PATH → config → discovery'
+    - 'Helper: core.project_session.get_plan_path() resolves ENV PLAN_PATH → config
+      → discovery'
     - All listed callers use helper (0 hard-coded mentions remain)
     - Wire test verifies /agent/plan and UI Plan tab still load
     - 'Pack includes: grep before/after, refactor map, tests/ui_wiretest.json'
@@ -975,7 +1039,8 @@ milestones:
     acceptance:
     - /agent/tools returns OK
     - gate blocks duplicate ids/titles
-    - every pack carries schemas_current.yaml + plan snapshot + catalog + wiretest JSON
+    - every pack carries schemas_current.yaml + plan snapshot + catalog + wiretest
+      JSON
   - id: 9.6-P1
     name: Docs (TOOLS.md, PROCESS.md)
     status: planned
