@@ -53,8 +53,8 @@ phases:
     desc: 'FastAPI on localhost: /run-tests, /apply-patch, /lint, /smoke. Token auth.
       Mirrors CI locally for fast feedback.'
   - id: '10.3'
-    title: Context pack builder for selected step
-    status: planned
+    title: Context pack + proposal generator (skeleton)
+    status: in_progress
     desc: 'Given a step id: collect plan text, referenced files, structure/index reports,
       recent commits, and diagnostics into a prompt pack.'
   - id: '10.4'
