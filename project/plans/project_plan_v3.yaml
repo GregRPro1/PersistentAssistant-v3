@@ -560,6 +560,7 @@ phases:
     status: planned
     title: Add Agent Watchdog + Alerting
     description: 'Gate on main: CI must pass'
+    desc: Install watchdog; schedule; backoff.
   - id: 6.4.e
     status: planned
     title: Consolidate inventory/report tools
