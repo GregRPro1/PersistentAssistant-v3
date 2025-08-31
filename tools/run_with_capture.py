@@ -1,3 +1,5 @@
+# ./tools/run_with-capture.py
+
 from __future__ import annotations
 # --- PA_ROOT_IMPORT ---
 import sys, pathlib
@@ -46,6 +48,24 @@ def parse_cmd(argv: list[str]) -> list[str]:
             cmd = arg.split(" ")  # last-resort fallback
     if cmd and cmd[0].lower() in ("python","py"):
         cmd[0] = exe()
+        # --- Windows path safety: arguments like --proposal "C:\...\tmp\patches\X.json"
+    # can contain \t which becomes a literal TAB. Convert those path-like values to POSIX.
+    from pathlib import Path as _P
+    i = 0
+    while i < len(cmd):
+        tok = cmd[i]
+        if tok in ("--proposal", "--out", "--input", "--file", "-o") and i + 1 < len(cmd):
+            # Normalize only the *value* following known file/path flags
+            try:
+                val = cmd[i + 1]
+                # Heuristic: drive letter or any backslash likely means Windows-style path
+                if (len(val) >= 2 and val[1] == ":") or ("\\" in val):
+                    cmd[i + 1] = str(_P(val)).replace("\\", "/")
+            except Exception:
+                pass
+            i += 2
+            continue
+        i += 1
     return cmd
 
 def append_capture_record(record: dict) -> None:
