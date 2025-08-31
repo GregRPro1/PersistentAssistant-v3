@@ -1,5 +1,6 @@
 # server/agent_sidecar_wrapper.py
-# Robust sidecar wrapper that guarantees required /agent/* endpoints exist.
+# Robust sidecar wrapper that guarantees required /agent/* endpoints exist
+# and delegates to the real sidecar app if present.
 
 import os
 import sys
@@ -10,6 +11,8 @@ import re
 import importlib
 import importlib.util
 import subprocess
+import urllib.request, urllib.error
+
 from flask import Flask, jsonify, make_response, send_from_directory, request, Response
 
 # ---------------------------------------------------------------------
@@ -33,10 +36,17 @@ def _repo_root():
 _REPO = _repo_root()
 _PLAN_PATH = os.path.join(_REPO, "project", "plans", "project_plan_v3.yaml")
 
-# existing plan tool may be in either location
+# existing plan tool is in one of these two spots in your repo
 _PLAN_ADD = os.path.join(_REPO, "tools", "py", "plan", "plan_step_add.py")
 if not os.path.exists(_PLAN_ADD):
     _PLAN_ADD = os.path.join(_REPO, "tools", "py", "plan_step_add.py")
+
+# LEB proxy defaults
+LEB_HOST = os.environ.get("LEB_HOST", "127.0.0.1")
+LEB_PORT = int(os.environ.get("LEB_PORT", "8765"))
+LEB_BASE = f"http://{LEB_HOST}:{LEB_PORT}"
+
+ALLOW_CMD_PREFIX = ("python ", "pytest ")
 
 def log(*a):
     print(*a, flush=True)
@@ -122,7 +132,7 @@ if app is None:
 
     # Optional: extension registry (no-op if absent)
     try:
-        from server.app_registry import register_extensions  # type: ignore
+        from server.app_registry import register_extensions
         try:
             register_extensions(app)  # type: ignore[misc]
         except Exception:
@@ -149,6 +159,7 @@ def ep_health():
     return jsonify({"ok": True, "sig": SIG})
 
 def ep_agent_routes():
+    # Alias expected by your auto-health
     try:
         rules = [str(r) for r in app.url_map.iter_rules()]
     except Exception:
@@ -187,16 +198,13 @@ def build_plan_fallback():
         try:
             import yaml  # optional
         except Exception:
-            yaml = None  # type: ignore
+            yaml = None  # type: ignore[assignment]
 
         plan_path = None
-        # be permissive (keeps working if path moves under repo)
         for base, _dirs, files in os.walk(REPO):
             if "project_plan_v3.yaml" in files:
                 plan_path = os.path.join(base, "project_plan_v3.yaml")
                 break
-        if not plan_path:
-            plan_path = _PLAN_PATH
 
         active = None
         tree = []
@@ -274,50 +282,30 @@ def build_plan_fallback():
             dsum(totals, count(phase))
             tree.append(phase)
 
-        return {"active": active, "tree": tree, "totals": totals}
+        return {"active": None, "tree": tree, "totals": totals}
     except Exception as e:
         log("[wrapper]", SIG, "plan fallback error:", e)
         return {"active": None, "tree": [], "totals": {}, "err": str(e)}
 
 def ep_agent_plan():
-    # Prefer server.plan_view if present
+    # Use server.plan_view.build_plan_response if available
     try:
-        from server.plan_view import build_plan_response  # type: ignore
+        from server.plan_view import build_plan_response  # type: ignore[import]
         try:
-            plan = build_plan_response(REPO)
-            return jsonify({"ok": True, "plan": plan, "plan_path": _PLAN_PATH})
+            return jsonify({"ok": True, "plan": build_plan_response(REPO)})
         except Exception as e:
-            return jsonify({"ok": True, "plan": {"active": None, "tree": [], "totals": {}, "err": str(e)}, "plan_path": _PLAN_PATH})
+            return jsonify({"ok": True, "plan": {"active": None, "tree": [], "totals": {}, "err": str(e)}})
     except Exception:
-        plan = build_plan_fallback()
-        return jsonify({"ok": True, "plan": plan, "plan_path": _PLAN_PATH})
-
-def ep_plan_update():
-    """
-    Best-effort wrapper to update a single step using plan_step_add.py.
-    Falls back to CLI generation on the client if this route is not present.
-    """
-    data = request.get_json(force=True, silent=True) or {}
-    sid = (data.get("id") or "").strip()
-    if not sid:
-        return jsonify(ok=False, err="missing id"), 400
-    args = [sys.executable, _PLAN_ADD, "--id", sid]
-    title = (data.get("title") or "").strip()
-    status = (data.get("status") or "").strip()
-    desc = (data.get("desc") or "").strip()
-    if title:
-        args += ["--title", title]
-    if status:
-        args += ["--status", status]
-    if desc:
-        args += ["--desc", desc]
-    cp = subprocess.run(args, cwd=_REPO, capture_output=True, text=True)
-    return jsonify(ok=(cp.returncode == 0), rc=cp.returncode, out=cp.stdout, err=cp.stderr, plan_path=_PLAN_PATH)
+        # include plan_path for UI
+        return jsonify({"ok": True, "plan": build_plan_fallback(), "plan_path": _PLAN_PATH})
 
 def ep_agent_summary():
     return jsonify({"ok": True, "summary": {"active_step": None, "desc": "fallback", "next_ids": []}})
 
 def ep_daily_status_fallback():
+    """
+    Return data/status/daily_status.json if present; else a minimal OK stub.
+    """
     try:
         path = os.path.join(REPO, "data", "status", "daily_status.json")
         if os.path.isfile(path):
@@ -327,6 +315,61 @@ def ep_daily_status_fallback():
             return jsonify({"ok": True, "last_run": 0, "summary": "no file"}), 200
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
+
+# ---------------------------------------------------------------------
+# LEB proxy (ping + run) with local fallback
+# ---------------------------------------------------------------------
+def _leb_http(path, payload=None, method=None, timeout=3.0):
+    url = LEB_BASE + path
+    try:
+        if payload is None:
+            req = urllib.request.Request(url, method=method or "GET")
+        else:
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(url, data=data, method=method or "POST")
+            req.add_header("Content-Type", "application/json")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            body = resp.read().decode("utf-8", errors="replace")
+            try:
+                return json.loads(body)
+            except Exception:
+                return {"ok": False, "raw": body, "status": resp.status}
+    except Exception as e:
+        return {"ok": False, "err": f"{type(e).__name__}: {e}"}
+
+def ep_agent_leb_ping():
+    res = _leb_http("/ping", method="GET", timeout=1.5)
+    return jsonify(res if isinstance(res, dict) else {"ok": False, "err": "unknown"})
+
+def ep_agent_leb_run():
+    data = request.get_json(force=True, silent=True) or {}
+    cmd = str(data.get("cmd") or "").strip()
+    if not cmd:
+        return jsonify(ok=False, err="missing cmd"), 400
+    if not any(cmd.startswith(p) for p in ALLOW_CMD_PREFIX):
+        return jsonify(ok=False, err=f"blocked_cmd_prefix; allowed={ALLOW_CMD_PREFIX}"), 400
+
+    # try LEB first
+    res = _leb_http("/run", {"cmd": cmd}, "POST", timeout=8.0)
+    if isinstance(res, dict) and ("ok" in res or "rc" in res or "stdout" in res):
+        return jsonify(res)
+
+    # fallback: run locally via run_with_capture
+    runner = [sys.executable, os.path.join(REPO, "tools", "run_with_capture.py"), "--", cmd]
+    try:
+        cp = subprocess.run(runner, capture_output=True, text=True)
+        out = cp.stdout or ""
+        err = cp.stderr or ""
+        # If the tool printed a JSON result, surface it directly
+        try:
+            parsed = json.loads(out.strip())
+            if isinstance(parsed, dict) and "ok" in parsed:
+                return jsonify(parsed)
+        except Exception:
+            pass
+        return jsonify(ok=(cp.returncode == 0), rc=cp.returncode, stdout=out, stderr=err, via="local_capture")
+    except Exception as e:
+        return jsonify(ok=False, err=f"local_fallback_failed: {type(e).__name__}: {e}")
 
 # ---------------------------------------------------------------------
 # Approvals / worker / recent / next2
@@ -339,6 +382,7 @@ def ep_agent_ac():
     return jsonify({"ok": True, "count": n})
 
 def ep_worker_status():
+    # Minimal stub; adapt to your worker if present
     worker = {"calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0, "last_ts": 0, "last_err": "", "last_reply_len": 0}
     return jsonify({"ok": True, "worker": worker})
 
@@ -393,19 +437,23 @@ def try_register_blueprints(flask_app):
         except Exception:
             pass
     try:
-        from server.agent_compose import bp as compose_bp  # type: ignore
+        from server.agent_compose import bp as compose_bp  # type: ignore[import]
         flask_app.register_blueprint(compose_bp)
         log("[wrapper]", SIG, "registered compose blueprint")
     except Exception:
         pass
+
+    # optional daily status micro-endpoint
     try:
-        from server.micro_daily_status import bp as daily_bp  # type: ignore
+        from server.micro_daily_status import bp as daily_bp
         flask_app.register_blueprint(daily_bp)
         log("[wrapper] bound /agent/daily_status -> daily_status")
-    except Exception:
+    except Exception as _e:
         pass
+
+    # optional new-project micro-endpoint
     try:
-        from server.micro_projects import bp as projects_bp  # type: ignore
+        from server.micro_projects import bp as projects_bp  # type: ignore[import]
         flask_app.register_blueprint(projects_bp)
         log("[wrapper] bound /agent/project/new -> micro_projects")
     except Exception:
@@ -414,28 +462,36 @@ def try_register_blueprints(flask_app):
 try_register_blueprints(app)
 
 # ---------------------------------------------------------------------
-# Bind routes
+# Bind routes (only if missing) so we do not collide with a real sidecar
 # ---------------------------------------------------------------------
+# Diagnostics
 ensure_rule(app, "/__routes__",      "pa_routes_list",       ep___routes__)
 ensure_rule(app, "/health",          "pa_health",            ep_health)
 ensure_rule(app, "/agent_routes",    "pa_agent_routes",      ep_agent_routes)
 ensure_rule(app, "/agent/_sig",      "pa_sig",               ep_agent_sig)
 
+# PWA
 ensure_rule(app, "/pwa/agent",       "pa_pwa_agent",         ep_pwa_agent)
 ensure_rule(app, "/pwa/<path:filename>", "pa_pwa_static",    ep_pwa_static)
 ensure_rule(app, "/static/<path:filename>", "pa_static",     ep_static_passthru)
 
+# Plan / summary
 ensure_rule(app, "/agent/plan",      "pa_plan_fallback",     ep_agent_plan)
-ensure_rule(app, "/agent/plan/update","pa_plan_update",      ep_plan_update, methods=("POST",))  # NEW
 ensure_rule(app, "/agent/summary",   "pa_summary_fallback",  ep_agent_summary)
-ensure_rule(app, "/agent/daily_status", "pa_daily_status_fallback", ep_daily_status_fallback, methods=("GET",))
+ensure_rule(app, "/agent/daily_status", "pa_daily_status_fallback", ep_daily_status_fallback)
 
+# LEB proxy
+ensure_rule(app, "/agent/leb/ping",  "pa_leb_ping",          ep_agent_leb_ping)
+ensure_rule(app, "/agent/leb/run",   "pa_leb_run",           ep_agent_leb_run, methods=("POST",))
+
+# Approvals / worker / recent / next2
 ensure_rule(app, "/agent/approvals_count", "pa_approvals_count", ep_agent_ac)
 ensure_rule(app, "/agent/ac",              "pa_ac_short",        ep_agent_ac)
 ensure_rule(app, "/agent/worker_status",   "pa_worker_status",   ep_worker_status)
 ensure_rule(app, "/agent/recent",          "pa_recent",          ep_agent_recent, methods=("GET",))
 ensure_rule(app, "/agent/next2",           "pa_next2",           ep_agent_next2,  methods=("GET","POST"))
 
+# UI / WS
 ensure_rule(app, "/agent/ui",          "pa_ui",            ep_agent_ui)
 ensure_rule(app, "/agent/ws",          "pa_ws",            ep_agent_ws)
 
