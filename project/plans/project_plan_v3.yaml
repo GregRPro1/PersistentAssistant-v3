@@ -58,13 +58,13 @@ phases:
     desc: 'Given a step id: collect plan text, referenced files, structure/index reports,
       recent commits, and diagnostics into a prompt pack.'
   - id: '10.4'
-    title: Change proposal + diff (human approval)
-    status: planned
+    title: Change proposal + diff + approval (proxy/LEB)
+    status: in_progress
     desc: Generate a minimal plan-of-change and unified diff; surface alternatives/risk;
       require explicit approval before touching disk.
   - id: '10.5'
-    title: Executor + micro-tests via LEB
-    status: planned
+    title: Executor + micro-tests via LEB (pytest)
+    status: in_progress
     desc: Apply patch in a temp workspace, run targeted micro-tests/smokes, capture
       logs/artifacts, implement backoff/retry rules.
   - id: '10.6'
