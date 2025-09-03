@@ -1,20 +1,24 @@
 # config/runner_policy.yaml
+
 ai_apply:
-  enabled: false # flip to true to allow writes, or pass --really-apply
-  require_feature_id: true # enforce Feature-ID for audit
+  enabled: true           # allow writes when --really-apply is passed
+  require_feature_id: true
+  require_before_sha: true
+
+# Back-compat keys some tools may still read
+apply_enabled: true
+require_before_sha: true
 
 limits:
   max_files: 10
   max_total_bytes: 200000
   max_hunks_per_file: 20
-  tokens_per_day: 100000 # placeholder, enforce in UI/runner as needed
 
 allow_globs:
-  - "web/**"
+  - "docs/USER_GUIDE.md"
+  - "tests/**"
   - "server/**"
   - "tools/**"
-  - "docs/**"
-  - "project/**"
 
 deny_globs:
   - "tmp/**"
@@ -29,3 +33,5 @@ deny_globs:
 backups:
   enabled: true
   dir: "tmp/backups"
+
+

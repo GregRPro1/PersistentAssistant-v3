@@ -15,3 +15,6 @@ python tools\py\pa_agent_bringup.py --host 127.0.0.1 --port 8783 --timeout 20 --
 # Open the UI
 start http://127.0.0.1:8783/pwa/agent
 
+
+
+> [plan] placeholder for step 10.3 (agentic bootstrap) @ 1756668966
