@@ -15,38 +15,93 @@ import urllib.request, urllib.error
 
 from flask import Flask, jsonify, make_response, send_from_directory, request, Response
 
+
+def attach_settings_blueprint(app):
+    """Attach settings endpoints, robustly. Falls back to local JSON file."""
+    try:
+        import importlib as _il
+        mod = _il.import_module("server.settings_api")
+        settings_bp = getattr(mod, "bp", None) or getattr(mod, "settings_bp", None)
+        if settings_bp is None and hasattr(mod, "create_blueprint"):
+            settings_bp = mod.create_blueprint()
+        if settings_bp is not None:
+            app.register_blueprint(settings_bp)
+            print("wrap-stable-v1: registered blueprint from server.settings_api")
+            return
+        if hasattr(mod, "init_app"):
+            mod.init_app(app)
+            print("wrap-stable-v1: initialized settings_api via init_app(app)")
+            return
+    except Exception as e:
+        print("wrap-stable-v1: settings_api module not usable:", e)
+
+    # If settings route already exists, don't add fallback.
+    try:
+        for r in app.url_map.iter_rules():
+            if str(r) in ("/agent/settings", "/agent/settings/get"):
+                print("wrap-stable-v1: settings routes already present; skipping fallback")
+                return
+    except Exception:
+        pass
+
+    # Fallback blueprint
+    import json as _json, os as _os
+    from flask import Blueprint, request, jsonify as _jsonify
+    _SETTINGS_FILE = _os.environ.get("PA_SETTINGS_FILE", "config/app_settings.json")
+    fb = Blueprint("pa_settings_fallback", __name__, url_prefix="/agent")
+
+    def _load():
+        try:
+            with open(_SETTINGS_FILE, "r", encoding="utf-8") as f:
+                return _json.load(f)
+        except Exception:
+            return {
+                "plan_file": "",
+                "tracker_file": "",
+                "status_path": "data/runtime/agent_status.json",
+                "projects_root": "",
+                "active_project": "",
+                "tests_default": "tests",
+                "pytest_flags_default": "-q",
+                "agent_base_url": "http://127.0.0.1:8782",
+                "bearer_token": "",
+                "auto_revise_default_iters": 2,
+                "auto_revise_ui_soft_max": 3,
+            }
+
+    def _save(data):
+        _os.makedirs(_os.path.dirname(_SETTINGS_FILE) or ".", exist_ok=True)
+        with open(_SETTINGS_FILE, "w", encoding="utf-8") as f:
+            _json.dump(data, f, ensure_ascii=False, indent=2)
+
+    @fb.get("/settings")
+    def settings_get():
+        return _jsonify(_load())
+
+    @fb.get("/settings/get")
+    def settings_get_alt():
+        return _jsonify(_load())
+
+    @fb.post("/settings")
+    def settings_set():
+        data = request.get_json(silent=True) or {}
+        cur = _load(); cur.update(data); _save(cur)
+        return _jsonify({"ok": True})
+
+    @fb.post("/settings/set")
+    def settings_set_alt():
+        return settings_set()
+
+    app.register_blueprint(fb)
+    print("wrap-stable-v1: registered fallback /agent/settings blueprint")
+
+
 # ---------------------------------------------------------------------
 # Constants / paths
 # ---------------------------------------------------------------------
 REPO = os.path.abspath(os.getcwd())
 PWA_DIR = os.path.join(REPO, "web", "pwa")
 SIG = "wrap-stable-v1"
-
-def _repo_root():
-    cur = os.path.abspath(os.path.dirname(__file__))
-    for _ in range(8):
-        if os.path.exists(os.path.join(cur, "project", "plans", "project_plan_v3.yaml")):
-            return cur
-        nxt = os.path.dirname(cur)
-        if nxt == cur:
-            break
-        cur = nxt
-    return cur
-
-_REPO = _repo_root()
-_PLAN_PATH = os.path.join(_REPO, "project", "plans", "project_plan_v3.yaml")
-
-# existing plan tool is in one of these two spots in your repo
-_PLAN_ADD = os.path.join(_REPO, "tools", "py", "plan", "plan_step_add.py")
-if not os.path.exists(_PLAN_ADD):
-    _PLAN_ADD = os.path.join(_REPO, "tools", "py", "plan_step_add.py")
-
-# LEB proxy defaults
-LEB_HOST = os.environ.get("LEB_HOST", "127.0.0.1")
-LEB_PORT = int(os.environ.get("LEB_PORT", "8765"))
-LEB_BASE = f"http://{LEB_HOST}:{LEB_PORT}"
-
-ALLOW_CMD_PREFIX = ("python ", "pytest ")
 
 def log(*a):
     print(*a, flush=True)
@@ -128,6 +183,13 @@ def load_sidecar_app():
 app = load_sidecar_app()
 if app is None:
     app = Flask(__name__, static_folder=None)
+    # plan-proxy init (must run before app.run())
+    from server.wrapper_plan_proxy import init_plan_proxy as _init_plan_proxy
+    try:
+        _init_plan_proxy(app)
+        print("[wrapper] plan-proxy initialized")
+    except Exception as _e:
+        print("[wrapper] plan-proxy init failed:", _e)
     log("[wrapper]", SIG, "created internal Flask app")
 
     # Optional: extension registry (no-op if absent)
@@ -139,6 +201,9 @@ if app is None:
             pass
     except Exception:
         pass
+
+# >>> Ensure Settings endpoints exist (real bp or fallback)
+attach_settings_blueprint(app)
 
 # ---------------------------------------------------------------------
 # Diagnostics / metadata endpoints
@@ -201,15 +266,15 @@ def build_plan_fallback():
             yaml = None  # type: ignore[assignment]
 
         plan_path = None
+        tree = []
+        totals = {"done": 0, "in_progress": 0, "blocked": 0, "todo": 0}
+        txt = ""
+
+        # try locate plan file
         for base, _dirs, files in os.walk(REPO):
             if "project_plan_v3.yaml" in files:
                 plan_path = os.path.join(base, "project_plan_v3.yaml")
                 break
-
-        active = None
-        tree = []
-        totals = {"done": 0, "in_progress": 0, "blocked": 0, "todo": 0}
-        txt = ""
 
         if plan_path and os.path.isfile(plan_path):
             txt = open(plan_path, "r", encoding="utf-8").read()
@@ -296,8 +361,8 @@ def ep_agent_plan():
         except Exception as e:
             return jsonify({"ok": True, "plan": {"active": None, "tree": [], "totals": {}, "err": str(e)}})
     except Exception:
-        # include plan_path for UI
-        return jsonify({"ok": True, "plan": build_plan_fallback(), "plan_path": _PLAN_PATH})
+        # include plan_path for UI (best effort)
+        return jsonify({"ok": True, "plan": build_plan_fallback()})
 
 def ep_agent_summary():
     return jsonify({"ok": True, "summary": {"active_step": None, "desc": "fallback", "next_ids": []}})
@@ -320,7 +385,7 @@ def ep_daily_status_fallback():
 # LEB proxy (ping + run) with local fallback
 # ---------------------------------------------------------------------
 def _leb_http(path, payload=None, method=None, timeout=3.0):
-    url = LEB_BASE + path
+    url = f"http://{os.environ.get('LEB_HOST','127.0.0.1')}:{int(os.environ.get('LEB_PORT','8765'))}{path}"
     try:
         if payload is None:
             req = urllib.request.Request(url, method=method or "GET")
@@ -333,7 +398,7 @@ def _leb_http(path, payload=None, method=None, timeout=3.0):
             try:
                 return json.loads(body)
             except Exception:
-                return {"ok": False, "raw": body, "status": resp.status}
+                return {"ok": False, "raw": body, "status": getattr(resp, "status", None)}
     except Exception as e:
         return {"ok": False, "err": f"{type(e).__name__}: {e}"}
 
@@ -346,8 +411,8 @@ def ep_agent_leb_run():
     cmd = str(data.get("cmd") or "").strip()
     if not cmd:
         return jsonify(ok=False, err="missing cmd"), 400
-    if not any(cmd.startswith(p) for p in ALLOW_CMD_PREFIX):
-        return jsonify(ok=False, err=f"blocked_cmd_prefix; allowed={ALLOW_CMD_PREFIX}"), 400
+    if not any(cmd.startswith(p) for p in ("python ", "pytest ")):
+        return jsonify(ok=False, err="blocked_cmd_prefix; allowed=('python ','pytest ')"), 400
 
     # try LEB first
     res = _leb_http("/run", {"cmd": cmd}, "POST", timeout=8.0)
@@ -369,6 +434,7 @@ def ep_agent_leb_run():
             pass
         return jsonify(ok=(cp.returncode == 0), rc=cp.returncode, stdout=out, stderr=err, via="local_capture")
     except Exception as e:
+        # FIX: proper closing parenthesis (no stray brace)
         return jsonify(ok=False, err=f"local_fallback_failed: {type(e).__name__}: {e}")
 
 # ---------------------------------------------------------------------
@@ -382,7 +448,6 @@ def ep_agent_ac():
     return jsonify({"ok": True, "count": n})
 
 def ep_worker_status():
-    # Minimal stub; adapt to your worker if present
     worker = {"calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0, "last_ts": 0, "last_err": "", "last_reply_len": 0}
     return jsonify({"ok": True, "worker": worker})
 
@@ -448,7 +513,7 @@ def try_register_blueprints(flask_app):
         from server.micro_daily_status import bp as daily_bp
         flask_app.register_blueprint(daily_bp)
         log("[wrapper] bound /agent/daily_status -> daily_status")
-    except Exception as _e:
+    except Exception:
         pass
 
     # optional new-project micro-endpoint
@@ -503,3 +568,325 @@ if __name__ == "__main__":
     port = int(os.environ.get("PA_SIDECAR_PORT", "8782"))
     log("[wrapper]", SIG, "running on %s:%d" % (host, port))
     app.run(host=host, port=port, threaded=True, use_reloader=False)
+# === injected: normalized plan endpoint (safe rebind) =========================
+def ep_agent_plan_fixed():
+    """
+    Deterministic plan payload the PWA expects.
+    Ensures each node has: id, title, status, children[] (list of dicts)
+    """
+    plan = build_plan_fallback()
+
+    def _norm(node):
+        if not isinstance(node, dict):
+            return None
+        node = dict(node)  # shallow copy
+        node["id"] = str(
+            node.get("id")
+            or node.get("step_id")
+            or node.get("name")
+            or node.get("title")
+            or ""
+        )
+        node["title"] = (
+            node.get("title")
+            or node.get("name")
+            or node.get("desc")
+            or node["id"]
+        )
+        node["status"] = node.get("status") or node.get("state") or ""
+        ch = node.get("children") or []
+        if not isinstance(ch, list):
+            ch = []
+        node["children"] = [x for x in (_norm(c) for c in ch) if x]
+        return node
+
+    plan_tree = plan.get("tree") or []
+    plan["tree"] = [x for x in (_norm(n) for n in plan_tree) if x]
+    return jsonify({"ok": True, "plan": plan})
+
+# Rebind existing endpoint (no duplicate rules; swap the view function)
+try:
+    vf = getattr(app, "view_functions", {})
+    if "pa_plan_fallback" in vf:
+        vf["pa_plan_fallback"] = ep_agent_plan_fixed
+        print("wrap-stable-v1: /agent/plan rebound to ep_agent_plan_fixed")
+except Exception as _e:
+    print("wrap-stable-v1: plan rebind failed:", _e)
+# ============================================================================
+# === post-bind rebind (ensure it runs after ensure_rule) ======================
+try:
+    vf = getattr(app, "view_functions", {})
+    if "pa_plan_fallback" in vf and "ep_agent_plan_fixed" in globals():
+        vf["pa_plan_fallback"] = ep_agent_plan_fixed
+        print("wrap-stable-v1: /agent/plan rebound (post-bind) to ep_agent_plan_fixed")
+    else:
+        print("wrap-stable-v1: post-bind rebind skipped (endpoint or func missing)")
+except Exception as _e:
+    print("wrap-stable-v1: post-bind rebind failed:", _e)
+# =============================================================================
+# === debug + rebind for /agent/plan ==========================================
+def _debug_plan_binding():
+    try:
+        rules = []
+        for r in app.url_map.iter_rules():
+            if str(r) == "/agent/plan":
+                rules.append({"rule": str(r), "endpoint": r.endpoint})
+        ep = rules[0]["endpoint"] if rules else None
+        vf = app.view_functions.get(ep) if ep else None
+        name = getattr(vf, "__name__", str(vf))
+        return {"rules": rules, "endpoint": ep, "view_func": name}
+    except Exception as e:
+        return {"err": str(e)}
+
+def ep_debug_plan_bind():
+    info = _debug_plan_binding()
+    return jsonify({"ok": True, "binding": info})
+
+def _rebind_plan_to_fixed():
+    info = _debug_plan_binding()
+    ep = info.get("endpoint")
+    # Prefer rebinding the actual endpoint that owns /agent/plan (often 'agent_plan')
+    if ep and "ep_agent_plan_fixed" in globals():
+        app.view_functions[ep] = ep_agent_plan_fixed
+        print(f"wrap-stable-v1: rebound /agent/plan endpoint '{ep}' -> ep_agent_plan_fixed")
+    elif "pa_plan_fallback" in app.view_functions and "ep_agent_plan_fixed" in globals():
+        app.view_functions["pa_plan_fallback"] = ep_agent_plan_fixed
+        print("wrap-stable-v1: rebound /agent/plan via pa_plan_fallback -> ep_agent_plan_fixed")
+    else:
+        print("wrap-stable-v1: plan rebind skipped:", info)
+
+# Bind debug endpoint and perform rebind AFTER all routes are registered.
+ensure_rule(app, "/__debug_plan_bind", "pa_debug_plan_bind", ep_debug_plan_bind)
+_rebind_plan_to_fixed()
+# ============================================================================ 
+# === plan proxy + diagnostics (append-only) ===================================
+import json as _json_mod
+from flask import Response as _FlaskResponse
+
+def _plan_normalize_tree(tree):
+    def _norm(node):
+        if not isinstance(node, dict):
+            return None
+        node = dict(node)  # shallow copy
+        node["id"] = str(
+            node.get("id")
+            or node.get("step_id")
+            or node.get("name")
+            or node.get("title")
+            or ""
+        )
+        node["title"] = (
+            node.get("title")
+            or node.get("name")
+            or node.get("desc")
+            or node["id"]
+        )
+        node["status"] = node.get("status") or node.get("state") or ""
+        ch = node.get("children") or []
+        if not isinstance(ch, list):
+            ch = []
+        node["children"] = [x for x in (_norm(c) for c in ch) if x]
+        return node
+    return [x for x in (_norm(n) for n in (tree or [])) if x]
+
+def _extract_json(obj):
+    # Accept dict, Flask Response, (obj, status), or raw JSON string
+    if isinstance(obj, tuple) and len(obj) >= 1:
+        obj = obj[0]
+    if isinstance(obj, dict):
+        return obj
+    if isinstance(obj, _FlaskResponse):
+        try:
+            txt = obj.get_data(as_text=True)
+            return _json_mod.loads(txt)
+        except Exception:
+            return {}
+    if isinstance(obj, (str, bytes)):
+        try:
+            return _json_mod.loads(obj.decode("utf-8") if isinstance(obj, bytes) else obj)
+        except Exception:
+            return {}
+    return {}
+
+def _debug_plan_binding():
+    info = {"rules": [], "endpoint": None, "view_func": None, "proxied": False}
+    try:
+        for r in app.url_map.iter_rules():
+            if str(r) == "/agent/plan":
+                info["rules"].append({"rule": str(r), "endpoint": r.endpoint})
+        if info["rules"]:
+            ep = info["rules"][0]["endpoint"]
+            info["endpoint"] = ep
+            vf = app.view_functions.get(ep)
+            info["view_func"] = getattr(vf, "__name__", str(vf))
+            info["proxied"] = (info["view_func"] == "agent_plan_proxy")
+    except Exception as e:
+        info["err"] = f"{type(e).__name__}: {e}"
+    return info
+
+def ep_debug_plan_bind():
+    return jsonify({"ok": True, "binding": _debug_plan_binding()})
+
+# Rebind /agent/plan to a proxy that normalizes output, preserving the original
+_ORIG_AGENT_PLAN_FUNC = None
+def _wrap_and_rebind_agent_plan():
+    global _ORIG_AGENT_PLAN_FUNC
+    info = _debug_plan_binding()
+    ep = info.get("endpoint")
+    if not ep:
+        print("wrap-stable-v1: no /agent/plan endpoint to rebind:", info)
+        return
+
+    if _ORIG_AGENT_PLAN_FUNC is None:
+        _ORIG_AGENT_PLAN_FUNC = app.view_functions.get(ep)
+
+    def agent_plan_proxy(*a, **kw):
+        try:
+            raw = _ORIG_AGENT_PLAN_FUNC(*a, **kw) if callable(_ORIG_AGENT_PLAN_FUNC) else ep_agent_plan()
+        except Exception:
+            raw = ep_agent_plan()  # fallback to our internal builder
+
+        data = _extract_json(raw)
+        # Support both {"ok":..., "plan": {...}} and bare plan dicts
+        plan = data.get("plan") if "plan" in data else data
+        if not isinstance(plan, dict):
+            plan = {}
+
+        tree = plan.get("tree") or []
+        plan["tree"] = _plan_normalize_tree(tree)
+
+        # Default totals/active if missing
+        plan.setdefault("totals", {})
+        plan.setdefault("active", None)
+        return jsonify({"ok": True, "plan": plan})
+
+    # Bind debug endpoint and swap the view function
+    ensure_rule(app, "/__debug_plan_bind", "pa_debug_plan_bind", ep_debug_plan_bind)
+    app.view_functions[ep] = agent_plan_proxy
+    print(f"wrap-stable-v1: rebound /agent/plan endpoint '{ep}' -> agent_plan_proxy")
+
+# Perform rebind after routes are registered
+try:
+    _wrap_and_rebind_agent_plan()
+except Exception as _e:
+    print("wrap-stable-v1: _wrap_and_rebind_agent_plan failed:", _e)
+# =============================================================================
+# === plan binding guard + diagnostics (runs at request time) ===================
+try:
+    from flask import Response as _FlaskResponse
+except Exception:
+    _FlaskResponse = None  # type: ignore
+
+_ORIG_AGENT_PLAN_EP = None
+_ORIG_AGENT_PLAN_FUNC = None
+
+def _plan_normalize_tree(_tree):
+    def _norm(node):
+        if not isinstance(node, dict):
+            return None
+        node = dict(node)  # shallow copy
+        node["id"] = str(node.get("id") or node.get("step_id") or node.get("name") or node.get("title") or "")
+        node["title"] = node.get("title") or node.get("name") or node.get("desc") or node["id"]
+        node["status"] = node.get("status") or node.get("state") or ""
+        ch = node.get("children") or []
+        if not isinstance(ch, list):
+            ch = []
+        node["children"] = [x for x in (_norm(c) for c in ch) if x]
+        return node
+    return [x for x in (_norm(n) for n in (_tree or [])) if x]
+
+def _extract_json(obj):
+    try:
+        if isinstance(obj, tuple) and len(obj) >= 1:
+            obj = obj[0]
+        if isinstance(obj, dict):
+            return obj
+        if _FlaskResponse is not None and isinstance(obj, _FlaskResponse):
+            txt = obj.get_data(as_text=True)
+            try:
+                return json.loads(txt)
+            except Exception:
+                return {}
+        if isinstance(obj, (str, bytes)):
+            s = obj.decode("utf-8") if isinstance(obj, bytes) else obj
+            try:
+                return json.loads(s)
+            except Exception:
+                return {}
+    except Exception:
+        pass
+    return {}
+
+def agent_plan_proxy(*a, **kw):
+    # call original if we captured it; else fall back to our internal builder
+    try:
+        raw = _ORIG_AGENT_PLAN_FUNC(*a, **kw) if callable(_ORIG_AGENT_PLAN_FUNC) else ep_agent_plan()
+    except Exception:
+        raw = ep_agent_plan()
+    data = _extract_json(raw)
+    plan = data.get("plan") if isinstance(data, dict) and "plan" in data else data
+    if not isinstance(plan, dict):
+        plan = {}
+    plan["tree"] = _plan_normalize_tree(plan.get("tree") or [])
+    plan.setdefault("totals", {})
+    plan.setdefault("active", None)
+    return jsonify({"ok": True, "plan": plan})
+
+def _resolve_plan_endpoint():
+    try:
+        for r in app.url_map.iter_rules():
+            if str(r) == "/agent/plan":
+                return r.endpoint
+    except Exception:
+        pass
+    return None
+
+def ep_debug_plan_bind():
+    ep = _resolve_plan_endpoint()
+    vf = app.view_functions.get(ep) if ep else None
+    return jsonify({
+        "ok": True,
+        "binding": {
+            "endpoint": ep,
+            "view_func": getattr(vf, "__name__", str(vf)),
+            "proxied": getattr(vf, "__name__", "") == "agent_plan_proxy"
+        },
+        "routes": [{"rule": str(r), "endpoint": r.endpoint} for r in app.url_map.iter_rules() if str(r).startswith("/agent")]
+    })
+
+# register debug endpoint unconditionally
+try:
+    app.add_url_rule("/__debug_plan_bind", "pa_debug_plan_bind", ep_debug_plan_bind, methods=["GET"])
+except Exception:
+    pass
+
+# before_request guard: capture original and rebind ONCE, after all blueprints are in
+@app.before_request
+def _plan_bind_guard():
+    global _ORIG_AGENT_PLAN_EP, _ORIG_AGENT_PLAN_FUNC
+    try:
+        if getattr(app, "_plan_proxy_wired", False):
+            return
+        ep = _resolve_plan_endpoint()
+        if not ep:
+            return  # route not registered yet (should be rare)
+        cur = app.view_functions.get(ep)
+        name = getattr(cur, "__name__", "")
+        if name != "agent_plan_proxy":
+            _ORIG_AGENT_PLAN_EP = ep
+            _ORIG_AGENT_PLAN_FUNC = cur
+            app.view_functions[ep] = agent_plan_proxy
+            app._plan_proxy_wired = True
+            print(f"[wrapper] bound /agent/plan proxy -> agent_plan_proxy (endpoint='{ep}', orig='{name}')")
+    except Exception as _e:
+        print("[wrapper] _plan_bind_guard failed:", _e)
+# =============================================================================
+# --- init: plan proxy + diagnostics (external module) -------------------------
+try:
+    from server.wrapper_plan_proxy import init_plan_proxy as _init_plan_proxy
+    if _init_plan_proxy(app):
+        print("[wrapper] plan-proxy initialized")
+except Exception as _e:
+    print("[wrapper] plan-proxy init failed:", _e)
+# -----------------------------------------------------------------------------
+
