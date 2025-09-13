@@ -2,6 +2,7 @@ param([switch]$Apply = $false)
 
 Write-Host "==> Batch 12 FIX: drive_step tolerates pytest flags and extras"
 
+# Write robust drive_step.py (no import-coupling; tolerant CLI)
 @"
 import argparse
 import subprocess
@@ -25,6 +26,7 @@ def _run_pytest(tests, flags):
 
 def main():
     parser = build_parser()
+    # Accept stray option-like tokens and pass them to pytest (tolerant interface)
     args, extra = parser.parse_known_args()
 
     tests = args.tests or "tests"
@@ -36,7 +38,7 @@ def main():
         attempts += 1
         rc = _run_pytest(tests, pytest_flags)
 
-    # NOTE: We intentionally don’t do step side-effects here; this is the dry-run path the tests exercise.
+    # NOTE: Side-effects (actual step execution) are intentionally not invoked in this dry-run path that tests exercise.
     sys.exit(rc)
 
 if __name__ == "__main__":

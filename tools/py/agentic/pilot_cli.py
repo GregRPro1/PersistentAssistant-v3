@@ -8,7 +8,7 @@ def build_parser():
     p = argparse.ArgumentParser(prog="pilot_cli.py", allow_abbrev=False)
     p.add_argument("--step", required=True, help="Plan step id to work on (e.g., 10.4)")
     p.add_argument("--tests", nargs="+", default=["tests"], help="pytest targets (files/dirs/nodes)")
-    p.add_argument("--flags", nargs="*", default=["-q"], help="pytest flags (e.g., -q -k smoke)")
+    p.add_argument("--flags", nargs="*", default=[], help="pytest flags (e.g., -q -k smoke)")
     p.add_argument("--iters", type=int, default=2, help="max attempts")
     p.add_argument("--status", type=str, default=None, help="status JSON path override")
     p.add_argument("--out-dir", type=str, default=None, help="proposal artifacts dir")
@@ -17,10 +17,13 @@ def build_parser():
     return p
 
 def run_cli(argv: Optional[List[str]] = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args, extra = parser.parse_known_args(argv)
+    all_flags = list(args.flags) + list(extra)  # tolerate stray -q/-k etc.
+
     res = run_once(step=args.step,
                    tests=args.tests,
-                   flags=args.flags,
+                   flags=all_flags,
                    out_dir=args.out_dir,
                    iters=args.iters,
                    really_apply=args.apply,

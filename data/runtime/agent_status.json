@@ -1,0 +1,10 @@
+{
+  "phase": "test",
+  "step": "10.4",
+  "attempt": 2,
+  "total": 2,
+  "last_proposal": "C:\\Users\\GPRap\\AppData\\Local\\Temp\\pytest-of-GPRap\\pytest-52\\test_pilot_stub_minimal0\\props\\p2.json",
+  "rc": 0,
+  "ok": true,
+  "timestamp": "2025-09-07T21:15:26.168561+00:00"
+}

@@ -1,0 +1,197 @@
+#!/usr/bin/env python3
+"""
+make_support_bundle.py — support-bundle maker with optional AST dump.
+
+- Detects repo root robustly.
+- Accepts relative OR absolute --include.
+- --add-logs pulls in sidecar/phone logs + runtime status + prior bundles.
+- --emit-ast writes <name>_<timestamp>_AST.json in outdir and includes it in the ZIP.
+
+Exit codes:
+  0 -> bundle created
+  2 -> nothing to include
+  3 -> unexpected error
+"""
+from __future__ import annotations
+import argparse, json, os, sys, time, zipfile, glob as _glob, ast
+from pathlib import Path
+from typing import Iterable, List, Dict, Any
+
+HERE = Path(__file__).resolve().parent
+
+def _detect_root(start: Path) -> Path:
+    cur = start
+    candidates = [cur, *cur.parents]
+    MARKER_DIRS = ("tools", "web", "server")
+    for p in candidates[:8]:
+        try:
+            if (p / ".git").exists() or all((p / d).exists() for d in MARKER_DIRS):
+                return p
+        except Exception:
+            pass
+    return start.parents[2] if len(start.parents) >= 2 else Path.cwd()
+
+ROOT = _detect_root(HERE)
+
+def _ts() -> str:
+    return time.strftime("%Y%m%d_%H%M%S", time.localtime())
+
+def _relpath(p: Path) -> str:
+    try:
+        return str(p.resolve().relative_to(ROOT))
+    except Exception:
+        return str(p.resolve())
+
+def _gather_globs(patterns: Iterable[str]) -> List[Path]:
+    out: List[Path] = []
+    for pat in patterns:
+        abs_glob = str(Path(pat)) if Path(pat).is_absolute() else str((ROOT / pat).resolve())
+        for hit in _glob.glob(abs_glob, recursive=True):
+            ph = Path(hit)
+            if ph.is_file():
+                out.append(ph)
+    return out
+
+def _safe_read_text(p: Path) -> str:
+    try:
+        return p.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        with open(p, "rb") as f:
+            return f.read().decode("utf-8", errors="replace")
+
+def _ast_dump_for_files(py_files: List[Path]) -> Dict[str, Any]:
+    dump: Dict[str, Any] = {}
+    for pf in py_files:
+        try:
+            src = _safe_read_text(pf)
+            tree = ast.parse(src, filename=str(pf))
+            # Use ast.dump string for compactness; include field annotations
+            dump[_relpath(pf)] = ast.dump(tree, include_attributes=False, annotate_fields=True)
+        except Exception as e:
+            dump[_relpath(pf)] = {"error": f"{type(e).__name__}: {e}"}
+    return dump
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(allow_abbrev=False)
+    p.add_argument("--outdir", required=True, help="Output directory (created if missing)")
+    p.add_argument("--name", default="support_bundle", help="Bundle name prefix")
+    p.add_argument("--add-logs", action="store_true", help="Include logs/runtime/status")
+    p.add_argument("--include", action="append", default=[], help="File path (relative to root or absolute)")
+    p.add_argument("--include-glob", action="append", default=[], help="Glob (relative to root or absolute)")
+    p.add_argument("--emit-ast", action="store_true", help="Emit AST JSON for included .py files")
+    p.add_argument("--note", action="append", default=[], help="Free-form notes for MANIFEST")
+    return p
+
+def main() -> int:
+    ap = build_parser()
+    args = ap.parse_args()
+
+    outdir = (ROOT / args.outdir).resolve() if not Path(args.outdir).is_absolute() else Path(args.outdir).resolve()
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    ts = _ts()
+    base = f"{args.name}_{ts}"
+    zip_path = outdir / f"{base}.zip"
+    manifest_path = outdir / f"{base}_MANIFEST.json"
+
+    include_files: List[Path] = []
+    missing: List[str] = []
+    warnings: List[str] = []
+
+    # Explicit includes
+    for rel in args.include:
+        p = Path(rel)
+        if not p.is_absolute():
+            p = (ROOT / rel).resolve()
+        if p.is_file():
+            include_files.append(p)
+        else:
+            missing.append(rel)
+
+    # Globs
+    if args.include_glob:
+        include_files.extend(_gather_globs(args.include_glob))
+
+    # Logs / diagnostics
+    if args.add_logs:
+        log_globs = [
+            "tmp/logs/*.log",
+            "tmp/logs/*.out.log",
+            "tmp/logs/*.err.log",
+            "tmp/logs/sidecar_*_*.out.log",
+            "tmp/logs/sidecar_*_*.err.log",
+            "tmp/logs/*.zip",
+            "tmp/logs/*_MANIFEST.json",
+            "tmp/logs/*.ast.json",
+            "tmp/logs/*.ast.*",
+            "data/runtime/*.json",
+        ]
+        include_files.extend(_gather_globs(log_globs))
+        for rel in ("config/app_settings.json", "project_plan_v3.yaml", "project/tracker.yaml"):
+            p = (ROOT / rel)
+            if p.is_file():
+                include_files.append(p.resolve())
+
+    # De-dup
+    uniq: List[Path] = []
+    seen = set()
+    for p in include_files:
+        rp = p.resolve()
+        if rp not in seen:
+            seen.add(rp)
+            uniq.append(rp)
+
+    if not uniq:
+        print(json.dumps({"ok": False, "reason": "no_files_to_bundle", "root": str(ROOT), "cwd": str(Path.cwd())}, indent=2))
+        return 2
+
+    # Optional AST
+    ast_file = None
+    if args.emit_ast:
+        py_files = [p for p in uniq if p.suffix.lower() == ".py"]
+        ast_doc = _ast_dump_for_files(py_files)
+        ast_file = outdir / f"{base}_AST.json"
+        with open(ast_file, "w", encoding="utf-8") as f:
+            json.dump(ast_doc, f, ensure_ascii=False, indent=2)
+
+    # Write ZIP
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as z:
+        for p in uniq:
+            arc = _relpath(p)
+            try:
+                z.write(p, arcname=arc)
+            except Exception as e:
+                warnings.append(f"zip_write_failed:{arc}:{type(e).__name__}:{e}")
+        if ast_file and ast_file.exists():
+            z.write(ast_file, arcname=_relpath(ast_file))
+
+    # MANIFEST
+    manifest: Dict[str, Any] = {
+        "ok": True,
+        "created_at": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime()),
+        "zip": str(zip_path),
+        "root": str(ROOT),
+        "count": len(uniq) + (1 if ast_file else 0),
+        "files": [_relpath(p) for p in uniq] + (([_relpath(ast_file)] if ast_file else [])),
+        "missing": missing,
+        "warnings": warnings,
+        "notes": args.note,
+        "env": {"python": sys.executable, "cwd": str(Path.cwd())},
+    }
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+    print(str(zip_path))
+    print("MANIFEST:" + str(manifest_path))
+    if ast_file:
+        print("AST:" + str(ast_file))
+    return 0
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except Exception as e:
+        print(json.dumps({"ok": False, "error": f"{type(e).__name__}: {e}"}))
+        sys.exit(3)

@@ -1,5 +1,5 @@
 === Persistent Assistant Dev Summary ===
-Timestamp: 2025-08-28 15:34:32
+Timestamp: 2025-09-13 13:07:37
 
 [INVENTORY]
 [DEEP INVENTORY OK]
@@ -12,7 +12,7 @@ Timestamp: 2025-08-28 15:34:32
 
 [PLAN STATUS]
 Current: 6.4.a - Add Windows CI workflow (GitHub Actions) [in_progress]
-Next:    6.4.b - Run CI smoke (tests minimal) and upload logs [planned]
+Next:    6.4.a - Add Windows CI workflow (GitHub Actions) [in_progress]
 
 [SHA CHECK]
 [NOT IN INVENTORY] gui/tabs/chat_tab.py

@@ -143,3 +143,27 @@ python tools\py\inventory\report_headers.py
 
 # Basic structure
 Web app is at web/pwa - main javascript is agent.html
+
+To do an AST and package requested files into a single zip
+(.venv) PS C:\_Repos\PersistentAssistant> .venv\Scripts\python.exe tools/py/pack/make_support_bundle.py `
+>>   --outdir tmp\logs --name sb_next --add-logs --emit-ast `
+>>   --include server\agent_actions_v7.py `
+>>   --include server\agent_sidecar_wrapper.py `
+>>   --include server\proposal_api.py `
+>>   --include server\settings_api.py `
+>>   --include tools\py\agentic\pilot_cli.py `
+>>   --include tools\py\agentic\status.py `
+>>   --include tools\py\agentic\drive_step.py `
+>>   --include web\pwa\agent.html `
+>>   --include web\pwa\settings_ext.js `
+>>   --include web\pwa\agent_plan_v3.js `
+>>   --include config\app_settings.json `
+>>   --include project_plan_v3.yaml `
+>>   --include project\tracker.yaml
+
+Creates
+
+C:\_Repos\PersistentAssistant\tmp\logs\sb_next_20250913_104046.zip
+MANIFEST:C:\_Repos\PersistentAssistant\tmp\logs\sb_next_20250913_104046_MANIFEST.json
+AST:C:\_Repos\PersistentAssistant\tmp\logs\sb_next_20250913_104046_AST.json
+(.venv) PS C:\_Repos\PersistentAssistant> 

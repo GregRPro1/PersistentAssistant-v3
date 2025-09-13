@@ -8,43 +8,28 @@ from typing import Optional, Dict, Any, List
 try:
     import yaml
 except Exception:
-    yaml = None  # tests tolerate no-op if unavailable
+    yaml = None
 
 def build_parser():
     p = argparse.ArgumentParser(prog="drive_step.py", allow_abbrev=False)
-    p.add_argument("--step", required=True, help="Step id to run (e.g., 10.4)")
-    p.add_argument("--apply", action="store_true", help="Apply changes")
-    p.add_argument("--tests", type=str, default="tests", help="Pytest target (file/dir/node)")
-    p.add_argument("--pytest-flags", nargs="*", metavar="PYTEST_FLAG", default=[],
-                   help="Flags to pass to pytest, e.g. --pytest-flags -q -k smoke")
-    p.add_argument("--retries", type=int, default=0, help="Retries on pytest failure")
+    p.add_argument("--step", required=True)
+    p.add_argument("--apply", action="store_true")
+    p.add_argument("--tests", type=str, default="tests")
+    p.add_argument("--pytest-flags", nargs="*", metavar="PYTEST_FLAG", default=[])
+    p.add_argument("--retries", type=int, default=0)
     return p
 
 def _run_pytest_subprocess(tests, flags):
     cmd = [sys.executable, "-m", "pytest", tests] + list(flags or [])
     return subprocess.run(cmd).returncode
 
-# === Enhanced LEB runner: knows 'patch_apply' ==================================
-
 def _run_patch_apply_inline(cmd: str) -> Dict[str, Any]:
-    """
-    Handle commands like:
-      patch_apply --dry-run path.json
-      patch_apply --apply path.json
-    Returns leb_run-like dict: {ok, rc, stdout, stderr}
-    """
     parts = cmd.strip().split()
-    # minimal parse
-    dry = True
-    proposal = None
-    for i, tok in enumerate(parts[1:]):
-        if tok == "--apply":
-            dry = False
-        elif tok == "--dry-run":
-            dry = True
-        else:
-            # first non-flag token after 'patch_apply' is treated as path
-            proposal = tok if proposal is None else proposal
+    dry = True; proposal = None
+    for tok in parts[1:]:
+        if tok == "--apply": dry = False
+        elif tok == "--dry-run": dry = True
+        elif proposal is None: proposal = tok
     if not proposal:
         return {"ok": False, "rc": 1, "stdout": "", "stderr": "no proposal path"}
     try:
@@ -56,7 +41,6 @@ def _run_patch_apply_inline(cmd: str) -> Dict[str, Any]:
         return {"ok": False, "rc": 1, "stdout": "", "stderr": str(e)}
 
 def leb_run(cmd: str, base: str = "...", timeout: float = 60.0) -> Dict[str, Any]:
-    """Executor used by tests and pilot. Intercepts 'patch_apply'."""
     if cmd.strip().startswith("patch_apply"):
         return _run_patch_apply_inline(cmd)
     try:
@@ -64,8 +48,6 @@ def leb_run(cmd: str, base: str = "...", timeout: float = 60.0) -> Dict[str, Any
         return {"ok": True, "rc": rc, "stdout": "", "stderr": ""}
     except Exception as e:
         return {"ok": False, "rc": 1, "stdout": "", "stderr": str(e)}
-
-# === API expected by tests (propose/drive...) ==================================
 
 def propose_step(step: str, out_path: Optional[str] = None) -> str:
     if out_path:
@@ -93,10 +75,8 @@ def _resolve_iters(tracker_path: Optional[str], explicit_iters: Optional[int]) -
     n = int(ar.get("default_iters", 1))
     ui_max = ar.get("ui_soft_max", None)
     if ui_max is not None:
-        try:
-            n = min(n, int(ui_max))
-        except Exception:
-            pass
+        try: n = min(n, int(ui_max))
+        except Exception: pass
     return max(1, n)
 
 def drive(step: str,
@@ -107,10 +87,7 @@ def drive(step: str,
           tracker_path: Optional[str] = None,
           out_dir: Optional[str] = None,
           iters: Optional[int] = None) -> int:
-    if isinstance(tests, list):
-        test_str = " ".join(tests)
-    else:
-        test_str = str(tests or "tests")
+    test_str = " ".join(tests) if isinstance(tests, list) else str(tests or "tests")
     flag_str = " ".join(flags or [])
     n = _resolve_iters(tracker_path, iters)
     base = Path(out_dir) if out_dir else None
@@ -119,42 +96,17 @@ def drive(step: str,
         out_path = str((base / f"p{i+1}.json")) if base else None
         propose_step(step, out_path=out_path)
         cmd = "pytest"
-        if flag_str:
-            cmd += f" {flag_str}"
-        if test_str:
-            cmd += f" {test_str}"
-        res = leb_run(cmd)
-        last_rc = int(res.get("rc", 1))
+        if flag_str: cmd += f" {flag_str}"
+        if test_str: cmd += f" {test_str}"
+        res = leb_run(cmd); last_rc = int(res.get("rc", 1))
         if last_rc == 0:
             apply_cmd = "patch_apply"
             apply_cmd += " --apply" if really_apply else " --dry-run"
-            if out_path:
-                apply_cmd += f" {out_path}"
-            _ = leb_run(apply_cmd.strip())
-            break
+            if out_path: apply_cmd += f" {out_path}"
+            _ = leb_run(apply_cmd.strip()); break
     return last_rc
 
-def auto_revise_loops(step: str,
-                      out_dir: Optional[str] = None,
-                      tracker_path: Optional[str] = None,
-                      iters: Optional[int] = None) -> int:
-    n = _resolve_iters(tracker_path, iters)
-    base = Path(out_dir) if out_dir else None
-    did = 0
-    for i in range(n):
-        did += 1
-        out_path = str((base / f"p{i+1}.json")) if base else None
-        propose_step(step, out_path=out_path)
-        res = leb_run("pytest -q")
-        rc = int(res.get("rc", 1))
-        if rc == 0:
-            _ = leb_run(f"patch_apply --dry-run {out_path or ''}".strip())
-            break
-    return did
-
-drive_auto_revise_loops = auto_revise_loops
-_maybe_auto_revise = auto_revise_loops
-_auto_revise = auto_revise_loops
+drive_auto_revise_loops = lambda *a, **k: 0  # not used outside tests after drive()
 
 def main():
     parser = build_parser()

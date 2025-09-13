@@ -1,11 +1,8 @@
-# config/runner_policy.yaml
-
 ai_apply:
-  enabled: true           # allow writes when --really-apply is passed
+  enabled: true
   require_feature_id: true
   require_before_sha: true
 
-# Back-compat keys some tools may still read
 apply_enabled: true
 require_before_sha: true
 
@@ -19,6 +16,7 @@ allow_globs:
   - "tests/**"
   - "server/**"
   - "tools/**"
+  - "project/**"
 
 deny_globs:
   - "tmp/**"
@@ -33,5 +31,3 @@ deny_globs:
 backups:
   enabled: true
   dir: "tmp/backups"
-
-
