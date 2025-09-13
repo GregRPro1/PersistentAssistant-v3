@@ -1,0 +1,13 @@
+{
+  "plan_file": "C:\\_Repos\\PersistentAssistant\\project_plan_v3.yaml",
+  "tracker_file": "C:\\_Repos\\PersistentAssistant\\project\\tracker.yaml",
+  "status_path": "data\\runtime\\agent_status.json",
+  "projects_root": "C:\\_Repos\\PersistentAssistant",
+  "active_project": "PersistentAssistant",
+  "tests_default": "tests",
+  "pytest_flags_default": "-q",
+  "agent_base_url": "http://127.0.0.1:8782",
+  "bearer_token": "",
+  "auto_revise_default_iters": 2,
+  "auto_revise_ui_soft_max": 3
+}

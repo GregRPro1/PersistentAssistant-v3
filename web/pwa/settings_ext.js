@@ -1,0 +1,145 @@
+/* web/pwa/settings_ext.js — v2 (form-based) */
+(function (doc, win) {
+  const TAG = 'ext-inline-v2';
+  const log = (...a) => console.log(`[${TAG}]`, ...a);
+  const err = (...a) => console.error(`[${TAG}]`, ...a);
+
+  function $(sel, root = doc) { return root.querySelector(sel); }
+  function el(tag, cls, html) { const n = doc.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+
+  async function httpGet(path) {
+    try {
+      const r = await fetch(path, { cache: 'no-store' });
+      const txt = await r.text();
+      log('GET', path, r.status, txt.slice(0, 200));
+      return { ok: r.ok, status: r.status, text: txt };
+    } catch (e) { err('GET failed', path, e); return { ok: false, status: 0, text: String(e || 'error') }; }
+  }
+  async function httpPost(path, body) {
+    try {
+      const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+      const txt = await r.text();
+      log('POST', path, r.status, txt.slice(0, 200));
+      return { ok: r.ok, status: r.status, text: txt };
+    } catch (e) { err('POST failed', path, e); return { ok: false, status: 0, text: String(e || 'error') }; }
+  }
+
+  // Fields to render as labeled inputs
+  const FIELDS = [
+    { key: 'plan_file', label: 'Plan file (YAML)', type: 'text', placeholder: 'C:\\_Repos\\PersistentAssistant\\project_plan_v3.yaml' },
+    { key: 'tracker_file', label: 'Tracker file (YAML)', type: 'text', placeholder: 'C:\\_Repos\\PersistentAssistant\\project\\tracker.yaml' },
+    { key: 'status_path', label: 'Status JSON path', type: 'text', placeholder: 'data\\runtime\\agent_status.json' },
+    { key: 'projects_root', label: 'Projects root', type: 'text', placeholder: 'C:\\_Repos\\PersistentAssistant' },
+    { key: 'active_project', label: 'Active project', type: 'text', placeholder: 'PersistentAssistant' },
+    { key: 'tests_default', label: 'Default pytest target(s)', type: 'text', placeholder: 'tests' },
+    { key: 'pytest_flags_default', label: 'Default pytest flags', type: 'text', placeholder: '-q' },
+    { key: 'agent_base_url', label: 'Agent base URL', type: 'text', placeholder: 'http://127.0.0.1:8782' },
+    { key: 'bearer_token', label: 'Bearer token', type: 'password', placeholder: '(optional)' },
+    { key: 'auto_revise_default_iters', label: 'Auto-revise default iters', type: 'number', placeholder: '2' },
+    { key: 'auto_revise_ui_soft_max', label: 'Auto-revise UI soft max', type: 'number', placeholder: '3' },
+  ];
+
+  function mountSettingsForm() {
+    const pane = $('section[data-pane="settings"]');
+    if (!pane) { err('settings pane not found'); return; }
+    log('settings pane found');
+
+    const card = el('div', 'card'); card.id = 'extSettingsFormBox';
+    const head = el('div', 'section-head', '<h3>Extended Settings</h3>');
+    const form = el('div');
+
+    // Build rows
+    FIELDS.forEach(f => {
+      const row = el('div', 'rowflex');
+      row.style.display = 'grid';
+      row.style.gridTemplateColumns = '220px 1fr';
+      row.style.columnGap = '8px';
+      row.style.alignItems = 'center';
+
+      const lbl = el('label', 'hint');
+      lbl.textContent = f.label + ':';
+      lbl.style.textAlign = 'right';
+
+      const inp = el('input', 'btn');
+      inp.type = f.type || 'text';
+      inp.placeholder = f.placeholder || '';
+      inp.id = 'f_' + f.key;
+      inp.style.width = '100%';          // make input span the right column
+      inp.style.minWidth = '0';          // allow shrinking in narrow windows
+      inp.id = 'f_' + f.key; inp.style.minWidth = '320px';
+      if (f.type === 'number') { inp.inputMode = 'numeric'; }
+      row.append(lbl, inp);
+      form.append(row);
+    });
+
+    const controls = el('div', 'rowflex');
+    const btnReload = el('button', 'btn', 'Reload');
+    const btnSave = el('button', 'btn', 'Save all');
+    controls.append(btnReload, btnSave);
+
+    const out = el('pre', 'codebox scroll'); out.id = 'extSettingsOut'; out.textContent = '[no logs yet]';
+
+    card.append(head, form, controls, out);
+    pane.append(card);
+    log('mounted settings form');
+
+    async function load() {
+      const r = await httpGet('/agent/settings');
+      if (!r.ok) { out.textContent = `GET /agent/settings failed (${r.status}): ${r.text}`; return; }
+      let j; try { j = JSON.parse(r.text) } catch (e) { out.textContent = 'parse error: ' + e; return; }
+      FIELDS.forEach(f => {
+        const inp = $('#f_' + f.key);
+        if (!inp) return;
+        const v = j[f.key];
+        if (f.type === 'number') inp.value = (v == null ? '' : String(v));
+        else inp.value = (v == null ? '' : String(v));
+      });
+      out.textContent = 'Loaded settings.';
+    }
+
+    async function save() {
+      const body = {};
+      FIELDS.forEach(f => {
+        const inp = $('#f_' + f.key);
+        if (!inp) return;
+        let v = inp.value;
+        if (f.type === 'number') {
+          if (v === '' || v == null) { body[f.key] = null; }
+          else {
+            const n = Number(v);
+            body[f.key] = Number.isFinite(n) ? n : v;
+          }
+        } else {
+          body[f.key] = v;
+        }
+      });
+      const r = await httpPost('/agent/settings', body);
+      out.textContent = `POST /agent/settings -> ${r.status}\n${r.text}`;
+    }
+
+    btnReload.addEventListener('click', load, { passive: true });
+    btnSave.addEventListener('click', save, { passive: true });
+    load(); // initial
+  }
+
+  function mountActionsPane() {
+    const pane = $('section[data-pane="actions"]');
+    if (!pane) { err('actions pane not found'); return; }
+    const card = el('div', 'card');
+    const title = el('h3', null, 'Diagnostics');
+    const btn = el('button', 'btn', 'Probe next step (/agent/next2)');
+    const out = el('pre', 'codebox scroll'); out.textContent = '[no results yet]';
+    card.append(title, btn, out); pane.append(card);
+    btn.addEventListener('click', async () => {
+      out.textContent = 'Probing…';
+      const r = await httpGet('/agent/next2');
+      out.textContent = `GET /agent/next2 -> ${r.status}\n${r.text}`;
+    }, { passive: true });
+  }
+
+  doc.addEventListener('DOMContentLoaded', () => {
+    log('DOMContentLoaded');
+    mountSettingsForm();
+    mountActionsPane();
+  });
+})(document, window);
