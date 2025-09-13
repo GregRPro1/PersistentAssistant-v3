@@ -1,0 +1,128 @@
+/* web/pwa/settings_ext.js — Actions accept UI (phase 1) */
+(function (doc, win) {
+  const TAG = 'ext-actions-v1';
+  const log = (...a) => console.log(`[${TAG}]`, ...a);
+  const err = (...a) => console.error(`[${TAG}]`, ...a);
+
+  function $(sel, root = doc) { return root.querySelector(sel); }
+  function el(tag, cls, html) { const n = doc.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+
+  async function fetchJson(url, opts) {
+    try {
+      const r = await fetch(url, Object.assign({ cache: 'no-store' }, opts || {}));
+      const text = await r.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch (_) { /* not JSON */ }
+      log('HTTP', (opts && opts.method) || 'GET', url, r.status, json ? '[json]' : text.slice(0, 200));
+      return { ok: r.ok, status: r.status, json, text };
+    } catch (e) {
+      err('fetch failed', url, e);
+      return { ok: false, status: 0, json: null, text: String(e || 'error') };
+    }
+  }
+
+  function suggestionsFromPayload(data) {
+    // Handle shapes:
+    // 1) { ok, result: { suggestions: [...] } }
+    // 2) { ok, suggestions: [...] }
+    // 3) raw array
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (data.result && Array.isArray(data.result.suggestions)) return data.result.suggestions;
+    if (Array.isArray(data.suggestions)) return data.suggestions;
+    return [];
+  }
+
+  function mountActions() {
+    const pane = $('section[data-pane="actions"]');
+    if (!pane) { err('actions pane not found'); return; }
+
+    // Clear placeholder
+    pane.innerHTML = '';
+
+    const card = el('div', 'card');
+    const head = el('div', 'section-head', '<h3>Actions</h3>');
+    const controls = el('div', 'rowflex');
+    const btnRefresh = el('button', 'btn', 'Refresh suggestions');
+    const btnApprove = el('button', 'btn', 'Approve (create file)');
+    const hint = el('div', 'hint', 'Suggestions come from /agent/propose; approval file via /agent/next2.');
+    const list = el('div', 'card');
+    const out = el('pre', 'codebox scroll');
+    out.textContent = '[no logs yet]';
+
+    controls.append(btnRefresh, btnApprove);
+    card.append(head, controls, hint, list, out);
+    pane.append(card);
+    log('mounted actions UI');
+
+    function renderSuggestions(items) {
+      list.innerHTML = '';
+      if (!items || !items.length) {
+        list.innerHTML = '<div class="hint">No suggestions.</div>';
+        return;
+      }
+      const ul = el('ul', 'plain');
+      items.forEach((s, i) => {
+        const li = el('li', null);
+        const badge = el('span', 'badge', String(i + 1).padStart(2, '0'));
+        const txt = el('span', null, ' ' + (typeof s === 'string' ? s : JSON.stringify(s)));
+        li.append(badge, txt);
+        ul.append(li);
+      });
+      list.append(ul);
+    }
+
+    async function refresh() {
+      out.textContent = 'Refreshing…';
+      // primary: /agent/propose
+      let r = await fetchJson('/agent/propose');
+      let sugg = suggestionsFromPayload(r.json);
+      if (!sugg.length) {
+        // fallback: /agent/next2 (does create an approval file, but we only read the suggestions)
+        const r2 = await fetchJson('/agent/next2');
+        const s2 = suggestionsFromPayload(r2.json);
+        if (s2.length) {
+          out.textContent = `GET /agent/propose -> ${r.status}\n(no suggestions)\nFALLBACK /agent/next2 -> ${r2.status}\n` + JSON.stringify(r2.json || r2.text, null, 2);
+          renderSuggestions(s2);
+          return;
+        }
+      }
+      out.textContent = `GET /agent/propose -> ${r.status}\n` + JSON.stringify(r.json || r.text, null, 2);
+      renderSuggestions(sugg);
+    }
+
+    async function approve() {
+      out.textContent = 'Approving (creating file via /agent/next2)…';
+      const r = await fetchJson('/agent/next2');
+      const body = r.json || r.text;
+      out.textContent = `GET /agent/next2 -> ${r.status}\n` + (typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+      // no-op for now: later we’ll wire to actual “apply” once auto-process is ready
+    }
+
+    btnRefresh.addEventListener('click', refresh, { passive: true });
+    btnApprove.addEventListener('click', approve, { passive: true });
+
+    // initial load
+    refresh();
+  }
+
+  function maybeMountSettingsForm() {
+    // Keep the working settings form you have now; if it exists we leave it alone.
+    // This stub is here only to avoid accidental regressions.
+    const pane = $('section[data-pane="settings"]');
+    if (!pane) return;
+    if ($('#extSettingsJson') || $('#extSettingsArea') || $('#extSettingsForm')) return; // already mounted by your current file
+  }
+
+  function onReady() {
+    log('DOMContentLoaded');
+    maybeMountSettingsForm();
+    mountActions();
+  }
+
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', onReady, { once: true });
+  } else {
+    onReady();
+  }
+})(document, window);

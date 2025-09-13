@@ -1,45 +1,95 @@
 # server/proposal_api.py
-# Minimal /agent/propose endpoint. First tries to proxy to /agent/next2.
-# Falls back to reading /agent/plan and deriving simple suggestions.
+from __future__ import annotations
+
+import json
+import time
+from typing import Any, Dict
+
 from flask import Blueprint, request, jsonify
-import json, urllib.request, urllib.error
 
 bp = Blueprint("proposal_api", __name__, url_prefix="/agent")
 
-def _http_json(url, timeout=2.0):
-    req = urllib.request.Request(url, headers={"Cache-Control":"no-store"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        data = r.read().decode("utf-8", errors="replace")
-        return json.loads(data)
 
-@bp.get("/propose")
+def _call_next2() -> Dict[str, Any]:
+    """
+    Best-effort helper: call the existing /agent/next2 handler in-process
+    (server.agent_actions_v7.agent_next2) to keep one source of truth for
+    proposed next steps. Falls back to a static list if anything fails.
+    """
+    try:
+        # Import lazily to avoid hard dependency if the module is absent.
+        from server.agent_actions_v7 import agent_next2  # type: ignore
+
+        resp = agent_next2()
+        # Normalize common Flask return shapes
+        if isinstance(resp, tuple):
+            resp = resp[0]
+        if hasattr(resp, "get_data"):
+            data = json.loads(resp.get_data(as_text=True))
+        elif isinstance(resp, dict):
+            data = resp
+        else:
+            try:
+                data = json.loads(str(resp))
+            except Exception:
+                data = {}
+
+        if isinstance(data, dict):
+            ok = bool(data.get("ok", False))
+            suggestions = data.get("suggestions") or []
+            if ok and isinstance(suggestions, list):
+                return {"ok": True, "suggestions": suggestions, "ts": int(time.time()), "source": "next2"}
+    except Exception:
+        # Swallow and fall back
+        pass
+
+    # Fallback: deterministic suggestions (match your historical values)
+    return {
+        "ok": True,
+        "suggestions": ["9.5a — Worker UX", "9.5b — Auto-process", "9.5c — Plan details"],
+        "ts": int(time.time()),
+        "source": "fallback",
+    }
+
+
+@bp.route("/propose", methods=["GET", "POST"])
 def agent_propose():
-    step = (request.args.get("step") or "").strip()
+    """
+    GET  -> returns proposed next steps (delegates to next2 when available)
+    POST -> accepts/rejects a proposed step or set of steps
 
-    # 1) Prefer existing next-step logic if available
-    try:
-        j = _http_json("http://127.0.0.1:8782/agent/next2")
-        # normalize a bit
-        return jsonify({"ok": True, "source": "next2", "result": j})
-    except Exception as e:
-        err1 = f"next2 failed: {type(e).__name__}: {e}"
+    POST body (examples):
+      {"accept": true, "step": "4.1"}
+      {"decision": "accept", "steps": ["4.1","4.2"], "note": "Looks good"}
 
-    # 2) Fallback: read plan and derive naive suggestions
-    try:
-        plan = _http_json("http://127.0.0.1:8782/agent/plan").get("plan", {})
-        tree = plan.get("tree") or []
-        # very simple derivation: collect a few titles from the tree
-        suggestions = []
-        def walk(nodes):
-            for n in nodes or []:
-                title = n.get("title") or n.get("name") or n.get("id")
-                if title:
-                    suggestions.append(title)
-                ch = n.get("children") or []
-                if ch:
-                    walk(ch)
-        walk(tree)
-        suggestions = suggestions[:3] or ["Review plan", "Pick active step", "Confirm next action"]
-        return jsonify({"ok": True, "source": "plan", "suggestions": suggestions, "note": err1})
-    except Exception as e2:
-        return jsonify({"ok": False, "error": f"{err1}; plan fallback failed: {type(e2).__name__}: {e2}"}), 500
+    Response:
+      {"ok": true, "accepted": true/false, "step": "...", "steps": [...], "ts": ...}
+    """
+    if request.method == "POST":
+        payload = request.get_json(silent=True) or {}
+        # Normalize decision
+        decision = payload.get("decision")
+        if decision is None:
+            # Support boolean flags used by the UI
+            if "accept" in payload:
+                decision = "accept" if payload.get("accept") else "reject"
+        decision = (str(decision or "")).strip().lower()
+
+        accepted = decision in ("accept", "accepted", "yes", "y", "true", "1")
+        step = payload.get("step")
+        steps = payload.get("steps") if isinstance(payload.get("steps"), list) else None
+        note = payload.get("note")
+
+        # Here is where you’d persist acceptance (e.g., write an approval file,
+        # update tracker.yaml, enqueue a worker job, etc). For now we just ack.
+        return jsonify({
+            "ok": True,
+            "accepted": bool(accepted),
+            "step": step,
+            "steps": steps,
+            "note": note,
+            "ts": int(time.time())
+        })
+
+    # GET: return suggestions
+    return jsonify(_call_next2())

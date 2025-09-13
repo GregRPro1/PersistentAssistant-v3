@@ -48,8 +48,7 @@
     const card = el('div', 'card');
     const head = el('div', 'section-head', '<h3>Actions</h3>');
 
-    const __style = el("style", null, ".action-sugg li{cursor:pointer;padding:4px 6px;border-radius:8px}.action-sugg li.selected{outline:2px solid #888;background:rgba(0,0,0,.03)}"); head.append(__style);
-const controls = el('div', 'rowflex');
+    const controls = el('div', 'rowflex');
     const btnRefresh = el('button', 'btn', 'Refresh suggestions');
 
     const stepRow = el('div', 'rowflex');
@@ -68,8 +67,7 @@ const controls = el('div', 'rowflex');
     const out = el('pre', 'codebox scroll');
     out.textContent = '[no logs yet]';
 
-    let selectedStep = null;
-controls.append(btnRefresh);
+    controls.append(btnRefresh);
     stepRow.append(stepInput, noteInput, btnAccept, btnApprove);
     card.append(head, controls, stepRow, hint, list, out);
     pane.append(card);
@@ -167,4 +165,3 @@ controls.append(btnRefresh);
     onReady();
   }
 })(document, window);
-
