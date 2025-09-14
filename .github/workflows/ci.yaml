@@ -55,14 +55,22 @@ jobs:
         run: |
           if (Test-Path tools\leb_server.py) {
             New-Item -ItemType Directory -Force tmp\logs | Out-Null
-            $wd = "$env:GITHUB_WORKSPACE"
-            $job = Start-Job -ScriptBlock {
-              param($wd)
-              Set-Location $wd
-              python tools\leb_server.py 1> tmp\logs\leb_stdout.log 2> tmp\logs\leb_stderr.log
-            } -ArgumentList $wd
+            $wd  = "$env:GITHUB_WORKSPACE"
+            $out = "tmp\logs\leb_stdout.log"
+            $err = "tmp\logs\leb_stderr.log"
 
-            # Wait for ping on 127.0.0.1:8765 (up to ~30s)
+            # Start as a detached process that survives this step
+            $p = Start-Process -FilePath "python" `
+                              -ArgumentList "tools\leb_server.py" `
+                              -WorkingDirectory $wd `
+                              -RedirectStandardOutput $out `
+                              -RedirectStandardError  $err `
+                              -PassThru
+
+            # Save PID for later Stop step
+            "$($p.Id)" | Set-Content leb_pid.txt
+
+            # Wait for the HTTP ping to be ready
             $ok = $false
             1..30 | ForEach-Object {
               try {
@@ -72,12 +80,9 @@ jobs:
             }
             if (-not $ok) {
               Write-Host "---- leb_stderr.log (tail) ----"
-              Get-Content tmp\logs\leb_stderr.log -Tail 120 -ErrorAction SilentlyContinue
+              Get-Content $err -Tail 200 -ErrorAction SilentlyContinue
               throw "LEB did not respond to /ping"
             }
-
-            # Stash the job id for the Stop step
-            Set-Content -Path leb_job_id.txt -Value $job.Id
           } else {
             Write-Host "[SKIP] tools\leb_server.py not present"
           }
@@ -89,12 +94,22 @@ jobs:
 
       - name: Stop LEB
         if: always()
+        shell: pwsh
         run: |
-          if (Test-Path leb_job_id.txt) {
-            $jid = Get-Content leb_job_id.txt
-            Stop-Job -Id $jid -ErrorAction SilentlyContinue
-            Remove-Job -Id $jid -ErrorAction SilentlyContinue
+          if (Test-Path leb_pid.txt) {
+            $pid = Get-Content leb_pid.txt
+            Write-Host "Stopping LEB PID $pid"
+            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
           }
+
+      - name: Upload LEB logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: leb-logs
+          path: tmp\logs\*
+          if-no-files-found: ignore
+
 
       - name: Apply+Pack (no replace)
         run: |
