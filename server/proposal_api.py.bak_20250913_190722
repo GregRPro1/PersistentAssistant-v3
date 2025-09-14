@@ -1,6 +1,7 @@
+# server/proposal_api.py
 from __future__ import annotations
 import os, json, time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from flask import Blueprint, jsonify, request, Flask
 
 # ------------------------------------------------------------------------------
@@ -8,7 +9,7 @@ from flask import Blueprint, jsonify, request, Flask
 # ------------------------------------------------------------------------------
 ROOT = os.path.abspath(os.getcwd())
 
-# LEB configuration (match wrapper defaults)
+# LEB configuration (match your wrapper/LEB defaults)
 LEB_HOST = os.environ.get("LEB_HOST", "127.0.0.1")
 LEB_PORT = int(os.environ.get("LEB_PORT", "8765"))
 LEB_URL  = f"http://{LEB_HOST}:{LEB_PORT}"
@@ -19,10 +20,17 @@ LEB_URL  = f"http://{LEB_HOST}:{LEB_PORT}"
 bp = Blueprint("proposal_api", __name__, url_prefix="/agent")
 
 def _default_suggestions() -> List[str]:
+    # Keep these aligned with what your UI shows today
     return ["9.5a — Worker UX", "9.5b — Auto-process", "9.5c — Plan details"]
 
 @bp.get("/propose")
 def agent_propose_get():
+    """
+    Return suggestions for the next step(s). Shape tolerated by your UI:
+      - { ok, result: { suggestions: [...] } }  OR
+      - { ok, suggestions: [...] }
+    We'll return the simple second one.
+    """
     try:
         suggestions = _default_suggestions()
         return jsonify({"ok": True, "suggestions": suggestions, "ts": int(time.time())})
@@ -31,35 +39,49 @@ def agent_propose_get():
 
 @bp.post("/propose")
 def agent_propose_post():
+    """
+    Accept a chosen step.
+    Body: { step: "9.5a", note: null|string }
+    Returns: { ok, accepted: bool, step, note, ts }
+    (We keep acceptance lightweight here; your wrapper may also overlay active state.)
+    """
     data = request.get_json(silent=True) or {}
     step = str(data.get("step") or "").strip()
     note = data.get("note")
-    accepted = bool(step)
 
-    # Best-effort: write a small marker so tooling can observe activity.
+    accepted = bool(step)
+    # Optional: write a minimal status hint so the UI/debugging can see something move.
     try:
         status_path = os.environ.get("PA_STATUS_FILE", os.path.join("data", "runtime", "agent_status.json"))
         os.makedirs(os.path.dirname(status_path) or ".", exist_ok=True)
+        # Preserve existing file if present; append a small marker
         prev: Dict[str, Any] = {}
         if os.path.isfile(status_path):
             try:
                 prev = json.loads(open(status_path, "r", encoding="utf-8").read() or "{}")
             except Exception:
                 prev = {}
-        prev["last_accept"] = {"step": step or None, "note": note, "ts": int(time.time())}
+        prev["last_accept"] = {"step": step, "note": note, "ts": int(time.time())}
         with open(status_path, "w", encoding="utf-8") as f:
             json.dump(prev, f, ensure_ascii=False, indent=2)
     except Exception:
+        # status write is best-effort; never fail the API for this
         pass
 
     return jsonify({"ok": True, "accepted": accepted, "step": step or None, "note": note, "ts": int(time.time())})
 
+# ------------------------------------------------------------------------------
+# Factory hook used by some registries
+# ------------------------------------------------------------------------------
 def create_blueprint() -> Blueprint:
     return bp
 
 # ------------------------------------------------------------------------------
 # Test shim: expose a minimal Flask app for pytest to import as `app`
 # ------------------------------------------------------------------------------
+# This does NOT replace your real sidecar app. It merely allows:
+#   from server.proposal_api import app, LEB_URL, ROOT
+# in unit tests without booting the whole wrapper.
 app = Flask("proposal_api_app")
 app.register_blueprint(bp)
 

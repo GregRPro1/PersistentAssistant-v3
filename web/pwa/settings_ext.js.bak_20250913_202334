@@ -37,7 +37,8 @@
   ];
 
   async function mountSettingsForm() {
-    const pane = $('$('section[data-pane="settings"]')'); if (!pane) return; if (pane.querySelector('#tok') || pane.querySelector('#saveTok')) { try { console.log('[ext-actions-v2] keep existing settings pane'); } catch(_) {} return; }
+    const pane = $('section[data-pane="settings"]');
+    if (!pane) return;
 
     pane.innerHTML = '';
     const card = el('div', 'card');
@@ -99,7 +100,27 @@
 
   // ---------------- Actions (Accept + Apply) ----------------
   // === Append to web/pwa/settings_ext.js (inside the IIFE) =====================
-  
+  function wireApplyButton(btnApply, out, getSelectedStep) {
+    btnApply.addEventListener('click', async () => {
+      const step = (getSelectedStep && getSelectedStep()) || null;
+      if (!step) { out.textContent = 'Pick a suggestion first.'; return; }
+      out.textContent = 'Applying…';
+      const payload = { step, tests: 'tests', pytest_flags: ['-q'], retries: 0 };
+      const r = await fetchJson('/agent/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const __body = r.json ? JSON.stringify(r.json, null, 2) : r.text;
+      const __summary = (typeof extractPytestSummary === 'function') ? extractPytestSummary(r.json) : null;
+      out.textContent = `POST /agent/apply -> ${r.status}
+` + __body + (__summary ? (`\n\nSummary: ${__summary}`) : '');
+      if (__summary) {
+        const isFail = /failed|error/i.test(__summary);
+        try { out.style.borderLeft = isFail ? '4px solid #b00020' : '4px solid #0a7d2a'; } catch(_) {}
+      }
+    }, { passive: true });
+}
 
   function mountActions() {
     const pane = $('section[data-pane="actions"]');
@@ -124,14 +145,12 @@
     headEl.append(__style);
 
     controls.append(btnRefresh, btnAccept, btnApply, btnApprove);
-    
-btnApply.addEventListener('click', applyStep, { passive: true });
-card.append(head, controls, hint, list, out);
+    card.append(head, controls, hint, list, out);
     pane.append(card);
     log('mounted actions UI');
 
     // …after you define/maintain `selectedStep` when a suggestion is clicked:
-
+    wireApplyButton(btnApply, out, () => selectedStep);
 
     let selectedStep = null;
     function renderSuggestions(items) {
@@ -214,8 +233,6 @@ card.append(head, controls, hint, list, out);
     btnApprove.addEventListener('click', approve, { passive: true });
 
     refresh();
-    
-
   }
 
   function onReady() {
@@ -229,25 +246,6 @@ card.append(head, controls, hint, list, out);
   } else {
     onReady();
   }
-// ---- Back-compat / fallback: named handler expected by some probes ----
-async function applyStep() {
-  if (!selectedStep) { out.textContent = 'Pick a suggestion to apply.'; return; }
-  out.textContent = 'Running apply…';
-  const r = await fetchJson('/agent/apply', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ step: selectedStep, tests: 'tests', pytest_flags: ['-q'], retries: 0 })
-  });
-  const __body = r.json ? JSON.stringify(r.json, null, 2) : r.text;
-  const __summary = (typeof extractPytestSummary === 'function') ? extractPytestSummary(r.json) : null;
-  out.textContent = `POST /agent/apply -> ${r.status}
-` + __body + (__summary ? (`\n\nSummary: ${__summary}`) : '');
-  if (__summary) {
-    const isFail = /failed|error/i.test(__summary);
-    try { out.style.borderLeft = isFail ? '4px solid #b00020' : '4px solid #0a7d2a'; } catch (_) {}
-  }
-}
-
-
 function extractPytestSummary(resp) {
   try {
     const s = (resp && resp.run && resp.run.stdout) || '';
@@ -262,166 +260,6 @@ function extractPytestSummary(resp) {
   } catch (_) {}
   return null;
 }
-
-/* ext-fallback binder + boot flag */
-(function(doc){
-  try{
-    // brief boot message
-    try {
-      var sr = doc.getElementById('statusRight');
-      if (sr) { sr.textContent = 'ext ok'; setTimeout(function(){ sr.textContent=''; }, 1500); }
-    } catch(_) {}
-
-    // bind tabs only if not already bound
-    var tabs = Array.prototype.slice.call(doc.querySelectorAll('.tab'));
-    tabs.forEach(function(t){
-      if (t.dataset && t.dataset.extBound) return;
-      t.dataset.extBound = '1';
-      t.addEventListener('click', function(){
-        var name = t.getAttribute('data-tab');
-        Array.prototype.slice.call(doc.querySelectorAll('.tab')).forEach(function(x){ x.classList.remove('active'); });
-        t.classList.add('active');
-        Array.prototype.slice.call(doc.querySelectorAll('[data-pane]')).forEach(function(p){
-          p.classList.toggle('hidden', p.getAttribute('data-pane') !== name);
-        });
-      }, { passive: true });
-    });
-  } catch(e) { try { console.error('[ext-actions-v2] fallback binder error:', e); } catch(_) {} }
-})(document);
-
-  // ensure extractor is globally available but defined inside this IIFE
-  if (!win.extractPytestSummary) {
-    win.extractPytestSummary = function(resp) {
-      try {
-        const s = (resp && resp.run && resp.run.stdout) || '';
-        const lines = String(s).trim().split(/\r?\n/);
-        for (let i = lines.length - 1; i >= 0; i--) {
-          const L = lines[i];
-          if (/\bpassed\b|\bfailed\b|\bskipped\b|\berrors?\b/i.test(L) &&
-              /(\d+\s+passed|\d+\s+failed|\d+\s+errors?|\d+\s+skipped)/i.test(L)) {
-            return L.trim();
-          }
-        }
-      } catch (_) {}
-      return null;
-    };
-  }
 })(document, window);
-
-
-
-
-
-;(() => {
-  const TAG = "ext-safety-v1";
-  try {
-    const pane = document.querySelector('section[data-pane="actions"]');
-    if (!pane) return;
-    if (pane.querySelector('#pa-actions-safety')) return;
-
-    const fetchJson = async (url, opts) => {
-      try {
-        if (window.PA && (!opts || !opts.method || String(opts.method).toUpperCase()==='GET')) {
-          const r = await PA.GET(url); const t = await r.text();
-          try { return { ok:r.ok, status:r.status, json:JSON.parse(t), text:t }; } catch { return { ok:r.ok, status:r.status, json:null, text:t }; }
-        }
-        if (window.PA && opts && String(opts.method).toUpperCase()==='POST') {
-          const r = await PA.POST(url, JSON.parse(opts.body || '{}')); const t = await r.text();
-          try { return { ok:r.ok, status:r.status, json:JSON.parse(t), text:t }; } catch { return { ok:r.ok, status:r.status, json:null, text:t }; }
-        }
-        const r = await fetch(url, Object.assign({ cache:'no-store' }, opts||{})); const t = await r.text();
-        try { return { ok:r.ok, status:r.status, json:JSON.parse(t), text:t }; } catch { return { ok:r.ok, status:r.status, json:null, text:t }; }
-      } catch (e) {
-        console.error('[ext-safety] fetch failed', e);
-        return { ok:false, status:0, json:null, text:String(e||'error') };
-      }
-    };
-
-    const boot = () => {
-      try {
-        if (pane.querySelector('.action-sugg')) return;
-
-        const card = document.createElement('div'); card.className='card'; card.id='pa-actions-safety';
-        const head = document.createElement('div'); head.className='section-head'; head.innerHTML = '<h3>Actions (safety)</h3>';
-        const controls = document.createElement('div'); controls.className='rowflex';
-        const btnRefresh = document.createElement('button'); btnRefresh.className='btn'; btnRefresh.textContent='Refresh suggestions';
-        const btnAccept  = document.createElement('button'); btnAccept.className='btn'; btnAccept.textContent='Accept step (POST)';
-        const btnApply   = document.createElement('button'); btnApply.className='btn'; btnApply.textContent='Apply step (run driver)';
-        const list = document.createElement('div'); list.className='card action-sugg';
-        const out  = document.createElement('pre'); out.className='codebox scroll'; out.textContent='[no logs yet]';
-
-        controls.append(btnRefresh, btnAccept, btnApply);
-        card.append(head, controls, list, out);
-        pane.innerHTML = '';
-        pane.append(card);
-
-        let selectedStep = null;
-
-        function render(items) {
-          list.innerHTML = '';
-          if (!items || !items.length) { list.innerHTML = '<div class="hint">No suggestions.</div>'; return; }
-          const ul = document.createElement('ul'); ul.className='plain';
-          items.forEach((s,i) => {
-            const li = document.createElement('li');
-            const badge = document.createElement('span'); badge.className='badge'; badge.textContent = String(i+1).padStart(2,'0');
-            const txt = document.createElement('span'); txt.textContent = ' ' + (typeof s === 'string' ? s : JSON.stringify(s));
-            li.append(badge, txt);
-            li.addEventListener('click', () => {
-              selectedStep = (typeof s === 'string') ? s : String(s);
-              ul.querySelectorAll('li').forEach(n => n.classList.remove('selected'));
-              li.classList.add('selected');
-            }, { passive:true });
-            ul.append(li);
-          });
-          list.append(ul);
-        }
-
-        async function suggestions() {
-          out.textContent = 'Refreshing…';
-          const r = await fetchJson('/agent/propose');
-          const data = r.json || {};
-          const sugg = Array.isArray(data?.suggestions) ? data.suggestions :
-                       Array.isArray(data?.result?.suggestions) ? data.result.suggestions : [];
-          out.textContent = `GET /agent/propose -> ${r.status}\n` + (r.json ? JSON.stringify(r.json, null, 2) : r.text);
-          render(sugg);
-        }
-
-        async function accept() {
-          if (!selectedStep) { out.textContent = 'Pick a suggestion to accept.'; return; }
-          out.textContent = 'Posting acceptance…';
-          const r = await fetchJson('/agent/propose', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ step: selectedStep, note: null }) });
-          out.textContent = `POST /agent/propose -> ${r.status}\n` + (r.json ? JSON.stringify(r.json, null, 2) : r.text);
-        }
-
-        async function apply() {
-          if (!selectedStep) { out.textContent = 'Pick a suggestion to apply.'; return; }
-          out.textContent = 'Running apply…';
-          const payload = { step: selectedStep, tests: 'tests', pytest_flags: ['-q'], retries: 0 };
-          const r = await fetchJson('/agent/apply', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-          const summary = (function(resp){ try{ const s=(resp&&resp.run&&resp.run.stdout)||''; const lines=String(s).trim().split(/\r?\n/); for(let i=lines.length-1;i>=0;i--){const L=lines[i]; if (/\bpassed\b|\bfailed\b|\bskipped\b|\berrors?\b/i.test(L) && /(\d+\s+passed|\d+\s+failed|\d+\s+errors?|\d+\s+skipped)/i.test(L)) return L.trim(); } } catch(_){} return null; })(r.json);
-          out.textContent = `POST /agent/apply -> ${r.status}\n` + (r.json ? JSON.stringify(r.json, null, 2) : r.text) + (summary ? `\n\nSummary: ${summary}` : '');
-          try { out.style.borderLeft = summary && /failed|error/i.test(summary) ? '4px solid #b00020' : '4px solid #0a7d2a'; } catch {}
-        }
-
-        btnRefresh.addEventListener('click', suggestions, { passive:true });
-        btnAccept .addEventListener('click', accept,      { passive:true });
-        btnApply  .addEventListener('click', apply,       { passive:true });
-
-        suggestions();
-        console.log('[ext-safety] mounted');
-      } catch (e) {
-        console.error('[ext-safety] boot failed', e);
-      }
-    };
-
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      boot();
-    } else {
-      document.addEventListener('DOMContentLoaded', boot, { once:true });
-    }
-  } catch (e) {
-    console.error('[ext-safety] init error', e);
-  }
-})();
 
 

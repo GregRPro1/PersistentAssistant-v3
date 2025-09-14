@@ -1,43 +1,45 @@
 # server/app_registry.py
-# Loaded by the wrapper (if present). Use this to register optional blueprints cleanly.
+from __future__ import annotations
 
-from importlib import import_module
-
-def _attach_proposal_blueprint(app):
-    """
-    Try to import server.proposal_api and register its blueprint.
-    Logs are printed but failures are non-fatal.
-    """
+def _have_rule(app, path: str) -> bool:
+    """Return True if a route with exactly this path exists."""
     try:
-        mod = import_module("server.proposal_api")
-    except Exception as e:
-        print("[app_registry] proposal_api import failed:", e)
-        return False
-
-    bp = getattr(mod, "bp", None) or getattr(mod, "proposal_bp", None)
-    if bp is None and hasattr(mod, "create_blueprint"):
-        try:
-            bp = mod.create_blueprint()
-        except Exception as e:
-            print("[app_registry] create_blueprint() failed:", e)
-            return False
-
-    if bp is not None:
-        try:
-            app.register_blueprint(bp)
-            print("[app_registry] registered /agent/propose from server.proposal_api")
-            return True
-        except Exception as e:
-            print("[app_registry] register_blueprint failed:", e)
-            return False
-
-    print("[app_registry] proposal_api has no blueprint to register")
+        for r in app.url_map.iter_rules():
+            if str(r) == path:
+                return True
+    except Exception:
+        pass
     return False
 
-def register_extensions(app):
-    """
-    Entry-point called by the wrapper (best-effort).
-    Add more attach_* calls here in the future as we grow.
-    """
-    ok1 = _attach_proposal_blueprint(app)
-    print(f"[app_registry] summary: propose={'ok' if ok1 else 'skip'}")
+
+def _try_register_bp(app, import_path: str, route_probe: str, label: str) -> None:
+    """Import <import_path>.bp and register it unless route already present."""
+    try:
+        mod = __import__(import_path, fromlist=["bp"])
+        bp = getattr(mod, "bp", None)
+        if bp is None:
+            print(f"[app_registry] {label}: no 'bp' attribute on {import_path}")
+            return
+        if _have_rule(app, route_probe):
+            print(f"[app_registry] {label}: {route_probe} already present; skipping")
+            return
+        app.register_blueprint(bp)
+        print(f"[app_registry] registered {route_probe} from {import_path}")
+    except Exception as e:
+        print(f"[app_registry] register {label} failed:", e)
+
+
+def register_extensions(app) -> None:
+    """Register optional blueprints (robust & idempotent)."""
+    _try_register_bp(app, "server.proposal_api", "/agent/propose", "/agent/propose")
+    _try_register_bp(app, "server.apply_api",    "/agent/apply",   "/agent/apply")
+
+    print(
+        "[app_registry] summary: propose={}; apply={}".format(
+            "ok" if _have_rule(app, "/agent/propose") else "skip",
+            "ok" if _have_rule(app, "/agent/apply") else "skip"
+        )
+    )
+
+
+__all__ = ["register_extensions"]

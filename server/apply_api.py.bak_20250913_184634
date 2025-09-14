@@ -1,0 +1,57 @@
+# server/apply_api.py
+from __future__ import annotations
+import json
+from typing import Any, List
+from flask import Blueprint, request, jsonify
+
+# Route under /agent/*
+bp = Blueprint("apply_api", __name__, url_prefix="/agent")
+
+@bp.post("/apply")
+def agent_apply():
+    """
+    Body:
+      {
+        "step": "9.5a",
+        "tests": "tests" | ["tests","tests/test_something.py::node"],
+        "pytest_flags": ["-q", "-k", "smoke"],
+        "retries": 0
+      }
+    """
+    data = request.get_json(silent=True) or {}
+    step = str(data.get("step") or "").strip()
+    if not step:
+        return jsonify(ok=False, err="missing step"), 400
+
+    tests = data.get("tests") or "tests"
+    flags = data.get("pytest_flags") or []
+    retries = int(data.get("retries") or 0)
+
+    # Import here so the module import never fails during app bootstrap
+    try:
+        from tools.py.agentic.drive_step import drive  # returns int rc
+    except Exception as e:
+        return jsonify(ok=False, err=f"import drive_step failed: {type(e).__name__}: {e}"), 500
+
+    # Normalize tests to list[str]
+    if isinstance(tests, str):
+        tests_list: List[str] = [tests]
+    elif isinstance(tests, list):
+        tests_list = [str(x) for x in tests]
+    else:
+        tests_list = ["tests"]
+
+    try:
+        rc = drive(
+            step=step,
+            tests=tests_list,
+            flags=list(flags or []),
+            really_apply=True,         # apply, not dry-run
+            retries=int(max(0, retries)),
+            tracker_path=None,
+            out_dir=None,
+            iters=None,
+        )
+        return jsonify(ok=(rc == 0), rc=int(rc), step=step)
+    except Exception as e:
+        return jsonify(ok=False, rc=1, err=f"drive() failed: {type(e).__name__}: {e}", step=step), 500

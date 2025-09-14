@@ -37,7 +37,7 @@
   ];
 
   async function mountSettingsForm() {
-    const pane = $('$('section[data-pane="settings"]')'); if (!pane) return; if (pane.querySelector('#tok') || pane.querySelector('#saveTok')) { try { console.log('[ext-actions-v2] keep existing settings pane'); } catch(_) {} return; }
+    const pane = section[data-pane="settings"]; if (!pane) return; if (pane.querySelector('#tok') || pane.querySelector('#saveTok')) { try { console.log('[ext-actions-v2] keep existing settings pane'); } catch(_) {} return; }
 
     pane.innerHTML = '';
     const card = el('div', 'card');
@@ -423,5 +423,3 @@ function extractPytestSummary(resp) {
     console.error('[ext-safety] init error', e);
   }
 })();
-
-

@@ -100,14 +100,6 @@ def load_sidecar_app() -> Optional[Flask]:
 app = load_sidecar_app()
 if app is None:
     app = Flask(__name__, static_folder=None)
-try:
-    from server.app_registry import register_extensions
-    try:
-        register_extensions(app)  # type: ignore[misc]
-    except Exception as _e:
-        print("[wrapper] register_extensions(app) failed:", _e)
-except Exception as _e:
-    print("[wrapper] import server.app_registry failed:", _e)
     log("[wrapper]", SIG, "created internal Flask app")
 
 # -----------------------------------------------------------------------------
@@ -758,25 +750,5 @@ def _overlay_active_on_plan(resp):
     except Exception as _e:
         print("[wrapper] _overlay_active_on_plan err:", _e)
     return resp
-# ==============================================================================
-
-# === accept-proposal intercept v2 (broader matching + logging) =================
-@app.before_request
-def _accept_proposal_intercept2():
-    try:
-        p  = (getattr(request, "path", None) or "")
-        ep = (getattr(request, "endpoint", None) or "")
-        m  = (getattr(request, "method", None) or "")
-        # Be permissive in matching. We only intercept POST.
-        if m == "POST" and (p.endswith("/agent/propose") or ep.endswith("agent_propose") or "/propose" in p):
-            print(f"[wrapper] intercept2: POST {p} endpoint={ep}")
-            body = request.get_json(silent=True) or {}
-            step = body.get("step") or (body.get("steps") or [None])[0]
-            note = body.get("note")
-            ok = bool(step) and _status_write_active(step)
-            print(f"[wrapper] intercept2: write active={step} ok={ok}")
-            return jsonify({"ok": True, "accepted": bool(step) and ok, "step": step, "note": note, "ts": int(_time.time())})
-    except Exception as _e:
-        print("[wrapper] _accept_proposal_intercept2 err:", _e)
 # ==============================================================================
 

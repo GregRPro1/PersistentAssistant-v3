@@ -100,14 +100,6 @@ def load_sidecar_app() -> Optional[Flask]:
 app = load_sidecar_app()
 if app is None:
     app = Flask(__name__, static_folder=None)
-try:
-    from server.app_registry import register_extensions
-    try:
-        register_extensions(app)  # type: ignore[misc]
-    except Exception as _e:
-        print("[wrapper] register_extensions(app) failed:", _e)
-except Exception as _e:
-    print("[wrapper] import server.app_registry failed:", _e)
     log("[wrapper]", SIG, "created internal Flask app")
 
 # -----------------------------------------------------------------------------
@@ -779,4 +771,3 @@ def _accept_proposal_intercept2():
     except Exception as _e:
         print("[wrapper] _accept_proposal_intercept2 err:", _e)
 # ==============================================================================
-
