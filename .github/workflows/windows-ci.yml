@@ -1,4 +1,4 @@
-name: Windows CI
+name: Windows CI (hyphen)
 
 on:
   pull_request:
