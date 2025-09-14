@@ -51,23 +51,37 @@ jobs:
           if (Test-Path tools\export_insights.py) { python tools\export_insights.py } else { Write-Host "[SKIP] export_insights.py" }
 
       - name: Start LEB (background)
+        shell: pwsh
         run: |
           if (Test-Path tools\leb_server.py) {
-            $job = Start-Job -ScriptBlock { python tools\leb_server.py }
-            # Wait for ping
-            $ok=$false
-            1..20 | ForEach-Object {
+            New-Item -ItemType Directory -Force tmp\logs | Out-Null
+            $wd = "$env:GITHUB_WORKSPACE"
+            $job = Start-Job -ScriptBlock {
+              param($wd)
+              Set-Location $wd
+              python tools\leb_server.py 1> tmp\logs\leb_stdout.log 2> tmp\logs\leb_stderr.log
+            } -ArgumentList $wd
+
+            # Wait for ping on 127.0.0.1:8765 (up to ~30s)
+            $ok = $false
+            1..30 | ForEach-Object {
               try {
-                $r = Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/ping -TimeoutSec 2
-                if ($r.StatusCode -eq 200) { $ok=$true; break }
+                $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 -Uri "http://127.0.0.1:8765/ping"
+                if ($r.StatusCode -eq 200) { $ok = $true; break }
               } catch { Start-Sleep -Seconds 1 }
             }
-            if (-not $ok) { throw "LEB did not respond to /ping" }
-            # Stash the job id for next step
+            if (-not $ok) {
+              Write-Host "---- leb_stderr.log (tail) ----"
+              Get-Content tmp\logs\leb_stderr.log -Tail 120 -ErrorAction SilentlyContinue
+              throw "LEB did not respond to /ping"
+            }
+
+            # Stash the job id for the Stop step
             Set-Content -Path leb_job_id.txt -Value $job.Id
           } else {
             Write-Host "[SKIP] tools\leb_server.py not present"
           }
+
 
       - name: Probe LEB
         run: |
