@@ -1,0 +1,106 @@
+diff --git a/tools/py/pack/make_support_bundle.py b/tools/py/pack/make_support_bundle.py
+--- a/tools/py/pack/make_support_bundle.py
++++ b/tools/py/pack/make_support_bundle.py
+@@ -1,10 +1,12 @@
+-import argparse, zipfile, sys, os, re, json, textwrap
++import argparse, zipfile, sys, os, re, json, textwrap
+ from pathlib import Path
+ from datetime import datetime
+ import typing as t
+ from urllib import request as urlreq
+ import subprocess
++import ast
++import traceback
+ 
+ # ---------------------------
+ # Helpers
+@@ -38,6 +40,9 @@
+     p.add_argument("--include", action="append", default=[], help="Paths to include (repeatable).")
+     p.add_argument("--capture-http", action="append", default=[], help="HTTP capture spec 'label=URL' (repeatable).")
+     p.add_argument("--capture-cmd", action="append", default=[], help="Command capture spec 'label=CMD' (repeatable).")
++    p.add_argument(
++        "--emit-ast", action="store_true",
++        help="Emit a Python AST index for included .py files into outdir and add it to the bundle.")
+     return p
+ 
+@@ -86,6 +91,73 @@
+     k, v = s.split("=", 1)
+     return k.strip(), v.strip()
+ 
++def _safe_read_text(p: Path) -> str:
++    try:
++        return p.read_text(encoding="utf-8", errors="ignore")
++    except Exception:
++        return ""
++
++def _annotate_parents(tree: ast.AST) -> None:
++    for parent in ast.walk(tree):
++        for child in ast.iter_child_nodes(parent):
++            setattr(child, "parent", parent)
++
++def _build_py_ast_index(files: list[Path]) -> dict:
++    """
++    Build a lightweight AST index of Python files:
++      { "<rel_path>": { "imports": [...], "classes": {"Name": ["method", ...]}, "functions": ["fname", ...] } }
++    """
++    index: dict[str, dict] = {}
++    for f in files:
++        if f.suffix.lower() != ".py":
++            continue
++        rel = str(f)
++        src = _safe_read_text(f)
++        if not src.strip():
++            continue
++        try:
++            tree = ast.parse(src, filename=rel)
++            _annotate_parents(tree)
++        except Exception as e:
++            index[rel] = {"error": f"parse_failed: {type(e).__name__}: {e}"}
++            continue
++        imports: list[str] = []
++        classes: dict[str, list[str]] = {}
++        functions: list[str] = []
++        for node in ast.walk(tree):
++            if isinstance(node, ast.Import):
++                for n in node.names:
++                    imports.append(n.name)
++            elif isinstance(node, ast.ImportFrom):
++                mod = node.module or ""
++                for n in node.names:
++                    imports.append(f"{mod}:{n.name}")
++            elif isinstance(node, ast.ClassDef):
++                methods: list[str] = []
++                for b in node.body:
++                    if isinstance(b, ast.FunctionDef):
++                        methods.append(b.name)
++                classes[node.name] = methods
++            elif isinstance(node, ast.FunctionDef):
++                # only top-level functions (class methods handled above)
++                if isinstance(getattr(node, "parent", None), ast.Module) or not hasattr(node, "parent"):
++                    functions.append(node.name)
++        index[rel] = {
++            "imports": sorted(set(imports)),
++            "classes": {k: sorted(v) for k, v in classes.items()},
++            "functions": sorted(set(functions)),
++        }
++    return index
++
++def emit_ast_map(base_name: str, outdir: Path, files: list[Path]) -> list[Path]:
++    """
++    Create {base}_ast_index.json and {base}_ast_index.yaml in outdir.
++    Returns the created file paths.
++    """
++    py_files = [Path(p) for p in files if Path(p).suffix.lower() == ".py"]
++    ast_index = _build_py_ast_index(py_files)
++    outdir.mkdir(parents=True, exist_ok=True)
++    jpath = outdir / f"{base_name}_ast_index.json"
++    ypath = outdir / f"{base_name}_ast_index.yaml"
++    jpath.write_text(json.dumps(ast_index, indent=2), encoding="utf-8")
++    try:
++        import yaml as _yaml
++        ypath.write_text(_yaml.safe_dump(ast_index, sort_keys=False), encoding="utf-8")
++        return [jpath, ypath]
++    except Exception:
++        return [jpath]
++
+ def _norm_rel(p:
