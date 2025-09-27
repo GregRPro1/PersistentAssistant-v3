@@ -1,12 +1,12 @@
-enabled: false
+enabled: yes
 protocol: imap
-host: imap.example.com
+host: outlook.office365.com
 port: 993
-username: user@example.com
-password: app-password-here
+username: grapson_pro1@outlook.com
+password: MSk1tk@t
 folder: INBOX
 allow_from:
-  - "you@example.com"
+  - "gprapson@gmail.com"
 subject_flag: "[PA] APPLY"
 save_dir: "_inbox"
 processed_dir: "_inbox/processed"

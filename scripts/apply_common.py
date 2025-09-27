@@ -22,14 +22,6 @@ def git(args, root: Path, allow_fail=False):
     except subprocess.CalledProcessError as e:
         if allow_fail: return e.returncode or 1
         raise
-def zip_files(out_zip: Path, files, root: Path):
-    from zipfile import ZipFile, ZIP_DEFLATED
-    out_zip.parent.mkdir(parents=True, exist_ok=True)
-    with ZipFile(out_zip,'w',compression=ZIP_DEFLATED) as z:
-        from pathlib import Path as _P
-        for f in files:
-            f=_P(f)
-            if f.exists(): z.write(f, f.relative_to(root).as_posix())
 import re as _re
 _slug_re = _re.compile(r'[^a-z0-9._/-]+')
 def slugify_branch(text: str) -> str:

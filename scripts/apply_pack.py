@@ -8,19 +8,22 @@ def main():
     if not root:
         print('Repo root not found', file=sys.stderr); sys.exit(2)
     ts=datetime.datetime.now().strftime('%Y%m%d_%H%M')
-    step_id='PA-236'
-    commit_msg = "dev step catalog (HTML/JSON/MD) + viewer + smoke"
+    step_id='PA-234'
+    commit_msg = "ensure tools/py/apply_common.resolve_repo_root exists + smoke"
     slug = slugify_branch(commit_msg)
     branch=f'step/{step_id}-' + slug
     git(['checkout','-B',branch], root)
     git(['add','-A'], root)
-    git(['commit','-m', f'{step_id}: stage files'], root, allow_fail=True)
+    git(['commit','-m', f'{step_id}: stage hotfix files'], root, allow_fail=True)
     results = root/f'dev_steps/{step_id}/results'; results.mkdir(parents=True, exist_ok=True)
     junit = results/f'junit_{ts}.xml'; log = results/f'pytest_{ts}.log'
     with open(log,'a',encoding='utf-8') as lf:
-        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_dev_catalog.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
+        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_email_watcher_imports.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
+    from zipfile import ZipFile, ZIP_DEFLATED
     smoke = results / f'smoke_{ts}.zip'
-    zip_files(smoke, [junit, log], root)
+    with ZipFile(smoke,'w',compression=ZIP_DEFLATED) as Z:
+        if junit.exists(): Z.write(junit, junit.relative_to(root).as_posix())
+        if log.exists(): Z.write(log, log.relative_to(root).as_posix())
     manifest = root/f'dev_steps/{step_id}/manifest.yaml'
     status = 'pass' if code==0 else 'fail'
     sha = subprocess.check_output(['git','rev-parse','HEAD'], cwd=root, text=True).strip()
