@@ -1,9 +1,6 @@
-import argparse, datetime, subprocess, sys, os
+import argparse, datetime, subprocess, sys
 from pathlib import Path
 from apply_common import *
-
-INBOX = Path('_inbox')
-TOOLS = Path('tools')
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--repo-root', default=''); a=ap.parse_args()
@@ -11,19 +8,15 @@ def main():
     if not have_git_repo(root): root = Path(r'C:\\_Repos\\PersistentAssistant')
     if not have_git_repo(root): print('Repo root not found', file=sys.stderr); sys.exit(2)
     ts=datetime.datetime.now().strftime('%Y%m%d_%H%M')
-    step_id='PA-213'
-    branch=f'step/{step_id}-pack-intake'
+    step_id='PA-224'; branch=f'step/{step_id}-bug-intake'
     git(['checkout','-B',branch], root)
-    # ensure inbox dir and tool script
-    (root/INBOX).mkdir(exist_ok=True)
     git(['add','-A'], root)
-    git(['commit','-m', f'{step_id}: add pack inbox watcher + smoke'], root, allow_fail=True)
+    git(['commit','-m', f'{step_id}: add bug schema + CLI + smoke'], root, allow_fail=True)
     git(['push','-u','origin',branch], root, allow_fail=True)
-    # smoke: run only PA-213 tests
     results = root/f'dev_steps/{step_id}/results'; results.mkdir(parents=True, exist_ok=True)
     junit = results/f'junit_{ts}.xml'; log = results/f'pytest_{ts}.log'
     with open(log,'a',encoding='utf-8') as lf:
-        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_pack_inbox_watcher.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
+        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_intake_bug.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
     smoke = results/f'smoke_{ts}.zip'; zip_files(smoke, [junit, log], root)
     manifest = root/f'dev_steps/{step_id}/manifest.yaml'
     status = 'pass' if code==0 else 'fail'
@@ -39,6 +32,6 @@ latest:
     git(['add', str(results), str(manifest)], root)
     git(['commit','-m', f'{step_id}: publish smoke ({status}) @ {ts}'], root, allow_fail=True)
     git(['push'], root, allow_fail=True)
-    print('PA-213 done.')
+    print('PA-224 done.')
 
 if __name__=='__main__': main()

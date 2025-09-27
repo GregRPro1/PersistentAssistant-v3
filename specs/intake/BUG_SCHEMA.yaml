@@ -1,0 +1,11 @@
+schema: intake/bug/v1
+fields:
+  - id: title
+    type: string
+    required: true
+  - id: description
+    type: string
+    required: true
+  - id: severity
+    type: enum
+    values: [low,medium,high,critical]

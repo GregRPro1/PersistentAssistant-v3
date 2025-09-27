@@ -1,0 +1,7 @@
+id: PA-224
+step_branch: 'step/PA-224-bug-intake'
+latest:
+  smoke_zip: ''
+  status: 'unknown'
+  commit_sha: ''
+  updated_at: ''
