@@ -14,13 +14,6 @@ def ensure_pydeps(mods):
         except Exception:
             subprocess.run([sys.executable,'-m','pip','install',m], check=True)
 
-def first_step_id(root: Path) -> str:
-    import yaml
-    ds = sorted((root/'dev_steps').glob('*/dev_step.yaml'))
-    if not ds: return 'PA-000'
-    y = yaml.safe_load(ds[0].read_text(encoding='utf-8')) or {}
-    return y.get('id') or ds[0].parent.name
-
 def git(args, root: Path, allow_fail=False):
     try:
         run(['git']+list(args), cwd=root, check=not allow_fail)

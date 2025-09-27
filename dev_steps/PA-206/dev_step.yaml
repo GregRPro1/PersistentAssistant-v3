@@ -1,0 +1,10 @@
+id: PA-206
+title: Smoke tiers & markers
+status: proposed
+owner: greg
+touches:
+  - 'pytest.ini'
+  - 'tests/smoke/test_dummy_smoke.py'
+artifacts:
+  manifest: 'dev_steps/PA-206/manifest.yaml'
+  results_dir: 'dev_steps/PA-206/results/'
