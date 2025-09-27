@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.135" timestamp="2025-09-27T12:15:37.207860+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_intake_feature" name="test_feature_submit_creates_file" time="0.098" /></testsuite></testsuites>
