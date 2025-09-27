@@ -11,3 +11,9 @@ latest:
   status: "pass"
   commit_sha: "5beab8f678190f2a232587fa46e3982b5a7627c1"
   updated_at: "20250927_1901"
+# updated smoke at 20250927_1926
+latest:
+  smoke_zip: "dev_steps/PA-238/results/smoke_20250927_1926.zip"
+  status: "pass"
+  commit_sha: "6bf42ed82864fe7a281822c298560ce3f1140491"
+  updated_at: "20250927_1926"
