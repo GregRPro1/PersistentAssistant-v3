@@ -1,12 +1,12 @@
-enabled: yes
+enabled: false
 protocol: imap
-host: outlook.office365.com
+host: outlook.office365.com   # Outlook.com / MSA IMAP
 port: 993
 username: grapson_pro1@outlook.com
-password: MSk1tk@t
+password: "<APP_PASSWORD>"    # Use an app password if 2FA enabled
 folder: INBOX
 allow_from:
-  - "gprapson@gmail.com"
+  - "YOUR_PHONE_SENDER_EMAIL@domain.com"
 subject_flag: "[PA] APPLY"
 save_dir: "_inbox"
 processed_dir: "_inbox/processed"

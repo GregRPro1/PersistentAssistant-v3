@@ -1,0 +1,1 @@
+Import-Module ScheduledTasks; (Get-Command New-ScheduledTaskAction) | Out-Null
