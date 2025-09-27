@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.148" timestamp="2025-09-27T17:17:15.123636+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_email_watch" name="test_disabled_exit_zero" time="0.070"><failure message="assert 2 == 0">tmp_path = WindowsPath('C:/Users/GPRap/AppData/Local/Temp/pytest-of-GPRap/pytest-125/test_disabled_exit_zero0')
+
+    def test_disabled_exit_zero(tmp_path):
+        cfg = tmp_path/'config'; cfg.mkdir()
+        (cfg/'email_watch.yaml').write_text('enabled: false\n', encoding='utf-8')
+        code = subprocess.call([sys.executable,'tools/py/email_watcher.py'], cwd=tmp_path)
+&gt;       assert code==0
+E       assert 2 == 0
+
+tests\smoke\test_email_watch.py:7: AssertionError</failure></testcase></testsuite></testsuites>
