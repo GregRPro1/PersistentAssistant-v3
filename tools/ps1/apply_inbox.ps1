@@ -1,17 +1,21 @@
 $ErrorActionPreference='Stop'
-$inbox = Join-Path $PSScriptRoot '..\_inbox' | Resolve-Path -ErrorAction SilentlyContinue
-if (-not $inbox) { $inbox = '_inbox' }
-$inbox = [string]$inbox
-if (-not (Test-Path $inbox)) { New-Item -ItemType Directory -Force -Path $inbox | Out-Null }
-$packs = Get-ChildItem -Path $inbox -Filter '*.zip' -File -ErrorAction SilentlyContinue
-foreach($p in $packs){
-  Write-Host "Applying pack: $($p.FullName)"
-  pwsh (Join-Path $PSScriptRoot '..\apply_packs_only.ps1') -ZipPath $p.FullName
-  if ($LASTEXITCODE -eq 0){
-    $dest = Join-Path $inbox ('processed_' + (Get-Date -Format 'yyyyMMdd_HHmm'))
-    New-Item -ItemType Directory -Force -Path $dest | Out-Null
-    Move-Item $p.FullName $dest -Force
-  } else {
-    Write-Host "Pack failed: $($p.FullName)"
-  }
+param([string]$Inbox="_inbox",[string]$Processed="_inbox\processed")
+$root = (Get-Location).Path
+$inboxPath = Join-Path $root $Inbox
+$procPath  = Join-Path $root $Processed
+New-Item -ItemType Directory -Force -Path $inboxPath | Out-Null
+New-Item -ItemType Directory -Force -Path $procPath  | Out-Null
+$log = Join-Path $root 'reports\ops\inbox_apply.log'
+function Log($m){ $ts=Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; Add-Content -Path $log -Value "$ts $m" }
+$zips = Get-ChildItem -Path $inboxPath -Filter *.zip -ErrorAction SilentlyContinue
+if (-not $zips){ Log "no zips in $inboxPath"; exit 0 }
+foreach($z in $zips){
+  Log "apply $($z.FullName)"
+  pwsh -File (Join-Path $root 'apply_packs_only.ps1') -ZipPath $z.FullName | Out-Null
+  $ec=$LASTEXITCODE
+  if ($ec -ne 0) { Log "apply failed ec=$ec" } else { Log "apply ok" }
+  $dest = Join-Path $procPath $z.Name
+  $i=1; while (Test-Path $dest){ $dest = Join-Path $procPath ("{0}_{1}{2}" -f $z.BaseName,$i,$z.Extension); $i++ }
+  Move-Item $z.FullName $dest -Force
+  Log "moved to $dest"
 }
