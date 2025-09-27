@@ -2,10 +2,6 @@ import subprocess, sys, re
 from pathlib import Path
 def run(args, check=True, cwd=None): subprocess.run(args, cwd=cwd, check=check)
 def have_git_repo(root: Path) -> bool: return (root / '.git').exists()
-def ensure_pydeps(mods):
-    for m in mods:
-        try: __import__(m)
-        except Exception: subprocess.run([sys.executable,'-m','pip','install',m], check=True)
 def find_repo_root(start: Path):
     p=start
     for _ in range(10):

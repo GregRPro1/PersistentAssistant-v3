@@ -22,16 +22,19 @@ def collect(dev_steps: Path):
 def ascii_table(rows):
     if not rows: return 'No smoke artifacts found.'
     hdr='| Step | Total | Failures | Errors | Skips |\n|---|---:|---:|---:|---:|'
-    lines=[hdr]+[f\"| {r['step']} | {r['total']} | {r['failures']} | {r['errors']} | {r['skips']} |\" for r in rows]
+    lines=[hdr]+[f"| {r['step']} | {r['total']} | {r['failures']} | {r['errors']} | {r['skips']} |" for r in rows]
     return '\n'.join(lines)
 def write_html(rows, out_html: Path):
     out_html.parent.mkdir(parents=True, exist_ok=True)
     def status(r): return 'pass' if (r['failures']==0 and r['errors']==0) else 'fail'
     rows2=[{**r,'status':status(r)} for r in rows]
-    table_rows='\n'.join([f\"<tr><td>{r['step']}</td><td>{r['total']}</td><td>{r['failures']}</td><td>{r['errors']}</td><td>{r['skips']}</td><td>{r['status']}</td></tr>\" for r in rows2])
-    html=f\"\"\"<!DOCTYPE html><html><head><meta charset="utf-8"><title>Smoke Summary</title>
-<style>body{{font-family:Segoe UI,Arial,sans-serif}} table{{border-collapse:collapse}} td,th{{border:1px solid #ccc;padding:6px 10px}} th{{background:#f3f3f3}}</style>
-</head><body><h2>Smoke Summary</h2><table><thead><tr><th>Step</th><th>Total</th><th>Failures</th><th>Errors</th><th>Skips</th><th>Status</th></tr></thead><tbody>{table_rows}</tbody></table></body></html>\"\"\"
+    table_rows='\n'.join([f"<tr><td>{r['step']}</td><td>{r['total']}</td><td>{r['failures']}</td><td>{r['errors']}</td><td>{r['skips']}</td><td>{r['status']}</td></tr>" for r in rows2])
+    html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Smoke Summary</title>" \
+           "<style>body{font-family:Segoe UI,Arial,sans-serif} table{border-collapse:collapse} " \
+           "td,th{border:1px solid #ccc;padding:6px 10px} th{background:#f3f3f3}</style>" \
+           "</head><body><h2>Smoke Summary</h2><table><thead><tr>" \
+           "<th>Step</th><th>Total</th><th>Failures</th><th>Errors</th><th>Skips</th><th>Status</th>" \
+           "</tr></thead><tbody>" + table_rows + "</tbody></table></body></html>"
     out_html.write_text(html, encoding='utf-8')
 def main():
     import argparse
