@@ -1,0 +1,13 @@
+id: PA-207
+step_branch: 'step/PA-207-doc-inventory'
+latest:
+  smoke_zip: ''
+  status: 'unknown'
+  commit_sha: ''
+  updated_at: ''
+# updated smoke at 20250927_1325
+latest:
+  smoke_zip: "dev_steps/PA-207/results/smoke_20250927_1325.zip"
+  status: "pass"
+  commit_sha: "7efee4325d4747a72688c041a2ed66491307457b"
+  updated_at: "20250927_1325"
