@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.150" timestamp="2025-09-27T18:15:35.874207+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_dev_catalog" name="test_catalog_writes" time="0.070"><failure message="AssertionError: assert False&#10; +  where False = exists()&#10; +    where exists = (((WindowsPath('C:/Users/GPRap/AppData/Local/Temp/pytest-of-GPRap/pytest-129/test_catalog_writes0') / 'reports') / 'dev') / 'index.html').exists">tmp_path = WindowsPath('C:/Users/GPRap/AppData/Local/Temp/pytest-of-GPRap/pytest-129/test_catalog_writes0')
+
+    def test_catalog_writes(tmp_path):
+        ds = tmp_path/'dev_steps'/'PA-111'; ds.mkdir(parents=True)
+        (ds/'dev_step.yaml').write_text('id: PA-111\ntitle: Demo\nstatus: proposed\nowner: greg\n', encoding='utf-8')
+        code = subprocess.call([sys.executable,'tools/py/devstep_catalog.py','--repo-root', str(tmp_path)], cwd=tmp_path)
+&gt;       assert (tmp_path/'reports'/'dev'/'index.html').exists()
+E       AssertionError: assert False
+E        +  where False = exists()
+E        +    where exists = (((WindowsPath('C:/Users/GPRap/AppData/Local/Temp/pytest-of-GPRap/pytest-129/test_catalog_writes0') / 'reports') / 'dev') / 'index.html').exists
+
+tests\smoke\test_dev_catalog.py:7: AssertionError</failure></testcase></testsuite></testsuites>
