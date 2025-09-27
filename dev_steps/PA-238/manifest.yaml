@@ -23,3 +23,9 @@ latest:
   status: "fail"
   commit_sha: "bde77105ac7c1cf5bc2c9a780a17f1205bb78461"
   updated_at: "20250927_1949"
+# updated smoke at 20250927_2037
+latest:
+  smoke_zip: "dev_steps/PA-238/results/smoke_20250927_2037.zip"
+  status: "fail"
+  commit_sha: "48aad2a5ca6c4234076d6182f4cf24fe6752bcd8"
+  updated_at: "20250927_2037"
