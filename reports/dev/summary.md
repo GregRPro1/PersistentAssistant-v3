@@ -13,6 +13,7 @@
 | PA-225 | Feature intake schema + template CLI | proposed | pass |
 | PA-226 | Intake→DevStep auto-scaffold | proposed | pass |
 | PA-230 | File usage analyzer (report-only) | proposed | pass |
-| PA-234 | TBD | proposed | fail |
+| PA-234 | Email watcher (IMAP+local) – hotfix imports | proposed | fail |
 | PA-235 | TBD | proposed | fail |
 | PA-236 | TBD | proposed | fail |
+| PA-238 | Email watcher scheduling (robust) | proposed | pass |

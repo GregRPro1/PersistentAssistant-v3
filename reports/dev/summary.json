@@ -197,16 +197,19 @@
   },
   {
     "id": "PA-234",
-    "title": "TBD",
+    "title": "Email watcher (IMAP+local) \u2013 hotfix imports",
     "status": "proposed",
     "owner": "greg",
     "latest": {
-      "smoke_zip": "dev_steps/PA-234/results/smoke_20250927_1815.zip",
+      "smoke_zip": "dev_steps/PA-234/results/smoke_20250927_1832.zip",
       "status": "fail",
-      "commit_sha": "55995430763a26e05dc7fa032abf89525e38675b",
-      "updated_at": "20250927_1815"
+      "commit_sha": "d772b3bdf202da6ab2f47c6ed230b42605fa86d3",
+      "updated_at": "20250927_1832"
     },
-    "touches": null
+    "touches": [
+      "tools/py/email_watcher.py",
+      "tools/py/apply_common.py"
+    ]
   },
   {
     "id": "PA-235",
@@ -233,5 +236,23 @@
       "updated_at": "20250927_1815"
     },
     "touches": null
+  },
+  {
+    "id": "PA-238",
+    "title": "Email watcher scheduling (robust)",
+    "status": "proposed",
+    "owner": "greg",
+    "latest": {
+      "smoke_zip": "dev_steps/PA-238/results/smoke_20250927_1926.zip",
+      "status": "pass",
+      "commit_sha": "6bf42ed82864fe7a281822c298560ce3f1140491",
+      "updated_at": "20250927_1926"
+    },
+    "touches": [
+      "tools/ps1/run_email_watcher.ps1",
+      "tools/ps1/register_email_watcher.ps1",
+      "tools/ps1/unregister_email_watcher.ps1",
+      "tools/ps1/one_shot_email_poll.ps1"
+    ]
   }
 ]

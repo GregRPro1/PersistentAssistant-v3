@@ -16,11 +16,6 @@ if (-not $pwsh) { Write-Error "No PowerShell host found"; exit 4 }
 $arg = "-NoProfile -ExecutionPolicy Bypass -File `"$wrapper`""
 $action = New-ScheduledTaskAction -Execute $pwsh -Argument $arg
 $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration ([TimeSpan]::MaxValue)
-$rl = (if (Test-Admin) { 'Highest' } else { 'Limited' })
-try {
-  Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -RunLevel $rl -Force | Out-Null
-  Write-Host "Scheduled task '$taskName' created (RunLevel=$rl)."
-} catch {
-  Write-Error ("Register-ScheduledTask failed: " + $_.Exception.Message)
-  exit 5
-}
+$rl = 'Limited'; if (Test-Admin) { $rl = 'Highest' }
+try { Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -RunLevel $rl -Force | Out-Null; Write-Host "Scheduled task '$taskName' created (RunLevel=$rl)." }
+catch { Write-Error ("Register-ScheduledTask failed: " + $_.Exception.Message); exit 5 }
