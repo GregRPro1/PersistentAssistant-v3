@@ -1,0 +1,13 @@
+id: PA-214
+step_branch: 'step/PA-214-smoke-agg'
+latest:
+  smoke_zip: ''
+  status: 'unknown'
+  commit_sha: ''
+  updated_at: ''
+# updated smoke at 20250927_1325
+latest:
+  smoke_zip: "dev_steps/PA-214/results/smoke_20250927_1325.zip"
+  status: "pass"
+  commit_sha: "7cc9e8e34d038cb1700a4c5b9a73908b0b2b8c34"
+  updated_at: "20250927_1325"

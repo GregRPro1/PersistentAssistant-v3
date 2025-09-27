@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.043" timestamp="2025-09-27T13:25:33.853980+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_smoke_aggregate" name="test_write_outputs_creates_md_and_json" time="0.006" /></testsuite></testsuites>
