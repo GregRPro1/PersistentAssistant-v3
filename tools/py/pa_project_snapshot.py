@@ -87,8 +87,8 @@ def step_env(stage: pathlib.Path) -> dict:
         "cwd": str(os.getcwd()),
     }
     try:
-        import flask  # type: ignore
-        info["flask_version"] = getattr(flask, "__version__", None)
+        from importlib.metadata import version, PackageNotFoundError
+        info["flask_version"] = version("flask")
     except Exception:
         info["flask_version"] = None
     write_json(stage / "env.json", info)

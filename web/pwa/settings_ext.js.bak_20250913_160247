@@ -1,0 +1,167 @@
+/* web/pwa/settings_ext.js — Actions accept UI (phase 1.1) */
+(function (doc, win) {
+  const TAG = 'ext-actions-v1';
+  const log = (...a) => console.log(`[${TAG}]`, ...a);
+  const err = (...a) => console.error(`[${TAG}]`, ...a);
+
+  function $(sel, root = doc) { return root.querySelector(sel); }
+  function el(tag, cls, html) { const n = doc.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+
+  async function fetchJson(url, opts) {
+    try {
+      const r = await fetch(url, Object.assign({ cache: 'no-store' }, opts || {}));
+      const text = await r.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch (_) { /* not JSON */ }
+      log('HTTP', (opts && opts.method) || 'GET', url, r.status, json ? '[json]' : text.slice(0, 200));
+      return { ok: r.ok, status: r.status, json, text };
+    } catch (e) {
+      err('fetch failed', url, e);
+      return { ok: false, status: 0, json: null, text: String(e || 'error') };
+    }
+  }
+
+  function suggestionsFromPayload(data) {
+    // Accept shapes:
+    // 1) { ok, result: { suggestions: [...] } }
+    // 2) { ok, suggestions: [...] }
+    // 3) raw array
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (data.result && Array.isArray(data.result.suggestions)) return data.result.suggestions;
+    if (Array.isArray(data.suggestions)) return data.suggestions;
+    return [];
+  }
+
+  function guessStepIdFromSuggestion(s) {
+    if (typeof s !== 'string') return '';
+    // e.g., "4.1 — ..." or "9.5a - ..." or "4 — ..."
+    const m = s.trim().match(/^([0-9]+(?:\.[0-9a-z]+)?)/i);
+    return m ? m[1] : '';
+  }
+
+  function mountActions() {
+    const pane = $('section[data-pane="actions"]');
+    if (!pane) { err('actions pane not found'); return; }
+    pane.innerHTML = '';
+
+    const card = el('div', 'card');
+    const head = el('div', 'section-head', '<h3>Actions</h3>');
+
+    const controls = el('div', 'rowflex');
+    const btnRefresh = el('button', 'btn', 'Refresh suggestions');
+
+    const stepRow = el('div', 'rowflex');
+    stepRow.style.gap = '8px';
+    const stepInput = el('input'); stepInput.type = 'text'; stepInput.placeholder = 'Step id (e.g., 4.1)';
+    stepInput.style.minWidth = '140px';
+    const noteInput = el('input'); noteInput.type = 'text'; noteInput.placeholder = 'Note (optional)';
+    noteInput.style.minWidth = '200px';
+    const btnAccept = el('button', 'btn', 'Accept step (POST)');
+    const btnApprove = el('button', 'btn', 'Create approval file');
+
+    const hint = el('div', 'hint',
+      'Suggestions come from <code>/agent/propose</code>. “Create approval file” uses <code>/agent/next2</code>.');
+    const list = el('div', 'card');
+
+    const out = el('pre', 'codebox scroll');
+    out.textContent = '[no logs yet]';
+
+    controls.append(btnRefresh);
+    stepRow.append(stepInput, noteInput, btnAccept, btnApprove);
+    card.append(head, controls, stepRow, hint, list, out);
+    pane.append(card);
+    log('mounted actions UI');
+
+    function renderSuggestions(items) {
+      list.innerHTML = '';
+      if (!items || !items.length) {
+        list.innerHTML = '<div class="hint">No suggestions.</div>';
+        return;
+      }
+      const ul = el('ul', 'plain');
+      items.forEach((s, i) => {
+        const li = el('li');
+        const badge = el('span', 'badge', String(i + 1).padStart(2, '0'));
+        const text = typeof s === 'string' ? s : JSON.stringify(s);
+        const txt = el('span', null, ' ' + text);
+        li.append(badge, txt);
+        // Clicking a suggestion copies a guessed step id into the input
+        li.addEventListener('click', () => {
+          const guess = guessStepIdFromSuggestion(text);
+          if (guess) { stepInput.value = guess; stepInput.focus(); }
+        }, { passive: true });
+        ul.append(li);
+      });
+      list.append(ul);
+      // Set placeholder from first suggestion, if parseable
+      const g = guessStepIdFromSuggestion(items[0]);
+      if (g && !stepInput.value) stepInput.placeholder = `Step id (e.g., ${g})`;
+    }
+
+    async function refresh() {
+      out.textContent = 'Refreshing…';
+      // primary: /agent/propose
+      let r = await fetchJson('/agent/propose');
+      let sugg = suggestionsFromPayload(r.json);
+      if (!sugg.length) {
+        // fallback: /agent/next2 (does create an approval file; we’re only reading it here)
+        const r2 = await fetchJson('/agent/next2');
+        const s2 = suggestionsFromPayload(r2.json);
+        out.textContent =
+          `GET /agent/propose -> ${r.status}\n` + JSON.stringify(r.json || r.text, null, 2) +
+          (s2.length ? `\n\nFALLBACK /agent/next2 -> ${r2.status}\n` + JSON.stringify(r2.json || r2.text, null, 2) : '');
+        renderSuggestions(s2.length ? s2 : []);
+        return;
+      }
+      out.textContent = `GET /agent/propose -> ${r.status}\n` + JSON.stringify(r.json || r.text, null, 2);
+      renderSuggestions(sugg);
+    }
+
+    async function accept() {
+      const step = (stepInput.value || '').trim();
+      if (!step) {
+        out.textContent = 'Please enter a step id (e.g., 4.1) or click a suggestion to fill it.';
+        stepInput.focus();
+        return;
+      }
+      const payload = { step, note: (noteInput.value || '').trim() || null };
+      out.textContent = 'Posting acceptance…';
+      const r = await fetchJson('/agent/propose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const body = r.json || r.text;
+      out.textContent = `POST /agent/propose -> ${r.status}\n` +
+        (typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+      try { if (r.json && r.json.ok) { await refresh(); } } catch (_) {}
+    }
+
+    async function approve() {
+      out.textContent = 'Creating approval file…';
+      const r = await fetchJson('/agent/next2');
+      const body = r.json || r.text;
+      out.textContent = `GET /agent/next2 -> ${r.status}\n` +
+        (typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+    }
+
+    btnRefresh.addEventListener('click', refresh, { passive: true });
+    btnAccept.addEventListener('click', accept, { passive: true });
+    btnApprove.addEventListener('click', approve, { passive: true });
+
+    // initial load
+    refresh();
+  }
+
+  function onReady() {
+    log('DOMContentLoaded');
+    mountActions();
+  }
+
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', onReady, { once: true });
+  } else {
+    onReady();
+  }
+})(document, window);

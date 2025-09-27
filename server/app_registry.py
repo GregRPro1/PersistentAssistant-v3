@@ -1,50 +1,45 @@
-from flask import Response
-import os, json, time, uuid, glob
+# server/app_registry.py
+from __future__ import annotations
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
-def _approvals_dir():
-    d = os.path.join(ROOT, "tmp", "phone", "approvals")
-    os.makedirs(d, exist_ok=True)
-    return d
-
-def _j(o, code=200):
-    return Response(json.dumps(o), mimetype="application/json", status=code)
-
-def _recent():
+def _have_rule(app, path: str) -> bool:
+    """Return True if a route with exactly this path exists."""
     try:
-        d = _approvals_dir()
-        fs = sorted(glob.glob(os.path.join(d, "approve_*.json")), key=os.path.getmtime, reverse=True)[:25]
-        items=[]
-        for f in fs:
-            try:
-                items.append({"file": os.path.basename(f), "bytes": os.path.getsize(f)})
-            except Exception:
-                pass
-        return _j({"ok": True, "approvals": items})
-    except Exception as e:
-        return _j({"ok": False, "err": str(e)}, 500)
-
-def _next2():
-    try:
-        d = _approvals_dir()
-        ts = int(time.time()); nonce = str(uuid.uuid4())
-        p = os.path.join(d, f"approve_{ts}_{nonce}.json")
-        with open(p, "w", encoding="utf-8") as f:
-            f.write(json.dumps({"ok": True, "action": "NEXT", "ts": ts, "nonce": nonce}))
-        sug = ["9.5a — Worker UX", "9.5b — Auto-process", "9.5c — Plan details"]
-        return _j({"ok": True, "file": os.path.basename(p), "suggestions": sug})
-    except Exception as e:
-        return _j({"ok": False, "err": str(e)}, 500)
-
-def register_extensions(app):
-    try:
-        have = {r.rule for r in app.url_map.iter_rules()}
+        for r in app.url_map.iter_rules():
+            if str(r) == path:
+                return True
     except Exception:
-        have = set()
-    if "/agent/recent" not in have:
-        try: app.add_url_rule("/agent/recent", view_func=_recent, methods=["GET"])
-        except Exception: pass
-    if "/agent/next2" not in have:
-        try: app.add_url_rule("/agent/next2", view_func=_next2, methods=["GET","POST"])
-        except Exception: pass
+        pass
+    return False
+
+
+def _try_register_bp(app, import_path: str, route_probe: str, label: str) -> None:
+    """Import <import_path>.bp and register it unless route already present."""
+    try:
+        mod = __import__(import_path, fromlist=["bp"])
+        bp = getattr(mod, "bp", None)
+        if bp is None:
+            print(f"[app_registry] {label}: no 'bp' attribute on {import_path}")
+            return
+        if _have_rule(app, route_probe):
+            print(f"[app_registry] {label}: {route_probe} already present; skipping")
+            return
+        app.register_blueprint(bp)
+        print(f"[app_registry] registered {route_probe} from {import_path}")
+    except Exception as e:
+        print(f"[app_registry] register {label} failed:", e)
+
+
+def register_extensions(app) -> None:
+    """Register optional blueprints (robust & idempotent)."""
+    _try_register_bp(app, "server.proposal_api", "/agent/propose", "/agent/propose")
+    _try_register_bp(app, "server.apply_api",    "/agent/apply",   "/agent/apply")
+
+    print(
+        "[app_registry] summary: propose={}; apply={}".format(
+            "ok" if _have_rule(app, "/agent/propose") else "skip",
+            "ok" if _have_rule(app, "/agent/apply") else "skip"
+        )
+    )
+
+
+__all__ = ["register_extensions"]

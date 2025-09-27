@@ -1,0 +1,294 @@
+/* web/pwa/settings_ext.js — Settings form + Actions (Accept/Apply) */
+(function (doc, win) {
+  const TAG = 'ext-actions-v2';
+  const log = (...a) => console.log(`[${TAG}]`, ...a);
+  const err = (...a) => console.error(`[${TAG}]`, ...a);
+
+  function $(sel, root = doc) { return root.querySelector(sel); }
+  function el(tag, cls, html) { const n = doc.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+
+  async function fetchJson(url, opts) {
+    try {
+      const r = await fetch(url, Object.assign({ cache: 'no-store' }, opts || {}));
+      const text = await r.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch (_) { }
+      log('HTTP', (opts && opts.method) || 'GET', url, r.status, json ? '[json]' : text.slice(0, 200));
+      return { ok: r.ok, status: r.status, json, text };
+    } catch (e) {
+      err('fetch failed', url, e);
+      return { ok: false, status: 0, json: null, text: String(e || 'error') };
+    }
+  }
+
+  // ---------------- Settings form (restored) ----------------
+  const FIELDS = [
+    { key: 'plan_file', label: 'Plan file (YAML)', type: 'text', placeholder: 'C:\\_Repos\\PersistentAssistant\\project_plan_v3.yaml' },
+    { key: 'tracker_file', label: 'Tracker file (YAML)', type: 'text', placeholder: 'project\\tracker.yaml' },
+    { key: 'status_path', label: 'Status JSON path', type: 'text', placeholder: 'data\\runtime\\agent_status.json' },
+    { key: 'projects_root', label: 'Projects root', type: 'text', placeholder: '' },
+    { key: 'active_project', label: 'Active project', type: 'text', placeholder: '' },
+    { key: 'tests_default', label: 'Default tests dir', type: 'text', placeholder: 'tests' },
+    { key: 'pytest_flags_default', label: 'Default pytest flags', type: 'text', placeholder: '-q' },
+    { key: 'agent_base_url', label: 'Agent base URL', type: 'text', placeholder: 'http://127.0.0.1:8782' },
+    { key: 'bearer_token', label: 'Bearer token', type: 'password', placeholder: '' },
+    { key: 'auto_revise_default_iters', label: 'Auto-revise default iters', type: 'number', placeholder: '2' },
+    { key: 'auto_revise_ui_soft_max', label: 'UI soft max iters', type: 'number', placeholder: '3' },
+  ];
+
+  async function mountSettingsForm() {
+    const pane = section[data-pane="settings"]; if (!pane) return; if (pane.querySelector('#tok') || pane.querySelector('#saveTok')) { try { console.log('[ext-actions-v2] keep existing settings pane'); } catch(_) {} return; }
+
+    pane.innerHTML = '';
+    const card = el('div', 'card');
+    const head = el('div', 'section-head', '<h3>Settings</h3>');
+    const form = el('div'); form.id = 'extSettingsForm';
+    const grid = el('div'); grid.style.display = 'grid'; grid.style.gridTemplateColumns = '240px 1fr'; grid.style.gap = '8px';
+
+    FIELDS.forEach(f => {
+      const lbl = el('label', null, f.label);
+      const inp = el('input'); inp.id = 'set_' + f.key; inp.type = f.type || 'text'; if (f.placeholder) inp.placeholder = f.placeholder;
+      grid.append(lbl, inp);
+    });
+
+    const row = el('div', 'rowflex');
+    const btnReload = el('button', 'btn', 'Reload');
+    const btnSave = el('button', 'btn', 'Save');
+    const out = el('pre', 'codebox scroll'); out.textContent = '[settings log]';
+
+    row.append(btnReload, btnSave);
+    card.append(head, grid, row, out);
+    pane.append(card);
+
+    async function load() {
+      out.textContent = 'Loading…';
+      const r = await fetchJson('/agent/settings');
+      out.textContent = `GET /agent/settings -> ${r.status}`;
+      const data = r.json || {};
+      FIELDS.forEach(f => {
+        const n = $('#set_' + f.key);
+        if (!n) return;
+        let v = data[f.key];
+        if (typeof v === 'number') n.value = String(v);
+        else if (typeof v === 'string') n.value = v;
+        else if (v == null) n.value = '';
+        else n.value = JSON.stringify(v);
+      });
+    }
+
+    async function save() {
+      const body = {};
+      FIELDS.forEach(f => {
+        const n = $('#set_' + f.key);
+        if (!n) return;
+        let v = n.value;
+        if (f.type === 'number' && v !== '') v = Number(v);
+        body[f.key] = v;
+      });
+      const r = await fetchJson('/agent/settings', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      out.textContent = `POST /agent/settings -> ${r.status}\n` + JSON.stringify(r.json || r.text, null, 2);
+    }
+
+    btnReload.addEventListener('click', load, { passive: true });
+    btnSave.addEventListener('click', save, { passive: true });
+
+    load();
+  }
+
+  // ---------------- Actions (Accept + Apply) ----------------
+  // === Append to web/pwa/settings_ext.js (inside the IIFE) =====================
+  
+
+  function mountActions() {
+    const pane = $('section[data-pane="actions"]');
+    if (!pane) { err('actions pane not found'); return; }
+    pane.innerHTML = '';
+
+    const card = el('div', 'card');
+    const head = el('div', 'section-head', '<h3>Actions</h3>');
+    const controls = el('div', 'rowflex');
+    const btnRefresh = el('button', 'btn', 'Refresh suggestions');
+    const btnAccept = el('button', 'btn', 'Accept step (POST)');
+    const btnApply = el('button', 'btn', 'Apply step (run driver)');
+    const btnApprove = el('button', 'btn', 'Create approval file');
+    const hint = el('div', 'hint',
+      'Suggestions come from <code>/agent/propose</code>. “Create approval file” uses <code>/agent/next2</code>.');
+    const list = el('div', 'card action-sugg');
+    const out = el('pre', 'codebox scroll'); out.textContent = '[no logs yet]';
+
+    // styling for selected suggestion
+    const headEl = doc.querySelector('head') || doc.body;
+    const __style = el('style', null, '.action-sugg li{cursor:pointer;padding:4px 6px;border-radius:8px}.action-sugg li.selected{outline:2px solid #888;background:rgba(0,0,0,.03)}');
+    headEl.append(__style);
+
+    controls.append(btnRefresh, btnAccept, btnApply, btnApprove);
+    
+btnApply.addEventListener('click', applyStep, { passive: true });
+card.append(head, controls, hint, list, out);
+    pane.append(card);
+    log('mounted actions UI');
+
+    // …after you define/maintain `selectedStep` when a suggestion is clicked:
+
+
+    let selectedStep = null;
+    function renderSuggestions(items) {
+      list.innerHTML = '';
+      if (!items || !items.length) {
+        list.innerHTML = '<div class="hint">No suggestions.</div>';
+        return;
+      }
+      const ul = el('ul', 'plain');
+      items.forEach((s, i) => {
+        const val = (typeof s === 'string') ? s : JSON.stringify(s);
+        const li = el('li', null);
+        const badge = el('span', 'badge', String(i + 1).padStart(2, '0'));
+        const txt = el('span', null, ' ' + val);
+        li.addEventListener('click', () => {
+          selectedStep = (typeof s === 'string') ? s : String(s);
+          ul.querySelectorAll('li').forEach(n => n.classList.remove('selected'));
+          li.classList.add('selected');
+        }, { passive: true });
+        li.append(badge, txt);
+        ul.append(li);
+      });
+      list.append(ul);
+    }
+
+    function suggestionsFromPayload(data) {
+      if (!data) return [];
+      if (Array.isArray(data)) return data;
+      if (data.result && Array.isArray(data.result.suggestions)) return data.result.suggestions;
+      if (Array.isArray(data.suggestions)) return data.suggestions;
+      return [];
+    }
+
+    async function refresh() {
+      out.textContent = 'Refreshing…';
+      let r = await fetchJson('/agent/propose');
+      let sugg = suggestionsFromPayload(r.json);
+      if (!sugg.length) {
+        const r2 = await fetchJson('/agent/next2');
+        const s2 = suggestionsFromPayload(r2.json);
+        out.textContent = `GET /agent/propose -> ${r.status}\n` +
+          (s2.length ? `FALLBACK /agent/next2 -> ${r2.status}\n` : '') +
+          JSON.stringify((s2.length ? r2.json : r.json) || (s2.length ? r2.text : r.text), null, 2);
+        renderSuggestions(s2.length ? s2 : sugg);
+        return;
+      }
+      out.textContent = `GET /agent/propose -> ${r.status}\n` + JSON.stringify(r.json || r.text, null, 2);
+      renderSuggestions(sugg);
+    }
+
+    async function accept() {
+      if (!selectedStep) { out.textContent = 'Pick a suggestion to accept.'; return; }
+      out.textContent = 'Posting acceptance…';
+      const r = await fetchJson('/agent/propose', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ step: selectedStep, note: null })
+      });
+      out.textContent = `POST /agent/propose -> ${r.status}\n` + JSON.stringify(r.json || r.text, null, 2);
+    }
+
+    /* removed: legacy applyStep() — now handled by wireApplyButton */
+      out.textContent = 'Running apply…';
+      const r = await fetchJson('/agent/apply', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ step: selectedStep })
+      });
+      out.textContent = `POST /agent/apply -> ${r.status}\n` + JSON.stringify(r.json || r.text, null, 2);
+    }
+
+    async function approve() {
+      out.textContent = 'Creating approval file via /agent/next2…';
+      const r = await fetchJson('/agent/next2');
+      const body = r.json || r.text;
+      out.textContent = `GET /agent/next2 -> ${r.status}\n` + (typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+    }
+
+    btnRefresh.addEventListener('click', refresh, { passive: true });
+    btnAccept.addEventListener('click', accept, { passive: true });
+    // removed: legacy applyStep listener;
+    btnApprove.addEventListener('click', approve, { passive: true });
+
+    refresh();
+    
+
+  }
+
+  function onReady() {
+    log('DOMContentLoaded');
+    mountSettingsForm();   // <- restored
+    mountActions();
+  }
+
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', onReady, { once: true });
+  } else {
+    onReady();
+  }
+// ---- Back-compat / fallback: named handler expected by some probes ----
+async function applyStep() {
+  if (!selectedStep) { out.textContent = 'Pick a suggestion to apply.'; return; }
+  out.textContent = 'Running apply…';
+  const r = await fetchJson('/agent/apply', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ step: selectedStep, tests: 'tests', pytest_flags: ['-q'], retries: 0 })
+  });
+  const __body = r.json ? JSON.stringify(r.json, null, 2) : r.text;
+  const __summary = (typeof extractPytestSummary === 'function') ? extractPytestSummary(r.json) : null;
+  out.textContent = `POST /agent/apply -> ${r.status}
+` + __body + (__summary ? (`\n\nSummary: ${__summary}`) : '');
+  if (__summary) {
+    const isFail = /failed|error/i.test(__summary);
+    try { out.style.borderLeft = isFail ? '4px solid #b00020' : '4px solid #0a7d2a'; } catch (_) {}
+  }
+}
+
+
+function extractPytestSummary(resp) {
+  try {
+    const s = (resp && resp.run && resp.run.stdout) || '';
+    const lines = String(s).trim().split(/\r?\n/);
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const L = lines[i];
+      if (/\bpassed\b|\bfailed\b|\bskipped\b|\berrors?\b/i.test(L) &&
+          /(\d+\s+passed|\d+\s+failed|\d+\s+errors?|\d+\s+skipped)/i.test(L)) {
+        return L.trim();
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
+/* ext-fallback binder + boot flag */
+(function(doc){
+  try{
+    // brief boot message
+    try {
+      var sr = doc.getElementById('statusRight');
+      if (sr) { sr.textContent = 'ext ok'; setTimeout(function(){ sr.textContent=''; }, 1500); }
+    } catch(_) {}
+
+    // bind tabs only if not already bound
+    var tabs = Array.prototype.slice.call(doc.querySelectorAll('.tab'));
+    tabs.forEach(function(t){
+      if (t.dataset && t.dataset.extBound) return;
+      t.dataset.extBound = '1';
+      t.addEventListener('click', function(){
+        var name = t.getAttribute('data-tab');
+        Array.prototype.slice.call(doc.querySelectorAll('.tab')).forEach(function(x){ x.classList.remove('active'); });
+        t.classList.add('active');
+        Array.prototype.slice.call(doc.querySelectorAll('[data-pane]')).forEach(function(p){
+          p.classList.toggle('hidden', p.getAttribute('data-pane') !== name);
+        });
+      }, { passive: true });
+    });
+  } catch(e) { try { console.error('[ext-actions-v2] fallback binder error:', e); } catch(_) {} }
+})(document);
+})(document, window);
+
+
+

@@ -1,11 +1,8 @@
-port: 8765
 bind: 127.0.0.1
-# Allow only simple, low-risk commands initially. Expand later under policy.
+port: 8765
 allowlist:
   - "python --version"
-  - "python -V"
-  - "pip --version"
-  - "echo hello"
+  # add your own smoke cmd(s) here, e.g.:
+  # - "pytest -q -k smoke"
 time_limits:
   run_seconds: 30
-log_file: "logs/leb_service.log"

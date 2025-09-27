@@ -1,9 +1,178 @@
-/* Agent EXT v2 (tab-integrated) */
-.pa2-bar { font: 12px/1.4 system-ui,Segoe UI,Roboto,Arial; padding:6px 8px; display:flex; gap:12px; align-items:center; border-top:1px solid #2a2a2a; background: transparent; }
-.pa2-pill { padding:2px 8px; border-radius:999px; background:rgba(148,163,184,.15); display:inline-block; }
-.pa2-badge { padding:1px 6px; border-radius:9px; font-size:11px; color:#fff; }
-.b-done{background:#16a34a;} .b-prog{background:#2563eb;} .b-blk{background:#dc2626;} .b-todo{background:#64748b;}
-.pa2-panel { max-height:260px; overflow:auto; border:1px solid #2a2a2a; border-radius:8px; padding:8px; }
-.pa2-tree ul{ list-style:none; padding-left:14px; margin:0; }
-.pa2-tree li{ margin:2px 0; }
-.preline { white-space: pre-line; }
+/* Agent EXT v2 (aux + plan helpers) */
+.pa2-bar {
+    font: 12px/1.4 system-ui, Segoe UI, Roboto, Arial;
+    padding: 6px 8px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border-top: 1px solid #2a2a2a;
+    background: transparent
+}
+
+.pa2-pill {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, .15);
+    display: inline-block
+}
+
+.pa2-badge {
+    padding: 1px 6px;
+    border-radius: 9px;
+    font-size: 11px;
+    color: #fff
+}
+
+.b-done {
+    background: #16a34a
+}
+
+.b-prog {
+    background: #2563eb
+}
+
+.b-blk {
+    background: #dc2626
+}
+
+.b-todo {
+    background: #64748b
+}
+
+.pa2-panel {
+    max-height: 260px;
+    overflow: auto;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 8px
+}
+
+.pa2-tree ul {
+    list-style: none;
+    padding-left: 14px;
+    margin: 0
+}
+
+.pa2-tree li {
+    margin: 2px 0
+}
+
+.preline {
+    white-space: pre-line
+}
+
+/* Plan v3 helpers */
+.tree ul.plain {
+    list-style: none;
+    margin: 0;
+    padding-left: 16px
+}
+
+.tree .tree-item {
+    margin: 4px 0
+}
+
+.caret {
+    display: inline-block;
+    width: 14px;
+    cursor: pointer;
+    user-select: none;
+    color: #9ca3af
+}
+
+.caret.leaf {
+    visibility: visible
+}
+
+.caret::before {
+    content: '\25B6';
+    display: inline-block;
+    transform: translateY(-1px)
+}
+
+.caret.down::before {
+    transform: rotate(90deg)
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 6px
+}
+
+.dot.green {
+    background: #22c55e
+}
+
+.dot.amber {
+    background: #f59e0b
+}
+
+.dot.red {
+    background: #ef4444
+}
+
+.dot.blue {
+    background: #3b82f6
+}
+
+.lbl {
+    cursor: pointer
+}
+
+.tree .selected>.lbl {
+    text-decoration: underline
+}
+
+.codebox {
+    background: #0f1113;
+    border: 1px solid #28303d;
+    padding: 8px;
+    border-radius: 8px;
+    white-space: pre-wrap
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999
+}
+
+.modal-card {
+    background: #111214;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 12px;
+    width: 680px;
+    max-width: 95vw
+}
+
+.modal-card .row {
+    margin: 8px 0
+}
+
+.modal-card input,
+.modal-card textarea,
+.modal-card select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #28303d;
+    background: #0f1113;
+    color: #e5e7eb
+}
+
+.btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #28303d;
+    background: #14161a;
+    color: #e5e7eb;
+    cursor: pointer
+}

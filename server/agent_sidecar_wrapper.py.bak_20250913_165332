@@ -1,0 +1,754 @@
+# server/agent_sidecar_wrapper.py
+# Robust sidecar wrapper that guarantees required /agent/* endpoints exist
+# and delegates to the real sidecar app if present.
+
+from __future__ import annotations
+
+import os
+import sys
+import time
+import json
+import glob
+import re
+import importlib
+import importlib.util
+import subprocess
+import urllib.request, urllib.error
+from typing import Any, Dict, List, Optional
+
+from flask import Flask, jsonify, make_response, send_from_directory, request, Response
+
+# -----------------------------------------------------------------------------
+# Constants / paths
+# -----------------------------------------------------------------------------
+REPO = os.path.abspath(os.getcwd())
+PWA_DIR = os.path.join(REPO, "web", "pwa")
+SIG = "wrap-stable-v1"
+
+def log(*a: Any) -> None:
+    print(*a, flush=True)
+
+# -----------------------------------------------------------------------------
+# Utilities
+# -----------------------------------------------------------------------------
+def no_cache(resp: Response) -> Response:
+    try:
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return resp
+
+def approvals_dir() -> str:
+    p = os.path.join(REPO, "tmp", "phone", "approvals")
+    try:
+        os.makedirs(p, exist_ok=True)
+    except Exception:
+        pass
+    return p
+
+def have_rule(flask_app: Flask, rule_text: str) -> bool:
+    try:
+        for r in flask_app.url_map.iter_rules():
+            if str(r) == rule_text:
+                return True
+    except Exception:
+        pass
+    return False
+
+def ensure_rule(flask_app: Flask, rule: str, endpoint: str, view_func, methods=("GET",)) -> None:
+    if not have_rule(flask_app, rule):
+        try:
+            flask_app.add_url_rule(rule, endpoint=endpoint, view_func=view_func, methods=list(methods))
+            log("[wrapper]", SIG, "bound", rule, "->", endpoint)
+        except Exception as e:
+            log("[wrapper]", SIG, "add_url_rule failed for", rule, ":", e)
+
+# -----------------------------------------------------------------------------
+# Try to load a real sidecar app; else create our own
+# -----------------------------------------------------------------------------
+def load_sidecar_app() -> Optional[Flask]:
+    # Try package import: server.agent_sidecar:app
+    try:
+        m = importlib.import_module("server.agent_sidecar")
+        app = getattr(m, "app", None)
+        if app is not None:
+            log("[wrapper]", SIG, "imported server.agent_sidecar.app (package)")
+            return app
+    except Exception as e:
+        log("[wrapper]", SIG, "package import failed:", e)
+
+    # Try by file path
+    try:
+        path = os.path.join(REPO, "server", "agent_sidecar.py")
+        if os.path.isfile(path):
+            spec = importlib.util.spec_from_file_location("agent_sidecar", path)
+            mod = importlib.util.module_from_spec(spec)
+            sys.modules["agent_sidecar"] = mod
+            assert spec is not None and spec.loader is not None
+            spec.loader.exec_module(mod)
+            app = getattr(mod, "app", None)
+            if app is not None:
+                log("[wrapper]", SIG, "imported server/agent_sidecar.py (file)")
+                return app
+    except Exception as e:
+        log("[wrapper]", SIG, "file import failed:", e)
+
+    return None
+
+app = load_sidecar_app()
+if app is None:
+    app = Flask(__name__, static_folder=None)
+    log("[wrapper]", SIG, "created internal Flask app")
+
+# -----------------------------------------------------------------------------
+# Settings blueprint (robust fallback)
+# -----------------------------------------------------------------------------
+def attach_settings_blueprint(flask_app: Flask) -> None:
+    """Attach settings endpoints, robustly. Falls back to local JSON file."""
+    try:
+        mod = importlib.import_module("server.settings_api")
+        settings_bp = getattr(mod, "bp", None) or getattr(mod, "settings_bp", None)
+        if settings_bp is None and hasattr(mod, "create_blueprint"):
+            settings_bp = mod.create_blueprint()  # type: ignore[attr-defined]
+        if settings_bp is not None:
+            flask_app.register_blueprint(settings_bp)
+            print("wrap-stable-v1: registered blueprint from server.settings_api")
+            return
+        if hasattr(mod, "init_app"):
+            mod.init_app(flask_app)  # type: ignore[attr-defined]
+            print("wrap-stable-v1: initialized settings_api via init_app(app)")
+            return
+    except Exception as e:
+        print("wrap-stable-v1: settings_api module not usable:", e)
+
+    # If settings route already exists, don't add fallback.
+    try:
+        for r in flask_app.url_map.iter_rules():
+            if str(r) in ("/agent/settings", "/agent/settings/get"):
+                print("wrap-stable-v1: settings routes already present; skipping fallback")
+                return
+    except Exception:
+        pass
+
+    # Fallback blueprint
+    from flask import Blueprint, jsonify as _jsonify
+
+    _SETTINGS_FILE = os.environ.get("PA_SETTINGS_FILE", "config/app_settings.json")
+    fb = Blueprint("pa_settings_fallback", __name__, url_prefix="/agent")
+
+    def _load():
+        try:
+            with open(_SETTINGS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {
+                "plan_file": "",
+                "tracker_file": "",
+                "status_path": "data/runtime/agent_status.json",
+                "projects_root": "",
+                "active_project": "",
+                "tests_default": "tests",
+                "pytest_flags_default": "-q",
+                "agent_base_url": "http://127.0.0.1:8782",
+                "bearer_token": "",
+                "auto_revise_default_iters": 2,
+                "auto_revise_ui_soft_max": 3,
+            }
+
+    def _save(data: Dict[str, Any]) -> None:
+        os.makedirs(os.path.dirname(_SETTINGS_FILE) or ".", exist_ok=True)
+        with open(_SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+    @fb.get("/settings")
+    def settings_get():
+        return _jsonify(_load())
+
+    @fb.get("/settings/get")
+    def settings_get_alt():
+        return _jsonify(_load())
+
+    @fb.post("/settings")
+    def settings_set():
+        data = request.get_json(silent=True) or {}
+        cur = _load()
+        cur.update(data)
+        _save(cur)
+        return _jsonify({"ok": True})
+
+    @fb.post("/settings/set")
+    def settings_set_alt():
+        return settings_set()
+
+    flask_app.register_blueprint(fb)
+    print("wrap-stable-v1: registered fallback /agent/settings blueprint")
+
+attach_settings_blueprint(app)
+
+# -----------------------------------------------------------------------------
+# Optional blueprints (best-effort)
+# -----------------------------------------------------------------------------
+def try_register_blueprints(flask_app: Flask) -> None:
+    for mod in ("server.agent_actions_v5", "server.agent_actions_v6", "server.agent_actions_v7", "server.agent_actions_v8"):
+        try:
+            m = importlib.import_module(mod)
+            bp = getattr(m, "bp", None)
+            if bp is not None:
+                flask_app.register_blueprint(bp)
+                log("[wrapper]", SIG, "registered blueprint from", mod)
+        except Exception:
+            pass
+    try:
+        from server.agent_compose import bp as compose_bp  # type: ignore[import]
+        flask_app.register_blueprint(compose_bp)
+        log("[wrapper]", SIG, "registered compose blueprint")
+    except Exception:
+        pass
+    try:
+        from server.micro_daily_status import bp as daily_bp  # type: ignore[import]
+        flask_app.register_blueprint(daily_bp)
+        log("[wrapper] bound /agent/daily_status -> daily_status")
+    except Exception:
+        pass
+    try:
+        from server.micro_projects import bp as projects_bp  # type: ignore[import]
+        flask_app.register_blueprint(projects_bp)
+        log("[wrapper] bound /agent/project/new -> micro_projects")
+    except Exception:
+        pass
+
+try_register_blueprints(app)
+
+# -----------------------------------------------------------------------------
+# Proposal blueprint (optional)
+# -----------------------------------------------------------------------------
+def attach_proposal_blueprint(flask_app: Flask) -> bool:
+    """Attach /agent/propose from server.proposal_api if available."""
+    try:
+        mod = importlib.import_module("server.proposal_api")
+        bp = getattr(mod, "bp", None) or getattr(mod, "proposal_bp", None)
+        if bp is None and hasattr(mod, "create_blueprint"):
+            bp = mod.create_blueprint()  # type: ignore[attr-defined]
+        if bp is not None:
+            flask_app.register_blueprint(bp)
+            print("[wrapper] registered proposal blueprint")
+            return True
+        if hasattr(mod, "init_app"):
+            mod.init_app(flask_app)  # type: ignore[attr-defined]
+            print("[wrapper] initialized proposal_api via init_app(app)")
+            return True
+        print("[wrapper] proposal_api found but no blueprint to register")
+        return False
+    except Exception as e:
+        print("[wrapper] proposal_api attach failed:", e)
+        return False
+
+# Try to attach it (no-op if module is absent)
+attach_proposal_blueprint(app)
+
+# -----------------------------------------------------------------------------
+# Diagnostics / metadata endpoints
+# -----------------------------------------------------------------------------
+def routes_list() -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    try:
+        for r in app.url_map.iter_rules():
+            out.append({"rule": str(r), "methods": sorted(list(r.methods or []))})
+    except Exception:
+        pass
+    return out
+
+def ep___routes__():
+    return jsonify({"ok": True, "routes": routes_list(), "sig": SIG})
+
+def ep_health():
+    return jsonify({"ok": True, "sig": SIG})
+
+def ep_agent_routes():
+    try:
+        rules = [str(r) for r in app.url_map.iter_rules()]
+    except Exception:
+        rules = []
+    return jsonify({"ok": True, "routes": rules, "sig": SIG})
+
+def ep_agent_sig():
+    return jsonify({"ok": True, "sig": SIG})
+
+# -----------------------------------------------------------------------------
+# PWA assets
+# -----------------------------------------------------------------------------
+def ep_pwa_agent():
+    if not os.path.isdir(PWA_DIR):
+        return ("pwa dir missing", 404)
+    resp = make_response(send_from_directory(PWA_DIR, "agent.html"))
+    return no_cache(resp)
+
+def ep_pwa_static(filename: str):
+    if not os.path.isdir(PWA_DIR):
+        return ("pwa dir missing", 404)
+    resp = make_response(send_from_directory(PWA_DIR, filename))
+    return no_cache(resp)
+
+def ep_static_passthru(filename: str):
+    if not os.path.isdir(PWA_DIR):
+        return ("pwa dir missing", 404)
+    resp = make_response(send_from_directory(PWA_DIR, filename))
+    return no_cache(resp)
+
+# -----------------------------------------------------------------------------
+# Plan view (fallback) and summary
+# -----------------------------------------------------------------------------
+def build_plan_fallback() -> Dict[str, Any]:
+    try:
+        try:
+            import yaml  # optional
+        except Exception:
+            yaml = None  # type: ignore[assignment]
+
+        plan_path = None
+        tree: List[Dict[str, Any]] = []
+        totals = {"done": 0, "in_progress": 0, "blocked": 0, "todo": 0}
+        txt = ""
+
+        # locate plan file
+        for base, _dirs, files in os.walk(REPO):
+            if "project_plan_v3.yaml" in files:
+                plan_path = os.path.join(base, "project_plan_v3.yaml")
+                break
+
+        if plan_path and os.path.isfile(plan_path):
+            txt = open(plan_path, "r", encoding="utf-8").read()
+            doc = yaml.safe_load(txt) if yaml else {}
+        else:
+            doc = {}
+
+        nodes: List[Dict[str, Any]] = []
+
+        def walk_all(x):
+            st = [x]
+            while st:
+                v = st.pop()
+                if isinstance(v, dict):
+                    yield v
+                    st.extend(list(v.values()))
+                elif isinstance(v, list):
+                    st.extend(v)
+
+        for n in walk_all(doc):
+            if not isinstance(n, dict):
+                continue
+            _id = str(n.get("id") or n.get("step_id") or "").strip()
+            if not _id:
+                continue
+            title = str(n.get("name") or n.get("title") or n.get("desc") or "").strip()
+            status = str(n.get("status") or n.get("state") or "").strip()
+            nodes.append({"id": _id, "title": title, "status": status, "children": []})
+
+        if not nodes and txt:
+            ids = re.findall(r'^[ \t]*(?:id|step_id)\s*:\s*([\w\.-]+)', txt, flags=re.MULTILINE)
+            nodes = [{"id": i, "title": "", "status": "", "children": []} for i in sorted(set(ids))]
+
+        def classify(s: str) -> str:
+            s = (s or "").lower()
+            if s in ("done", "complete", "finished"):
+                return "done"
+            if s in ("in_progress", "active", "working", "running"):
+                return "in_progress"
+            if s in ("blocked", "error", "fail", "failed"):
+                return "blocked"
+            return "todo"
+
+        def dsum(a: Dict[str, int], b: Dict[str, int]) -> Dict[str, int]:
+            for k in ("done", "in_progress", "blocked", "todo"):
+                a[k] = a.get(k, 0) + b.get(k, 0)
+            return a
+
+        def count(node: Dict[str, Any]) -> Dict[str, int]:
+            c = {"done": 0, "in_progress": 0, "blocked": 0, "todo": 0}
+            if node.get("id"):
+                c[classify(node.get("status") or "")] += 1
+            for ch in node.get("children") or []:
+                dsum(c, count(ch))
+            node["counts"] = c
+            return c
+
+        groups: Dict[str, List[Dict[str, Any]]] = {}
+        for nd in nodes:
+            major = nd["id"].split(".", 1)[0] if "." in nd["id"] else nd["id"]
+            groups.setdefault(major, []).append(nd)
+
+        for major in sorted(groups.keys(), key=lambda x: (len(x), x)):
+            phase = {
+                "id": str(major),
+                "title": "Phase " + str(major),
+                "status": "",
+                "children": sorted(groups[major], key=lambda x: x["id"]),
+            }
+            dsum(totals, count(phase))
+            tree.append(phase)
+
+        return {"active": None, "tree": tree, "totals": totals}
+    except Exception as e:
+        log("[wrapper]", SIG, "plan fallback error:", e)
+        return {"active": None, "tree": [], "totals": {}, "err": str(e)}
+
+def ep_agent_plan():
+    # Use server.plan_view.build_plan_response if available
+    try:
+        from server.plan_view import build_plan_response  # type: ignore[import]
+        try:
+            return jsonify({"ok": True, "plan": build_plan_response(REPO)})
+        except Exception as e:
+            return jsonify({"ok": True, "plan": {"active": None, "tree": [], "totals": {}, "err": str(e)}})
+    except Exception:
+        return jsonify({"ok": True, "plan": build_plan_fallback()})
+
+def ep_agent_summary():
+    return jsonify({"ok": True, "summary": {"active_step": None, "desc": "fallback", "next_ids": []}})
+
+def ep_daily_status_fallback():
+    """Return data/status/daily_status.json if present; else a minimal OK stub."""
+    try:
+        path = os.path.join(REPO, "data", "status", "daily_status.json")
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return Response(f.read(), mimetype="application/json", status=200)
+        else:
+            return jsonify({"ok": True, "last_run": 0, "summary": "no file"}), 200
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+# -----------------------------------------------------------------------------
+# LEB proxy (ping + run) with local fallback
+# -----------------------------------------------------------------------------
+def _leb_http(path: str, payload=None, method=None, timeout=3.0):
+    url = f"http://{os.environ.get('LEB_HOST','127.0.0.1')}:{int(os.environ.get('LEB_PORT','8765'))}{path}"
+    try:
+        if payload is None:
+            req = urllib.request.Request(url, method=method or "GET")
+        else:
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(url, data=data, method=method or "POST")
+            req.add_header("Content-Type", "application/json")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            body = resp.read().decode("utf-8", errors="replace")
+            try:
+                return json.loads(body)
+            except Exception:
+                return {"ok": False, "raw": body, "status": getattr(resp, "status", None)}
+    except Exception as e:
+        return {"ok": False, "err": f"{type(e).__name__}: {e}"}
+
+def ep_agent_leb_ping():
+    res = _leb_http("/ping", method="GET", timeout=1.5)
+    return jsonify(res if isinstance(res, dict) else {"ok": False, "err": "unknown"})
+
+def ep_agent_leb_run():
+    data = request.get_json(force=True, silent=True) or {}
+    cmd = str(data.get("cmd") or "").strip()
+    if not cmd:
+        return jsonify(ok=False, err="missing cmd"), 400
+    if not any(cmd.startswith(p) for p in ("python ", "pytest ")):
+        return jsonify(ok=False, err="blocked_cmd_prefix; allowed=('python ','pytest ')"), 400
+
+    # try LEB first
+    res = _leb_http("/run", {"cmd": cmd}, "POST", timeout=8.0)
+    if isinstance(res, dict) and ("ok" in res or "rc" in res or "stdout" in res):
+        return jsonify(res)
+
+    # fallback: run locally via tools/run_with_capture.py
+    runner = [sys.executable, os.path.join(REPO, "tools", "run_with_capture.py"), "--", cmd]
+    try:
+        cp = subprocess.run(runner, capture_output=True, text=True)
+        out = cp.stdout or ""
+        err = cp.stderr or ""
+        try:
+            parsed = json.loads(out.strip())
+            if isinstance(parsed, dict) and "ok" in parsed:
+                return jsonify(parsed)
+        except Exception:
+            pass
+        return jsonify(ok=(cp.returncode == 0), rc=cp.returncode, stdout=out, stderr=err, via="local_capture")
+    except Exception as e:
+        return jsonify(ok=False, err=f"local_fallback_failed: {type(e).__name__}: {e}")
+
+# -----------------------------------------------------------------------------
+# Approvals / worker / recent / next2
+# -----------------------------------------------------------------------------
+def ep_agent_ac():
+    try:
+        n = len([x for x in os.listdir(approvals_dir()) if x.endswith(".json")])
+    except Exception:
+        n = 0
+    return jsonify({"ok": True, "count": n})
+
+def ep_worker_status():
+    worker = {"calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0, "last_ts": 0, "last_err": "", "last_reply_len": 0}
+    return jsonify({"ok": True, "worker": worker})
+
+def ep_agent_recent():
+    try:
+        d = approvals_dir()
+        files = sorted(glob.glob(os.path.join(d, "approve_*.json")), key=os.path.getmtime, reverse=True)[:25]
+        items = []
+        for f in files:
+            try:
+                items.append({"file": os.path.basename(f), "bytes": os.path.getsize(f)})
+            except Exception:
+                pass
+        return jsonify({"ok": True, "approvals": items})
+    except Exception as e:
+        return jsonify({"ok": False, "err": str(e)}), 500
+
+def ep_agent_next2():
+    try:
+        d = approvals_dir()
+        ts = int(time.time())
+        nonce = "%d_%d" % (ts, os.getpid())
+        path = os.path.join(d, "approve_%s.json" % nonce)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"ok": True, "action": "NEXT", "ts": ts, "nonce": nonce}))
+        suggestions = ["9.5a — Worker UX", "9.5b — Auto-process", "9.5c — Plan details"]
+        return jsonify({"ok": True, "file": os.path.basename(path), "suggestions": suggestions})
+    except Exception as e:
+        return jsonify({"ok": False, "err": str(e)}), 500
+
+# -----------------------------------------------------------------------------
+# UI / WS stubs
+# -----------------------------------------------------------------------------
+def ep_agent_ui():
+    html = '<html><body><a href="/pwa/agent">Open PWA Agent UI</a></body></html>'
+    return make_response(html, 200)
+
+def ep_agent_ws():
+    return jsonify({"ok": True, "ws": "stub"})
+
+# -----------------------------------------------------------------------------
+# Plan proxy + diagnostics
+# -----------------------------------------------------------------------------
+try:
+    from flask import Response as _FlaskResponse  # for isinstance checks
+except Exception:
+    _FlaskResponse = None  # type: ignore
+
+def _plan_normalize_tree(tree: Any) -> List[Dict[str, Any]]:
+    def _norm(node: Any) -> Optional[Dict[str, Any]]:
+        if not isinstance(node, dict):
+            return None
+        node = dict(node)  # shallow copy
+        node["id"] = str(
+            node.get("id")
+            or node.get("step_id")
+            or node.get("name")
+            or node.get("title")
+            or ""
+        )
+        node["title"] = (
+            node.get("title")
+            or node.get("name")
+            or node.get("desc")
+            or node["id"]
+        )
+        node["status"] = node.get("status") or node.get("state") or ""
+        ch = node.get("children") or []
+        if not isinstance(ch, list):
+            ch = []
+        node["children"] = [x for x in (_norm(c) for c in ch) if x]
+        return node
+    return [x for x in (_norm(n) for n in (tree or [])) if x]
+
+def _extract_json(obj: Any) -> Dict[str, Any]:
+    try:
+        if isinstance(obj, tuple) and len(obj) >= 1:
+            obj = obj[0]
+        if isinstance(obj, dict):
+            return obj
+        if _FlaskResponse is not None and isinstance(obj, _FlaskResponse):
+            txt = obj.get_data(as_text=True)
+            try:
+                return json.loads(txt)
+            except Exception:
+                return {}
+        if isinstance(obj, (str, bytes)):
+            s = obj.decode("utf-8") if isinstance(obj, bytes) else obj
+            try:
+                return json.loads(s)
+            except Exception:
+                return {}
+    except Exception:
+        pass
+    return {}
+
+def _resolve_plan_endpoint() -> Optional[str]:
+    try:
+        for r in app.url_map.iter_rules():
+            if str(r) == "/agent/plan":
+                return r.endpoint
+    except Exception:
+        pass
+    return None
+
+def agent_plan_proxy(*a, **kw):
+    # call original if captured; else fall back to our builder
+    try:
+        raw = app.view_functions.get("_orig_agent_plan", None)
+        if callable(raw):
+            raw = raw(*a, **kw)
+        else:
+            raw = ep_agent_plan()
+    except Exception:
+        raw = ep_agent_plan()
+    data = _extract_json(raw)
+    plan = data.get("plan") if isinstance(data, dict) and "plan" in data else data
+    if not isinstance(plan, dict):
+        plan = {}
+    plan["tree"] = _plan_normalize_tree(plan.get("tree") or [])
+    plan.setdefault("totals", {})
+    plan.setdefault("active", None)
+    return jsonify({"ok": True, "plan": plan})
+
+def ep_debug_plan_bind():
+    info = {"endpoint": None, "view_func": None, "proxied": False, "routes": []}
+    try:
+        for r in app.url_map.iter_rules():
+            if str(r).startswith("/agent"):
+                info["routes"].append({"rule": str(r), "endpoint": r.endpoint})
+        ep = _resolve_plan_endpoint()
+        vf = app.view_functions.get(ep) if ep else None
+        info["endpoint"] = ep
+        info["view_func"] = getattr(vf, "__name__", str(vf))
+        info["proxied"] = (info["view_func"] == "agent_plan_proxy")
+    except Exception as e:
+        info["err"] = f"{type(e).__name__}: {e}"
+    return jsonify({"ok": True, "binding": info})
+
+def _wrap_and_rebind_agent_plan() -> None:
+    ep = _resolve_plan_endpoint()
+    if not ep:
+        print("wrap-stable-v1: no /agent/plan endpoint to rebind")
+        return
+    cur = app.view_functions.get(ep)
+    if getattr(cur, "__name__", "") == "agent_plan_proxy":
+        return  # already proxied
+    app.view_functions["_orig_agent_plan"] = cur
+    app.view_functions[ep] = agent_plan_proxy
+    print(f"wrap-stable-v1: rebound /agent/plan endpoint '{ep}' -> agent_plan_proxy")
+
+# Bind debug endpoint and rebind after routes exist
+ensure_rule(app, "/__debug_plan_bind", "pa_debug_plan_bind", ep_debug_plan_bind)
+_wrap_and_rebind_agent_plan()
+
+# Also guard in case blueprints register later
+@app.before_request
+def _plan_bind_guard():
+    try:
+        ep = _resolve_plan_endpoint()
+        if not ep:
+            return
+        cur = app.view_functions.get(ep)
+        if getattr(cur, "__name__", "") != "agent_plan_proxy":
+            app.view_functions["_orig_agent_plan"] = cur
+            app.view_functions[ep] = agent_plan_proxy
+            print(f"[wrapper] bound /agent/plan proxy (guard) -> agent_plan_proxy (endpoint='{ep}')")
+    except Exception as _e:
+        print("[wrapper] _plan_bind_guard failed:", _e)
+
+# -----------------------------------------------------------------------------
+# Bind routes (only if missing) so we do not collide with a real sidecar
+# -----------------------------------------------------------------------------
+# Diagnostics
+ensure_rule(app, "/__routes__",      "pa_routes_list",       ep___routes__)
+ensure_rule(app, "/health",          "pa_health",            ep_health)
+ensure_rule(app, "/agent_routes",    "pa_agent_routes",      ep_agent_routes)
+ensure_rule(app, "/agent/_sig",      "pa_sig",               ep_agent_sig)
+
+# PWA
+ensure_rule(app, "/pwa/agent",       "pa_pwa_agent",         ep_pwa_agent)
+ensure_rule(app, "/pwa/<path:filename>", "pa_pwa_static",    ep_pwa_static)
+ensure_rule(app, "/static/<path:filename>", "pa_static",     ep_static_passthru)
+
+# Plan / summary
+ensure_rule(app, "/agent/plan",      "pa_plan_fallback",     ep_agent_plan)
+ensure_rule(app, "/agent/summary",   "pa_summary_fallback",  ep_agent_summary)
+ensure_rule(app, "/agent/daily_status", "pa_daily_status_fallback", ep_daily_status_fallback)
+
+# LEB proxy
+ensure_rule(app, "/agent/leb/ping",  "pa_leb_ping",          ep_agent_leb_ping)
+ensure_rule(app, "/agent/leb/run",   "pa_leb_run",           ep_agent_leb_run, methods=("POST",))
+
+# Approvals / worker / recent / next2
+ensure_rule(app, "/agent/approvals_count", "pa_approvals_count", ep_agent_ac)
+ensure_rule(app, "/agent/ac",              "pa_ac_short",        ep_agent_ac)
+ensure_rule(app, "/agent/worker_status",   "pa_worker_status",   ep_worker_status)
+ensure_rule(app, "/agent/recent",          "pa_recent",          ep_agent_recent, methods=("GET",))
+ensure_rule(app, "/agent/next2",           "pa_next2",           ep_agent_next2,  methods=("GET","POST"))
+
+# UI / WS
+ensure_rule(app, "/agent/ui",          "pa_ui",            ep_agent_ui)
+ensure_rule(app, "/agent/ws",          "pa_ws",            ep_agent_ws)
+
+# -----------------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------------
+if __name__ == "__main__":
+    host = os.environ.get("PA_SIDECAR_HOST", "0.0.0.0")
+    port = int(os.environ.get("PA_SIDECAR_PORT", "8782"))
+    log("[wrapper]", SIG, "running on %s:%d" % (host, port))
+    app.run(host=host, port=port, threaded=True, use_reloader=False)
+# === accept-proposal intercept + plan.active overlay ===========================
+import time as _time
+
+def _status_path():
+    return os.path.join(REPO, "data", "runtime", "agent_status.json")
+
+def _status_write_active(step):
+    try:
+        os.makedirs(os.path.dirname(_status_path()), exist_ok=True)
+        data = {"active": step, "ts": int(_time.time())}
+        with open(_status_path(), "w", encoding="utf-8") as f:
+            json.dump(data, f)
+        return True
+    except Exception as _e:
+        print("[wrapper] write agent_status.json failed:", _e)
+        return False
+
+@app.before_request
+def _accept_proposal_intercept():
+    try:
+        if request.path == "/agent/propose" and request.method == "POST":
+            body = request.get_json(silent=True) or {}
+            step = body.get("step") or (body.get("steps") or [None])[0]
+            note = body.get("note")
+            ok = bool(step) and _status_write_active(step)
+            return jsonify({"ok": True, "accepted": bool(step) and ok, "step": step, "note": note, "ts": int(_time.time())})
+    except Exception as _e:
+        print("[wrapper] _accept_proposal_intercept err:", _e)
+        # fall through to normal handler
+
+@app.after_request
+def _overlay_active_on_plan(resp):
+    try:
+        if request.path == "/agent/plan" and (resp.mimetype or "").startswith("application/json"):
+            try:
+                payload = json.loads(resp.get_data(as_text=True))
+            except Exception:
+                return resp
+            sp = _status_path()
+            if os.path.isfile(sp):
+                try:
+                    st = json.loads(open(sp, "r", encoding="utf-8").read())
+                    if isinstance(payload, dict) and isinstance(st, dict) and st.get("active"):
+                        if isinstance(payload.get("plan"), dict):
+                            payload["plan"]["active"] = st["active"]
+                        else:
+                            payload.setdefault("plan", {})["active"] = st["active"]
+                        resp.set_data(json.dumps(payload))
+                except Exception:
+                    pass
+    except Exception as _e:
+        print("[wrapper] _overlay_active_on_plan err:", _e)
+    return resp
+# ==============================================================================
+

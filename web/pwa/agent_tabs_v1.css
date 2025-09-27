@@ -1,2 +1,9 @@
-.pa-hide{display:none !important;}
-button.active,a.active{outline:1px solid #4b5563;border-radius:6px;}
+.pa-hide {
+    display: none !important;
+}
+
+button.active,
+a.active {
+    outline: 1px solid #4b5563;
+    border-radius: 6px;
+}

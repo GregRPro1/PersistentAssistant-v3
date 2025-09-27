@@ -1,0 +1,176 @@
+version: 1
+generated_at: 1756369730
+tools:
+- name: CI Gate
+  description: reply-lint → guard test → std summary → build catalog → enrich → verify
+  usage: python tools/py/ci/ci_check.py
+  source: overlay
+  id: py:tools/py/ci/ci_check.py
+- name: MVP Smoke
+  description: Hit core agent endpoints and report HTTP status; nonzero on failure.
+  usage: python tools/py/mvp_smoke.py
+  source: overlay
+  id: py:tools/py/mvp_smoke.py
+- name: Pack Enrich
+  description: Inject plan snapshot, tool catalog, and reporters into a pack.
+  usage: python tools/py/pack/enrich_pack.py
+  source: overlay
+  id: py:tools/py/pack/enrich_pack.py
+- name: Pack Verify
+  description: Verify pack contains plan/catalog/reporters; auto-picks latest.
+  usage: python tools/py/pack/verify_pack.py --include-meta --check-insights
+  source: overlay
+  id: py:tools/py/pack/verify_pack.py
+- name: Reply Lint (selected)
+  description: Windows-safe linter for heredocs/here-strings in curated files.
+  usage: python tools/py/ci/reply_lint_selected.py
+  source: overlay
+  id: py:tools/py/ci/reply_lint_selected.py
+- name: Std Summary
+  description: orchestrator
+  usage: python tools/py/pa_std_summary.py --level standard
+  source: overlay
+  id: py:tools/py/pa_std_summary.py
+- id: endpoint:/agent/_sig
+  name: /agent/_sig
+  kind: endpoint
+  path: /agent/_sig
+  usage: GET /agent/_sig
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/ac
+  name: /agent/ac
+  kind: endpoint
+  path: /agent/ac
+  usage: GET /agent/ac
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/approvals_count
+  name: /agent/approvals_count
+  kind: endpoint
+  path: /agent/approvals_count
+  usage: GET /agent/approvals_count
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/next2
+  name: /agent/next2
+  kind: endpoint
+  path: /agent/next2
+  usage: GET /agent/next2
+  description: Flask route (GET,HEAD,OPTIONS,POST)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/plan
+  name: /agent/plan
+  kind: endpoint
+  path: /agent/plan
+  usage: GET /agent/plan
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/recent
+  name: /agent/recent
+  kind: endpoint
+  path: /agent/recent
+  usage: GET /agent/recent
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/summary
+  name: /agent/summary
+  kind: endpoint
+  path: /agent/summary
+  usage: GET /agent/summary
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/ui
+  name: /agent/ui
+  kind: endpoint
+  path: /agent/ui
+  usage: GET /agent/ui
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/worker_status
+  name: /agent/worker_status
+  kind: endpoint
+  path: /agent/worker_status
+  usage: GET /agent/worker_status
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent/ws
+  name: /agent/ws
+  kind: endpoint
+  path: /agent/ws
+  usage: GET /agent/ws
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/agent_routes
+  name: /agent_routes
+  kind: endpoint
+  path: /agent_routes
+  usage: GET /agent_routes
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/health
+  name: /health
+  kind: endpoint
+  path: /health
+  usage: GET /health
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live
+- id: endpoint:/pwa/agent
+  name: /pwa/agent
+  kind: endpoint
+  path: /pwa/agent
+  usage: GET /pwa/agent
+  description: Flask route (GET,HEAD,OPTIONS)
+  params: []
+  last_modified: null
+  bytes: null
+  sha1: null
+  source: live

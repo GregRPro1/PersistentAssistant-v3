@@ -4,12 +4,40 @@
 
 from __future__ import annotations
 import os, sys, time, json, subprocess, pathlib, urllib.request, urllib.error, argparse, socket
+import subprocess, re, time  # ensure these are imported
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 TMP   = ROOT / "tmp"
 LOGS  = TMP / "logs"
 RUN   = TMP / "run"
 SRV   = ROOT / "server" / "agent_sidecar_wrapper.py"
+
+def _netstat_pids_listening_on(port: int):
+    try:
+        cp = subprocess.run(["netstat","-ano"], capture_output=True, text=True, shell=False)
+        if cp.returncode != 0:
+            return set()
+        pat = re.compile(rf":{port}\b")
+        pids = set()
+        for ln in cp.stdout.splitlines():
+            if "LISTENING" in ln and pat.search(ln):
+                parts = ln.split()
+                if parts and parts[-1].isdigit():
+                    pids.add(int(parts[-1]))
+        return pids
+    except Exception:
+        return set()
+
+def _kill_port_windows(port: int) -> list[tuple[int,int,str]]:
+    out = []
+    pids = sorted(_netstat_pids_listening_on(port))
+    for pid in pids:
+        cp = subprocess.run(["taskkill","/PID",str(pid),"/F"], capture_output=True, text=True, shell=False)
+        msg = cp.stdout.strip() or cp.stderr.strip()
+        out.append((pid, cp.returncode, msg))
+    time.sleep(0.8)
+    return out
+
 
 def ensure_dirs():
     for p in (TMP, LOGS, RUN): p.mkdir(parents=True, exist_ok=True)
@@ -38,6 +66,8 @@ def main():
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8782)
     ap.add_argument("--timeout", type=int, default=25)
+    ap.add_argument("--force-kill", action="store_true", help="If port is busy, kill listeners and continue")
+
     args = ap.parse_args()
 
     ensure_dirs()
@@ -46,9 +76,24 @@ def main():
         print(f"FAIL: missing {SRV}")
         return 2
 
-    if not port_free(args.host, args.port):
-        print(f"FAIL: {args.host}:{args.port} already in use; pick another port or stop the listener.")
-        return 3
+    host = args.host
+    port = args.port
+    if not port_free(host, port):
+        if args.force_kill:
+            print(f"[INFO] Port {host}:{port} busy; attempting to free it...")
+            results = _kill_port_windows(port)
+            for pid, rc, msg in results:
+                print(f"[KILL] pid={pid} rc={rc} msg={msg}")
+            # re-check
+            if _netstat_pids_listening_on(port):
+                print(f"FAIL: {host}:{port} still in use after --force-kill.")
+                return 2
+            else:
+                print(f"[OK] Freed {host}:{port}; continuing bring-up.")
+                # fall through to normal start/probe
+        else:
+            print(f"FAIL: {host}:{port} already in use; pick another port or stop the listener.")
+            return 2
 
     ts = time.strftime("%Y%m%d_%H%M%S")
     out_log = LOGS / f"sidecar_{args.port}_{ts}.out.log"

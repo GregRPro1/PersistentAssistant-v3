@@ -1,0 +1,962 @@
+{
+  "0.1": {
+    "title": "Define root project directory layout (C:\\_Repos\\PersistentAssistant)",
+    "desc": "Define root project directory layout (C:\\_Repos\\PersistentAssistant)",
+    "status": "done"
+  },
+  "0.1.a": {
+    "title": "Confirm base folders created",
+    "desc": "",
+    "status": "done"
+  },
+  "0.1.b": {
+    "title": "Confirm Windows + VSCode env",
+    "desc": "",
+    "status": "done"
+  },
+  "0.2": {
+    "title": "Initialize new Git repository and first commit",
+    "desc": "Initialize new Git repository and first commit",
+    "status": "done"
+  },
+  "0.2.a": {
+    "title": ".gitignore and README present",
+    "desc": "",
+    "status": "done"
+  },
+  "0.3": {
+    "title": "Create venv, requirements, and lock PyQt6 environment",
+    "desc": "Create venv, requirements, and lock PyQt6 environment",
+    "status": "done"
+  },
+  "0.3.a": {
+    "title": "PyQt6 + PyQt6-WebEngine installed",
+    "desc": "",
+    "status": "done"
+  },
+  "1.1": {
+    "title": "Create main",
+    "desc": "Create main.py with minimal startup logic",
+    "status": "done"
+  },
+  "1.1.a": {
+    "title": "App boots",
+    "desc": "",
+    "status": "done"
+  },
+  "1.2": {
+    "title": "Create main_window",
+    "desc": "Create main_window.py with tabbed layout",
+    "status": "done"
+  },
+  "1.2.a": {
+    "title": "Tabs mount without errors",
+    "desc": "",
+    "status": "done"
+  },
+  "1.3": {
+    "title": "Create input_tab",
+    "desc": "Create input_tab.py with editable text + copy button",
+    "status": "done"
+  },
+  "1.3.a": {
+    "title": "Copy to clipboard works",
+    "desc": "",
+    "status": "done"
+  },
+  "1.4": {
+    "title": "Create prompt_tab",
+    "desc": "Create prompt_tab.py with editable prompt + copy button",
+    "status": "done"
+  },
+  "1.4.a": {
+    "title": "Copy to clipboard works",
+    "desc": "",
+    "status": "done"
+  },
+  "1.5": {
+    "title": "Create chat_tab",
+    "desc": "Create chat_tab.py with embedded ChatGPT browser pane",
+    "status": "done"
+  },
+  "1.5.a": {
+    "title": "Loads chat.openai.com (manual login)",
+    "desc": "",
+    "status": "done"
+  },
+  "1.6": {
+    "title": "Create response_tab",
+    "desc": "Create response_tab.py with paste + log",
+    "status": "done"
+  },
+  "1.6.a": {
+    "title": "Paste from clipboard works",
+    "desc": "",
+    "status": "done"
+  },
+  "1.6.b": {
+    "title": "Manual log to YAML works",
+    "desc": "",
+    "status": "done"
+  },
+  "1.7": {
+    "title": "Implement autosave on paste to YAML",
+    "desc": "Implement autosave on paste to YAML",
+    "status": "done"
+  },
+  "1.7.a": {
+    "title": "Auto-write to data/interactions/",
+    "desc": "",
+    "status": "done"
+  },
+  "1.8": {
+    "title": "Add visual confirmation (status label) for saves/copies",
+    "desc": "Add visual confirmation (status label) for saves/copies",
+    "status": "done"
+  },
+  "1.8.a": {
+    "title": "Timed status messages visible",
+    "desc": "",
+    "status": "done"
+  },
+  "1.9": {
+    "title": "Enforce file headers and docstrings",
+    "desc": "Enforce file headers and docstrings",
+    "status": "done"
+  },
+  "1.9.a": {
+    "title": "Headers present in all GUI/core files",
+    "desc": "",
+    "status": "done"
+  },
+  "1.10": {
+    "title": "Create core/prompt_formatter",
+    "desc": "Create core/prompt_formatter.py and hook Format button",
+    "status": "done"
+  },
+  "1.10.a": {
+    "title": "Minimal structured prompt wrapper",
+    "desc": "",
+    "status": "done"
+  },
+  "1.11": {
+    "title": "Simulate AI send (Prompt → Response)",
+    "desc": "Simulate AI send (Prompt → Response)",
+    "status": "done"
+  },
+  "1.11.a": {
+    "title": "Dummy response writer working",
+    "desc": "",
+    "status": "done"
+  },
+  "1.12": {
+    "title": "Copy All as YAML (Input+Prompt+Response)",
+    "desc": "Copy All as YAML (Input+Prompt+Response)",
+    "status": "done"
+  },
+  "1.12.a": {
+    "title": "Writes combined YAML and copies to clipboard",
+    "desc": "",
+    "status": "done"
+  },
+  "1.13": {
+    "title": "Plan tab (read-only) loads plan YAML and shows current",
+    "desc": "Plan tab (read-only) loads plan YAML and shows current",
+    "status": "done"
+  },
+  "1.13.a": {
+    "title": "Show phases/steps with statuses",
+    "desc": "",
+    "status": "done"
+  },
+  "1.13.b": {
+    "title": "Show progress string (Phase/Step/Items)",
+    "desc": "",
+    "status": "done"
+  },
+  "1.14": {
+    "title": "Plan controls (Advance / Rollback)",
+    "desc": "Plan controls (Advance / Rollback)",
+    "status": "done"
+  },
+  "1.14.a": {
+    "title": "Update plan YAML in place",
+    "desc": "",
+    "status": "done"
+  },
+  "1.14.b": {
+    "title": "Immediate UI refresh",
+    "desc": "",
+    "status": "done"
+  },
+  "1.15": {
+    "title": "Structure Runner (launch tools/structure_sync",
+    "desc": "Structure Runner (launch tools/structure_sync.py from UI)",
+    "status": "done"
+  },
+  "1.15.a": {
+    "title": "Show file counts and link to snapshot",
+    "desc": "",
+    "status": "done"
+  },
+  "1.16": {
+    "title": "Self-Introspection v1 (write insights report from snapshot)",
+    "desc": "Self-Introspection v1 (write insights report from snapshot)",
+    "status": "done"
+  },
+  "1.16.a": {
+    "title": "data/insights/introspection_report.yaml",
+    "desc": "",
+    "status": "done"
+  },
+  "1.17": {
+    "title": "Self-Development Loop v1 (open improvement tasks)",
+    "desc": "Self-Development Loop v1 (open improvement tasks)",
+    "status": "done"
+  },
+  "1.17.a": {
+    "title": "data/tickets/task_*.yaml (created via UI)",
+    "desc": "",
+    "status": "done"
+  },
+  "2.1": {
+    "title": "Project selector at startup (multi-project support)",
+    "desc": "Project selector at startup (multi-project support)",
+    "status": "done"
+  },
+  "2.1.a": {
+    "title": "Persist last project choice",
+    "desc": "",
+    "status": "done"
+  },
+  "2.2": {
+    "title": "Load project metadata (paths, plan path) from simple YAML",
+    "desc": "Load project metadata (paths, plan path) from simple YAML",
+    "status": "done"
+  },
+  "2.2.a": {
+    "title": "Show project name/path in status bar",
+    "desc": "",
+    "status": "done"
+  },
+  "2.3": {
+    "title": "Project switching entry point (menu)",
+    "desc": "Project switching entry point (menu)",
+    "status": "done"
+  },
+  "2.3.a": {
+    "title": "Project → Switch… menu opens selector and persists session",
+    "desc": "",
+    "status": "done"
+  },
+  "2.4": {
+    "title": "File-integrity protocol (manifest + safe replace + drift verify)",
+    "desc": "File-integrity protocol (manifest + safe replace + drift verify)",
+    "status": "planned"
+  },
+  "2.4.a": {
+    "title": "tools/file_manifest.py → project/structure/file_manifest.yaml",
+    "desc": "",
+    "status": "planned"
+  },
+  "2.4.b": {
+    "title": "tools/safe_replace.py gated by expected sha256",
+    "desc": "",
+    "status": "planned"
+  },
+  "2.4.c": {
+    "title": "tools/verify_against_manifest.py drift checker",
+    "desc": "",
+    "status": "planned"
+  },
+  "2.8": {
+    "title": "Deep inventory + dependency audit in place",
+    "desc": "Deep inventory + dependency audit in place",
+    "status": "done"
+  },
+  "2.8.a": {
+    "title": "tools/deep_inventory.py generates reports",
+    "desc": "",
+    "status": "done"
+  },
+  "2.8.b": {
+    "title": "Reports present: deep_inventory, deep_calls, docstring, imports, duplication",
+    "desc": "",
+    "status": "done"
+  },
+  "2.9": {
+    "title": "Snapshot-aware safe replace (use existing tools/safe_replace",
+    "desc": "Snapshot-aware safe replace (use existing tools/safe_replace.py + get_expected_sha.py)",
+    "status": "done"
+  },
+  "2.9.a": {
+    "title": "tools/get_expected_sha.py created",
+    "desc": "",
+    "status": "done"
+  },
+  "2.9.b": {
+    "title": "(optional) git pre-commit regenerates deep inventory",
+    "desc": "",
+    "status": "planned"
+  },
+  "2.10": {
+    "title": "Deep inventory includes dunder files (e",
+    "desc": "Deep inventory includes dunder files (e.g., __init__.py) and reflects them in insights.",
+    "status": "planned"
+  },
+  "3.1": {
+    "title": "Keys loader + sanity checks",
+    "desc": "Keys loader + sanity checks",
+    "status": "done"
+  },
+  "3.1.a": {
+    "title": "tools/_env.py + tools/check_api_keys.py",
+    "desc": "",
+    "status": "done"
+  },
+  "3.2": {
+    "title": "Fetch raw provider models",
+    "desc": "Fetch raw provider models",
+    "status": "done"
+  },
+  "3.2.a": {
+    "title": "tools/fetch_ai_models.py → ai_models_raw.yaml",
+    "desc": "",
+    "status": "done"
+  },
+  "3.3": {
+    "title": "Schema validator with JSON SUMMARY",
+    "desc": "Schema validator with JSON SUMMARY",
+    "status": "done"
+  },
+  "3.3.a": {
+    "title": "tools/check_ai_models.py validates ai_models.yaml",
+    "desc": "",
+    "status": "done"
+  },
+  "3.4": {
+    "title": "Provider docs + curated pricing/caps (override/scrape/baseline)",
+    "desc": "Provider docs + curated pricing/caps (override/scrape/baseline)",
+    "status": "done"
+  },
+  "3.4.a": {
+    "title": "tools/provider_docs.py produces curated dynamic entries",
+    "desc": "",
+    "status": "done"
+  },
+  "3.5": {
+    "title": "Update & promote models safely",
+    "desc": "Update & promote models safely",
+    "status": "done"
+  },
+  "3.5.a": {
+    "title": "tools/update_ai_models.py → ai_models_tmp.yaml → ai_models.yaml",
+    "desc": "",
+    "status": "done"
+  },
+  "3.6": {
+    "title": "Probe models (ping) and mark health",
+    "desc": "Probe models (ping) and mark health",
+    "status": "done"
+  },
+  "3.6.a": {
+    "title": "tools/probe_models.py → data/insights/probe_report.json",
+    "desc": "",
+    "status": "done"
+  },
+  "3.7": {
+    "title": "GUI tools tab: busy cursor, per-run logs, summaries",
+    "desc": "GUI tools tab: busy cursor, per-run logs, summaries",
+    "status": "done"
+  },
+  "3.7.a": {
+    "title": "Update/Probe/Check Keys buttons wired",
+    "desc": "",
+    "status": "done"
+  },
+  "3.7.b": {
+    "title": "Per-run logs logs/tool_run_*.log",
+    "desc": "",
+    "status": "done"
+  },
+  "3.8": {
+    "title": "Optional pricing overrides file",
+    "desc": "Optional pricing overrides file",
+    "status": "planned"
+  },
+  "3.8.a": {
+    "title": "config/provider_pricing_overrides.yaml supported",
+    "desc": "",
+    "status": "planned"
+  },
+  "4.1": {
+    "title": "Model & Mode UI (OpenAI-only now): provider lock, model dropdown from ai_models",
+    "desc": "Model & Mode UI (OpenAI-only now): provider lock, model dropdown from ai_models.yaml, Browser/API toggle",
+    "status": "in_progress"
+  },
+  "4.1.1": {
+    "title": "Model probe matrix (parallel): ping status per model; summarize failures for parallel fixes",
+    "desc": "Model probe matrix (parallel): ping status per model; summarize failures for parallel fixes",
+    "status": "in_progress"
+  },
+  "4.1.2": {
+    "title": "Capability cataloging: record model capability tags after successful ping",
+    "desc": "Capability cataloging: record model capability tags after successful ping",
+    "status": "in_progress"
+  },
+  "4.1.3": {
+    "title": "Centralized error-capture runner integrated into inventory/reflection/model probe pipeline",
+    "desc": "Centralized error-capture runner integrated into inventory/reflection/model probe pipeline",
+    "status": "done"
+  },
+  "4.1.4": {
+    "title": "UI shows traffic-light status for models from probe matrix",
+    "desc": "UI shows traffic-light status for models from probe matrix",
+    "status": "in_progress"
+  },
+  "4.1.5": {
+    "title": "Wire Browser/API toggle; persist provider/model/mode to project_session",
+    "desc": "Wire Browser/API toggle; persist provider/model/mode to project_session.yaml",
+    "status": "done"
+  },
+  "4.1.3b": {
+    "title": "Path normalization + cwd-agnostic execution across runner/probe",
+    "desc": "Path normalization + cwd-agnostic execution across runner/probe",
+    "status": "done"
+  },
+  "4.1.3c": {
+    "title": "Hardened runner with robust argv parsing + insights export",
+    "desc": "Hardened runner with robust argv parsing + insights export",
+    "status": "done"
+  },
+  "4.1.3d": {
+    "title": "UI traffic-light models safe-replaced; SKIP logging explicit",
+    "desc": "UI traffic-light models safe-replaced; SKIP logging explicit",
+    "status": "done"
+  },
+  "4.1.a": {
+    "title": "Filter to chat-capable & healthy models",
+    "desc": "",
+    "status": "planned"
+  },
+  "4.1.b": {
+    "title": "Persist selection in project_session.yaml",
+    "desc": "",
+    "status": "planned"
+  },
+  "4.2": {
+    "title": "Wire ai_client to 'Send to AI (API)' button",
+    "desc": "Wire ai_client to 'Send to AI (API)' button",
+    "status": "done"
+  },
+  "4.2.a": {
+    "title": "Reply → Response tab; errors → Tools status/log",
+    "desc": "",
+    "status": "planned"
+  },
+  "4.2.b": {
+    "title": "OpenAI-only gate via UI toggle",
+    "desc": "",
+    "status": "planned"
+  },
+  "4.3": {
+    "title": "Auto-log token usage and cost to interaction YAML",
+    "desc": "Auto-log token usage and cost to interaction YAML",
+    "status": "done"
+  },
+  "4.3.a": {
+    "title": "Append provider/model/tokens/cost",
+    "desc": "",
+    "status": "planned"
+  },
+  "4.4": {
+    "title": "Robust error surfacing (keys/quota/4xx/5xx) with succinct user summary",
+    "desc": "Robust error surfacing (keys/quota/4xx/5xx) with succinct user summary",
+    "status": "done"
+  },
+  "4.4.a": {
+    "title": "One-line UI summary + detailed log file",
+    "desc": "",
+    "status": "planned"
+  },
+  "4.5": {
+    "title": "Unit tests for ai_client pricing and selection",
+    "desc": "Unit tests for ai_client pricing and selection",
+    "status": "done"
+  },
+  "4.5.a": {
+    "title": "tests/test_ai_client_costs.py",
+    "desc": "",
+    "status": "planned"
+  },
+  "4.0R": {
+    "title": "Reflection Gate: verify existing GUI capability and handlers before any UI change",
+    "desc": "Reflection Gate: verify existing GUI capability and handlers before any UI change",
+    "status": "done"
+  },
+  "4.0R.a": {
+    "title": "deep_inventory refreshed",
+    "desc": "",
+    "status": "done"
+  },
+  "4.0R.b": {
+    "title": "reflection_report.yaml created",
+    "desc": "",
+    "status": "done"
+  },
+  "4.0R.c": {
+    "title": "pack_reflection created",
+    "desc": "",
+    "status": "done"
+  },
+  "5.1": {
+    "title": "Persistent memory (summarize interactions → memory store)",
+    "desc": "Persistent memory (summarize interactions → memory store)",
+    "status": "done"
+  },
+  "5.1.a": {
+    "title": "memory/summary_*.yaml",
+    "desc": "",
+    "status": "planned"
+  },
+  "5.2": {
+    "title": "Retrieve memory into prompt_formatter context window",
+    "desc": "Retrieve memory into prompt_formatter context window",
+    "status": "done"
+  },
+  "5.2.a": {
+    "title": "Configurable include rules",
+    "desc": "",
+    "status": "planned"
+  },
+  "5.3": {
+    "title": "Memory viewer in Plan tab (read-only first)",
+    "desc": "Memory viewer in Plan tab (read-only first)",
+    "status": "done"
+  },
+  "5.3.a": {
+    "title": "List & open summaries",
+    "desc": "",
+    "status": "planned"
+  },
+  "6.1": {
+    "title": "Enable Role GPTs (Architect / CodeGen / Reviewer) with pinned policies",
+    "desc": "Enable Role GPTs (Architect / CodeGen / Reviewer) with pinned policies",
+    "status": "done"
+  },
+  "6.1.a": {
+    "title": "docs/gpt/architect.md, codegen.md, reviewer.md created",
+    "desc": "",
+    "status": "planned"
+  },
+  "6.1.b": {
+    "title": "Headers with Feature-ID enforced in outputs",
+    "desc": "",
+    "status": "planned"
+  },
+  "6.2": {
+    "title": "Local Exec Bridge (LEB) service for local run & safe patch apply",
+    "desc": "Local Exec Bridge (LEB) service for local run & safe patch apply",
+    "status": "planned"
+  },
+  "6.2.a": {
+    "title": "leb/main.py FastAPI: /run-tests, /apply-patch",
+    "desc": "",
+    "status": "planned"
+  },
+  "6.2.b": {
+    "title": "Token auth; localhost bind only",
+    "desc": "",
+    "status": "planned"
+  },
+  "6.3": {
+    "title": "GUI Run tab wired to LEB with live logs and status",
+    "desc": "GUI Run tab wired to LEB with live logs and status",
+    "status": "done"
+  },
+  "6.3.a": {
+    "title": "One-click local test; red/green badge",
+    "desc": "",
+    "status": "planned"
+  },
+  "6.3.c": {
+    "title": "Wire Run tab to LEB (GUI verified)",
+    "desc": "Wire Run tab to LEB (GUI verified)",
+    "status": "done"
+  },
+  "6.4": {
+    "title": "CI parity (GitHub Actions on windows-latest)",
+    "desc": "CI parity (GitHub Actions on windows-latest)",
+    "status": "in_progress"
+  },
+  "6.4.a": {
+    "title": "Add Windows CI workflow (GitHub Actions)",
+    "desc": "Add Windows CI workflow (GitHub Actions)",
+    "status": "in_progress"
+  },
+  "6.4.b": {
+    "title": "Run CI smoke (tests minimal) and upload logs",
+    "desc": "Run CI smoke (tests minimal) and upload logs",
+    "status": "planned"
+  },
+  "6.4.c": {
+    "title": "Add Agent Watchdog + Alerting",
+    "desc": "Gate on main: CI must pass",
+    "status": "planned"
+  },
+  "6.4.e": {
+    "title": "Consolidate inventory/report tools",
+    "desc": "Keep: file_manifest + deep_inventory (+reporters). Deprecate: audit_inventory & structure_sync (soft). Add report_index.py; extend deep_inventory with extras. Wire tool_catalog + CI check.",
+    "status": "planned"
+  },
+  "6.4.f": {
+    "title": "Standardize project summary pipeline",
+    "desc": "Create reporters; add pa_std_summary orchestrator; ensure pack contains index+headers; wire into tool catalog.",
+    "status": "done"
+  },
+  "6.4.g": {
+    "title": "CI gate + verify in Actions",
+    "desc": "GH Actions mirrors local ci_check.py and blocks PRs if pack incomplete.",
+    "status": "planned"
+  },
+  "6.5": {
+    "title": "Apply patch (local) workflow via LEB using unified diff",
+    "desc": "Apply patch (local) workflow via LEB using unified diff",
+    "status": "planned"
+  },
+  "6.5.a": {
+    "title": "Parse diff → per-file expected SHA → safe replace",
+    "desc": "",
+    "status": "planned"
+  },
+  "7.0": {
+    "title": "MVP v0.1 Sprint",
+    "desc": "Lock scope; smoke-testable agent; pack+CI green.",
+    "status": "in_progress"
+  },
+  "7.1": {
+    "title": "Agent endpoints up (fallback acceptable)",
+    "desc": "Central research registry (store structured summaries + citations)",
+    "status": "done"
+  },
+  "7.1.a": {
+    "title": "No full-document storage",
+    "desc": "",
+    "status": "planned"
+  },
+  "7.2": {
+    "title": "MVP Smoke Test tool",
+    "desc": "Deep Research integration (cited digests on demand)",
+    "status": "done"
+  },
+  "7.2.a": {
+    "title": "Wire ingest to registry entries",
+    "desc": "",
+    "status": "planned"
+  },
+  "7.3": {
+    "title": "UI: Plan viewer reachable",
+    "desc": "Phone Digest microservice (LAN-only) with token header",
+    "status": "done"
+  },
+  "7.4": {
+    "title": "Watchdog schedule + backoff",
+    "desc": "PWA shell hits /phone/digest and renders cards",
+    "status": "planned"
+  },
+  "7.5": {
+    "title": "Phone approvals + diagnostics",
+    "desc": "",
+    "status": "done"
+  },
+  "7.6": {
+    "title": "LLM provider adapter (stub→API by config)",
+    "desc": "File stub now; API later; same interface.",
+    "status": "planned"
+  },
+  "7.7": {
+    "title": "Promote server package",
+    "desc": "server/app.py with create_app(); wrapper fallback retained.",
+    "status": "planned"
+  },
+  "7.8": {
+    "title": "Phone approvals E2E hook",
+    "desc": "Tie approvals to simple plan action.",
+    "status": "planned"
+  },
+  "7.9": {
+    "title": "Approvals watchdog for 8781/8770 (LAN bind recovery)",
+    "desc": "",
+    "status": "done"
+  },
+  "7.10": {
+    "title": "LAN bind + watchdog",
+    "desc": "",
+    "status": "done"
+  },
+  "7.5b": {
+    "title": "Secure HTTP approvals",
+    "desc": "",
+    "status": "done"
+  },
+  "7.5c": {
+    "title": "Diagnostics page",
+    "desc": "",
+    "status": "done"
+  },
+  "8.1": {
+    "title": "Agent Console base + approvals/NEXT wired",
+    "desc": "Agent Console base + approvals/NEXT wired",
+    "status": "planned"
+  },
+  "8.1.a": {
+    "title": "Guarded by project autonomy policy",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.0": {
+    "title": "Agent UX/Worker",
+    "desc": "",
+    "status": "in_progress"
+  },
+  "9.1": {
+    "title": "Recent panel",
+    "desc": "",
+    "status": "done"
+  },
+  "9.1.a": {
+    "title": "PR template with Feature-ID and checklist",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.1.b": {
+    "title": "CI must pass",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.2": {
+    "title": "Worker + plan endpoints",
+    "desc": "Worker + plan endpoints",
+    "status": "planned"
+  },
+  "9.3": {
+    "title": "Auto-poll + counts",
+    "desc": "Auto-poll + counts",
+    "status": "planned"
+  },
+  "9.4": {
+    "title": "UI extension + endpoints live",
+    "desc": "UI extension + endpoints live",
+    "status": "planned"
+  },
+  "9.5": {
+    "title": "Agent UX harden",
+    "desc": "",
+    "status": "in_progress"
+  },
+  "9.6": {
+    "title": "Tooling and process hardening",
+    "desc": "",
+    "status": "in_progress"
+  },
+  "9.6-P0": {
+    "title": "Registry + Gate + Pack discipline",
+    "desc": "",
+    "status": "in_progress"
+  },
+  "9.6-P1": {
+    "title": "Docs (TOOLS.md, PROCESS.md)",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.6-P2": {
+    "title": "UI Tools panel",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.6-P3": {
+    "title": "Reply enforcement (assistant_reply_v2 director)",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.6-P4": {
+    "title": "Centralize plan path (remove hard-coded references)",
+    "desc": "Introduce a single source for plan path and refactor all consumers to use it.",
+    "status": "planned"
+  },
+  "9.7": {
+    "title": "Lessons loop and schema modification process",
+    "desc": "Install schema_modifications and lessons process. Gate prehook linter. Lessons captured from failures and enforced.",
+    "status": "planned"
+  },
+  "9.7.1": {
+    "title": "schemas_current lessons+process",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.7.2": {
+    "title": "assistant_reply_contract lessons",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.7.3": {
+    "title": "gate prehook linter",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.8": {
+    "title": "Inbound AI processing pipeline v1",
+    "desc": "PA pipeline when receiving AI input: UI notify start; update schemas; update lessons; parse scripts; run; system diagnostics; code tests; UI endpoint tests; summary per schema; push status to UIs.",
+    "status": "planned"
+  },
+  "9.8.1": {
+    "title": "UI notify start (desktop+phone)",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.8.2": {
+    "title": "schema update + lessons apply",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.8.3": {
+    "title": "pre-exec parser for fixable errors",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.8.4": {
+    "title": "script run (non-interactive)",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.8.5": {
+    "title": "system diagnostics + logs pack",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.8.6": {
+    "title": "code tests/smoke where applicable",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.8.7": {
+    "title": "UI endpoint tests + health",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.8.8": {
+    "title": "schema-compliant summary + push to UIs",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.9": {
+    "title": "UI signals and traffic lights",
+    "desc": "Status bar with thinking timer and traffic lights (green ready, yellow waiting, red error). Re-run Health button and per-endpoint panel.",
+    "status": "planned"
+  },
+  "9.10": {
+    "title": "Tooling consolidation policy (Python primary)",
+    "desc": "Prefer Python for logic, parsing, tests. Use PowerShell only for Windows-native ops (firewall, netsh, processes, services). Document tool registry and avoid duplicate tools.",
+    "status": "planned"
+  },
+  "9.10.1": {
+    "title": "tool registry and discovery",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.10.2": {
+    "title": "avoid duplicates enforcement",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.11": {
+    "title": "Outbound prompt contractor v2",
+    "desc": "Outbound prompt includes schemas, lessons, tool catalog, plan snapshot and contract reminders.",
+    "status": "planned"
+  },
+  "9.12": {
+    "title": "MVP alignment checkpoint",
+    "desc": "Review plan, ensure active step correct, commit and tag. No silent shifts.",
+    "status": "planned"
+  },
+  "9.5a": {
+    "title": "Status lights + thinking timer",
+    "desc": "",
+    "status": "in_progress"
+  },
+  "9.5b": {
+    "title": "Auto-process cadence toggle",
+    "desc": "",
+    "status": "in_progress"
+  },
+  "9.5c": {
+    "title": "Plan counts + foldable tree",
+    "desc": "",
+    "status": "in_progress"
+  },
+  "9.5d": {
+    "title": "Agent UI wiring test (wiretest v1/v2)",
+    "desc": "",
+    "status": "done"
+  },
+  "9.5e": {
+    "title": "Agent UI bind fix",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5f": {
+    "title": "Agent endpoints hardbind",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5g": {
+    "title": "Parser deferred attach (agent actions + parser v1.1)",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5h": {
+    "title": "Agent hardensure v3",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5j": {
+    "title": "Agent bind scan v4",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5k": {
+    "title": "Flask monkeypatch bind v1",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5m": {
+    "title": "Agent bind appfile v1",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5m2": {
+    "title": "Agent bind appfile v2 + plan sync 9.5",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5n": {
+    "title": "Wrapper bind appvars v1 + full wiretest",
+    "desc": "",
+    "status": "planned"
+  },
+  "9.5q": {
+    "title": "App registry bind v1 + reverify",
+    "desc": "",
+    "status": "planned"
+  },
+  "12.0": {
+    "title": "Project: Suspension Optimization",
+    "desc": "Initialize workspace, baseline calc, smoke.",
+    "status": "in_progress"
+  },
+  "13.0": {
+    "title": "Project: BarSim",
+    "desc": "Initialize workspace, minimal loop, smoke.",
+    "status": "planned"
+  }
+}

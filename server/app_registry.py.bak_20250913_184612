@@ -1,0 +1,60 @@
+# server/app_registry.py
+# Loaded by the wrapper (if present). Use this to register optional blueprints cleanly.
+
+from importlib import import_module
+
+def _attach_proposal_blueprint(app):
+    """
+    Try to import server.proposal_api and register its blueprint.
+    Logs are printed but failures are non-fatal.
+    """
+    try:
+        mod = import_module("server.proposal_api")
+    except Exception as e:
+        print("[app_registry] proposal_api import failed:", e)
+        return False
+
+    bp = getattr(mod, "bp", None) or getattr(mod, "proposal_bp", None)
+    if bp is None and hasattr(mod, "create_blueprint"):
+        try:
+            bp = mod.create_blueprint()
+        except Exception as e:
+            print("[app_registry] create_blueprint() failed:", e)
+            return False
+
+    if bp is not None:
+        try:
+            app.register_blueprint(bp)
+            print("[app_registry] registered /agent/propose from server.proposal_api")
+            return True
+        except Exception as e:
+            print("[app_registry] register_blueprint failed:", e)
+            return False
+
+    print("[app_registry] proposal_api has no blueprint to register")
+    return False
+
+def register_extensions(app) -> bool:
+    ok_propose = False
+    ok_apply = False
+
+    # /agent/propose (already working on your machine)
+    try:
+        from server.proposal_api import bp as proposal_bp
+        app.register_blueprint(proposal_bp)
+        print("[app_registry] registered /agent/propose from server.proposal_api")
+        ok_propose = True
+    except Exception as e:
+        print("[app_registry] register /agent/propose failed:", e)
+
+    # /agent/apply (new)
+    try:
+        from server.apply_api import bp as apply_bp
+        app.register_blueprint(apply_bp)
+        print("[app_registry] registered /agent/apply from server.apply_api")
+        ok_apply = True
+    except Exception as e:
+        print("[app_registry] register /agent/apply failed:", e)
+
+    print(f"[app_registry] summary: propose={'ok' if ok_propose else 'skip'}; apply={'ok' if ok_apply else 'skip'}")
+    return ok_propose or ok_apply

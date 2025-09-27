@@ -1,0 +1,12 @@
+
+repo_root: "C:\\_Repos\\PersistentAssistant"
+inbox_root: "C:\\_Repos\\_inbox"
+incoming_dir: "C:\\_Repos\\_inbox\\incoming"
+processing_dir: "C:\\_Repos\\_inbox\\processing"
+processed_dir: "C:\\_Repos\\_inbox\\processed"
+failed_dir: "C:\\_Repos\\_inbox\\failed"
+log_dir: "C:\\_Repos\\_inbox\\logs"
+allowed_prefixes: ["PA_OUTPUT_", "PA_INPUT_"]
+stable_seconds: 6
+poll_seconds: 5
+wait_stable_timeout_min: 5

@@ -1,0 +1,71 @@
+name: Windows CI
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Upgrade pip
+        shell: pwsh
+        run: python -m pip install --upgrade pip
+
+      - name: Install requirements
+        shell: pwsh
+        run: |
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+          if (Test-Path requirements-dev.txt) { pip install -r requirements-dev.txt }
+
+      # ---- Agent bring-up on 8782 so smoke doesn't 10061 ----
+      - name: Start agent sidecar (8782)
+        shell: pwsh
+        run: |
+          python tools\py\pa_agent_bringup.py --host 127.0.0.1 --port 8782 --timeout 30
+
+      - name: Wait for /health (8782)
+        shell: pwsh
+        run: |
+          $retries = 20
+          for ($i=0; $i -lt $retries; $i++) {
+            try {
+              $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 3 -Uri "http://127.0.0.1:8782/health"
+              if ($r.StatusCode -eq 200) { Write-Host "Agent healthy"; exit 0 }
+            } catch { }
+            Start-Sleep -Seconds 2
+          }
+          Write-Error "Agent did not become healthy in time"; exit 1
+
+      - name: CI check
+        shell: pwsh
+        run: python tools\py\ci\ci_check.py
+
+      - name: MVP smoke
+        shell: pwsh
+        run: python tools\py\mvp_smoke.py
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-logs-${{ matrix.python-version }}
+          path: |
+            tmp\logs\**
+            tmp\feedback\**
+          if-no-files-found: ignore

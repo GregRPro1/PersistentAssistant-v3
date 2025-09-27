@@ -1,5 +1,5 @@
 # Text normalization
-*               text=auto
+*               text=auto eol=lf
 
 # Code: use LF in repo (Windows editors can still display fine)
 *.py            text eol=lf

@@ -1,0 +1,21 @@
+Set-StrictMode -Version Latest
+[CmdletBinding()]
+param(
+  [string]$Path = (Resolve-Path $PSScriptRoot).Path
+)
+$available = Get-Module -ListAvailable -Name PSScriptAnalyzer
+if (-not $available) {
+  try {
+    Set-PSRepository PSGallery -InstallationPolicy Trusted -ErrorAction SilentlyContinue
+    Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -ErrorAction Stop
+  } catch {
+    Write-Host 'PSScriptAnalyzer not available (install failed). Skipping lint.'
+    exit 0
+  }
+}
+Invoke-ScriptAnalyzer -Path $Path -Recurse -Severity Error,Warning | Tee-Object -Variable results | Out-String | Write-Host
+if ($results) {
+  $results | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'lint_results.json') -Encoding UTF8
+  exit 0
+}
+Write-Host 'PSScriptAnalyzer found no issues.'

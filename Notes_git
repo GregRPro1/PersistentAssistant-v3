@@ -1,0 +1,24 @@
+(.venv) PS C:\_Repos\PersistentAssistant> git config --get user.name
+>> git config --get user.email
+>> git config --get core.autocrlf
+>> git config --get core.eol
+>> git config --list --show-origin | Select-String 'user\.name|user\.email|core\.autocrlf|core\.eol'
+>> git remote -v
+
+
+Typical response
+
+GregRPro1
+62507415+GregRPro1@users.noreply.github.com
+false
+lf
+
+file:C:/Program Files/Git/etc/gitconfig core.autocrlf=true
+file:C:/Users/GPRap/.gitconfig  user.name=GregRPro1
+file:C:/Users/GPRap/.gitconfig  user.email=62507415+GregRPro1@users.noreply.github.com
+file:.git/config        core.autocrlf=false
+file:.git/config        core.eol=lf
+origin  https://github.com/GregRPro1/PersistentAssistant-v3.git (fetch)
+origin  https://github.com/GregRPro1/PersistentAssistant-v3.git (push)
+
+(.venv) PS C:\_Repos\PersistentAssistant> 

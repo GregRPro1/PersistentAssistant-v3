@@ -1,0 +1,61 @@
+You are joining the "Persistent Assistant" project.
+
+HARD RULES:
+- Windows + PowerShell only; no heredocs or here-strings; no inline if(...) in expressions.
+- ASCII punctuation only in .ps1; no smart quotes or em-dash.
+- Non-interactive: do not prompt; scripts must complete unattended.
+- Idempotent on re-run; check-before-write; never block STDIN.
+- End your script with three lines:
+  PACK: <absolute path or [NOT CREATED]>
+  STATUS: <OK|WARN|FAIL + short reason>
+  python ./tools/show_next_step.py
+- After your script finishes, run tools\auto_health.ps1 and print explicit OK/FAIL per endpoint.
+
+DISCIPLINE:
+- Treat project_plan_v3.yaml as single source of truth. Call `python tools\show_next_step.py` to fetch the active step before proposing actions; if you update the plan, write it and show the diff in the pack.
+- Never introduce a new file format or schema without providing a migration patch + list of impacted files.
+- Before suggesting a new tool, scan the tools catalog JSON and reuse existing tools when possible; if a gap exists, justify the new tool and update the catalog.
+
+DELIVERABLE:
+- Return exactly one paste-ready PowerShell script that follows these rules.
+- The script must create a zip pack under tmp\feedback\pack_*.zip with a concise JSON summary (what changed, endpoints health, plan active step, and any errors).
+
+EXTRAS
+    “No unilateral format change” clause: If the assistant must touch project_plan_v3.yaml, it must use existing writer utilities or provide a migration patch listing every file that references the old name/string and how it’s updated.
+    Script header/footer template so every paste looks the same (ID includes step and version).
+    Diagnostics level toggle (quiet/normal/verbose) controlled by a param or env var, default normal.
+    Pack content convention: always include summary.json, plan_snapshot.yaml, endpoint_health.json, and short tails of relevant logs.
+
+UPLOADS
+    Uploaded should be "pack_context_bootstrap.zip", it contains these files which I want you to closely inspect to understand where we are
+        project/plans/project_plan_v3.yaml
+        tools/schemas_current.json
+        tools/assistant_reply_contract.txt
+        tmp\run\auto_health_*.json
+        tmp\logs\phone_*.log
+        tmp\logs\sidecar_*.log
+        web/pwa/agent.html, web/pwa/agent_tabs_v1.js, web/pwa/agent_actions_v1.js, web/pwa/agent_plan_v1.js, web/pwa/service-worker.js
+        server/serve_phone_clean.py, server/agent_sidecar_wrapper.py, plus any server/agent_actions_v*.py
+        tools/auto_health.ps1, tools/pa_gate.ps1, tools/plan_sync.ps1, tools/show_next_step.py, tools/structure_sync.py
+
+First actions of the new context window
+    Read plan via tools\show_next_step.py; echo active step + 1–3 next options.
+    Run auto-health and print endpoint OK/FAIL.
+    If services are down, apply a restart script (kill → start :8781 and :8782 → verify).
+    Verify UI wiring (tabs/actions/plan assets present + endpoints) and pack a JSON.
+    Only then propose the next plan step work (3 options max), each with a one-line cost/benefit and risks.
+
+Actions for Greg
+Upload
+    pack_context_bootstrap.zip
+
+
+    project/plans/project_plan_v3.yaml
+    tools/schemas_current.json
+    tools/assistant_reply_contract.txt
+    tmp\run\auto_health_*.json
+    tmp\logs\phone_*.log
+    tmp\logs\sidecar_*.log
+    web/pwa/agent.html, web/pwa/agent_tabs_v1.js, web/pwa/agent_actions_v1.js, web/pwa/agent_plan_v1.js, web/pwa/service-worker.js
+    server/serve_phone_clean.py, server/agent_sidecar_wrapper.py, plus any server/agent_actions_v*.py
+    tools/auto_health.ps1, tools/pa_gate.ps1, tools/plan_sync.ps1, tools/show_next_step.py, tools/structure_sync.py

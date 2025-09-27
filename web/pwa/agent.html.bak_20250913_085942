@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agent Console</title>
+  <!-- single CSS (present on your server) -->
+  <link rel="stylesheet" href="/pwa/agent_ui_v3.css?v=3.4" />
+  <style>
+    /* minimal safety styles if CSS hasn’t loaded yet */
+    body {
+      background: #0b0b0c;
+      color: #e5e7eb;
+      font-family: system-ui, Segoe UI, Roboto, Arial;
+      margin: 0
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #1f2937;
+      background: #0f1113;
+      position: sticky;
+      top: 0;
+      z-index: 10
+    }
+
+    .tab {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #14161a;
+      cursor: pointer
+    }
+
+    .tab.active {
+      background: #1d2430
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 12px
+    }
+
+    section {
+      background: #111214;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 10px
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      margin-left: 6px;
+      border: 1px solid #28303d
+    }
+
+    .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      transform: translateY(1px)
+    }
+
+    .green {
+      background: #22c55e
+    }
+
+    .amber {
+      background: #f59e0b
+    }
+
+    .red {
+      background: #ef4444
+    }
+
+    .blue {
+      background: #2563eb
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #9ca3af
+    }
+
+    .statusbar {
+      position: sticky;
+      bottom: 0;
+      background: #0f1113;
+      border-top: 1px solid #1f2937;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #28303d;
+      border-top-color: #e5e7eb;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 6px
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .hidden {
+      display: none
+    }
+
+    .row {
+      margin: 8px 0
+    }
+
+    .rowflex {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #28303d;
+      background: #14161a;
+      color: #e5e7eb;
+      cursor: pointer
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 10px 1fr;
+      gap: 8px
+    }
+
+    .gutter {
+      cursor: col-resize;
+      background: #1f2937;
+      border-radius: 6px
+    }
+
+    .card {
+      border: 1px solid #28303d;
+      border-radius: 10px;
+      padding: 8px;
+      background: #0f1113
+    }
+
+    .scroll {
+      max-height: 60vh;
+      overflow: auto
+    }
+
+    .tree {
+      font-family: ui-monospace, Consolas, Menlo, monospace
+    }
+
+    .tree.small {
+      font-size: 12px
+    }
+
+    .tree.base {
+      font-size: 14px
+    }
+
+    .tree.large {
+      font-size: 16px
+    }
+
+    .plain {
+      list-style: none;
+      margin: 0;
+      padding-left: 18px
+    }
+
+    .caret {
+      cursor: pointer;
+      user-select: none
+    }
+
+    .caret::before {
+      content: '\25B6';
+      color: #9ca3af;
+      display: inline-block;
+      margin-right: 6px;
+      transform: translateY(-1px)
+    }
+
+    .caret.down::before {
+      transform: rotate(90deg)
+    }
+
+    .ico {
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+      margin-right: 6px
+    }
+
+    .lbl {
+      user-select: none
+    }
+
+    .help {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid #28303d;
+      background: #14161a;
+      color: #e5e7eb;
+      cursor: pointer
+    }
+
+    .help-panel {
+      margin: 6px 0 0 0;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px dashed #28303d;
+      background: #0e1116
+    }
+
+    .codebox {
+      background: #0b0d12;
+      border: 1px solid #28303d;
+      border-radius: 8px;
+      padding: 10px;
+      white-space: pre-wrap
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px
+    }
+  </style>
+</head>
+
+<body>
+  <header style="padding:10px 12px;background:#111214;border-bottom:1px solid #1f2937">
+    <div><strong>Agent Console</strong> <span class="badge" id="uiBaseBadge"></span></div>
+    <div class="hint" id="hint">Tip: Use the Plan tab → “Refresh plan”.</div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="summary">Summary</div>
+    <div class="tab" data-tab="plan">Plan</div>
+    <div class="tab" data-tab="actions">Actions</div>
+    <div class="tab" data-tab="settings">Settings</div>
+  </div>
+
+  <div class="grid">
+    <!-- Summary -->
+    <section data-pane="summary">
+      <div class="section-head">
+        <h2>Summary <span id="sumState" class="badge"></span></h2>
+        <button class="help" data-help="summary" aria-label="Help">?</button>
+      </div>
+      <div id="help-summary" class="help-panel hidden">
+        Loads <code>/agent/summary</code> and shows JSON as-is.
+      </div>
+      <div class="row"><button id="refreshSummary" class="btn">Refresh summary</button></div>
+      <pre id="summaryOut" class="codebox scroll">[no data]</pre>
+    </section>
+
+    <!-- Plan -->
+    <section data-pane="plan" class="hidden">
+      <div class="section-head">
+        <h2>
+          Plan
+          <span id="planState" class="badge"></span>
+          <span id="planCounts" class="badge"></span>
+          <span id="planSource" class="badge"></span>
+        </h2>
+        <button class="help" data-help="plan" aria-label="Help">?</button>
+      </div>
+      <div id="help-plan" class="help-panel hidden">
+        Shows <code>/agent/plan</code>. Left: tree with status icons; Right: details + edit controls.<br />
+        Status: <span class="dot green"></span>Done · <span class="dot amber"></span>In progress · <span
+          class="dot blue"></span>Planned · <span class="dot red"></span>Blocked.
+      </div>
+
+      <div class="rowflex" style="justify-content:space-between">
+        <div class="rowflex">
+          <button id="planRefresh" class="btn">Refresh plan</button>
+          <button id="jumpActive" class="btn" title="Jump to active / first in-progress">Jump to active</button>
+        </div>
+        <div class="rowflex">
+          <span class="hint">Tree size:</span>
+          <button id="treeFsMinus" class="btn">A−</button>
+          <button id="treeFsReset" class="btn">A</button>
+          <button id="treeFsPlus" class="btn">A+</button>
+        </div>
+      </div>
+
+      <div class="split" id="planSplit">
+        <div id="planTree" class="tree scroll card base">[no data]</div>
+        <div class="gutter" id="planGutter" aria-label="Resize"></div>
+        <div class="card">
+          <!-- right pane controls -->
+          <div class="rowflex" style="justify-content:flex-end; gap:6px; margin-bottom:6px">
+            <label class="hint">Status:</label>
+            <select id="edStatusSel" class="btn">
+              <option value="planned">planned</option>
+              <option value="in_progress">in_progress</option>
+              <option value="done">done</option>
+              <option value="blocked">blocked</option>
+            </select>
+            <button id="applyStatus" class="btn">Apply</button>
+          </div>
+          <div id="planDetails" class="scroll" style="min-height:240px">[select a step to see details]</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Actions (stub) -->
+    <section data-pane="actions" class="hidden">
+      <div class="section-head">
+        <h2>Actions</h2>
+      </div>
+      <div class="hint">Future: ask/send/process hooks.</div>
+    </section>
+
+    <!-- Settings -->
+    <section data-pane="settings" class="hidden">
+      <div class="section-head">
+        <h2>Settings</h2>
+      </div>
+      <div class="row"><label>Bearer token:</label>
+        <input id="tok" type="text" placeholder="paste token" class="btn" style="min-width:320px" />
+        <button id="saveTok" class="btn">Save</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="statusbar">
+    <div><span id="busyIcon" class="spinner hidden"></span><span id="statusLeft">Ready</span></div>
+    <div id="statusRight" class="hint"></div>
+  </div>
+
+  <!-- === Core (self-contained) === -->
+  <script>
+    (function (win, doc) {
+      const $ = (id) => doc.getElementById(id);
+      const qa = (sel) => Array.from(doc.querySelectorAll(sel));
+      const state = { busy: false, token: (localStorage.getItem('pa_token') || '').trim(), selected: null };
+      $('uiBaseBadge').textContent = location.origin;
+
+      function setBusy(b, msg) {
+        state.busy = b;
+        $('busyIcon').classList.toggle('hidden', !b);
+        $('statusLeft').textContent = msg || (b ? 'Working…' : 'Ready');
+      }
+      function badge(id, cls, txt) { const b = $(id); if (b) { b.className = 'badge ' + (cls || ''); b.textContent = txt || ''; } }
+      function GET(path) {
+        const h = { cache: 'no-store', headers: {} };
+        if (state.token) h.headers.Authorization = 'Bearer ' + state.token;
+        return fetch(location.origin + path, h);
+      }
+      function POST(path, body) {
+        const h = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) };
+        if (state.token) h.headers.Authorization = 'Bearer ' + state.token;
+        return fetch(location.origin + path, h);
+      }
+
+      // tabs
+      qa('.tab').forEach(t => t.addEventListener('click', () => {
+        qa('.tab').forEach(x => x.classList.remove('active')); t.classList.add('active');
+        const name = t.getAttribute('data-tab'); qa('[data-pane]').forEach(p => p.classList.toggle('hidden', p.getAttribute('data-pane') !== name));
+        $('statusLeft').textContent = 'Viewing ' + name;
+      }, { passive: true }));
+
+      // help toggles
+      qa('.help').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const k = 'help-' + btn.getAttribute('data-help'); const p = $(k); if (p) p.classList.toggle('hidden');
+        }, { passive: true });
+      });
+
+      // token save
+      $('tok').value = state.token;
+      $('saveTok').addEventListener('click', () => {
+        state.token = ($('tok').value || '').trim();
+        localStorage.setItem('pa_token', state.token);
+        $('statusRight').textContent = 'Token saved';
+        setTimeout(() => $('statusRight').textContent = '', 1500);
+      });
+
+      // summary
+      $('refreshSummary').addEventListener('click', async () => {
+        setBusy(true, 'Loading summary…'); badge('sumState', 'wait', 'loading');
+        try {
+          const r = await GET('/agent/summary'); const j = await r.json();
+          $('summaryOut').textContent = JSON.stringify(j, null, 2); badge('sumState', 'ok', 'ok');
+        }
+        catch (e) { $('summaryOut').textContent = String(e || 'error'); badge('sumState', 'err', 'error'); }
+        finally { setBusy(false); }
+      }, { passive: true });
+
+      // expose a tiny core for the plan module
+      win.PA = { GET, POST, setBusy, badge, setToken: (t) => { state.token = t } };
+
+    })(window, document);
+  </script>
+
+  <!-- === Plan module === -->
+  <script src="/pwa/agent_plan_v3.js?v=3.4" defer></script>
+  <!-- === Inline UI extension (debug, safe to re-run) === -->
+  <script>
+    (function () {
+      const DIAG = 'ext-inline-v1';
+      function log() { try { console.log('[%s]', DIAG, ...arguments); } catch (_) { } }
+      function $(sel, root = document) { return root.querySelector(sel); }
+      function el(tag, cls) { const n = document.createElement(tag); if (cls) n.className = cls; return n; }
+
+      async function init() {
+        log('DOMContentLoaded');
+
+        // SETTINGS PANEL (mount into pane, not the tab)
+        const settingsPane = $('section[data-pane="settings"]');
+        if (!settingsPane) { log('settings pane NOT found'); return; }
+        log('settings pane found');
+
+        if (!$('#extSettingsBox')) {
+          const box = el('div', 'card');
+          box.id = 'extSettingsBox';
+          box.style.marginTop = '8px';
+          box.innerHTML = `
+            <div class="section-head"><h3>Extended Settings (debug)</h3></div>
+            <textarea id="extSettingsArea" style="width:100%;min-height:160px"></textarea>
+            <div style="margin-top:8px">
+              <button id="extSaveJson" class="btn">Save JSON</button>
+            </div>
+          `;
+          settingsPane.appendChild(box);
+          log('mounted ext settings box');
+        }
+
+        // Prefer core helpers, but ALWAYS return parsed JSON
+        const hasPA = !!(window.PA && typeof PA.GET === 'function');
+
+        async function getJSON(path) {
+          const res = hasPA ? await PA.GET(path) : await fetch(path, { cache: 'no-store' });
+          console.debug('[ext-inline]', 'GET', path, res.status);
+          return res.json();
+        }
+
+        async function postJSON(path, body) {
+          if (hasPA) {
+            const res = await PA.POST(path, body);
+            console.debug('[ext-inline]', 'POST', path, res.status);
+            return res.json();
+          } else {
+            const res = await fetch(path, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body || {})
+            });
+            console.debug('[ext-inline]', 'POST', path, res.status);
+            return res.json();
+          }
+        }
+
+        try {
+          const data = await getJSON('/agent/settings');
+          $('#extSettingsArea').value = JSON.stringify(data, null, 2);
+          log('GET /agent/settings ok');
+        } catch (e) {
+          $('#extSettingsArea').value = JSON.stringify({ error: String(e) }, null, 2);
+          log('GET /agent/settings failed', e);
+        }
+
+        $('#extSaveJson').onclick = async () => {
+          try {
+            const obj = JSON.parse($('#extSettingsArea').value);
+            const res = await postJSON('/agent/settings', obj);
+            log('POST /agent/settings ->', res);
+            alert(res && res.ok ? 'Saved settings.' : 'Save failed.');
+          } catch (e) {
+            alert('Invalid JSON: ' + e);
+          }
+        };
+
+        // ACTIONS PANEL
+        const actionsPane = $('section[data-pane="actions"]');
+        if (actionsPane && !$('#extActionsBox')) {
+          const box2 = el('div', 'card');
+          box2.id = 'extActionsBox';
+          box2.style.marginTop = '8px';
+          box2.innerHTML = `
+            <div class="section-head"><h3>Agent actions</h3></div>
+            <div class="row"><button id="btnRunNext" class="btn">Run next step (dry-run)</button></div>
+            <pre id="extActionsOut" class="json" style="min-height:120px"></pre>
+          `;
+          actionsPane.appendChild(box2);
+          log('mounted actions box');
+
+          $('#btnRunNext').onclick = async () => {
+            $('#extActionsOut').textContent = 'Running...';
+            try {
+              const res = await getJSON('/agent/next2');
+              $('#extActionsOut').textContent = JSON.stringify(res, null, 2);
+              log('GET /agent/next2 ok');
+            } catch (e) {
+              $('#extActionsOut').textContent = 'Error: ' + e;
+              log('GET /agent/next2 failed', e);
+            }
+          };
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+
+</html>
