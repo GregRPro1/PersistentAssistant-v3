@@ -1,0 +1,7 @@
+id: PA-226
+step_branch: 'step/PA-226-intake-to-devstep'
+latest:
+  smoke_zip: ''
+  status: 'unknown'
+  commit_sha: ''
+  updated_at: ''
