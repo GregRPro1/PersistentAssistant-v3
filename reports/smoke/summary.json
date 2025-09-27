@@ -1,0 +1,58 @@
+[
+  {
+    "step": "PA-102",
+    "junit": "C:/_Repos/PersistentAssistant/dev_steps/PA-102/results/junit_20250927_1203.xml",
+    "total": 3,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0
+  },
+  {
+    "step": "PA-206",
+    "junit": "C:/_Repos/PersistentAssistant/dev_steps/PA-206/results/junit_20250927_1215.xml",
+    "total": 1,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0
+  },
+  {
+    "step": "PA-207",
+    "junit": "C:/_Repos/PersistentAssistant/dev_steps/PA-207/results/junit_20250927_1325.xml",
+    "total": 1,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0
+  },
+  {
+    "step": "PA-213",
+    "junit": "C:/_Repos/PersistentAssistant/dev_steps/PA-213/results/junit_20250927_1215.xml",
+    "total": 1,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0
+  },
+  {
+    "step": "PA-224",
+    "junit": "C:/_Repos/PersistentAssistant/dev_steps/PA-224/results/junit_20250927_1215.xml",
+    "total": 1,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0
+  },
+  {
+    "step": "PA-225",
+    "junit": "C:/_Repos/PersistentAssistant/dev_steps/PA-225/results/junit_20250927_1215.xml",
+    "total": 1,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0
+  },
+  {
+    "step": "PA-230",
+    "junit": "C:/_Repos/PersistentAssistant/dev_steps/PA-230/results/junit_20250927_1215.xml",
+    "total": 1,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0
+  }
+]
