@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.274" timestamp="2025-09-27T18:15:32.905726+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_apply_inbox" name="test_apply_inbox_no_zips" time="0.197"><failure message="assert 64 == 0">tmp_path = WindowsPath('C:/Users/GPRap/AppData/Local/Temp/pytest-of-GPRap/pytest-128/test_apply_inbox_no_zips0')
+
+    def test_apply_inbox_no_zips(tmp_path):
+        (tmp_path/'.git').mkdir()
+        (tmp_path/'_inbox').mkdir()
+        code = subprocess.call(['pwsh','-File','tools/ps1/apply_inbox.ps1'], cwd=tmp_path)
+&gt;       assert code==0
+E       assert 64 == 0
+
+tests\smoke\test_apply_inbox.py:7: AssertionError</failure></testcase></testsuite></testsuites>
