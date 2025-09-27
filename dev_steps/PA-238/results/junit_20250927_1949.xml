@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.555" timestamp="2025-09-27T19:49:15.678353+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_email_watcher_wrapper" name="test_wrapper_runs_process_local" time="0.479"><failure message="assert 1 in (0, 2)">def test_wrapper_runs_process_local():
+        env=dict(os.environ); env['PA_DRY_RUN']='1'
+        code = subprocess.call(['pwsh','-File','tools/ps1/run_email_watcher.ps1','-ProcessLocal'], env=env)
+&gt;       assert code in (0,2)  # 0 if repo root resolved, 2 if not present in CI; both acceptable
+        ^^^^^^^^^^^^^^^^^^^^
+E       assert 1 in (0, 2)
+
+tests\smoke\test_email_watcher_wrapper.py:5: AssertionError</failure></testcase></testsuite></testsuites>
