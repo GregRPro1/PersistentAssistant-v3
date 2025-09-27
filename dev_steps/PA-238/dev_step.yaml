@@ -1,0 +1,12 @@
+id: PA-238
+title: Email watcher scheduling (robust)
+status: proposed
+owner: greg
+touches:
+  - 'tools/ps1/run_email_watcher.ps1'
+  - 'tools/ps1/register_email_watcher.ps1'
+  - 'tools/ps1/unregister_email_watcher.ps1'
+  - 'tools/ps1/one_shot_email_poll.ps1'
+artifacts:
+  manifest: 'dev_steps/PA-238/manifest.yaml'
+  results_dir: 'dev_steps/PA-238/results/'

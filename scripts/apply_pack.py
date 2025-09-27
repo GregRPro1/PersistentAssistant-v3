@@ -8,17 +8,17 @@ def main():
     if not root:
         print('Repo root not found', file=sys.stderr); sys.exit(2)
     ts=datetime.datetime.now().strftime('%Y%m%d_%H%M')
-    step_id='PA-234'
-    commit_msg = "ensure tools/py/apply_common.resolve_repo_root exists + smoke"
+    step_id='PA-238'
+    commit_msg = "robust email watcher scheduling (wrapper, register/unregister, one-shot) + smoke"
     slug = slugify_branch(commit_msg)
     branch=f'step/{step_id}-' + slug
     git(['checkout','-B',branch], root)
     git(['add','-A'], root)
-    git(['commit','-m', f'{step_id}: stage hotfix files'], root, allow_fail=True)
+    git(['commit','-m', f'{step_id}: stage scheduler tooling'], root, allow_fail=True)
     results = root/f'dev_steps/{step_id}/results'; results.mkdir(parents=True, exist_ok=True)
     junit = results/f'junit_{ts}.xml'; log = results/f'pytest_{ts}.log'
     with open(log,'a',encoding='utf-8') as lf:
-        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_email_watcher_imports.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
+        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_email_watcher_wrapper.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
     from zipfile import ZipFile, ZIP_DEFLATED
     smoke = results / f'smoke_{ts}.zip'
     with ZipFile(smoke,'w',compression=ZIP_DEFLATED) as Z:
