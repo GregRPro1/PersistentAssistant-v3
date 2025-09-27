@@ -8,9 +8,9 @@ def main():
     if not root:
         print('Repo root not found', file=sys.stderr); sys.exit(2)
     ts=datetime.datetime.now().strftime('%Y%m%d_%H%M')
-    step_id='PA-216'
+    step_id='PA-224'
 
-    commit_msg = "smoke summary cli (console+html) + smoke"
+    commit_msg = "bug intake schema + template cli + smoke"
     slug = slugify_branch(commit_msg)
     branch=f'step/{step_id}-' + slug
     git(['checkout','-B',branch], root)
@@ -20,10 +20,10 @@ def main():
     results = root/f'dev_steps/{step_id}/results'; results.mkdir(parents=True, exist_ok=True)
     junit = results/f'junit_{ts}.xml'; log = results/f'pytest_{ts}.log'
     with open(log,'a',encoding='utf-8') as lf:
-        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_smoke_summary_cli.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
+        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_intake_new.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
     smoke = results / f'smoke_{ts}.zip'
     files=[junit, log]
-    files.append(root/'reports'/'smoke'/'index.html')
+    
     zip_files(smoke, files, root)
     manifest = root/f'dev_steps/{step_id}/manifest.yaml'
     status = 'pass' if code==0 else 'fail'
