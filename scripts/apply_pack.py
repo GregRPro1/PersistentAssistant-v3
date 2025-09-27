@@ -7,24 +7,18 @@ def main():
     root = Path(a.repo_root) if a.repo_root else Path(__file__).resolve().parents[2]
     if not have_git_repo(root): root = Path(r'C:\\_Repos\\PersistentAssistant')
     if not have_git_repo(root): print('Repo root not found', file=sys.stderr); sys.exit(2)
-    ensure_pydeps(['pyyaml']); import yaml  # noqa
+    ensure_pydeps(['pytest','pyyaml'])
     ts=datetime.datetime.now().strftime('%Y%m%d_%H%M')
-    step_id=first_step_id(root) or 'PA-102'
-    branch=f'step/{step_id}-plan-update'
+    step_id=first_step_id(root) or 'PA-201'
+    branch=f'step/{step_id}-pack-workflow'
     git(['checkout','-B',branch], root)
     git(['add','-A'], root)
-    git(['commit','-m', f'{step_id}: add plan merge tool, steps, smoke'], root, allow_fail=True)
-    plan=root/'project/plans/project_plan_v3.yaml'
-    add =root/'dev_steps/PA-102/plan_steps_to_add.yaml'
-    run([sys.executable, str(root/'tools/py/plan_merge.py'), str(plan), str(add)], check=True, cwd=root)
-    git(['add', str(plan)], root)
-    git(['commit','-m', f'{step_id}: merge dev_steps into plan @ {ts}'], root, allow_fail=True)
+    git(['commit','-m', f'{step_id}: add pack workflow specs, stubs, smoke'], root, allow_fail=True)
     git(['push','-u','origin',branch], root, allow_fail=True)
-    ensure_pydeps(['pytest'])
     results = root/f'dev_steps/{step_id}/results'; results.mkdir(parents=True, exist_ok=True)
     junit = results/f'junit_{ts}.xml'; log = results/f'pytest_{ts}.log'
     with open(log,'a',encoding='utf-8') as lf:
-        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_plan_includes_devsteps.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
+        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
     smoke = results/f'smoke_{ts}.zip'; zip_files(smoke, [junit, log], root)
     manifest = root/f'dev_steps/{step_id}/manifest.yaml'
     status = 'pass' if code==0 else 'fail'
@@ -40,6 +34,6 @@ latest:
     git(['add', str(results), str(manifest)], root)
     git(['commit','-m', f'{step_id}: publish smoke ({status}) @ {ts}'], root, allow_fail=True)
     git(['push'], root, allow_fail=True)
-    print('PA-102 done.')
+    print('PA-201 done.')
 
 if __name__=='__main__': main()

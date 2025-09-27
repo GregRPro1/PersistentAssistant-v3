@@ -1,0 +1,14 @@
+id: PA-201
+title: Pack workflow spec (A→D)
+status: proposed
+owner: greg
+touches:
+  - 'specs/workflow/**'
+  - 'dev_steps/**/manifest.yaml'
+requires: ['PA-101','PA-102']
+phone_approval: required
+smoke_targets:
+  - 'tests/smoke/**'
+artifacts:
+  manifest: 'dev_steps/PA-201/manifest.yaml'
+  results_dir: 'dev_steps/PA-201/results/'
