@@ -5,3 +5,9 @@ latest:
   status: 'unknown'
   commit_sha: ''
   updated_at: ''
+# updated smoke at 20250927_1716
+latest:
+  smoke_zip: "dev_steps/PA-216/results/smoke_20250927_1716.zip"
+  status: "fail"
+  commit_sha: "06ffcd5dd4e1e79ab019ffa70aeac96b53f486b5"
+  updated_at: "20250927_1716"
