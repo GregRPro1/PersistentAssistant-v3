@@ -1,0 +1,10 @@
+id: PA-102
+title: Plan file extensions (dev_steps, ci_policy, board)
+status: proposed
+owner: greg
+touches:
+  - "project/plans/project_plan_v3.yaml"
+  - "dev_steps/**/dev_step.yaml"
+artifacts:
+  manifest: "dev_steps/PA-102/manifest.yaml"
+  results_dir: "dev_steps/PA-102/results/"

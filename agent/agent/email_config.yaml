@@ -1,0 +1,13 @@
+
+imap_host: "imap.gmail.com"
+imap_port: 993
+use_ssl: true
+username: "you@example.com"
+password: "APP_PASSWORD_HERE"
+mailbox: "INBOX"
+processed_mailbox: "Processed"
+allowed_prefixes: ["PA_OUTPUT_", "PA_INPUT_"]
+save_dir: "C:\\_Repos\\_inbox\\incoming"
+log_dir: "C:\\_Repos\\_inbox\\logs"
+one_shot: true
+max_attachments_per_run: 5
