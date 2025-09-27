@@ -1,0 +1,236 @@
+{
+  "docs": [
+    {
+      "path": "C:/_Repos/PersistentAssistant/Daily dev loop (fast).md",
+      "title": "Daily dev loop (fast)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/Notes.md",
+      "title": "Persistent Assistant \u2014 Quick Ops Notes"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/OpenAI_Interaction.md",
+      "title": "OpenAI_Interaction"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/README.md",
+      "title": "[![CI](https://github.com/GregRPro1/PersistentAssistant-v3/actions/workflows/windows_ci.yml/badge.svg)](https://github.com/GregRPro1/PersistentAssistant-v3/actions/workflows/windows_ci.yml)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/Tasks.md",
+      "title": "Tasks"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/.pytest_cache/README.md",
+      "title": "pytest cache directory"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/docs/GLOSSARY.md",
+      "title": "Persistent Assistant \u2014 Glossary"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/docs/MANUAL_STEPS.md",
+      "title": "Phone Approvals + Diagnostics + Preflight (7.5b, 7.5c, 7.7)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/docs/PersistentAssistant_Change_Protocol.md",
+      "title": "PersistentAssistant Change Protocol"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/docs/USER_GUIDE.md",
+      "title": "Persistent Assistant \u2014 User Guide"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tools/tool_catalog.md",
+      "title": "Tool Catalog"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tools/py/tool_catalog.md",
+      "title": "Tool Catalog"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tools/tools/tool_catalog.md",
+      "title": "Tool Catalog"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/diagnostics/tidy_now_tidy_summary.md",
+      "title": "Tidy Summary \u2014 tidy_now"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/structure_snapshot_20250825_175737.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/tools_catalog_20250825_175737.md",
+      "title": "Tool Catalog (2025-08-25T16:57:37.254684Z)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/notes/notes.md",
+      "title": "Note @ 2025-08-24T00:34:38\\n"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_105543.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_171710.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_171745.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_172020.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_203132.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_203206.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_222429.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_222456.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_223032.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_223610.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_223642.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_224029.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_224405.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_224456.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_224837.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_230351.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_230904.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_231204.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_231737.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250827_235824.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250828_000301.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250828_001948.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250828_091918.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250828_094513.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250828_115319.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250828_115338.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250828_145844.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250828_153442.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250831_175656.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250907_213729.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250907_214527.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250907_214947.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250913_130748.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250914_071755.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250914_072702.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250914_080236.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250914_100143.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/tmp/feedback/pack_project_snapshot_20250914_105006.staging/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/specs/workflow/PACK_POLICY.md",
+      "title": "Pack policy for A\u2192D handshake"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/project/plans/project_plan_v3.md",
+      "title": "Persistent Assistant v3 \u2013 Development Plan"
+    },
+    {
+      "path": "C:/_Repos/PersistentAssistant/project/structure/project_structure_snapshot_index.md",
+      "title": "Project Structure Snapshot (index)"
+    }
+  ]
+}
