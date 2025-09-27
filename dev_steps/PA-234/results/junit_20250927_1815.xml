@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.144" timestamp="2025-09-27T18:15:29.989936+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_email_watcher_local" name="test_process_local_moves_zip" time="0.064"><failure message="assert 2 == 0">tmp_path = WindowsPath('C:/Users/GPRap/AppData/Local/Temp/pytest-of-GPRap/pytest-127/test_process_local_moves_zip0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001E10C898510&gt;
+
+    def test_process_local_moves_zip(tmp_path, monkeypatch):
+        (tmp_path/'.git').mkdir()
+        inbox = tmp_path/'_inbox'; inbox.mkdir()
+        z = inbox/'PA_OUTPUT_dummy.zip'
+        with zipfile.ZipFile(z,'w') as Z: Z.writestr('x.txt','ok')
+        env = dict(os.environ); env['PA_DRY_RUN']='1'
+        code = subprocess.call([sys.executable,'tools/py/email_watcher.py','--process-local','--repo-root', str(tmp_path)], cwd=tmp_path, env=env)
+&gt;       assert code==0
+E       assert 2 == 0
+
+tests\smoke\test_email_watcher_local.py:10: AssertionError</failure></testcase></testsuite></testsuites>
