@@ -1,0 +1,10 @@
+id: PA-213
+title: Pack-intake automation (auto-apply OUT zips)
+status: proposed
+owner: greg
+touches:
+  - 'tools/py/pack_inbox_watcher.py'
+  - '_inbox/**'
+artifacts:
+  manifest: 'dev_steps/PA-213/manifest.yaml'
+  results_dir: 'dev_steps/PA-213/results/'
