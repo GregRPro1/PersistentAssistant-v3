@@ -1,0 +1,7 @@
+id: PA-234
+step_branch: 'step/PA-234-email-watcher'
+latest:
+  smoke_zip: ''
+  status: 'unknown'
+  commit_sha: ''
+  updated_at: ''

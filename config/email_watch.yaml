@@ -1,0 +1,7 @@
+enabled: false
+protocol: imap
+host: imap.example.com
+username: user@example.com
+password: app-password-here
+interval_seconds: 300
+save_dir: "_inbox"
