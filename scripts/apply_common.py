@@ -22,7 +22,7 @@ def resolve_repo_root(cli_root: str | None):
     hard=Path(r'C:\_Repos\PersistentAssistant')
     return hard if have_git_repo(hard) else None
 def git(args, root: Path, allow_fail=False):
-    try: run(['git']+list(args), cwd=root, check=not allow_fail); return 0
+    try: subprocess.run(['git']+list(args), cwd=root, check=not allow_fail); return 0
     except subprocess.CalledProcessError as e:
         if allow_fail: return e.returncode or 1
         raise
@@ -39,6 +39,7 @@ def slugify_branch(text: str) -> str:
     s = text.lower()
     s = _slug_re.sub('-', s)
     s = s.strip('-/')
-    s = re.sub(r'-+', '-', s)
+    import re as _re
+    s = _re.sub(r'-+', '-', s)
     if s in ('.','..') or s.endswith('.lock'): s = s + '-x'
     return s[:48] or 'x'

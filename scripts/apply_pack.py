@@ -21,7 +21,7 @@ def main():
     junit = results/f'junit_{ts}.xml'; log = results/f'pytest_{ts}.log'
     with open(log,'a',encoding='utf-8') as lf:
         code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_smoke_summary_cli.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
-    smoke = results[f'smoke_{ts}.zip']
+    smoke = results / f'smoke_{ts}.zip'
     files=[junit, log]
     files.append(root/'reports'/'smoke'/'index.html')
     zip_files(smoke, files, root)
