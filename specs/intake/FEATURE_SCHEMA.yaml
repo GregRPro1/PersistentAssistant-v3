@@ -1,0 +1,11 @@
+schema: intake/feature/v1
+fields:
+  - id: title
+    type: string
+    required: true
+  - id: description
+    type: string
+    required: true
+  - id: priority
+    type: enum
+    values: [p1,p2,p3]
