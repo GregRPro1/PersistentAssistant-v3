@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.722" timestamp="2025-09-27T12:15:44.007755+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_file_usage_analyzer" name="test_analyze_runs_on_repo_root" time="0.669" /></testsuite></testsuites>
