@@ -8,9 +8,9 @@ def main():
     if not root:
         print('Repo root not found', file=sys.stderr); sys.exit(2)
     ts=datetime.datetime.now().strftime('%Y%m%d_%H%M')
-    step_id='PA-224'
+    step_id='PA-225'
 
-    commit_msg = "bug intake schema + template cli + smoke"
+    commit_msg = "feature intake schema + template + smoke"
     slug = slugify_branch(commit_msg)
     branch=f'step/{step_id}-' + slug
     git(['checkout','-B',branch], root)
@@ -20,7 +20,7 @@ def main():
     results = root/f'dev_steps/{step_id}/results'; results.mkdir(parents=True, exist_ok=True)
     junit = results/f'junit_{ts}.xml'; log = results/f'pytest_{ts}.log'
     with open(log,'a',encoding='utf-8') as lf:
-        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_intake_new.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
+        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_feature_template.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
     smoke = results / f'smoke_{ts}.zip'
     files=[junit, log]
     

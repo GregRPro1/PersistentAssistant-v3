@@ -1,11 +1,10 @@
 id: PA-225
-title: Feature request form (intake)
+title: Feature intake schema + template CLI
 status: proposed
 owner: greg
 touches:
-  - 'specs/intake/FEATURE_SCHEMA.yaml'
-  - 'tools/py/intake_submit.py'
-  - 'intake/**'
+  - 'specs/intake/feature_schema.json'
+  - 'tools/py/intake_new.py'
 artifacts:
   manifest: 'dev_steps/PA-225/manifest.yaml'
   results_dir: 'dev_steps/PA-225/results/'
