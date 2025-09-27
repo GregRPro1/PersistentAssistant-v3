@@ -30,12 +30,12 @@ def zip_files(out_zip: Path, files, root: Path):
         for f in files:
             f=_P(f)
             if f.exists(): z.write(f, f.relative_to(root).as_posix())
-_slug_re = re.compile(r'[^a-z0-9._/-]+')
+import re as _re
+_slug_re = _re.compile(r'[^a-z0-9._/-]+')
 def slugify_branch(text: str) -> str:
     s = text.lower()
     s = _slug_re.sub('-', s)
     s = s.strip('-/')
-    import re as _re
     s = _re.sub(r'-+', '-', s)
     if s in ('.','..') or s.endswith('.lock'): s = s + '-x'
     return s[:48] or 'x'

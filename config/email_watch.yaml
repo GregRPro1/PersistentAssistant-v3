@@ -1,7 +1,14 @@
 enabled: false
 protocol: imap
 host: imap.example.com
+port: 993
 username: user@example.com
 password: app-password-here
-interval_seconds: 300
+folder: INBOX
+allow_from:
+  - "you@example.com"
+subject_flag: "[PA] APPLY"
 save_dir: "_inbox"
+processed_dir: "_inbox/processed"
+max_attachment_mb: 50
+apply_after_download: true

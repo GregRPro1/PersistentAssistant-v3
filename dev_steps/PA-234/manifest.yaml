@@ -1,13 +1,7 @@
 id: PA-234
-step_branch: 'step/PA-234-email-watcher'
+step_branch: 'step/PA-234-work'
 latest:
   smoke_zip: ''
   status: 'unknown'
   commit_sha: ''
   updated_at: ''
-# updated smoke at 20250927_1717
-latest:
-  smoke_zip: "dev_steps/PA-234/results/smoke_20250927_1717.zip"
-  status: "fail"
-  commit_sha: "873bc33e631b6082a29c9b2636529d23a5a61cae"
-  updated_at: "20250927_1717"

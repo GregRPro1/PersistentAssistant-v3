@@ -1,10 +1,8 @@
 id: PA-234
-title: Email watcher scaffold (disabled)
+title: TBD
 status: proposed
 owner: greg
 touches:
-  - 'tools/py/email_watcher.py'
-  - 'config/email_watch.yaml'
 artifacts:
   manifest: 'dev_steps/PA-234/manifest.yaml'
   results_dir: 'dev_steps/PA-234/results/'
