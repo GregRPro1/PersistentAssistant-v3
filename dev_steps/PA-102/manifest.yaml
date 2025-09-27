@@ -1,7 +1,7 @@
 id: PA-102
-step_branch: "step/PA-102-plan-update"
+step_branch: 'step/PA-102-plan-update'
 latest:
-  smoke_zip: ""
-  status: "unknown"
-  commit_sha: ""
-  updated_at: ""
+  smoke_zip: ''
+  status: 'unknown'
+  commit_sha: ''
+  updated_at: ''

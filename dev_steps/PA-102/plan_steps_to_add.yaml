@@ -3,121 +3,121 @@ dev_steps:
     title: Basemap + board scaffold
     status: proposed
     owner: greg
-    touches: ["index/board.yaml","dev_steps/README.md"]
+    touches: ['index/board.yaml','dev_steps/README.md']
   - id: PA-102
     title: Plan file extensions (dev_steps, ci_policy, board)
     status: proposed
     owner: greg
-    touches: ["project/plans/project_plan_v3.yaml"]
+    touches: ['project/plans/project_plan_v3.yaml']
   - id: PA-201
     title: Pack workflow spec (A→D)
     status: proposed
     owner: greg
-    touches: ["specs/workflow/**","dev_steps/**/manifest.yaml"]
+    touches: ['specs/workflow/**','dev_steps/**/manifest.yaml']
     phone_approval: required
-    smoke_targets: ["tests/smoke/**"]
+    smoke_targets: ['tests/smoke/**']
   - id: PA-202
     title: CI results publishing policy
     status: proposed
     owner: greg
-    touches: ["specs/ci_policy.yaml","specs/workflow/PUBLISHING.md"]
+    touches: ['specs/ci_policy.yaml','specs/workflow/PUBLISHING.md']
   - id: PA-203
     title: Phone approvals contract (status gating)
     status: proposed
     owner: greg
-    touches: ["specs/approvals/**","dev_steps/**/dev_step.yaml"]
+    touches: ['specs/approvals/**','dev_steps/**/dev_step.yaml']
   - id: PA-204
     title: Parallel orchestration (collisions, locks, board)
     status: proposed
     owner: greg
-    touches: ["specs/parallel/**","index/board.yaml","index/locks.yaml"]
+    touches: ['specs/parallel/**','index/board.yaml','index/locks.yaml']
   - id: PA-205
     title: AST & file-map pack spec
     status: proposed
     owner: greg
-    touches: ["specs/analysis/**"]
+    touches: ['specs/analysis/**']
   - id: PA-206
     title: Smoke tiers & markers
     status: proposed
     owner: greg
-    touches: ["specs/tests/**"]
+    touches: ['specs/tests/**']
   - id: PA-207
     title: RAG baseline + doc policy + retrieval tests
     status: proposed
     owner: greg
-    touches: ["specs/rag/**","docs/**","specs/doc_policy.yaml"]
+    touches: ['specs/rag/**','docs/**','specs/doc_policy.yaml']
   - id: PA-209
     title: CI gate matrix (schema + smoke + approval)
     status: proposed
     owner: greg
-    touches: ["specs/ci_policy.yaml","specs/governance/**"]
+    touches: ['specs/ci_policy.yaml','specs/governance/**']
   - id: PA-210
     title: Qt6 base shell (themes, panels, config schema)
     status: proposed
     owner: greg
-    touches: ["specs/ui/UI_BASE_SPEC.yaml","specs/ui/GUI_CONFIG_SCHEMA.yaml"]
+    touches: ['specs/ui/UI_BASE_SPEC.yaml','specs/ui/GUI_CONFIG_SCHEMA.yaml']
   - id: PA-211
     title: Figma-lite YAML layout editor (preview)
     status: proposed
     owner: greg
-    touches: ["specs/ui/FIGMALITE_SPEC.yaml"]
+    touches: ['specs/ui/FIGMALITE_SPEC.yaml']
   - id: PA-212
     title: Unused file audit & archive policy (spec)
     status: proposed
     owner: greg
-    touches: ["specs/tidy/**"]
+    touches: ['specs/tidy/**']
   - id: PA-213
     title: Pack-intake automation (auto-apply OUT zips)
     status: proposed
     owner: greg
-    touches: ["specs/workflow/PACK_INTAKE.md"]
+    touches: ['specs/workflow/PACK_INTAKE.md']
   - id: PA-220
     title: Regression test strategy & matrix
     status: proposed
     owner: greg
-    touches: ["specs/tests/REG_MATRIX.yaml","specs/tests/REG_POLICY.md"]
+    touches: ['specs/tests/REG_MATRIX.yaml','specs/tests/REG_POLICY.md']
   - id: PA-221
     title: Test selection & coverage mapping
     status: proposed
     owner: greg
-    touches: ["specs/tests/SELECTION_RULES.yaml","specs/tests/COVERAGE_MAP.md"]
+    touches: ['specs/tests/SELECTION_RULES.yaml','specs/tests/COVERAGE_MAP.md']
   - id: PA-222
     title: Flaky test policy & quarantine
     status: proposed
     owner: greg
-    touches: ["specs/tests/FLAKE_POLICY.yaml"]
+    touches: ['specs/tests/FLAKE_POLICY.yaml']
   - id: PA-223
     title: Test data, golden files, non-determinism policy
     status: proposed
     owner: greg
-    touches: ["specs/tests/DATA_POLICY.md","specs/tests/GOLDEN_RULES.md"]
+    touches: ['specs/tests/DATA_POLICY.md','specs/tests/GOLDEN_RULES.md']
   - id: PA-224
     title: Bug report form (intake)
     status: proposed
     owner: greg
-    touches: ["specs/intake/BUG_SCHEMA.yaml","intake/**"]
+    touches: ['specs/intake/BUG_SCHEMA.yaml','intake/**']
   - id: PA-225
     title: Feature request form (intake)
     status: proposed
     owner: greg
-    touches: ["specs/intake/FEATURE_SCHEMA.yaml","intake/**"]
+    touches: ['specs/intake/FEATURE_SCHEMA.yaml','intake/**']
   - id: PA-226
     title: Intake→DevStep auto-scaffold
     status: proposed
     owner: greg
-    touches: ["specs/intake/INTAKE_TO_STEP.md","dev_steps/**"]
+    touches: ['specs/intake/INTAKE_TO_STEP.md','dev_steps/**']
   - id: PA-227
     title: Regression gate matrix integration
     status: proposed
     owner: greg
-    touches: ["specs/governance/GATE_MATRIX.yaml"]
+    touches: ['specs/governance/GATE_MATRIX.yaml']
   - id: PA-230
     title: File usage analyzer (report-only)
     status: proposed
     owner: greg
-    touches: ["dev_steps/PA-230/results/**","specs/tidy/**"]
+    touches: ['dev_steps/PA-230/results/**','specs/tidy/**']
   - id: PA-231
     title: Archive apply (controlled move)
     status: proposed
     owner: greg
-    touches: ["archive/**","specs/tidy/**"]
+    touches: ['archive/**','specs/tidy/**']
