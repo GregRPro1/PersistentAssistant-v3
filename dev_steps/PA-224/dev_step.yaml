@@ -1,11 +1,10 @@
 id: PA-224
-title: Bug report form (intake)
+title: Bug intake schema + template CLI
 status: proposed
 owner: greg
 touches:
-  - 'specs/intake/BUG_SCHEMA.yaml'
-  - 'tools/py/intake_submit.py'
-  - 'intake/**'
+  - 'specs/intake/bug_schema.json'
+  - 'tools/py/intake_new.py'
 artifacts:
   manifest: 'dev_steps/PA-224/manifest.yaml'
   results_dir: 'dev_steps/PA-224/results/'

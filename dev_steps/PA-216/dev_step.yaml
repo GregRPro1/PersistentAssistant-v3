@@ -1,0 +1,11 @@
+id: PA-216
+title: Smoke UX (console+HTML)
+status: proposed
+owner: greg
+touches:
+  - 'tools/py/smoke_summary_cli.py'
+  - 'tools/ps1/show_smoke.ps1'
+  - 'reports/smoke/index.html'
+artifacts:
+  manifest: 'dev_steps/PA-216/manifest.yaml'
+  results_dir: 'dev_steps/PA-216/results/'

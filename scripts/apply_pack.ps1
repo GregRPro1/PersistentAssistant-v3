@@ -12,9 +12,7 @@ function Find-RepoRoot([string]$start){
 try { & python -V | Out-Null; $py='python' } catch { try { & py -3 -V | Out-Null; $py='py -3' } catch { $py=$null } }
 if (-not $py) { Write-Error 'Python 3 not found on PATH'; exit 1 }
 $script = Join-Path $PSScriptRoot 'apply_pack.py'
-if (-not $RepoRoot -or -not (Test-Path (Join-Path $RepoRoot '.git'))) {
-  $RepoRoot = Find-RepoRoot $PSScriptRoot
-}
+if (-not $RepoRoot -or -not (Test-Path (Join-Path $RepoRoot '.git'))) { $RepoRoot = Find-RepoRoot $PSScriptRoot }
 if (-not $RepoRoot) { $RepoRoot = 'C:\_Repos\PersistentAssistant' }
 $argsList = @('--repo-root', $RepoRoot)
 & $py $script @argsList
