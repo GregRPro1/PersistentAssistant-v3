@@ -1,0 +1,10 @@
+id: PA-207
+title: RAG baseline doc inventory
+status: proposed
+owner: greg
+touches:
+  - 'tools/py/doc_inventory.py'
+  - 'reports/docs/**'
+artifacts:
+  manifest: 'dev_steps/PA-207/manifest.yaml'
+  results_dir: 'dev_steps/PA-207/results/'

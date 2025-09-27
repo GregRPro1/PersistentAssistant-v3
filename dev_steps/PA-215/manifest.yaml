@@ -1,0 +1,7 @@
+id: PA-215
+step_branch: 'step/PA-215-inbox-auto-apply'
+latest:
+  smoke_zip: ''
+  status: 'unknown'
+  commit_sha: ''
+  updated_at: ''

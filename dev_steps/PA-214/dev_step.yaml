@@ -1,0 +1,10 @@
+id: PA-214
+title: Smoke results aggregator
+status: proposed
+owner: greg
+touches:
+  - 'tools/py/smoke_aggregate.py'
+  - 'reports/smoke/**'
+artifacts:
+  manifest: 'dev_steps/PA-214/manifest.yaml'
+  results_dir: 'dev_steps/PA-214/results/'

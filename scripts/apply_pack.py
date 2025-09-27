@@ -4,24 +4,21 @@ from apply_common import *
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--repo-root', default=''); a=ap.parse_args()
-    root = Path(a.repo_root) if a.repo_root else Path(__file__).resolve().parents[2]
-    if not have_git_repo(root): root = Path(r'C:\\_Repos\\PersistentAssistant')
-    if not have_git_repo(root): print('Repo root not found', file=sys.stderr); sys.exit(2)
+    root = resolve_repo_root(a.repo_root)
+    if not root:
+        print('Repo root not found', file=sys.stderr); sys.exit(2)
     ts=datetime.datetime.now().strftime('%Y%m%d_%H%M')
-    step_id='PA-230'; branch=f'step/{step_id}-file-usage'
+    step_id='PA-215'
+    branch=f'step/{step_id}-inbox-auto-apply'
     git(['checkout','-B',branch], root)
     git(['add','-A'], root)
-    git(['commit','-m', f'{step_id}: add analyzer + smoke'], root, allow_fail=True)
+    git(['commit','-m', f'{step_id}: add inbox auto-apply + scheduler scaffold + smoke'], root, allow_fail=True)
     git(['push','-u','origin',branch], root, allow_fail=True)
-    # run analyzer once to emit a report
     results = root/f'dev_steps/{step_id}/results'; results.mkdir(parents=True, exist_ok=True)
-    log = results/'analyzer_report.txt'
-    run([sys.executable, str(root/'tools/py/file_usage_analyzer.py'), '--root', str(root), '--out', str(log)], check=True, cwd=root)
-    # smoke
-    junit = results/f'junit_{ts}.xml'; plog = results/f'pytest_{ts}.log'
-    with open(plog,'a',encoding='utf-8') as lf:
-        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_file_usage_analyzer.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
-    smoke = results/f'smoke_{ts}.zip'; zip_files(smoke, [junit, plog, log], root)
+    junit = results/f'junit_{ts}.xml'; log = results/f'pytest_{ts}.log'
+    with open(log,'a',encoding='utf-8') as lf:
+        code = subprocess.call([sys.executable,'-m','pytest','tests/smoke/test_inbox_auto_apply.py',f'--junitxml={junit}','-q'], cwd=root, stdout=lf, stderr=subprocess.STDOUT)
+    smoke = results/f'smoke_{ts}.zip'; zip_files(smoke, [junit, log], root)
     manifest = root/f'dev_steps/{step_id}/manifest.yaml'
     status = 'pass' if code==0 else 'fail'
     sha = subprocess.check_output(['git','rev-parse','HEAD'], cwd=root, text=True).strip()
@@ -36,6 +33,6 @@ latest:
     git(['add', str(results), str(manifest)], root)
     git(['commit','-m', f'{step_id}: publish smoke ({status}) @ {ts}'], root, allow_fail=True)
     git(['push'], root, allow_fail=True)
-    print('PA-230 done.')
+    print('PA-215 done.')
 
 if __name__=='__main__': main()
