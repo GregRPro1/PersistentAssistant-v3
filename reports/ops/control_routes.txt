@@ -1,0 +1,34 @@
+ROUTES:
+/static/<path:filename>
+/control/control/
+/control/control/apply
+/app/app/
+/ops/ops/
+/api/jobs/api/jobs/apply
+/api/jobs/api/jobs/<jid>
+/api/jobs/api/jobs/<jid>/tail
+/
+/healthz
+/__debug
+
+MOUNTS:
+[
+  {
+    "module": "server.control_console",
+    "prefix": "/control"
+  },
+  {
+    "module": "server.mobile_home",
+    "prefix": "/app"
+  },
+  {
+    "module": "server.ops_pages",
+    "prefix": "/ops"
+  },
+  {
+    "module": "server.jobs_api",
+    "prefix": "/api/jobs"
+  }
+]
+
+ERRORS:
