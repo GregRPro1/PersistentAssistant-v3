@@ -1,0 +1,16 @@
+{
+  "id": "20250929_222709_95d494",
+  "kind": "apply",
+  "args": {
+    "repo": "",
+    "release": "",
+    "asset_glob": "PA_OUTPUT_*.zip",
+    "direct_url": "https://example.com/fake.zip",
+    "gh_token": ""
+  },
+  "status": "running",
+  "returncode": null,
+  "started": 1759181229,
+  "ended": null,
+  "log": "C:/_Repos/PersistentAssistant/reports/ops/jobs/20250929_222709_95d494.log"
+}

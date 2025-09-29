@@ -19,16 +19,27 @@ Write-Host "Applying payload from $payload to $root"
 Copy-Item -Path (Join-Path $payload '*') -Destination $root -Recurse -Force
 
 Push-Location $root
-git checkout -B step/PA-342-blueprint-paths | Out-Null
+git checkout -B step/PA-343-mobile-template-fix | Out-Null
 git add -A
-git commit -m "PA-342: fix duplicated blueprint prefixes; add path smokes" | Out-Null
-git push -u origin step/PA-342-blueprint-paths
+git commit -m "PA-343: fix Template collision in mobile_home; /app/ returns 200" | Out-Null
+git push -u origin step/PA-343-mobile-template-fix
 
-# quick smoke
-$env:PA_JOB_DUMMY = '1'
-python -m pytest -q tests\smoke\test_blueprint_paths.py
+# Write a small smoke to disk and execute it (PowerShell-safe)
+$smoke = @"
+import importlib
+from flask import Flask
+m = importlib.import_module('server.mobile_home')
+app = Flask('t'); app.register_blueprint(m.bp, url_prefix=m.mount_path)
+r = app.test_client().get('/app/')
+assert r.status_code==200, r.status_code
+print('OK /app/')
+"@
+$smokePath = Join-Path $root "tmp\smoke_mobile.py"
+New-Item -ItemType Directory -Force -Path (Split-Path $smokePath) | Out-Null
+Set-Content -Path $smokePath -Value $smoke -Encoding UTF8
+python $smokePath
 $code = $LASTEXITCODE
 Pop-Location
-if ($code -ne 0) { throw "smoke failed ($code)" }
-Write-Host "PA-342 applied & smokes passed."
+if ($code -ne 0) { throw "mobile smoke failed ($code)" }
+Write-Host "PA-343 applied & mobile smoke passed."
 exit 0

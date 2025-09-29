@@ -1,11 +1,10 @@
 # server/mobile_home.py
 from flask import Blueprint, Response
-from string import Template
 
 bp = Blueprint('mobile_home', __name__)
 mount_path = '/app'
 
-_TPL = Template("""<!doctype html>
+_HTML = """<!doctype html>
 <html><head><meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>PA Mobile</title>
@@ -28,10 +27,10 @@ _TPL = Template("""<!doctype html>
       <input id="direct" type="text" placeholder="https://.../PA_OUTPUT_*.zip">
     </label>
     <div class="row">
-      <div><label>Repo<input id="repo" type="text" value="$REPO"></label></div>
-      <div><label>Release<input id="rel" type="text" value="$REL"></label></div>
+      <div><label>Repo<input id="repo" type="text" value="__REPO__"></label></div>
+      <div><label>Release<input id="rel" type="text" value="__REL__"></label></div>
     </div>
-    <label>Asset glob<input id="glob" type="text" value="$GLOB"></label>
+    <label>Asset glob<input id="glob" type="text" value="__GLOB__"></label>
     <label>GitHub token (optional)<input id="tok" type="text" value=""></label>
     <button class="btn" onclick="startApply()">Apply</button>
   </div>
@@ -60,10 +59,10 @@ _TPL = Template("""<!doctype html>
     }
     async function poll(id){
       try{
-        let s = await fetch(`${MOUNT}/${id}`); if(s.ok){ let js = await s.json(); el('jst').textContent=js.status; }
+        let s = await fetch(MOUNT + '/' + id); if(s.ok){ let js = await s.json(); el('jst').textContent=js.status; }
       }catch(e){}
       try{
-        let t = await fetch(`${MOUNT}/${id}/tail?n=400`); if(t.ok){ el('log').textContent = await t.text(); }
+        let t = await fetch(MOUNT + '/' + id + '/tail?n=400'); if(t.ok){ el('log').textContent = await t.text(); }
       }catch(e){}
       setTimeout(()=>poll(id), 1000);
     }
@@ -76,10 +75,14 @@ _TPL = Template("""<!doctype html>
       <a class="btn" style="background:#777" href="/smoke/">Smoke</a>
     </div>
   </div>
-</body></html>""")
+</body></html>"""
 
 def _page():
-    return _TPL.substitute(REPO='GregRPro1/PersistentAssistant-v3', REL='PA-OUTPUT', GLOB='PA_OUTPUT_*.zip')
+    html = _HTML
+    html = html.replace('__REPO__','GregRPro1/PersistentAssistant-v3')
+    html = html.replace('__REL__','PA-OUTPUT')
+    html = html.replace('__GLOB__','PA_OUTPUT_*.zip')
+    return html
 
 @bp.get('/')
 def home():
