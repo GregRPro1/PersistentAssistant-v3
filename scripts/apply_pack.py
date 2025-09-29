@@ -1,9 +1,16 @@
-
-import base64, subprocess, sys
+import subprocess
 from pathlib import Path
 
-CC_B64 = 'IiIiCnNlcnZlci9jb250cm9sX2NvbnNvbGUucHkKTWluaW1hbCBjb250cm9sIGNvbnNvbGUgYmx1ZXByaW50OgogIC0gR0VUIC9jb250cm9sLyAgLT4gSFRNTCBmb3JtCiAgLSBQT1NUIC9jb250cm9sL2FwcGx5IC0+IGludm9rZXMgcGFjayBmZXRjaC9hcHBseSBvbmNlLCBzaG93cyBzdGRvdXQvc3RkZXJyClVuaWZpZWQgc2VydmVyIHNob3VsZCBhdXRvLW1vdW50IG1vZHVsZXMgdGhhdCBleHBvcnQgYGJwYCAoRmxhc2sgQmx1ZXByaW50KS4KRXhwb3J0czoKICAtIGJwIDogQmx1ZXByaW50CiAgLSBtb3VudF9wYXRoIDogJy9jb250cm9sJwoiIiIKaW1wb3J0IG9zLCBzdWJwcm9jZXNzCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApmcm9tIGZsYXNrIGltcG9ydCBCbHVlcHJpbnQsIHJlcXVlc3QsIFJlc3BvbnNlCgpicCA9IEJsdWVwcmludCgnY29udHJvbF9jb25zb2xlJywgX19uYW1lX18pCm1vdW50X3BhdGggPSAnL2NvbnRyb2wnCgpSRVBPX0RFRkFVTFQgPSBvcy5nZXRlbnYoJ1BBX1JFUE8nLCAnR3JlZ1JQcm8xL1BlcnNpc3RlbnRBc3Npc3RhbnQtdjMnKQpSRUxFQVNFX0RFRkFVTFQgPSBvcy5nZXRlbnYoJ1BBX1JFTEVBU0UnLCAnUEEtT1VUUFVUJykKQVNTRVRfR0xPQl9ERUZBVUxUID0gb3MuZ2V0ZW52KCdQQV9BU1NFVF9HTE9CJywgJ1BBX09VVFBVVF8qLnppcCcpCgpkZWYgX2lzX2xvY2FsKHJlcSkgLT4gYm9vbDoKICAgIGlwID0gKHJlcS5yZW1vdGVfYWRkciBvciAnJykKICAgIHJldHVybiBpcC5zdGFydHN3aXRoKCcxMjcuJykgb3IgaXAgPT0gJzo6MScKCmRlZiBfYXV0aHoocmVxKSAtPiBib29sOgogICAgdG9rZW4gPSBvcy5nZXRlbnYoJ1BBX1dFQl9UT0tFTicsICcnKS5zdHJpcCgpCiAgICBpZiBub3QgdG9rZW46CiAgICAgICAgcmV0dXJuIFRydWUgaWYgX2lzX2xvY2FsKHJlcSkgZWxzZSBUcnVlICAjIHJlbGF4ZWQgYnkgZGVmYXVsdAogICAgaWYgX2lzX2xvY2FsKHJlcSk6IHJldHVybiBUcnVlCiAgICBoZHIgPSByZXEuaGVhZGVycy5nZXQoJ0F1dGhvcml6YXRpb24nLCcnKQogICAgcGFydHMgPSBoZHIuc3BsaXQoKQogICAgcmV0dXJuIChsZW4ocGFydHMpPT0yIGFuZCBwYXJ0c1swXS5sb3dlcigpPT0nYmVhcmVyJyBhbmQgcGFydHNbMV09PXRva2VuKQoKZGVmIF9yZXBvX3Jvb3QoKSAtPiBQYXRoOgogICAgcCA9IFBhdGgoX19maWxlX18pLnJlc29sdmUoKQogICAgZm9yIF8gaW4gcmFuZ2UoMTIpOgogICAgICAgIGlmIChwLycuZ2l0JykuZXhpc3RzKCk6IHJldHVybiBwCiAgICAgICAgaWYgcC5wYXJlbnQ9PXA6IGJyZWFrCiAgICAgICAgcCA9IHAucGFyZW50CiAgICByZXR1cm4gUGF0aC5jd2QoKQoKZGVmIF9wYWdlKGV4dHJhOiBzdHI9JycpIC0+IHN0cjoKICAgIHJldHVybiBmIiIiPCFkb2N0eXBlIGh0bWw+CjxodG1sPjxoZWFkPjxtZXRhIGNoYXJzZXQ9J3V0Zi04Jy8+PHRpdGxlPlBBIENvbnRyb2w8L3RpdGxlPgo8c3R5bGU+CiAgYm9keXt7Zm9udC1mYW1pbHk6c3lzdGVtLXVpLFNlZ29lIFVJLEFyaWFsLHNhbnMtc2VyaWY7bWFyZ2luOjI0cHg7bWF4LXdpZHRoOjkwMHB4fX0KICBsYWJlbHt7ZGlzcGxheTpibG9jazttYXJnaW4tdG9wOjEycHh9fSBpbnB1dFt0eXBlPXRleHRde3t3aWR0aDoxMDAlO3BhZGRpbmc6OHB4fX0KICAucm93e3tkaXNwbGF5OmZsZXg7Z2FwOjEycHh9fSAucm93PmRpdnt7ZmxleDoxfX0gYnV0dG9ue3ttYXJnaW4tdG9wOjE2cHg7cGFkZGluZzo4cHggMTRweH19CiAgcHJle3tiYWNrZ3JvdW5kOiNmNmY2ZjY7cGFkZGluZzoxMHB4O292ZXJmbG93OmF1dG99fSAub2t7e2NvbG9yOmdyZWVufX0gLmVycnt7Y29sb3I6I2IwMH19Cjwvc3R5bGU+PC9oZWFkPjxib2R5PgogIDxoMT5QZXJzaXN0ZW50IEFzc2lzdGFudCDigJQgQ29udHJvbCBDb25zb2xlPC9oMT4KICA8Zm9ybSBtZXRob2Q9J1BPU1QnIGFjdGlvbj0ne21vdW50X3BhdGh9L2FwcGx5Jz4KICAgIDxkaXYgY2xhc3M9J3Jvdyc+CiAgICAgIDxkaXY+PGxhYmVsPlJlcG8gKG93bmVyL3JlcG8pPGlucHV0IG5hbWU9J3JlcG8nIHZhbHVlPSd7UkVQT19ERUZBVUxUfSc+PC9sYWJlbD48L2Rpdj4KICAgICAgPGRpdj48bGFiZWw+UmVsZWFzZSB0YWc8aW5wdXQgbmFtZT0ncmVsZWFzZScgdmFsdWU9J3tSRUxFQVNFX0RFRkFVTFR9Jz48L2xhYmVsPjwvZGl2PgogICAgPC9kaXY+CiAgICA8bGFiZWw+QXNzZXQgZ2xvYjxpbnB1dCBuYW1lPSdhc3NldF9nbG9iJyB2YWx1ZT0ne0FTU0VUX0dMT0JfREVGQVVMVH0nPjwvbGFiZWw+CiAgICA8bGFiZWw+RGlyZWN0IFpJUCBVUkwgKG9wdGlvbmFsKTxpbnB1dCBuYW1lPSdkaXJlY3RfdXJsJyB2YWx1ZT0nJz48L2xhYmVsPgogICAgPGxhYmVsPkdpdEh1YiB0b2tlbiAob3B0aW9uYWwpPGlucHV0IG5hbWU9J2doX3Rva2VuJyB2YWx1ZT0nJz48L2xhYmVsPgogICAgPGJ1dHRvbiB0eXBlPSdzdWJtaXQnPkFwcGx5PC9idXR0b24+CiAgPC9mb3JtPgogIHtleHRyYX0KICA8cD5Mb2dzOiA8Y29kZT5yZXBvcnRzL29wcy9wYWNrX2ZldGNoZXIubG9nPC9jb2RlPjwvcD4KPC9ib2R5PjwvaHRtbD4iIiIKCkBicC5iZWZvcmVfcmVxdWVzdApkZWYgX2dhdGUoKToKICAgIGlmIG5vdCBfYXV0aHoocmVxdWVzdCk6CiAgICAgICAgcmV0dXJuIFJlc3BvbnNlKCdGb3JiaWRkZW4nLCBzdGF0dXM9NDAzKQoKQGJwLmdldChtb3VudF9wYXRoICsgJy8nKQpkZWYgdWkoKToKICAgIHJldHVybiBSZXNwb25zZShfcGFnZSgpLCBtaW1ldHlwZT0ndGV4dC9odG1sJykKCkBicC5wb3N0KG1vdW50X3BhdGggKyAnL2FwcGx5JykKZGVmIGFwcGx5X29uY2UoKToKICAgIGlmIG5vdCBfYXV0aHoocmVxdWVzdCk6CiAgICAgICAgcmV0dXJuIFJlc3BvbnNlKCdGb3JiaWRkZW4nLCBzdGF0dXM9NDAzKQogICAgZGF0YSA9IHJlcXVlc3QuZm9ybSBvciB7fQogICAgcmVwbyA9IChkYXRhLmdldCgncmVwbycpIG9yIFJFUE9fREVGQVVMVCkuc3RyaXAoKQogICAgcmVsZWFzZSA9IChkYXRhLmdldCgncmVsZWFzZScpIG9yIFJFTEVBU0VfREVGQVVMVCkuc3RyaXAoKQogICAgYXNzZXQgPSAoZGF0YS5nZXQoJ2Fzc2V0X2dsb2InKSBvciBBU1NFVF9HTE9CX0RFRkFVTFQpLnN0cmlwKCkKICAgIGRpcmVjdCA9IChkYXRhLmdldCgnZGlyZWN0X3VybCcpIG9yICcnKS5zdHJpcCgpCiAgICB0b2tlbiA9IChkYXRhLmdldCgnZ2hfdG9rZW4nKSBvciBvcy5nZXRlbnYoJ0dJVEhVQl9UT0tFTicsJycpKS5zdHJpcCgpCgogICAgcm9vdCA9IF9yZXBvX3Jvb3QoKQogICAgcHlfZmV0Y2hlciA9IHJvb3QgLyAndG9vbHMnIC8gJ3B5JyAvICdwYWNrJyAvICdwYWNrX2ZldGNoZXIucHknCiAgICBwczEgPSByb290IC8gJ3Rvb2xzJyAvICdwczEnIC8gJ3J1bl9wYWNrX2ZldGNoZXIucHMxJwoKICAgIGVudiA9IG9zLmVudmlyb24uY29weSgpCiAgICBpZiB0b2tlbjogZW52WydHSVRIVUJfVE9LRU4nXSA9IHRva2VuCgogICAgaWYgZGlyZWN0OgogICAgICAgIGFyZ3MgPSBbJ3B5dGhvbicsIHN0cihweV9mZXRjaGVyKSwgJy0tb25jZScsICctLWRpcmVjdCcsIGRpcmVjdF0KICAgIGVsc2U6CiAgICAgICAgYXJncyA9IFsncHl0aG9uJywgc3RyKHB5X2ZldGNoZXIpLCAnLS1vbmNlJywgJy0tcmVwbycsIHJlcG8sICctLXJlbGVhc2UnLCByZWxlYXNlLCAnLS1hc3NldCcsIGFzc2V0XQogICAgaWYgbm90IHB5X2ZldGNoZXIuZXhpc3RzKCk6CiAgICAgICAgYXJncyA9IFsncHdzaCcsIHN0cihwczEpLCAnLU9uY2UnXQoKICAgIHRyeToKICAgICAgICBwID0gc3VicHJvY2Vzcy5ydW4oYXJncywgY3dkPXN0cihyb290KSwgZW52PWVudiwgY2FwdHVyZV9vdXRwdXQ9VHJ1ZSwgdGV4dD1UcnVlLCB0aW1lb3V0PTYwMCkKICAgICAgICBvayA9IChwLnJldHVybmNvZGU9PTApCiAgICAgICAgZXh0cmEgPSBmIjxwIGNsYXNzPSd7J29rJyBpZiBvayBlbHNlICdlcnInfSc+RXhpdCB7cC5yZXR1cm5jb2RlfTwvcD48aDM+c3Rkb3V0PC9oMz48cHJlPntwLnN0ZG91dCBvciAnJ308L3ByZT48aDM+c3RkZXJyPC9oMz48cHJlPntwLnN0ZGVyciBvciAnJ308L3ByZT4iCiAgICAgICAgcmV0dXJuIFJlc3BvbnNlKF9wYWdlKGV4dHJhKSwgbWltZXR5cGU9J3RleHQvaHRtbCcsIHN0YXR1cz0oMjAwIGlmIG9rIGVsc2UgNTAwKSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZToKICAgICAgICByZXR1cm4gUmVzcG9uc2UoX3BhZ2UoZlwiPHAgY2xhc3M9J2Vycic+RXhjZXB0aW9uOiB7ZSFzfTwvcD5cIiksIG1pbWV0eXBlPSd0ZXh0L2h0bWwnLCBzdGF0dXM9NTAwKQ=='
-DOC_B64 = 'IyAvY29udHJvbCBjb25zb2xlClNlZSBzZXJ2ZXIvY29udHJvbF9jb25zb2xlLnB5Cg=='
+FILES = {
+    'tools/py/control_server.py': "# tools/py/control_server.py\nfrom flask import Flask, redirect\nimport argparse\n\ntry:\n    # Import the blueprint created earlier\n    from server.control_console import bp as control_bp, mount_path as control_mount\nexcept Exception as e:\n    # Friendly error message in case the blueprint isn't present yet\n    raise SystemExit(f\"[control_server] Failed to import server.control_console: {e}\")\n\napp = Flask(\"pa_control\")\napp.register_blueprint(control_bp, url_prefix=control_mount)\n\n@app.get('/')\ndef _root():\n    return redirect(control_mount + '/')\n\n@app.get('/healthz')\ndef _health():\n    return 'ok', 200, {'Content-Type':'text/plain'}\n\ndef main():\n    p = argparse.ArgumentParser()\n    p.add_argument('--host', default='127.0.0.1')\n    p.add_argument('--port', default=8776, type=int)\n    a = p.parse_args()\n    app.run(host=a.host, port=a.port, debug=False)\n\nif __name__ == '__main__':\n    main()",
+    'tools/ps1/run_control_server.ps1': "param([string]$Host='127.0.0.1',[int]$Port=8776)\n$ErrorActionPreference='Stop'\nWrite-Host \"Starting PA Control standalone at http://$Host:$Port/control/\"\npython (Join-Path $PSScriptRoot '..\\py\\control_server.py') --host $Host --port $Port\n",
+    'tests/smoke/test_control_import.py': "# tests/smoke/test_control_import.py\ndef test_import_blueprint():\n    mod = __import__('server.control_console', fromlist=['bp','mount_path'])\n    assert hasattr(mod, 'bp')\n    assert hasattr(mod, 'mount_path')",
+}
+
+def write(root: Path, rel: str, txt: str):
+    p = root/rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(txt, encoding='utf-8')
 
 def find_root(seed: Path) -> Path:
     p = seed
@@ -13,25 +20,18 @@ def find_root(seed: Path) -> Path:
         p = p.parent
     return seed
 
-def write_b64(root: Path, rel: str, b64: str):
-    p = root/rel
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_bytes(base64.b64decode(b64))
-
 def run(a, cwd=None, check=False):
     subprocess.run(a, cwd=cwd, check=check)
 
 def main():
-    here = Path(__file__).resolve()
-    root = find_root(here)
-    write_b64(root, 'server/control_console.py', CC_B64)
-    write_b64(root, 'docs/ops/control_console.md', DOC_B64)
-    try: run(['git','checkout','-B','step/PA-330-control-console'], root)
+    root = find_root(Path(__file__).resolve())
+    for rel,txt in FILES.items():
+        write(root, rel, txt)
+    try: run(['git','checkout','-B','step/PA-331-control-standalone'], root)
     except Exception: pass
     run(['git','add','-A'], root)
-    run(['git','commit','-m','PA-330: add control console blueprint'], root)
-    run(['git','push','-u','origin','step/PA-330-control-console'], root)
-    print('PA-330 applied. If /control/ is not visible, restart unified server.')
-
-if __name__=='__main__':
+    run(['git','commit','-m','PA-331: add control standalone server (8776) + smoke import'], root)
+    run(['git','push','-u','origin','step/PA-331-control-standalone'], root)
+    print('PA-331 applied. Start with: pwsh tools\\ps1\\run_control_server.ps1')
+if __name__ == '__main__':
     main()
