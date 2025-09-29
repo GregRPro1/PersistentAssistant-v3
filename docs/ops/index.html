@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PA Status</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:16px;max-width:900px}
+  pre{white-space:pre-wrap;background:#111;color:#0f0;padding:10px;border-radius:8px;max-height:300px;overflow:auto}
+  .card{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px}
+  a.btn{display:inline-block;padding:8px 12px;background:#0a84ff;color:#fff;border-radius:8px;text-decoration:none}
+</style></head><body>
+  <h1>PersistentAssistant — Ops Status</h1>
+  <p>Generated: 2025-09-29 16:57:03Z</p>
+
+  <div class="card"><h3>Control page</h3>
+  <p><a class="btn" href="http://127.0.0.1:8765/">Open Control</a></p></div>
+
+  <div class="card"><h3>Recent processed packs</h3>
+  <pre>PA_OUTPUT_HELLOPACK_20250929_133351_2.zip
+PA_OUTPUT_HELLOPACK_20250929_133351_1.zip
+PA_OUTPUT_HELLOPACK_20250929_133351.zip</pre></div>
+
+  <div class="card"><h3>Pack fetcher log (tail)</h3>
+  <pre>2025-09-29 14:50:28 no asset matching PA_OUTPUT_*.zip on release pa-pack-hello-1
+2025-09-29 15:07:04 downloaded PA_OUTPUT_HELLOPACK_20250929_133351.zip from release PA-OUTPUT
+2025-09-29 15:18:15 downloaded PA_OUTPUT_HELLOPACK_20250929_133351_1.zip from release PA-OUTPUT
+2025-09-29 15:21:20 downloaded PA_OUTPUT_HELLOPACK_20250929_133351.zip from release PA-OUTPUT</pre></div>
+
+  <div class="card"><h3>Hello marker (tail)</h3>
+  <pre>HELLO PACK APPLIED 20250929_141816Z
+HELLO PACK APPLIED 20250929_141816Z
+HELLO PACK APPLIED 20250929_142121Z</pre></div>
+
+  <div class="card"><h3>Smoke report</h3>
+  <p>Present</p>
+  </div>
+
+</body></html>
