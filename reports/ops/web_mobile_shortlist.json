@@ -1,0 +1,2514 @@
+{
+  "count": 2360,
+  "top": [
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\py\\web_mobile_inventory.py",
+      "frameworks": [
+        "aiohttp",
+        "starlette",
+        "tornado",
+        "flask",
+        "fastapi",
+        "uvicorn",
+        "quart",
+        "http.server"
+      ],
+      "routes": [],
+      "ports": [
+        80,
+        65535
+      ],
+      "hints": [
+        "stdlib-http-server"
+      ]
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\approvals_micro.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "phone_ping",
+          "method": "GET"
+        },
+        {
+          "fn": "phone_health",
+          "method": "GET"
+        },
+        {
+          "fn": "phone_approve",
+          "method": "POST"
+        }
+      ],
+      "ports": [
+        300,
+        900,
+        127,
+        172,
+        192,
+        168,
+        128,
+        401,
+        400,
+        409,
+        8781
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\micro_approvals.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "ping",
+          "method": "GET"
+        },
+        {
+          "fn": "health",
+          "method": "GET"
+        },
+        {
+          "fn": "approve",
+          "method": "POST"
+        }
+      ],
+      "ports": [
+        300,
+        900,
+        127,
+        172,
+        192,
+        168,
+        128,
+        401,
+        400,
+        409,
+        500,
+        8778
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\apply_api.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "agent_apply",
+          "method": "POST"
+        }
+      ],
+      "ports": [
+        127,
+        8765,
+        400
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\proposal_api.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "agent_propose_get",
+          "method": "GET"
+        },
+        {
+          "fn": "agent_propose_post",
+          "method": "POST"
+        }
+      ],
+      "ports": [
+        127,
+        8765,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\serve_phone_clean.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "ping",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "health",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "routes",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "approve",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "pwa_config",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "pwa_diag",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "pa_agent_html",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "pa_agent_summary",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "pa_agent_ask",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "pa_agent_choose",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "_pa_reload_token",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        127,
+        172,
+        192,
+        168,
+        128,
+        300,
+        900,
+        80,
+        401,
+        400,
+        409,
+        500,
+        8781,
+        404
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_sidecar.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "_routes",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_html",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_summary",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_ask",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_choose",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_next",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_process",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_next2",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_recent",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_notes_get",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_notes_set",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_brief",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_plan",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_process2",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_plan",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_approvals_count",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_worker_status",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_plan",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        404,
+        401,
+        400,
+        500,
+        127,
+        8765,
+        200,
+        100,
+        1000,
+        8782
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_sidecar_wrapper.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "settings_get",
+          "method": "GET"
+        },
+        {
+          "fn": "settings_get_alt",
+          "method": "GET"
+        },
+        {
+          "fn": "settings_set",
+          "method": "POST"
+        },
+        {
+          "fn": "settings_set_alt",
+          "method": "POST"
+        }
+      ],
+      "ports": [
+        127,
+        8782,
+        404,
+        200,
+        500,
+        8765,
+        400
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\micro_leb_proxy.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "leb_ping",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "leb_run",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "leb_logs",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        8783,
+        8765,
+        127,
+        502,
+        400,
+        403
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\phone_approve_fallback.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "approve",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        300,
+        900,
+        127,
+        172,
+        192,
+        168,
+        128,
+        401,
+        400,
+        409,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\phone_blueprint.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "ping",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "health",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "approve",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "serve_pwa",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        127,
+        172,
+        192,
+        168,
+        120,
+        900,
+        401,
+        400,
+        409,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\settings_api.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "get_ar",
+          "method": "GET"
+        },
+        {
+          "fn": "set_ar",
+          "method": "POST"
+        }
+      ],
+      "ports": [
+        127,
+        5001
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\serve_phone.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "ping",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "health",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "routes",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "approve",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        127,
+        172,
+        192,
+        168,
+        128,
+        300,
+        900,
+        401,
+        400,
+        409,
+        500,
+        8770
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\serve_phone_inline.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "ping",
+          "method": "GET"
+        },
+        {
+          "fn": "health",
+          "method": "GET"
+        },
+        {
+          "fn": "approve",
+          "method": "POST"
+        }
+      ],
+      "ports": [
+        127,
+        172,
+        192,
+        168,
+        128,
+        300,
+        900,
+        401,
+        400,
+        409,
+        500,
+        8770
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\leb_server.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "ping",
+          "method": "GET"
+        },
+        {
+          "fn": "run",
+          "method": "POST"
+        },
+        {
+          "fn": "logs",
+          "method": "GET"
+        }
+      ],
+      "ports": [
+        500,
+        400,
+        8765,
+        127
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_actions_v5.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "agent_summary",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_recent",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "approvals_count",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_actions_v6.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "agent_summary",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_recent",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "approvals_count",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_next2",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_actions_v7.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "agent_plan",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_summary",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_recent",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "approvals_count",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_next2",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_actions_v8.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "agent_recent",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_next2",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        200,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_bp.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "agent_html",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_summary",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_ask",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "agent_choose",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        404,
+        500,
+        401,
+        400
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_compose.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "compose",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        401,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\logs_tail.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "tail",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        200,
+        4096,
+        20000
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\micro_daily_status.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "daily_status",
+          "method": "GET"
+        }
+      ],
+      "ports": [
+        404,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\micro_projects.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "create_project",
+          "method": "POST"
+        }
+      ],
+      "ports": [
+        400,
+        409
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\phone_preview.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [
+        {
+          "fn": "phone_ping",
+          "method": "GET"
+        },
+        {
+          "fn": "phone_digest",
+          "method": "GET"
+        },
+        {
+          "fn": "phone_token_hash",
+          "method": "GET"
+        },
+        {
+          "fn": "phone_app",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "phone_static",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "phone_options",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "phone_approve",
+          "method": "ROUTE"
+        },
+        {
+          "fn": "phone_latest_pack",
+          "method": "ROUTE"
+        }
+      ],
+      "ports": [
+        127,
+        8770,
+        401,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\pip\\_vendor\\rich\\_cell_widths.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        127,
+        159,
+        173,
+        768,
+        879,
+        1155,
+        1161,
+        1425,
+        1469,
+        1471,
+        1473,
+        1474,
+        1476,
+        1477,
+        1479,
+        1536,
+        1541,
+        1552,
+        1562,
+        1564,
+        1611,
+        1631,
+        1648,
+        1750,
+        1757,
+        1759,
+        1764,
+        1767,
+        1768,
+        1770,
+        1773,
+        1807,
+        1809,
+        1840,
+        1866,
+        1958,
+        1968,
+        2027,
+        2035,
+        2045,
+        2070,
+        2073,
+        2075,
+        2083,
+        2085,
+        2087,
+        2089,
+        2093,
+        2137,
+        2139,
+        2192,
+        2193,
+        2200,
+        2207,
+        2250,
+        2307,
+        2362,
+        2364,
+        2366,
+        2383,
+        2385,
+        2391,
+        2402,
+        2403,
+        2433,
+        2435,
+        2492,
+        2494,
+        2500,
+        2503,
+        2504,
+        2507,
+        2509,
+        2519,
+        2530,
+        2531,
+        2558,
+        2561,
+        2563,
+        2620,
+        2622,
+        2626,
+        2631,
+        2632,
+        2635,
+        2637,
+        2641,
+        2672,
+        2673,
+        2677,
+        2689,
+        2691,
+        2748,
+        2750,
+        2757,
+        2759,
+        2761,
+        2763,
+        2765,
+        2786,
+        2787,
+        2810,
+        2815,
+        2817,
+        2819,
+        2876,
+        2878,
+        2884,
+        2887,
+        2888,
+        2891,
+        2893,
+        2901,
+        2903,
+        2914,
+        2915,
+        2946,
+        3006,
+        3010,
+        3014,
+        3016,
+        3018,
+        3021,
+        3031,
+        3072,
+        3076,
+        3132,
+        3134,
+        3140,
+        3142,
+        3144,
+        3146,
+        3149,
+        3157,
+        3158,
+        3170,
+        3171,
+        3201,
+        3203,
+        3260,
+        3262,
+        3268,
+        3270,
+        3272,
+        3274,
+        3277,
+        3285,
+        3286,
+        3298,
+        3299,
+        3315,
+        3328,
+        3331,
+        3387,
+        3388,
+        3390,
+        3396,
+        3398,
+        3400,
+        3402,
+        3405,
+        3415,
+        3426,
+        3427,
+        3457,
+        3459,
+        3530,
+        3535,
+        3540,
+        3542,
+        3544,
+        3551,
+        3570,
+        3571,
+        3633,
+        3636,
+        3642,
+        3655,
+        3662,
+        3761,
+        3764,
+        3772,
+        3784,
+        3790,
+        3864,
+        3865,
+        3893,
+        3895,
+        3897,
+        3902,
+        3903,
+        3953,
+        3972,
+        3974,
+        3975,
+        3981,
+        3991,
+        3993,
+        4028,
+        4038,
+        4139,
+        4158,
+        4182,
+        4185,
+        4190,
+        4192,
+        4194,
+        4196,
+        4199,
+        4205,
+        4209,
+        4212,
+        4226,
+        4237,
+        4239,
+        4250,
+        4253,
+        4352,
+        4447,
+        4448,
+        4607,
+        4957,
+        4959,
+        5906,
+        5909,
+        5938,
+        5940,
+        5970,
+        5971,
+        6002,
+        6003,
+        6068,
+        6099,
+        6109,
+        6155,
+        6159,
+        6277,
+        6278,
+        6313,
+        6432,
+        6443,
+        6448,
+        6459,
+        6679,
+        6683,
+        6741,
+        6750,
+        6752,
+        6780,
+        6783,
+        6832,
+        6862,
+        6912,
+        6916,
+        6964,
+        6980,
+        7019,
+        7027,
+        7040,
+        7042,
+        7073,
+        7085,
+        7142,
+        7155,
+        7204,
+        7223,
+        7376,
+        7378,
+        7380,
+        7400,
+        7405,
+        7412,
+        7415,
+        7417,
+        7616,
+        7679,
+        8203,
+        8207,
+        8232,
+        8238,
+        8288,
+        8292,
+        8294,
+        8303,
+        8400,
+        8432,
+        8986,
+        8987,
+        9001,
+        9002,
+        9193,
+        9196,
+        9200,
+        9203,
+        9725,
+        9726,
+        9748,
+        9749,
+        9800,
+        9811,
+        9855,
+        9875,
+        9889,
+        9898,
+        9899,
+        9917,
+        9918,
+        9924,
+        9925,
+        9934,
+        9940,
+        9962,
+        9970,
+        9971,
+        9973,
+        9978,
+        9981,
+        9989,
+        9994,
+        9995,
+        10024,
+        10060,
+        10062,
+        10067,
+        10069,
+        10071,
+        10133,
+        10135,
+        10160,
+        10175,
+        11035,
+        11036,
+        11088,
+        11093,
+        11503,
+        11505,
+        11647,
+        11744,
+        11775,
+        11904,
+        11929,
+        11931,
+        12019,
+        12032,
+        12245,
+        12272,
+        12329,
+        12330,
+        12335,
+        12336,
+        12350,
+        12353,
+        12438,
+        12441,
+        12442,
+        12443,
+        12543,
+        12549,
+        12591,
+        12593,
+        12686,
+        12688,
+        12771,
+        12783,
+        12830,
+        12832,
+        12871,
+        12880,
+        19903,
+        19968,
+        42124,
+        42128,
+        42182,
+        42607,
+        42610,
+        42612,
+        42621,
+        42654,
+        42655,
+        42736,
+        42737,
+        43010,
+        43014,
+        43019,
+        43043,
+        43047,
+        43052,
+        43136,
+        43137,
+        43188,
+        43205,
+        43232,
+        43249,
+        43263,
+        43302,
+        43309,
+        43335,
+        43347,
+        43360,
+        43388,
+        43392,
+        43395,
+        43443,
+        43456,
+        43493,
+        43561,
+        43574,
+        43587,
+        43596,
+        43597,
+        43643,
+        43645,
+        43696,
+        43698,
+        43700,
+        43703,
+        43704,
+        43710,
+        43711,
+        43713,
+        43755,
+        43759,
+        43765,
+        43766,
+        44003,
+        44010,
+        44012,
+        44013,
+        44032,
+        55203,
+        55216,
+        55295,
+        63744,
+        64255,
+        64286,
+        65024,
+        65039,
+        65040,
+        65049,
+        65056,
+        65071,
+        65072,
+        65106,
+        65108,
+        65126,
+        65128,
+        65131,
+        65279,
+        65281,
+        65376,
+        65504,
+        65510,
+        65529,
+        65531
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\py\\pack\\repo_tidy_classifier.py",
+      "frameworks": [
+        "flask",
+        "fastapi"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\charset_normalizer\\constant.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        128,
+        256,
+        384,
+        592,
+        688,
+        768,
+        880,
+        1024,
+        1280,
+        1328,
+        1424,
+        1536,
+        1792,
+        1872,
+        1920,
+        1984,
+        2048,
+        2112,
+        2144,
+        2160,
+        2208,
+        2304,
+        2432,
+        2560,
+        2688,
+        2816,
+        2944,
+        3072,
+        3200,
+        3328,
+        3456,
+        3584,
+        3712,
+        3840,
+        4096,
+        4256,
+        4352,
+        4608,
+        4992,
+        5024,
+        5120,
+        5760,
+        5792,
+        5888,
+        5920,
+        5952,
+        5984,
+        6016,
+        6144,
+        6320,
+        6400,
+        6480,
+        6528,
+        6624,
+        6656,
+        6688,
+        6832,
+        6912,
+        7040,
+        7104,
+        7168,
+        7248,
+        7296,
+        7312,
+        7360,
+        7376,
+        7424,
+        7552,
+        7616,
+        7680,
+        7936,
+        8192,
+        8304,
+        8352,
+        8400,
+        8448,
+        8528,
+        8592,
+        8704,
+        8960,
+        9216,
+        9280,
+        9312,
+        9472,
+        9600,
+        9632,
+        9728,
+        9984,
+        10176,
+        10224,
+        10240,
+        10496,
+        10624,
+        10752,
+        11008,
+        11264,
+        11360,
+        11392,
+        11520,
+        11568,
+        11648,
+        11744,
+        11776,
+        11904,
+        12032,
+        12256,
+        12272,
+        12288,
+        12352,
+        12448,
+        12544,
+        12592,
+        12688,
+        12704,
+        12736,
+        12784,
+        12800,
+        13056,
+        13312,
+        19904,
+        19968,
+        40960,
+        42128,
+        42192,
+        42240,
+        42560,
+        42656,
+        42752,
+        42784,
+        43008,
+        43056,
+        43072,
+        43136,
+        43232,
+        43264,
+        43312,
+        43360,
+        43392,
+        43488,
+        43520,
+        43616,
+        43648,
+        43744,
+        43776,
+        43824,
+        43888,
+        43968,
+        44032,
+        55216,
+        55296,
+        56192,
+        56320,
+        57344,
+        63744,
+        64256,
+        64336,
+        65024,
+        65040,
+        65056,
+        65072,
+        65104,
+        65136,
+        65280,
+        65520,
+        2022,
+        620,
+        8859,
+        1250,
+        1251,
+        1252,
+        1253,
+        1255,
+        1256,
+        1254
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\qrcode\\tests\\test_example.py",
+      "frameworks": [],
+      "routes": [
+        {
+          "fn": "test_example",
+          "method": "PATCH"
+        }
+      ],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\qrcode\\tests\\test_release.py",
+      "frameworks": [],
+      "routes": [
+        {
+          "fn": "test_invalid_data",
+          "method": "PATCH"
+        },
+        {
+          "fn": "test_not_qrcode",
+          "method": "PATCH"
+        },
+        {
+          "fn": "test_no_change",
+          "method": "PATCH"
+        },
+        {
+          "fn": "test_change",
+          "method": "PATCH"
+        }
+      ],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\qrcode\\tests\\test_script.py",
+      "frameworks": [],
+      "routes": [
+        {
+          "fn": "test_isatty",
+          "method": "PATCH"
+        },
+        {
+          "fn": "test_isatty",
+          "method": "PATCH"
+        },
+        {
+          "fn": "test_piped",
+          "method": "PATCH"
+        },
+        {
+          "fn": "test_stdin",
+          "method": "PATCH"
+        },
+        {
+          "fn": "test_stdin_py3_unicodedecodeerror",
+          "method": "PATCH"
+        }
+      ],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\protobuf\\descriptor_pb2.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        370,
+        242,
+        252,
+        900,
+        998,
+        999,
+        1000,
+        1001,
+        210,
+        230,
+        204,
+        347,
+        350,
+        262,
+        9995,
+        10000,
+        10001,
+        11873,
+        12168,
+        144,
+        147,
+        811,
+        814,
+        1639,
+        1460,
+        1582,
+        1584,
+        1642,
+        2230,
+        2017,
+        2165,
+        2167,
+        2219,
+        2233,
+        3066,
+        2687,
+        2997,
+        2999,
+        3068,
+        3167,
+        3170,
+        3525,
+        3466,
+        3528,
+        3659,
+        3662,
+        3829,
+        3832,
+        4097,
+        4100,
+        5297,
+        5194,
+        5252,
+        5300,
+        5800,
+        5803,
+        7496,
+        6640,
+        6730,
+        6733,
+        7011,
+        7013,
+        7060,
+        7062,
+        7115,
+        7117,
+        7202,
+        7205,
+        7473,
+        7499,
+        7671,
+        7674,
+        8011,
+        8014,
+        8358,
+        8361,
+        8574,
+        8577,
+        8986,
+        8895,
+        8975,
+        8989,
+        9399,
+        9325,
+        9402,
+        10721,
+        10218,
+        10310,
+        10312,
+        10367,
+        10369,
+        10455,
+        10457,
+        10530,
+        10532,
+        10615,
+        10617,
+        10689,
+        10724,
+        11219,
+        10971,
+        11222,
+        11531,
+        11311,
+        11517,
+        11534,
+        11870,
+        11635,
+        11830
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\agent_injector.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        404,
+        500,
+        401,
+        400
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\wrapper_plan_proxy.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\leb_service.py",
+      "frameworks": [
+        "http.server"
+      ],
+      "routes": [],
+      "ports": [
+        200,
+        4000,
+        500,
+        404,
+        403,
+        408,
+        1200,
+        127,
+        8765
+      ],
+      "hints": [
+        "stdlib-http-server"
+      ]
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\werkzeug\\serving.py",
+      "frameworks": [
+        "http.server"
+      ],
+      "routes": [],
+      "ports": [
+        128,
+        2616,
+        100,
+        204,
+        304,
+        200,
+        413,
+        1000,
+        404,
+        2048,
+        365,
+        253,
+        155,
+        219,
+        58162,
+        127,
+        5000,
+        8080
+      ],
+      "hints": [
+        "stdlib-http-server"
+      ]
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\pip\\_vendor\\urllib3\\packages\\six.py",
+      "frameworks": [
+        "http.server"
+      ],
+      "routes": [],
+      "ports": [
+        2010,
+        2020,
+        560,
+        302,
+        451,
+        366
+      ],
+      "hints": [
+        "stdlib-http-server"
+      ]
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\serve_approvals_8778.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        8778
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\server\\serve_phone_lan.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        8781
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\phone_pwa_patch.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\phone_pwa_upgrade.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        401,
+        500,
+        5000
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tmp\\run\\probe_flask_20250827_103357.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\app.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        4093,
+        3761,
+        308,
+        307,
+        127,
+        5000,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\blueprints.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\cli.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        127,
+        5000
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\config.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\ctx.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\debughelpers.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        307,
+        308
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\globals.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\helpers.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        404,
+        302,
+        2231
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\logging.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\sessions.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\testing.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        127
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\typing.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        4095,
+        4295,
+        4297
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\views.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\wrappers.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        413
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\__init__.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\pip\\_vendor\\truststore\\_api.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        6667
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\api_core\\exceptions.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        2014,
+        301,
+        304,
+        307,
+        308,
+        400,
+        401,
+        403,
+        404,
+        405,
+        409,
+        411,
+        412,
+        416,
+        429,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        691
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\auth\\transport\\_aiohttp_requests.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        2020,
+        180
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\auth\\aio\\transport\\aiohttp.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        2024,
+        1024
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\json\\provider.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        822
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\json\\tag.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\json\\__init__.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\sansio\\app.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        302
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\sansio\\blueprints.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\flask\\sansio\\scaffold.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        404,
+        500
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\py\\pa_diag_runner.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        99,
+        10000,
+        200
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\py\\pa_project_snapshot.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [
+        127
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\py\\ci\\patch_workflows.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tmp\\run\\env_probe_20250827_014530.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tmp\\run\\env_probe_20250827_015148.py",
+      "frameworks": [
+        "flask"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\anthropic\\_base_client.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        3464,
+        2399,
+        2880,
+        3526,
+        1000,
+        408,
+        409,
+        429,
+        500,
+        81
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\groq\\_base_client.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        3464,
+        2399,
+        2880,
+        3526,
+        1000,
+        408,
+        409,
+        429,
+        500,
+        81
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\openai\\_base_client.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        3464,
+        2399,
+        2880,
+        3526,
+        1000,
+        408,
+        409,
+        429,
+        500,
+        81
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\pydantic\\version.py",
+      "frameworks": [
+        "fastapi"
+      ],
+      "routes": [],
+      "ports": [],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\pygments\\lexers\\_scilab_builtins.py",
+      "frameworks": [
+        "quart"
+      ],
+      "routes": [],
+      "ports": [
+        2006,
+        2025
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\pydantic\\_internal\\_validators.py",
+      "frameworks": [
+        "uvicorn"
+      ],
+      "routes": [],
+      "ports": [
+        5595,
+        123,
+        230,
+        12300
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\pip\\_vendor\\rich\\_emoji_codes.py",
+      "frameworks": [
+        "tornado"
+      ],
+      "routes": [],
+      "ports": [
+        100,
+        1234
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\oauth2\\_id_token_async.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        2020,
+        509,
+        4110
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\oauth2\\_reauth_async.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        2021
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\auth\\aio\\transport\\sessions.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        2024,
+        1174
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\auth\\aio\\transport\\__init__.py",
+      "frameworks": [
+        "aiohttp"
+      ],
+      "routes": [],
+      "ports": [
+        2024,
+        180
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\grpc\\_server.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        2016,
+        6597
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\grpc\\aio\\_base_server.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        2020
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\grpc\\aio\\_server.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        2019
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\grpc\\beta\\_server_adaptations.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        2016,
+        4078
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\google\\api\\control_pb2.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        2025,
+        242,
+        146
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tests\\test_proposal_api.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        200,
+        127,
+        8765
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\phone_cfg_dump.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        192,
+        168,
+        8770
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\py\\net\\port_probe.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        1024,
+        8781,
+        8782,
+        8783,
+        127,
+        200
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\werkzeug\\http.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        100,
+        101,
+        102,
+        103,
+        8297,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        5842,
+        226,
+        3229,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        2324,
+        421,
+        7540,
+        422,
+        423,
+        424,
+        425,
+        8470,
+        426,
+        428,
+        6585,
+        429,
+        431,
+        449,
+        451,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        2295,
+        507,
+        508,
+        510,
+        511,
+        9110,
+        2231,
+        8859,
+        2822,
+        2616,
+        256,
+        4093,
+        3333,
+        6265
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tests\\test_settings_api.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        200
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\check_api_keys.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        2025
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tools\\phone_listener.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        120
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tmp\\run\\plan_mark_78_79_710.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        8781,
+        8770
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tmp\\archive\\tools_staging\\patch_chat_tab_send_api.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        200,
+        4000
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\tmp\\archive\\tools_staging\\patch_chat_tab_send_api2.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        4000
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\charset_normalizer\\api.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        512,
+        100
+      ],
+      "hints": []
+    },
+    {
+      "file": "C:\\_Repos\\PersistentAssistant\\.venv\\Lib\\site-packages\\googleapiclient\\channel.py",
+      "frameworks": [],
+      "routes": [],
+      "ports": [
+        2014,
+        1970,
+        1000,
+        3600
+      ],
+      "hints": []
+    }
+  ]
+}
