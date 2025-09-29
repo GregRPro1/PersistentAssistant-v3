@@ -1,15 +1,15 @@
+# server/control_console.py
 """
-server/control_console.py
-Minimal control console blueprint:
-  - GET /control/  -> HTML form
-  - POST /control/apply -> invokes pack fetch/apply once, shows stdout/stderr
-Unified server should auto-mount modules that export `bp` (Flask Blueprint).
+Control console as a Flask Blueprint.
+- GET  /control/        -> HTML form
+- POST /control/apply   -> run pack fetcher once (release/tag or direct URL)
 Exports:
-  - bp : Blueprint
-  - mount_path : '/control'
+  - bp (Blueprint)
+  - mount_path = '/control'
 """
 import os, subprocess
 from pathlib import Path
+from string import Template
 from flask import Blueprint, request, Response
 
 bp = Blueprint('control_console', __name__)
@@ -26,7 +26,7 @@ def _is_local(req) -> bool:
 def _authz(req) -> bool:
     token = os.getenv('PA_WEB_TOKEN', '').strip()
     if not token:
-        return True if _is_local(req) else True  # relaxed by default
+        return True if _is_local(req) else True  # relaxed for now
     if _is_local(req): return True
     hdr = req.headers.get('Authorization','')
     parts = hdr.split()
@@ -40,29 +40,37 @@ def _repo_root() -> Path:
         p = p.parent
     return Path.cwd()
 
-def _page(extra: str='') -> str:
-    return f"""<!doctype html>
-<html><head><meta charset='utf-8'/><title>PA Control</title>
-<style>
-  body{{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:900px}}
-  label{{display:block;margin-top:12px}} input[type=text]{{width:100%;padding:8px}}
-  .row{{display:flex;gap:12px}} .row>div{{flex:1}} button{{margin-top:16px;padding:8px 14px}}
-  pre{{background:#f6f6f6;padding:10px;overflow:auto}} .ok{{color:green}} .err{{color:#b00}}
-</style></head><body>
+_TPL = Template("""<!doctype html>
+<html><head><meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PA Control</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:24px;max-width:900px}
+    label{display:block;margin-top:12px}
+    input[type=text]{width:100%;padding:8px}
+    .row{display:flex;gap:12px}.row>div{flex:1}
+    button{margin-top:16px;padding:8px 14px}
+    pre{background:#f6f6f6;padding:10px;overflow:auto}
+    .ok{color:green}.err{color:#b00}
+  </style>
+</head><body>
   <h1>Persistent Assistant — Control Console</h1>
-  <form method='POST' action='{mount_path}/apply'>
-    <div class='row'>
-      <div><label>Repo (owner/repo)<input name='repo' value='{REPO_DEFAULT}'></label></div>
-      <div><label>Release tag<input name='release' value='{RELEASE_DEFAULT}'></label></div>
+  <form method="POST" action="$MOUNT/apply">
+    <div class="row">
+      <div><label>Repo (owner/repo)<input name="repo" value="$REPO"></label></div>
+      <div><label>Release tag<input name="release" value="$REL"></label></div>
     </div>
-    <label>Asset glob<input name='asset_glob' value='{ASSET_GLOB_DEFAULT}'></label>
-    <label>Direct ZIP URL (optional)<input name='direct_url' value=''></label>
-    <label>GitHub token (optional)<input name='gh_token' value=''></label>
-    <button type='submit'>Apply</button>
+    <label>Asset glob<input name="asset_glob" value="$GLOB"></label>
+    <label>Direct ZIP URL (optional)<input name="direct_url" value=""></label>
+    <label>GitHub token (optional)<input name="gh_token" value=""></label>
+    <button type="submit">Apply</button>
   </form>
-  {extra}
+  $EXTRA
   <p>Logs: <code>reports/ops/pack_fetcher.log</code></p>
-</body></html>"""
+</body></html>""")
+
+def _page(extra: str='') -> str:
+    return _TPL.substitute(MOUNT=mount_path, REPO=REPO_DEFAULT, REL=RELEASE_DEFAULT, GLOB=ASSET_GLOB_DEFAULT, EXTRA=(extra or ''))
 
 @bp.before_request
 def _gate():
@@ -77,6 +85,7 @@ def ui():
 def apply_once():
     if not _authz(request):
         return Response('Forbidden', status=403)
+
     data = request.form or {}
     repo = (data.get('repo') or REPO_DEFAULT).strip()
     release = (data.get('release') or RELEASE_DEFAULT).strip()
@@ -101,7 +110,8 @@ def apply_once():
     try:
         p = subprocess.run(args, cwd=str(root), env=env, capture_output=True, text=True, timeout=600)
         ok = (p.returncode==0)
-        extra = f"<p class='{'ok' if ok else 'err'}'>Exit {p.returncode}</p><h3>stdout</h3><pre>{p.stdout or ''}</pre><h3>stderr</h3><pre>{p.stderr or ''}</pre>"
+        klass = 'ok' if ok else 'err'
+        extra = f"<p class='{klass}'>Exit {p.returncode}</p><h3>stdout</h3><pre>{(p.stdout or '').replace('<','&lt;')}</pre><h3>stderr</h3><pre>{(p.stderr or '').replace('<','&lt;')}</pre>"
         return Response(_page(extra), mimetype='text/html', status=(200 if ok else 500))
     except Exception as e:
-        return Response(_page(f\"<p class='err'>Exception: {e!s}</p>\"), mimetype='text/html', status=500)
+        return Response(_page(f"<p class='err'>Exception: {e!s}</p>"), mimetype='text/html', status=500)

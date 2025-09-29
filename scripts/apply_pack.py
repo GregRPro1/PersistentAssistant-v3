@@ -1,16 +1,17 @@
-import subprocess
+
+import subprocess, base64
 from pathlib import Path
 
-FILES = {
-    'tools/ps1/run_control_server.ps1': "param([string]$BindHost='127.0.0.1',[int]$BindPort=8776)\n$ErrorActionPreference='Stop'\n$u = \"http://$($BindHost):$($BindPort)/control/\"\nWrite-Host \"Starting PA Control standalone at $u\"\npython (Join-Path $PSScriptRoot '..\\py\\control_server.py') --host $BindHost --port $BindPort\n",
-    'tools/py/control_server.py': "from flask import Flask, redirect\nimport argparse\ntry:\n    from server.control_console import bp as control_bp, mount_path as control_mount\nexcept Exception as e:\n    raise SystemExit(f\"[control_server] Failed to import server.control_console: {e}\")\napp = Flask(\"pa_control\")\napp.register_blueprint(control_bp, url_prefix=control_mount)\n@app.get('/')\ndef _root(): return redirect(control_mount + '/')\n@app.get('/healthz')\ndef _health(): return 'ok', 200, {'Content-Type':'text/plain'}\ndef main():\n    p = argparse.ArgumentParser()\n    p.add_argument('--host', default='127.0.0.1')\n    p.add_argument('--port', default=8776, type=int)\n    a = p.parse_args()\n    app.run(host=a.host, port=a.port, debug=False)\nif __name__=='__main__': main()\n",
-    'tests/smoke/test_control_bp_import.py': "def test_control_bp_import():\n    mod = __import__('server.control_console', fromlist=['bp','mount_path'])\n    assert hasattr(mod, 'bp') and hasattr(mod, 'mount_path')\n",
+FILES_B64 = {
+    'server/control_console.py': 'IyBzZXJ2ZXIvY29udHJvbF9jb25zb2xlLnB5CiIiIgpDb250cm9sIGNvbnNvbGUgYXMgYSBGbGFzayBCbHVlcHJpbnQuCi0gR0VUICAvY29udHJvbC8gICAgICAgIC0+IEhUTUwgZm9ybQotIFBPU1QgL2NvbnRyb2wvYXBwbHkgICAtPiBydW4gcGFjayBmZXRjaGVyIG9uY2UgKHJlbGVhc2UvdGFnIG9yIGRpcmVjdCBVUkwpCkV4cG9ydHM6CiAgLSBicCAoQmx1ZXByaW50KQogIC0gbW91bnRfcGF0aCA9ICcvY29udHJvbCcKIiIiCmltcG9ydCBvcywgc3VicHJvY2Vzcwpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgKZnJvbSBzdHJpbmcgaW1wb3J0IFRlbXBsYXRlCmZyb20gZmxhc2sgaW1wb3J0IEJsdWVwcmludCwgcmVxdWVzdCwgUmVzcG9uc2UKCmJwID0gQmx1ZXByaW50KCdjb250cm9sX2NvbnNvbGUnLCBfX25hbWVfXykKbW91bnRfcGF0aCA9ICcvY29udHJvbCcKClJFUE9fREVGQVVMVCA9IG9zLmdldGVudignUEFfUkVQTycsICdHcmVnUlBybzEvUGVyc2lzdGVudEFzc2lzdGFudC12MycpClJFTEVBU0VfREVGQVVMVCA9IG9zLmdldGVudignUEFfUkVMRUFTRScsICdQQS1PVVRQVVQnKQpBU1NFVF9HTE9CX0RFRkFVTFQgPSBvcy5nZXRlbnYoJ1BBX0FTU0VUX0dMT0InLCAnUEFfT1VUUFVUXyouemlwJykKCmRlZiBfaXNfbG9jYWwocmVxKSAtPiBib29sOgogICAgaXAgPSAocmVxLnJlbW90ZV9hZGRyIG9yICcnKQogICAgcmV0dXJuIGlwLnN0YXJ0c3dpdGgoJzEyNy4nKSBvciBpcCA9PSAnOjoxJwoKZGVmIF9hdXRoeihyZXEpIC0+IGJvb2w6CiAgICB0b2tlbiA9IG9zLmdldGVudignUEFfV0VCX1RPS0VOJywgJycpLnN0cmlwKCkKICAgIGlmIG5vdCB0b2tlbjoKICAgICAgICByZXR1cm4gVHJ1ZSBpZiBfaXNfbG9jYWwocmVxKSBlbHNlIFRydWUgICMgcmVsYXhlZCBmb3Igbm93CiAgICBpZiBfaXNfbG9jYWwocmVxKTogcmV0dXJuIFRydWUKICAgIGhkciA9IHJlcS5oZWFkZXJzLmdldCgnQXV0aG9yaXphdGlvbicsJycpCiAgICBwYXJ0cyA9IGhkci5zcGxpdCgpCiAgICByZXR1cm4gKGxlbihwYXJ0cyk9PTIgYW5kIHBhcnRzWzBdLmxvd2VyKCk9PSdiZWFyZXInIGFuZCBwYXJ0c1sxXT09dG9rZW4pCgpkZWYgX3JlcG9fcm9vdCgpIC0+IFBhdGg6CiAgICBwID0gUGF0aChfX2ZpbGVfXykucmVzb2x2ZSgpCiAgICBmb3IgXyBpbiByYW5nZSgxMik6CiAgICAgICAgaWYgKHAvJy5naXQnKS5leGlzdHMoKTogcmV0dXJuIHAKICAgICAgICBpZiBwLnBhcmVudD09cDogYnJlYWsKICAgICAgICBwID0gcC5wYXJlbnQKICAgIHJldHVybiBQYXRoLmN3ZCgpCgpfVFBMID0gVGVtcGxhdGUoIiIiPCFkb2N0eXBlIGh0bWw+CjxodG1sPjxoZWFkPjxtZXRhIGNoYXJzZXQ9InV0Zi04Ii8+CiAgPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xIi8+CiAgPHRpdGxlPlBBIENvbnRyb2w8L3RpdGxlPgogIDxzdHlsZT4KICAgIGJvZHl7Zm9udC1mYW1pbHk6c3lzdGVtLXVpLFNlZ29lIFVJLEFyaWFsLHNhbnMtc2VyaWY7bWFyZ2luOjI0cHg7bWF4LXdpZHRoOjkwMHB4fQogICAgbGFiZWx7ZGlzcGxheTpibG9jazttYXJnaW4tdG9wOjEycHh9CiAgICBpbnB1dFt0eXBlPXRleHRde3dpZHRoOjEwMCU7cGFkZGluZzo4cHh9CiAgICAucm93e2Rpc3BsYXk6ZmxleDtnYXA6MTJweH0ucm93PmRpdntmbGV4OjF9CiAgICBidXR0b257bWFyZ2luLXRvcDoxNnB4O3BhZGRpbmc6OHB4IDE0cHh9CiAgICBwcmV7YmFja2dyb3VuZDojZjZmNmY2O3BhZGRpbmc6MTBweDtvdmVyZmxvdzphdXRvfQogICAgLm9re2NvbG9yOmdyZWVufS5lcnJ7Y29sb3I6I2IwMH0KICA8L3N0eWxlPgo8L2hlYWQ+PGJvZHk+CiAgPGgxPlBlcnNpc3RlbnQgQXNzaXN0YW50IOKAlCBDb250cm9sIENvbnNvbGU8L2gxPgogIDxmb3JtIG1ldGhvZD0iUE9TVCIgYWN0aW9uPSIkTU9VTlQvYXBwbHkiPgogICAgPGRpdiBjbGFzcz0icm93Ij4KICAgICAgPGRpdj48bGFiZWw+UmVwbyAob3duZXIvcmVwbyk8aW5wdXQgbmFtZT0icmVwbyIgdmFsdWU9IiRSRVBPIj48L2xhYmVsPjwvZGl2PgogICAgICA8ZGl2PjxsYWJlbD5SZWxlYXNlIHRhZzxpbnB1dCBuYW1lPSJyZWxlYXNlIiB2YWx1ZT0iJFJFTCI+PC9sYWJlbD48L2Rpdj4KICAgIDwvZGl2PgogICAgPGxhYmVsPkFzc2V0IGdsb2I8aW5wdXQgbmFtZT0iYXNzZXRfZ2xvYiIgdmFsdWU9IiRHTE9CIj48L2xhYmVsPgogICAgPGxhYmVsPkRpcmVjdCBaSVAgVVJMIChvcHRpb25hbCk8aW5wdXQgbmFtZT0iZGlyZWN0X3VybCIgdmFsdWU9IiI+PC9sYWJlbD4KICAgIDxsYWJlbD5HaXRIdWIgdG9rZW4gKG9wdGlvbmFsKTxpbnB1dCBuYW1lPSJnaF90b2tlbiIgdmFsdWU9IiI+PC9sYWJlbD4KICAgIDxidXR0b24gdHlwZT0ic3VibWl0Ij5BcHBseTwvYnV0dG9uPgogIDwvZm9ybT4KICAkRVhUUkEKICA8cD5Mb2dzOiA8Y29kZT5yZXBvcnRzL29wcy9wYWNrX2ZldGNoZXIubG9nPC9jb2RlPjwvcD4KPC9ib2R5PjwvaHRtbD4iIiIpCgpkZWYgX3BhZ2UoZXh0cmE6IHN0cj0nJykgLT4gc3RyOgogICAgcmV0dXJuIF9UUEwuc3Vic3RpdHV0ZShNT1VOVD1tb3VudF9wYXRoLCBSRVBPPVJFUE9fREVGQVVMVCwgUkVMPVJFTEVBU0VfREVGQVVMVCwgR0xPQj1BU1NFVF9HTE9CX0RFRkFVTFQsIEVYVFJBPShleHRyYSBvciAnJykpCgpAYnAuYmVmb3JlX3JlcXVlc3QKZGVmIF9nYXRlKCk6CiAgICBpZiBub3QgX2F1dGh6KHJlcXVlc3QpOgogICAgICAgIHJldHVybiBSZXNwb25zZSgnRm9yYmlkZGVuJywgc3RhdHVzPTQwMykKCkBicC5nZXQobW91bnRfcGF0aCArICcvJykKZGVmIHVpKCk6CiAgICByZXR1cm4gUmVzcG9uc2UoX3BhZ2UoKSwgbWltZXR5cGU9J3RleHQvaHRtbCcpCgpAYnAucG9zdChtb3VudF9wYXRoICsgJy9hcHBseScpCmRlZiBhcHBseV9vbmNlKCk6CiAgICBpZiBub3QgX2F1dGh6KHJlcXVlc3QpOgogICAgICAgIHJldHVybiBSZXNwb25zZSgnRm9yYmlkZGVuJywgc3RhdHVzPTQwMykKCiAgICBkYXRhID0gcmVxdWVzdC5mb3JtIG9yIHt9CiAgICByZXBvID0gKGRhdGEuZ2V0KCdyZXBvJykgb3IgUkVQT19ERUZBVUxUKS5zdHJpcCgpCiAgICByZWxlYXNlID0gKGRhdGEuZ2V0KCdyZWxlYXNlJykgb3IgUkVMRUFTRV9ERUZBVUxUKS5zdHJpcCgpCiAgICBhc3NldCA9IChkYXRhLmdldCgnYXNzZXRfZ2xvYicpIG9yIEFTU0VUX0dMT0JfREVGQVVMVCkuc3RyaXAoKQogICAgZGlyZWN0ID0gKGRhdGEuZ2V0KCdkaXJlY3RfdXJsJykgb3IgJycpLnN0cmlwKCkKICAgIHRva2VuID0gKGRhdGEuZ2V0KCdnaF90b2tlbicpIG9yIG9zLmdldGVudignR0lUSFVCX1RPS0VOJywnJykpLnN0cmlwKCkKCiAgICByb290ID0gX3JlcG9fcm9vdCgpCiAgICBweV9mZXRjaGVyID0gcm9vdCAvICd0b29scycgLyAncHknIC8gJ3BhY2snIC8gJ3BhY2tfZmV0Y2hlci5weScKICAgIHBzMSA9IHJvb3QgLyAndG9vbHMnIC8gJ3BzMScgLyAncnVuX3BhY2tfZmV0Y2hlci5wczEnCgogICAgZW52ID0gb3MuZW52aXJvbi5jb3B5KCkKICAgIGlmIHRva2VuOiBlbnZbJ0dJVEhVQl9UT0tFTiddID0gdG9rZW4KCiAgICBpZiBkaXJlY3Q6CiAgICAgICAgYXJncyA9IFsncHl0aG9uJywgc3RyKHB5X2ZldGNoZXIpLCAnLS1vbmNlJywgJy0tZGlyZWN0JywgZGlyZWN0XQogICAgZWxzZToKICAgICAgICBhcmdzID0gWydweXRob24nLCBzdHIocHlfZmV0Y2hlciksICctLW9uY2UnLCAnLS1yZXBvJywgcmVwbywgJy0tcmVsZWFzZScsIHJlbGVhc2UsICctLWFzc2V0JywgYXNzZXRdCiAgICBpZiBub3QgcHlfZmV0Y2hlci5leGlzdHMoKToKICAgICAgICBhcmdzID0gWydwd3NoJywgc3RyKHBzMSksICctT25jZSddCgogICAgdHJ5OgogICAgICAgIHAgPSBzdWJwcm9jZXNzLnJ1bihhcmdzLCBjd2Q9c3RyKHJvb3QpLCBlbnY9ZW52LCBjYXB0dXJlX291dHB1dD1UcnVlLCB0ZXh0PVRydWUsIHRpbWVvdXQ9NjAwKQogICAgICAgIG9rID0gKHAucmV0dXJuY29kZT09MCkKICAgICAgICBrbGFzcyA9ICdvaycgaWYgb2sgZWxzZSAnZXJyJwogICAgICAgIGV4dHJhID0gZiI8cCBjbGFzcz0ne2tsYXNzfSc+RXhpdCB7cC5yZXR1cm5jb2RlfTwvcD48aDM+c3Rkb3V0PC9oMz48cHJlPnsocC5zdGRvdXQgb3IgJycpLnJlcGxhY2UoJzwnLCcmbHQ7Jyl9PC9wcmU+PGgzPnN0ZGVycjwvaDM+PHByZT57KHAuc3RkZXJyIG9yICcnKS5yZXBsYWNlKCc8JywnJmx0OycpfTwvcHJlPiIKICAgICAgICByZXR1cm4gUmVzcG9uc2UoX3BhZ2UoZXh0cmEpLCBtaW1ldHlwZT0ndGV4dC9odG1sJywgc3RhdHVzPSgyMDAgaWYgb2sgZWxzZSA1MDApKQogICAgZXhjZXB0IEV4Y2VwdGlvbiBhcyBlOgogICAgICAgIHJldHVybiBSZXNwb25zZShfcGFnZShmIjxwIGNsYXNzPSdlcnInPkV4Y2VwdGlvbjoge2Uhc308L3A+IiksIG1pbWV0eXBlPSd0ZXh0L2h0bWwnLCBzdGF0dXM9NTAwKQ==',
+    'tools/ps1/open_control_in_edge.ps1': 'cGFyYW0oW3N0cmluZ10kSG9zdD0nMTI3LjAuMC4xJyxbaW50XSRQb3J0PTg3NzYpCiRFcnJvckFjdGlvblByZWZlcmVuY2U9J1N0b3AnCiR1cmwgPSAiaHR0cDovLyQoJEhvc3QpOiQoJFBvcnQpL2NvbnRyb2wvIgojIFRyeSBtc2VkZ2UuZXhlIGZpcnN0CiRlZGdlID0gR2V0LUNvbW1hbmQgJ21zZWRnZS5leGUnIC1FcnJvckFjdGlvbiBTaWxlbnRseUNvbnRpbnVlCmlmICgkZWRnZSkgewogIFN0YXJ0LVByb2Nlc3MgLUZpbGVQYXRoICRlZGdlLlNvdXJjZSAtQXJndW1lbnRMaXN0ICR1cmwKICBleGl0IDAKfQojIFRyeSB0eXBpY2FsIGluc3RhbGwgcGF0aAokcGF0aDEgPSAnQzpcUHJvZ3JhbSBGaWxlcyAoeDg2KVxNaWNyb3NvZnRcRWRnZVxBcHBsaWNhdGlvblxtc2VkZ2UuZXhlJwokcGF0aDIgPSAnQzpcUHJvZ3JhbSBGaWxlc1xNaWNyb3NvZnRcRWRnZVxBcHBsaWNhdGlvblxtc2VkZ2UuZXhlJwppZiAoVGVzdC1QYXRoICRwYXRoMSkgeyBTdGFydC1Qcm9jZXNzIC1GaWxlUGF0aCAkcGF0aDEgLUFyZ3VtZW50TGlzdCAkdXJsOyBleGl0IDAgfQppZiAoVGVzdC1QYXRoICRwYXRoMikgeyBTdGFydC1Qcm9jZXNzIC1GaWxlUGF0aCAkcGF0aDIgLUFyZ3VtZW50TGlzdCAkdXJsOyBleGl0IDAgfQojIEZhbGxiYWNrIHRvIHNoZWxsClN0YXJ0LVByb2Nlc3MgImNtZCIgIi9jIHN0YXJ0ICR1cmwiCg==',
+    'tests/smoke/test_control_bp_import.py': 'ZGVmIHRlc3RfY29udHJvbF9icF9pbXBvcnQoKToKICAgIG1vZCA9IF9faW1wb3J0X18oJ3NlcnZlci5jb250cm9sX2NvbnNvbGUnLCBmcm9tbGlzdD1bJ2JwJywnbW91bnRfcGF0aCddKQogICAgYXNzZXJ0IGhhc2F0dHIobW9kLCAnYnAnKSBhbmQgaGFzYXR0cihtb2QsICdtb3VudF9wYXRoJykK',
+    'tests/smoke/test_control_http_local.py': 'ZnJvbSBmbGFzayBpbXBvcnQgRmxhc2sKZGVmIHRlc3RfY29udHJvbF9odHRwX2xvY2FsKCk6CiAgICBtID0gX19pbXBvcnRfXygnc2VydmVyLmNvbnRyb2xfY29uc29sZScsIGZyb21saXN0PVsnYnAnLCdtb3VudF9wYXRoJ10pCiAgICBhcHAgPSBGbGFzaygndCcpOyBhcHAucmVnaXN0ZXJfYmx1ZXByaW50KG0uYnAsIHVybF9wcmVmaXg9bS5tb3VudF9wYXRoKQogICAgYyA9IGFwcC50ZXN0X2NsaWVudCgpCiAgICByID0gYy5nZXQobS5tb3VudF9wYXRoICsgJy8nKQogICAgYXNzZXJ0IHIuc3RhdHVzX2NvZGUgPT0gMjAwCiAgICBhc3NlcnQgYidDb250cm9sIENvbnNvbGUnIGluIHIuZGF0YQo=',
+    'tools/py/patch_unified_add_control.py': 'aW1wb3J0IHN5cywgeWFtbApmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgKZGVmIG1haW4oKToKICAgIHJvb3QgPSBQYXRoKF9fZmlsZV9fKS5yZXNvbHZlKCkKICAgIGZvciBfIGluIHJhbmdlKDgpOgogICAgICAgIGlmIChyb290LycuZ2l0JykuZXhpc3RzKCk6IGJyZWFrCiAgICAgICAgaWYgcm9vdC5wYXJlbnQ9PXJvb3Q6IGJyZWFrCiAgICAgICAgcm9vdCA9IHJvb3QucGFyZW50CiAgICBjZmcgPSByb290Lydjb25maWcnLyd1bmlmaWVkX3NlcnZlci55YW1sJwogICAgaWYgbm90IGNmZy5leGlzdHMoKToKICAgICAgICBzeXMuZXhpdCgwKQogICAgZGF0YSA9IHlhbWwuc2FmZV9sb2FkKGNmZy5yZWFkX3RleHQoZW5jb2Rpbmc9J3V0Zi04JykpIG9yIHt9CiAgICBjYW5kcyA9IGxpc3QoZGF0YS5nZXQoJ2NhbmRpZGF0ZXMnLCBbXSkpCiAgICBpZiAnc2VydmVyLmNvbnRyb2xfY29uc29sZScgbm90IGluIGNhbmRzOgogICAgICAgIGNhbmRzLmFwcGVuZCgnc2VydmVyLmNvbnRyb2xfY29uc29sZScpCiAgICAgICAgZGF0YVsnY2FuZGlkYXRlcyddID0gY2FuZHMKICAgICAgICBjZmcud3JpdGVfdGV4dCh5YW1sLnNhZmVfZHVtcChkYXRhLCBzb3J0X2tleXM9RmFsc2UpLCBlbmNvZGluZz0ndXRmLTgnKQppZiBfX25hbWVfXz09J19fbWFpbl9fJzogbWFpbigp',
 }
 
-def write(root: Path, rel: str, txt: str):
-    p = root/rel
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(txt, encoding='utf-8')
+def write_b64(root: Path, rel: str, b: str):
+    p = root/rel; p.parent.mkdir(parents=True, exist_ok=True); p.write_bytes(base64.b64decode(b))
 
 def find_root(seed: Path) -> Path:
     p = seed
@@ -20,18 +21,25 @@ def find_root(seed: Path) -> Path:
         p = p.parent
     return seed
 
-def run(a, cwd=None, check=False):
-    subprocess.run(a, cwd=cwd, check=check)
+def run(a, cwd=None, check=False): subprocess.run(a, cwd=cwd, check=check)
 
 def main():
-    root = find_root(Path(__file__).resolve())
-    for rel,txt in FILES.items():
-        write(root, rel, txt)
-    try: run(['git','checkout','-B','step/PA-331-control-standalone'], root)
+    here = Path(__file__).resolve()
+    root = find_root(here)
+
+    for rel,b in FILES_B64.items():
+        write_b64(root, rel, b)
+
+    # ensure unified server candidate contains control console
+    run(['python', str(root/'tools/py/patch_unified_add_control.py')], root, check=False)
+
+    try: run(['git','checkout','-B','step/PA-332-control-console-fix2'], root)
     except Exception: pass
     run(['git','add','-A'], root)
-    run(['git','commit','-m','PA-331: rename params in run_control_server.ps1 + smoke'], root)
-    run(['git','push','-u','origin','step/PA-331-control-standalone'], root)
-    print('PA-331 updated. Start with: pwsh tools\\ps1\\run_control_server.ps1')
+    run(['git','commit','-m','PA-332: control console fix (Template), Edge launcher, smoke, unified candidates'], root)
+    run(['git','push','-u','origin','step/PA-332-control-console-fix2'], root)
 
+    print('PA-332 applied. Use:')
+    print('  pwsh tools\\ps1\\run_control_server.ps1   # if using standalone')
+    print('  pwsh tools\\ps1\\open_control_in_edge.ps1 # open in Edge')
 if __name__=='__main__': main()
