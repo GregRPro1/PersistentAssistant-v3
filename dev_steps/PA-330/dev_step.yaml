@@ -1,0 +1,7 @@
+id: PA-330
+title: Control UI: URL/tag apply + logs/history
+type: feature
+status: planned
+owner: assistant
+description: |
+  Upgrade control plane with paste URL/tag apply, live logs (SSE), and run history.

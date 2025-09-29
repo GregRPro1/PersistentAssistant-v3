@@ -1,0 +1,7 @@
+id: PA-342
+title: Cloudflare Tunnel helper
+type: feature
+status: planned
+owner: assistant
+description: |
+  Secure remote access with bearer token gate and one-line tunnel helper.

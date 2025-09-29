@@ -1,0 +1,7 @@
+id: PA-350
+title: Unified server harness
+type: feature
+status: planned
+owner: assistant
+description: |
+  Mount existing Flask apps/blueprints behind one port with optional Bearer auth.

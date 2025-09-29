@@ -1,0 +1,7 @@
+id: PA-360
+title: Repo tidy classifier
+type: feature
+status: planned
+owner: assistant
+description: |
+  Classify active vs dev vs dead; produce mover + rollback for safe archiving.

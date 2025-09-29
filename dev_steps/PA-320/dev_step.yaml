@@ -1,0 +1,7 @@
+id: PA-320
+title: Ops status HTML + SHA256 tools
+type: feature
+status: planned
+owner: assistant
+description: |
+  Add docs/ops/index.html publisher, sha256 helpers, and integrate with control page.
