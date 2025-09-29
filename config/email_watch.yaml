@@ -1,18 +1,17 @@
-enabled: false
+# C:\_Repos\PersistentAssistant\config\email_watch.yaml
+enabled: true
 protocol: imap
-host: outlook.office365.com
+host: imap-mail.outlook.com
 port: 993
-username: grapson_pro1@outlook.com
-password: "MSk1tk@t!""
+username: pa-ops-65699801RAP@outlook.com
+password: "huwjweoteurjjimb"
 folder: INBOX
 allow_from:
-  - "gprapson@gmail.com
-subject_flag: "[PA] APPLY"
+  - "gprapson@gmail.com"
+subject_flag: "[PA:8c9f]"
 save_dir: "_inbox"
 processed_dir: "_inbox/processed"
 max_attachment_mb: 50
 apply_after_download: true
-
-# TLS settings
-verify_ssl: true         # set false temporarily only for diagnostics
-cafile: ""               # optional path to a custom CA bundle (PEM)
+verify_ssl: true
+cafile: ""

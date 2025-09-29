@@ -1,0 +1,14 @@
+id: PA-301
+title: Switch email watcher to Microsoft Graph (OAuth2)
+status: proposed
+owner: greg
+touches:
+  - 'tools/py/email_watcher_graph.py'
+  - 'tools/ps1/run_email_watcher_graph.ps1'
+  - 'tools/ps1/register_email_watcher_graph.ps1'
+  - 'tools/ps1/unregister_email_watcher_graph.ps1'
+  - 'config/email_watch_graph.yaml'
+  - 'docs/GRAPH_SETUP.md'
+artifacts:
+  manifest: 'dev_steps/PA-301/manifest.yaml'
+  results_dir: 'dev_steps/PA-301/results/'

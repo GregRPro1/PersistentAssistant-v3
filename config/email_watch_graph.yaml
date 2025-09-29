@@ -1,0 +1,16 @@
+# Use Microsoft Graph (OAuth2 device-code) instead of IMAP.
+enabled: false
+
+# App registration (personal Microsoft account)
+client_id: ""    # paste Application (client) ID after registration
+authority: "https://login.microsoftonline.com/consumers"
+
+# Filters
+subject_flag: "[PA:01f9aa]"
+allow_from:
+  - "gprapson@gmail.com"
+
+# Download/apply
+save_dir: "_inbox"
+processed_dir: "_inbox/processed"
+apply_after_download: true
