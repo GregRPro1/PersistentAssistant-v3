@@ -1,4 +1,3 @@
-param([string]$RepoRoot='')
 $ErrorActionPreference='Stop'
-& python (Join-Path $PSScriptRoot 'apply_pack.py') --repo-root $RepoRoot
+& python (Join-Path $PSScriptRoot 'apply_pack.py')
 exit $LASTEXITCODE

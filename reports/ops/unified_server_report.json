@@ -1,0 +1,87 @@
+{
+  "mounted": [
+    {
+      "module": "server.apply_api",
+      "status": "mounted",
+      "path": "/apply",
+      "how": "bp"
+    },
+    {
+      "module": "server.proposal_api",
+      "status": "mounted",
+      "path": "/proposals",
+      "how": "app"
+    },
+    {
+      "module": "server.serve_phone_clean",
+      "status": "mounted",
+      "path": "/phone",
+      "how": "app"
+    },
+    {
+      "module": "server.phone_blueprint",
+      "status": "skipped",
+      "reason": "no app/create_app/bp"
+    },
+    {
+      "module": "server.settings_api",
+      "status": "mounted",
+      "path": "/settings",
+      "how": "app"
+    },
+    {
+      "module": "server.logs_tail",
+      "status": "skipped",
+      "reason": "no app/create_app/bp"
+    },
+    {
+      "module": "server.agent_sidecar",
+      "status": "import_failed",
+      "error": "View function mapping is overwriting an existing endpoint function: agent_plan"
+    },
+    {
+      "module": "server.agent_sidecar_wrapper",
+      "status": "mounted",
+      "path": "/sidecar_wrap",
+      "how": "app"
+    },
+    {
+      "module": "server.micro_approvals",
+      "status": "mounted",
+      "path": "/approvals",
+      "how": "app"
+    },
+    {
+      "module": "server.approvals_micro",
+      "status": "mounted",
+      "path": "/approvals_alt",
+      "how": "create_app"
+    },
+    {
+      "module": "server.micro_leb_proxy",
+      "status": "mounted",
+      "path": "/leb",
+      "how": "bp"
+    },
+    {
+      "module": "serve_phone",
+      "status": "mounted",
+      "path": "/phone_legacy",
+      "how": "app"
+    },
+    {
+      "module": "serve_phone_inline",
+      "status": "mounted",
+      "path": "/phone_inline",
+      "how": "app"
+    },
+    {
+      "module": "tools.leb_server",
+      "status": "skipped",
+      "reason": "no app/create_app/bp"
+    }
+  ],
+  "host": "127.0.0.1",
+  "port": 8765,
+  "token_env": "PA_WEB_TOKEN"
+}

@@ -1,4 +1,4 @@
-import sys, yaml
+import sys, pyyaml
 from pathlib import Path
 
 def load_yaml(p):

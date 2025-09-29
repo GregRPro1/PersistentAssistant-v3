@@ -1,0 +1,21 @@
+# unified server configuration
+host: 127.0.0.1
+port: 8765
+# name of env var that holds a Bearer token; if empty -> no token required on localhost
+token_env: PA_WEB_TOKEN
+# override import candidates (advanced)
+candidates:
+- server.apply_api
+- server.proposal_api
+- server.serve_phone_clean
+- server.phone_blueprint
+- server.settings_api
+- server.logs_tail
+- server.agent_sidecar
+- server.agent_sidecar_wrapper
+- server.micro_approvals
+- server.approvals_micro
+- server.micro_leb_proxy
+- serve_phone
+- serve_phone_inline
+- tools.leb_server
