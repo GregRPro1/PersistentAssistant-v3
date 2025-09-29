@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.185" timestamp="2025-09-29T13:29:35.246041+01:00" hostname="Gregs-PC1"><testcase classname="tests.smoke.test_email_watcher_import" name="test_import" time="0.044"><failure message="AttributeError: module 'email' has no attribute 'message'">def test_import():
+        import importlib
+&gt;       m = importlib.import_module('tools.py.email_watcher'.replace('/', '.'))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\smoke\test_email_watcher_import.py:4: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\GPRap\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+&lt;frozen importlib._bootstrap_external&gt;:1026: in exec_module
+    ???
+&lt;frozen importlib._bootstrap&gt;:488: in _call_with_frames_removed
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    
+    #!/usr/bin/env python3
+    # -*- coding: utf-8 -*-
+    """
+    PersistentAssistant: Email watcher (IMAP)
+    
+    Responsibilities
+    ----------------
+    - Load config from config/email_watch.yaml
+    - Connect to an IMAP server (Gmail/Outlook/etc.) with TLS handling controlled by
+      verify_ssl and cafile.
+    - Locate candidate messages based on allow_from and subject_flag (prefers UNSEEN).
+    - Download only .zip attachments into save_dir.
+    - Optionally run tools/ps1/apply_inbox.ps1 to apply packs.
+    - Move processed zips to processed_dir.
+    - Log activity to reports/ops/email_watch.log.
+    
+    Notes
+    -----
+    - If your environment has SSL interception (AV proxy), set verify_ssl: false
+      temporarily or point cafile at a trusted PEM bundle.
+    - Keep email_watch.yaml out of version control; it can contain credentials.
+    """
+    
+    import email
+    import imaplib
+    import os
+    import ssl
+    import sys
+    import time
+    import shutil
+    import subprocess
+    from pathlib import Path
+    from typing import List, Optional
+    
+    try:
+        import yaml  # Optional; we have a fallback parser
+    except Exception:
+        yaml = None
+    
+    # ------------------------------ Logging ---------------------------------
+    
+    def _log_path(root: Path) -&gt; Path:
+        p = root / "reports" / "ops" / "email_watch.log"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        return p
+    
+    def log_write(root: Path, msg: str) -&gt; None:
+        ts = time.strftime("%Y-%m-%d %H:%M:%S ")
+        with open(_log_path(root), "a", encoding="utf-8") as f:
+            f.write(ts + msg + "\n")
+    
+    # ------------------------------ Config ----------------------------------
+    
+    class WatchCfg:
+        def __init__(self, d: dict):
+            self.enabled            = bool(d.get("enabled", False))
+            self.protocol           = str(d.get("protocol", "imap")).lower()
+            self.host               = str(d.get("host", ""))
+            self.port               = int(d.get("port", 993))
+            self.username           = str(d.get("username", ""))
+            self.password           = str(d.get("password", ""))
+            self.folder             = str(d.get("folder", "INBOX"))
+            self.allow_from         = [str(x).lower() for x in (d.get("allow_from") or [])]
+            self.subject_flag       = str(d.get("subject_flag", "[PA] APPLY"))
+            self.save_dir           = str(d.get("save_dir", "_inbox"))
+            self.processed_dir      = str(d.get("processed_dir", "_inbox/processed"))
+            self.apply_after_download = bool(d.get("apply_after_download", True))
+            self.verify_ssl         = bool(d.get("verify_ssl", True))
+            self.cafile             = str(d.get("cafile", ""))
+    
+    def load_yaml(path: Path) -&gt; dict:
+        txt = path.read_text(encoding="utf-8")
+        if yaml:
+            return yaml.safe_load(txt) or {}
+        # Minimal fallback (key: "value" or key: value)
+        out = {}
+        for line in txt.splitlines():
+            s = line.strip()
+            if not s or s.startswith("#") or ":" not in s:
+                continue
+            k, v = line.split(":", 1)
+            v = v.strip()
+            if v[:1] in ("'", '"') and v[-1:] in ("'", '"'):
+                v = v[1:-1]
+            out[k.strip()] = v
+        return out
+    
+    # --------------------------- Repo root ----------------------------------
+    
+    def resolve_repo_root(cli: str = "") -&gt; Optional[Path]:
+        """
+        Prefer tools/py/apply_common.resolve_repo_root if available; else walk up.
+        """
+        if cli:
+            p = Path(cli)
+            if (p / ".git").exists():
+                return p
+        # Try import helper
+        sys.path.append(str(Path(__file__).resolve().parent.parent))
+        try:
+            from apply_common import resolve_repo_root as _r  # type: ignore
+            r = _r(cli)
+            if r:
+                return Path(r)
+        except Exception:
+            pass
+        # Fallback: walk up
+        p = Path(__file__).resolve()
+        for _ in range(8):
+            if (p / ".git").exists():
+                return p
+            p = p.parent
+        return None
+    
+    # ----------------------------- IMAP -------------------------------------
+    
+    def build_ssl_context(verify_ssl: bool, cafile: str) -&gt; ssl.SSLContext:
+        if not verify_ssl:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            return ctx
+        if cafile:
+            return ssl.create_default_context(cafile=cafile)
+        return ssl.create_default_context()
+    
+    def imap_connect(host: str, port: int, ctx: ssl.SSLContext) -&gt; imaplib.IMAP4_SSL:
+        M = imaplib.IMAP4_SSL(host, port, ssl_context=ctx)
+        typ, _ = M.noop()
+        if typ != "OK":
+            raise RuntimeError("IMAP NOOP failed before login")
+        return M
+    
+    def imap_login(M: imaplib.IMAP4_SSL, username: str, password: str) -&gt; None:
+        typ, data = M.login(username, password)
+        if typ != "OK":
+            raise RuntimeError(f"LOGIN failed: {data!r}")
+    
+    def imap_select(M: imaplib.IMAP4_SSL, folder: str) -&gt; None:
+        typ, _ = M.select(folder, readonly=False)
+        if typ != "OK":
+            raise RuntimeError(f"Could not select folder: {folder}")
+    
+    # --------------------------- Helpers ------------------------------------
+    
+    def _normalize_addr(s: str) -&gt; str:
+        try:
+            from email.utils import parseaddr
+            _, addr = parseaddr(s or "")
+            return (addr or "").lower()
+        except Exception:
+            return (s or "").lower()
+    
+&gt;   def _message_matches(msg: email.message.Message, allow_from: List[str], subject_flag: str) -&gt; bool:
+                              ^^^^^^^^^^^^^
+E   AttributeError: module 'email' has no attribute 'message'
+
+tools\py\email_watcher.py:155: AttributeError</failure></testcase><testcase classname="tests.smoke.test_email_watcher_yaml_placeholder" name="test_yaml_present" time="0.001" /></testsuite></testsuites>
