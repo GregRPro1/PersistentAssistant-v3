@@ -1,18 +1,1 @@
-import sys, yaml
-from pathlib import Path
-def main():
-    root = Path(__file__).resolve()
-    for _ in range(8):
-        if (root/'.git').exists(): break
-        if root.parent==root: break
-        root = root.parent
-    cfg = root/'config'/'unified_server.yaml'
-    if not cfg.exists():
-        sys.exit(0)
-    data = yaml.safe_load(cfg.read_text(encoding='utf-8')) or {}
-    cands = list(data.get('candidates', []))
-    if 'server.control_console' not in cands:
-        cands.append('server.control_console')
-        data['candidates'] = cands
-        cfg.write_text(yaml.safe_dump(data, sort_keys=False), encoding='utf-8')
-if __name__=='__main__': main()
+"# tools/py/patch_unified_add_control.py\n# Add 'server.control_console' into config/unified_server.yaml candidates without requiring PyYAML.\nimport re\nfrom pathlib import Path\n\nTARGET = 'server.control_console'\n\ndef find_root(seed: Path) -> Path:\n    p = seed\n    for _ in range(12):\n        if (p/'.git').exists(): return p\n        if p.parent==p: break\n        p = p.parent\n    return seed\n\ndef ensure_candidate(txt: str) -> str:\n    if TARGET in txt:\n        return txt\n    # If there's a candidates: YAML list, insert '- server.control_console' after it.\n    m = re.search(r'(?m)^(?P<indent>\\s*)candidates\\s*:\\s*(?:#.*)?$', txt)\n    if m:\n        indent = m.group('indent')\n        # Find where the list ends (next non-indented key or end of file)\n        start = m.end()\n        # Look ahead for the next top-level key (same or less indent and ends with ':')\n        tail = txt[start:]\n        lines = tail.splitlines(True)\n        insert_pos = start\n        for i, line in enumerate(lines):\n            if re.match(rf'(?m)^[^\\S\\r\\n]*\\S', line) and not line.startswith(indent + '  -'):\n                # If this looks like a new key at same or less indent, stop\n                if re.match(rf'^{indent}\\S.*:\\s*', line):\n                    break\n            insert_pos += len(line)\n        insertion = f'\\n{indent}  - {TARGET}\\n'\n        return txt[:start] + insertion + txt[start:]\n    # If no candidates block, create one at end\n    add = f'\\n# added by patch_unified_add_control.py\\ncandidates:\\n  - {TARGET}\\n'\n    return txt + add\n\ndef main():\n    root = find_root(Path(__file__).resolve())\n    cfg = root/'config'/'unified_server.yaml'\n    if not cfg.exists():\n        return\n    txt = cfg.read_text(encoding='utf-8')\n    new = ensure_candidate(txt)\n    if new != txt:\n        cfg.write_text(new, encoding='utf-8')\n\nif __name__=='__main__':\n    main()"

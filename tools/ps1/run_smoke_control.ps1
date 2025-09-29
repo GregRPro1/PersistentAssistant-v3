@@ -1,0 +1,1 @@
+"param([string]$Pattern='control')\n$ErrorActionPreference='Stop'\nWrite-Host \"Running smoke tests matching: $Pattern\"\n$py = Join-Path $PSScriptRoot '..\\..\\..\\.venv\\Scripts\\python.exe'\nif (-not (Test-Path $py)) { $py = 'python' }\n& $py -m pytest -q (\"tests\\smoke\\test_*${Pattern}*.py\")\n"
