@@ -2,7 +2,8 @@ param([switch]$Once, [int]$IntervalSeconds = 60, [int]$Tail = 80)
 $ErrorActionPreference='Stop'
 
 function Find-RepoRoot([string]$start) {
-  $cur = Resolve-Path -LiteralPath (if ($start) { $start } else { $PSScriptRoot })
+  if (-not $start) { $start = $PSScriptRoot }
+  $cur = Resolve-Path -LiteralPath $start
   for ($i=0; $i -lt 10; $i++) {
     if (Test-Path (Join-Path $cur '.git')) { return $cur }
     $parent = Split-Path -Parent $cur
