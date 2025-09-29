@@ -1,0 +1,10 @@
+enabled: true
+owner: GregRPro1
+repo: PersistentAssistant-v3
+api_base: "https://api.github.com"
+asset_name_glob: "PA_OUTPUT_*.zip"
+pat_env_var: "PA_GITHUB_PAT"
+verify_ssl: true
+save_dir: "_inbox"
+processed_dir: "_inbox/processed"
+apply_after_download: true
