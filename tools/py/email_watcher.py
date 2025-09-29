@@ -27,12 +27,15 @@ def log(path: Path, msg: str):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path,'a',encoding='utf-8') as f: f.write(time.strftime("%Y-%m-%d %H:%M:%S ") + msg + "\n")
 def save_attachment(part, out_dir: Path, logf: Path):
-    fn = part.get_filename(); if not fn: return None
+    fn = part.get_filename()
+    if not fn: return None
     fn = safe_fn(email.utils.collapse_rfc2231_value(fn))
-    data = part.get_payload(decode=True); if not data: return None
+    data = part.get_payload(decode=True)
+    if not data: return None
     out_dir.mkdir(parents=True, exist_ok=True); p = out_dir / fn; i=1
     while p.exists(): p = out_dir / f"{p.stem}_{i}{p.suffix}"; i+=1
     p.write_bytes(data); log(logf, f"saved {p}"); return p
+
 def process_local(cfg, repo: Path, logf: Path):
     inbox = repo / cfg.get('save_dir','_inbox'); processed = repo / cfg.get('processed_dir','_inbox/processed')
     inbox.mkdir(parents=True, exist_ok=True); processed.mkdir(parents=True, exist_ok=True)
@@ -63,18 +66,20 @@ def poll_imap(cfg, repo: Path, logf: Path):
         typ, data = M.search(None, 'UNSEEN')
         if typ!='OK': log(logf, f"search failed: {typ} {data}"); return 1
         for num in data[0].split():
-            typ, msgdata = M.fetch(num, '(RFC822)'); if typ!='OK': continue
+            typ, msgdata = M.fetch(num, '(RFC822)')
+            if typ!='OK': continue
             msg = email.message_from_bytes(msgdata[0][1]); subj = msg.get('Subject',''); frm = email.utils.parseaddr(msg.get('From',''))[1].lower()
             if allow_from and frm not in allow_from: log(logf, f"skip email from {frm}"); continue
             if flag and flag not in subj: log(logf, f"skip email subj '{subj}' (missing flag)"); continue
             saved = []
             for part in msg.walk():
                 if part.get_content_disposition()=='attachment':
-                    fn = part.get_filename() or ''; if not fn.lower().endswith('.zip'): continue
-                    payload = part.get_payload(decode=True) or b''; size = len(payload)/(1024*1024)
-                    if size > max_mb: log(logf, f"skip {fn}: {size:.1f}MB > limit"); continue
-                    p = save_attachment(part, save_dir, logf); 
-                    if p: saved.append(p)
+                    fn = part.get_filename() or ''
+                if not fn.lower().endswith('.zip'): continue
+                payload = part.get_payload(decode=True) or b''; size = len(payload)/(1024*1024)
+                if size > max_mb: log(logf, f"skip {fn}: {size:.1f}MB > limit"); continue
+                p = save_attachment(part, save_dir, logf); 
+                if p: saved.append(p)
             M.store(num, '+FLAGS', '\\Seen')
             if saved: log(logf, f"saved {len(saved)} zip(s) from {frm} subj='{subj}'")
     return process_local(cfg, repo, logf)
@@ -94,3 +99,4 @@ def main():
     try: return poll_imap(cfg, repo, logf)
     except Exception as e: log(logf, f"ERROR: {e}"); return 1
 if __name__=='__main__': sys.exit(main())
+
