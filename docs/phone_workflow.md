@@ -1,17 +1,17 @@
-# Phone-first Approval Workflow (Recommended)
+# Phone-first Approval + Feedback (v1)
 
-## Option A — Stable Tag (no JSON, easiest)
-1. On iPhone (Safari): Repo → Releases → create (once) or open tag **PA-OUTPUT**.
-2. Edit release → remove old assets → upload new `PA_OUTPUT_<anything>.zip` → Update.
-3. PC fetcher (scheduled) will detect and apply automatically.
+## Approve from phone (stable tag)
+- Repo → Releases → tag **PA-OUTPUT** → Edit → upload new `PA_OUTPUT_*.zip` → Update.
 
-## Option B — Control File + URL (great with ChatGPT links)
-1. On iPhone (GitHub Mobile): Add file `control/next_pack.json` at repo root:
-   ```json
-   {"source":"url","url":"<direct pack URL>","name":"PA_OUTPUT_<anything>.zip"}
-   ```
-2. Commit to `main`. The PC fetcher will download the URL and apply.
+## Approve from phone (URL control)
+- File `control/next_pack.json` on `main`:
+  `{"source":"url","url":"<direct pack URL>","name":"PA_OUTPUT_<anything>.zip"}`
 
-## Getting Status on Your Phone
-- Quick: check `reports/ops/pack_fetcher.log` and `reports/ops/hello_pack_applied.txt` in the repo.
-- Next step (to be added): PC will publish `reports/ops/status.md` and `docs/ops/index.html` (GitHub Pages) after each run for a clean phone view.
+## Get feedback on phone
+- Check `reports/ops/pack_fetcher.log` and `reports/ops/hello_pack_applied.txt`.
+- Next: we’ll add `reports/ops/status.md` and `docs/ops/index.html` (phone-friendly).
+
+## Keep it safe
+- Only accept `PA_OUTPUT_*.zip` you trust.
+- Prefer Github Releases (immutable assets) + optional `.sha256` verification (coming).
+- Keep the repo public only if you’re comfortable with exposure; otherwise use a read-only PAT on the PC.

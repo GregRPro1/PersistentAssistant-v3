@@ -1,4 +1,8 @@
-param([string]$TaskName = 'PA_PackFetcher', [int]$EveryMinutes = 1)
+param(
+  [string]$TaskName = 'PA_PackFetcher',
+  [int]$EveryMinutes = 1,
+  [switch]$AsAdmin  # add /RL HIGHEST only when explicitly requested
+)
 $ErrorActionPreference='Stop'
 
 function Quote([string]$s) {
@@ -15,7 +19,6 @@ function PwshPath {
   return "powershell.exe"
 }
 
-# repo root = parent of this script folder
 $root = (Resolve-Path (Split-Path -Parent $MyInvocation.MyCommand.Path)).Path
 $script = Join-Path $root 'run_pack_fetcher.ps1'
 $pwsh = (PwshPath)
@@ -27,9 +30,9 @@ $args = @(
   '/SC','MINUTE','/MO',"$EveryMinutes",
   '/TN',"$TaskName",
   '/TR',"$tr",
-  '/RL','HIGHEST',
   '/F'
 )
+if ($AsAdmin) { $args += @('/RL','HIGHEST') }
 
 # Use Start-Process for reliable quoting
 $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -47,7 +50,7 @@ $stderr = $p.StandardError.ReadToEnd()
 $p.WaitForExit()
 
 if ($p.ExitCode -ne 0) {
-  Write-Error "schtasks failed ($($p.ExitCode)). Stdout:`n$stdout`nStderr:`n$stderr`nTry running as Administrator or use Task Scheduler UI."
+  Write-Error "schtasks failed ($($p.ExitCode)). Stdout:`n$stdout`nStderr:`n$stderr`nIf access denied, try -AsAdmin or run elevated, or use install_startup_loop.ps1."
 } else {
   Write-Host $stdout.TrimEnd()
   Write-Host "Scheduled task '$TaskName' created to run every $EveryMinutes minute(s)."
