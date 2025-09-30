@@ -19,27 +19,17 @@ Write-Host "Applying payload from $payload to $root"
 Copy-Item -Path (Join-Path $payload '*') -Destination $root -Recurse -Force
 
 Push-Location $root
-git checkout -B step/PA-343-mobile-template-fix | Out-Null
+git checkout -B step/PA-360-lan-expose | Out-Null
 git add -A
-git commit -m "PA-343: fix Template collision in mobile_home; /app/ returns 200" | Out-Null
-git push -u origin step/PA-343-mobile-template-fix
+git commit -m "PA-360: add LAN server runner, firewall opener, and smokes" | Out-Null
+git push -u origin step/PA-360-lan-expose
 
-# Write a small smoke to disk and execute it (PowerShell-safe)
-$smoke = @"
-import importlib
-from flask import Flask
-m = importlib.import_module('server.mobile_home')
-app = Flask('t'); app.register_blueprint(m.bp, url_prefix=m.mount_path)
-r = app.test_client().get('/app/')
-assert r.status_code==200, r.status_code
-print('OK /app/')
-"@
-$smokePath = Join-Path $root "tmp\smoke_mobile.py"
-New-Item -ItemType Directory -Force -Path (Split-Path $smokePath) | Out-Null
-Set-Content -Path $smokePath -Value $smoke -Encoding UTF8
-python $smokePath
+# run smoke
+python -m pytest -q tests\smoke\test_lan_server_boot.py
 $code = $LASTEXITCODE
 Pop-Location
-if ($code -ne 0) { throw "mobile smoke failed ($code)" }
-Write-Host "PA-343 applied & mobile smoke passed."
+if ($code -ne 0) { throw "smoke failed ($code)" }
+Write-Host "PA-360 applied & smokes passed."
+Write-Host "Start the LAN server with:"
+Write-Host "  pwsh tools\ps1\run_control_server_lan.ps1"
 exit 0

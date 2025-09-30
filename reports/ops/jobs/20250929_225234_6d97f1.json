@@ -1,0 +1,16 @@
+{
+  "id": "20250929_225234_6d97f1",
+  "kind": "apply",
+  "args": {
+    "repo": "GregRPro1/PersistentAssistant-v3",
+    "release": "PA-OUTPUT",
+    "asset_glob": "PA_OUTPUT_*.zip",
+    "direct_url": "",
+    "gh_token": ""
+  },
+  "status": "success",
+  "returncode": 0,
+  "started": 1759182754,
+  "ended": 1759182759,
+  "log": "C:/_Repos/PersistentAssistant/reports/ops/jobs/20250929_225234_6d97f1.log"
+}
