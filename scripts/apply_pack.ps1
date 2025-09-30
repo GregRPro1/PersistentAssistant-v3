@@ -18,18 +18,22 @@ Write-Host "Applying payload from $payload to $root"
 
 Copy-Item -Path (Join-Path $payload '*') -Destination $root -Recurse -Force
 
-Push-Location $root
-git checkout -B step/PA-360-lan-expose | Out-Null
-git add -A
-git commit -m "PA-360: add LAN server runner, firewall opener, and smokes" | Out-Null
-git push -u origin step/PA-360-lan-expose
+# Inject Status card into mobile page
+pwsh (Join-Path $root 'scripts\inject_status_card.ps1')
 
-# run smoke
-python -m pytest -q tests\smoke\test_lan_server_boot.py
+Push-Location $root
+git checkout -B step/PA-370-desktop-suite | Out-Null
+git add -A
+git commit -m "PA-370: desktop suite launcher, status API, mobile status card, smokes" | Out-Null
+git push -u origin step/PA-370-desktop-suite
+
+# run smokes
+python -m pytest -q tests\smoke\test_status_api_json.py
 $code = $LASTEXITCODE
 Pop-Location
 if ($code -ne 0) { throw "smoke failed ($code)" }
-Write-Host "PA-360 applied & smokes passed."
-Write-Host "Start the LAN server with:"
-Write-Host "  pwsh tools\ps1\run_control_server_lan.ps1"
+
+Write-Host "PA-370 applied & smokes passed."
+Write-Host "Start everything with:  pwsh tools\ps1\run_desktop_suite.ps1"
+Write-Host "Stop jobs with:         pwsh tools\ps1\stop_desktop_suite.ps1"
 exit 0
