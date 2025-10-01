@@ -1,0 +1,107 @@
+from flask import Blueprint, jsonify, request
+import os, json, hmac, hashlib, subprocess, time
+
+bp = Blueprint('watchdog_api', __name__)
+
+STATUS_PATH = os.path.join('reports', 'ops', 'watchdog_status.json')
+PID_FILE    = os.path.join('tmp','pid','watchdog.pid')
+HMAC_KEY    = os.path.join('config','hmac.key')
+
+def _load_status():
+    try:
+        with open(STATUS_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {"ok": False, "error": "status_missing"}
+    except Exception as e:
+        return {"ok": False, "error": f"status_error:{e}"}
+
+def _tail(path, n=120):
+    try:
+        with open(path, 'rb') as f:
+            f.seek(0, os.SEEK_END)
+            end = f.tell()
+            f.seek(max(0, end - 4000), os.SEEK_SET)
+            data = f.read().decode('utf-8', 'replace')
+        lines = data.splitlines()[-n:]
+        return lines
+    except Exception as e:
+        return [f"(no log: {e})"]
+
+def _require_auth(body: bytes):
+    if not os.path.exists(HMAC_KEY):
+        return True
+    try:
+        with open(HMAC_KEY, 'rb') as f:
+            key = f.read().strip()
+    except Exception:
+        return False
+    sig = request.headers.get('X-PA-Signature', '')
+    comp = hmac.new(key, body or b'', hashlib.sha256).hexdigest()
+    return hmac.compare_digest(sig, comp)
+
+def _taskkill(pid: int):
+    try:
+        subprocess.run(['taskkill','/PID', str(int(pid)), '/T','/F'], check=False, capture_output=True)
+        return True
+    except Exception:
+        return False
+
+@bp.get('/api/watchdog')
+def watchdog_root():
+    st = _load_status()
+    try:
+        mtime = os.path.getmtime(STATUS_PATH)
+        st['_file_mtime'] = mtime
+        st['_file_age_s'] = max(0.0, time.time() - mtime)
+    except Exception:
+        pass
+    return jsonify(st)
+
+@bp.get('/api/watchdog/<name>')
+def watchdog_proc(name):
+    st = _load_status()
+    p = (st.get('processes') or {}).get(name)
+    if not p:
+        return jsonify({"ok": False, "error": "unknown_process", "name": name}), 404
+    p['_file_age_s'] = st.get('_file_age_s')
+    return jsonify({"ok": True, "process": p})
+
+@bp.post('/api/watchdog/<name>/restart')
+def watchdog_restart(name):
+    body = request.get_data() or b''
+    if not _require_auth(body):
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+    st = _load_status()
+    p = (st.get('processes') or {}).get(name)
+    if not p or not p.get('pid'):
+        return jsonify({"ok": False, "error": "no_pid_or_unknown", "name": name}), 400
+    ok = _taskkill(p['pid'])
+    return jsonify({"ok": ok, "name": name, "action": "restart_via_kill"})
+
+@bp.get('/api/watchdog/logs/<name>')
+def watchdog_logs(name):
+    st = _load_status()
+    p = (st.get('processes') or {}).get(name)
+    if not p:
+        return jsonify({"ok": False, "error": "unknown_process"}), 404
+    try:
+        n = int(request.args.get('tail', '120'))
+    except Exception:
+        n = 120
+    out = _tail(p.get('stdout'), n)
+    err = _tail(p.get('stderr'), n)
+    return jsonify({"ok": True, "stdout_tail": out, "stderr_tail": err})
+
+@bp.post('/api/watchdog/exit')
+def watchdog_exit():
+    body = request.get_data() or b''
+    if not _require_auth(body):
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+    try:
+        with open(PID_FILE, 'r', encoding='ascii') as f:
+            pid = int(f.read().strip())
+    except Exception:
+        return jsonify({"ok": False, "error": "no_pid"}), 400
+    ok = _taskkill(pid)
+    return jsonify({"ok": ok, "action": "exit_watchdog"})
