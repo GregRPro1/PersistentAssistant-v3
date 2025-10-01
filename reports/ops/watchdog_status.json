@@ -1,28 +1,28 @@
 {
   "ok": true,
-  "started_at": "2025-10-01T19:06:16.097514+00:00",
+  "started_at": "2025-10-01T19:58:21.257815+00:00",
   "processes": {
     "server": {
       "name": "server",
       "state": "healthy",
-      "pid": 27096,
+      "pid": 32092,
       "restarts": 0,
       "last_exit": null,
       "last_error": null,
       "stdout": "tmp\\logs\\server.out.log",
       "stderr": "tmp\\logs\\server.err.log",
-      "started_at": 1759345574.557796
+      "started_at": 1759348699.822617
     },
     "tunnel": {
       "name": "tunnel",
       "state": "running",
-      "pid": 11700,
+      "pid": 32144,
       "restarts": 0,
       "last_exit": null,
       "last_error": null,
       "stdout": "tmp\\logs\\cloudflared.out.log",
       "stderr": "tmp\\logs\\cloudflared.err.log",
-      "started_at": 1759345575.5969763
+      "started_at": 1759348700.7576525
     }
   }
 }

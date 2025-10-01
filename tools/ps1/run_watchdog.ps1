@@ -59,3 +59,69 @@ Start-Job -ScriptBlock {
 
 $p.Id | Set-Content -Encoding ASCII -Path $pidFile
 Write-Host "Watchdog started (PID $($p.Id)). Logs: $out / $err"
+
+# --- TUNNEL URL MONITOR (PA-361) ---
+try {
+  function Ensure-Dir([string]$p){ if (-not (Test-Path $p)) { New-Item -ItemType Directory -Force -Path $p | Out-Null } }
+  $logDir = "tmp\logs"
+  $outL = Join-Path $logDir "cloudflared.out.log"
+  $errL = Join-Path $logDir "cloudflared.err.log"
+  $pub  = "reports\ops\tunnel_url.txt"
+  Ensure-Dir (Split-Path $pub -Parent)
+  Start-Job -Name "pa_tunnel_monitor" -ScriptBlock {
+    param($outL,$errL,$pub)
+    $pattern = 'https?://\S*trycloudflare\.com'
+    $wrote = $false
+    while(-not $wrote){
+      $hits = @()
+      foreach($p in @($outL,$errL)){
+        if (Test-Path $p) {
+          $m = Select-String -Path $p -Pattern $pattern -AllMatches -ErrorAction SilentlyContinue
+          if ($m) { $hits += ($m.Matches | ForEach-Object { $_.Value }) }
+        }
+      }
+      if ($hits.Count -gt 0) {
+        $first = [string]($hits | Select-Object -First 1)
+        Set-Content -Encoding UTF8 -Path $pub -Value $first
+        $wrote = $true
+      } else {
+        Start-Sleep -Milliseconds 700
+      }
+    }
+  } -ArgumentList $outL,$errL,$pub | Out-Null
+} catch {}
+# --- /TUNNEL URL MONITOR ---
+
+
+# --- TUNNEL URL MONITOR (PA-NONBLOCK) ---
+try {
+  function Ensure-Dir([string]$p){ if (-not (Test-Path $p)) { New-Item -ItemType Directory -Force -Path $p | Out-Null } }
+  $logDir = "tmp\logs"
+  $outL = Join-Path $logDir "cloudflared.out.log"
+  $errL = Join-Path $logDir "cloudflared.err.log"
+  $pub  = "reports\ops\tunnel_url.txt"
+  Ensure-Dir (Split-Path $pub -Parent)
+  Start-Job -Name "pa_tunnel_monitor" -ScriptBlock {
+    param($outL,$errL,$pub)
+    $pattern = 'https?://\S*trycloudflare\.com'
+    $wrote = $false
+    while(-not $wrote){
+      $hits = @()
+      foreach($p in @($outL,$errL)){
+        if (Test-Path $p) {
+          $m = Select-String -Path $p -Pattern $pattern -AllMatches -ErrorAction SilentlyContinue
+          if ($m) { $hits += ($m.Matches | ForEach-Object { $_.Value }) }
+        }
+      }
+      if ($hits.Count -gt 0) {
+        $first = [string]($hits | Select-Object -First 1)
+        Set-Content -Encoding UTF8 -Path $pub -Value $first
+        $wrote = $true
+      } else {
+        Start-Sleep -Milliseconds 700
+      }
+    }
+  } -ArgumentList $outL,$errL,$pub | Out-Null
+} catch {}
+# --- /TUNNEL URL MONITOR (PA-NONBLOCK) ---
+

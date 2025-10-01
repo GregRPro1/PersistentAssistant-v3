@@ -3,14 +3,17 @@ $ErrorActionPreference = 'Stop'
 
 $pidFile = "tmp\pid\watchdog.pid"
 if (-not (Test-Path $pidFile)) { Write-Host "No PID file ($pidFile). Nothing to stop."; exit 0 }
-$pid = Get-Content $pidFile
-$proc = Get-Process -Id ([int]$pid) -ErrorAction SilentlyContinue
+$wdPid = 0
+try { $wdPid = [int](Get-Content $pidFile -Raw) } catch {}
+$proc = $null
+if ($wdPid -gt 0) { $proc = Get-Process -Id $wdPid -ErrorAction SilentlyContinue }
+
 if ($proc) {
   try { $proc.CloseMainWindow() | Out-Null } catch {}
-  Start-Sleep -Seconds 1
+  Start-Sleep -Milliseconds 500
   try { $proc.Kill() } catch {}
-  Write-Host "Stopped watchdog (PID $pid)"
+  Write-Host "Stopped watchdog (PID $wdPid)"
 } else {
-  Write-Host "No running process found for PID $pid"
+  Write-Host "No running process found for PID $wdPid"
 }
 Remove-Item $pidFile -ErrorAction SilentlyContinue
