@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "defaults": {
+    "restart": {
+      "policy": "always",
+      "backoff": {
+        "initial": 1,
+        "factor": 1.5,
+        "max": 60
+      },
+      "max_restarts": 10,
+      "window": 300
+    },
+    "health": {
+      "interval": 5,
+      "timeout": 2,
+      "grace": 10
+    }
+  },
+  "processes": [
+    {
+      "name": "server",
+      "cmd": [
+        "pwsh",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools\\ps1\\run_control_server_lan.ps1"
+      ],
+      "cwd": ".",
+      "health": {
+        "http": {
+          "url": "http://127.0.0.1:8776/healthz",
+          "expect_status": 200
+        }
+      },
+      "logs": {
+        "stdout": "tmp\\logs\\server.out.log",
+        "stderr": "tmp\\logs\\server.err.log"
+      },
+      "restart": {
+        "policy": "always",
+        "backoff": {
+          "initial": 1,
+          "factor": 1.5,
+          "max": 60
+        },
+        "max_restarts": 10,
+        "window": 300
+      }
+    },
+    {
+      "name": "tunnel",
+      "depends_on": [
+        "server"
+      ],
+      "cmd": [
+        "cloudflared",
+        "tunnel",
+        "--no-autoupdate",
+        "--url",
+        "http://127.0.0.1:8776"
+      ],
+      "cwd": ".",
+      "health": {
+        "log_regex": "https?://\\S*trycloudflare\\.com",
+        "publish": {
+          "file": "reports\\ops\\tunnel_url.txt"
+        }
+      },
+      "logs": {
+        "stdout": "tmp\\logs\\cloudflared.out.log",
+        "stderr": "tmp\\logs\\cloudflared.err.log"
+      },
+      "restart": {
+        "policy": "on-failure",
+        "backoff": {
+          "initial": 2,
+          "factor": 1.5,
+          "max": 120
+        },
+        "max_restarts": 5,
+        "window": 600
+      }
+    }
+  ]
+}
