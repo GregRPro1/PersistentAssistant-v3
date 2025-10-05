@@ -19,7 +19,47 @@ param(
     [int]$TimeoutSec = 5
 )
 
-$ErrorActionPreference = 'Continue'
+function Get-TunnelUrlSafe {
+    <#
+      Returns the most recent https://*.trycloudflare.com URL, or $null.
+      Sources (in order):
+        1) reports\ops\tunnel_url.txt
+        2) tmp\logs\cloudflared.out.log / tmp\logs\cloudflared.err.log
+      IMPORTANT: Always treat results as an array so we never index a string.
+    #>
+    $candidates = @()
+
+    # 1) canonical file
+    $txt = 'reports\ops\tunnel_url.txt'
+    if (Test-Path $txt) {
+        try {
+            $raw = Get-Content -LiteralPath $txt -Raw -ErrorAction Stop
+            $m = [regex]::Match($raw, 'https?://\S*trycloudflare\.com')
+            if ($m.Success) { $candidates += $m.Value.Trim() }
+        }
+        catch {}
+    }
+
+    # 2) logs (collect ALL matches)
+    foreach ($p in @('tmp\logs\cloudflared.out.log', 'tmp\logs\cloudflared.err.log')) {
+        if (Test-Path $p) {
+            try {
+                $matches = Select-String -Path $p -Pattern 'https?://\S*trycloudflare\.com' -AllMatches -ErrorAction Stop |
+                ForEach-Object { $_.Matches } |
+                ForEach-Object { $_.Value }
+                if ($matches) { $candidates += $matches }
+            }
+            catch {}
+        }
+    }
+
+    # Normalize + pick LAST as array (avoid string indexing pitfall)
+    $flat = @($candidates | Where-Object { $_ -match '^https?://\S*trycloudflare\.com$' } | Select-Object -Unique)
+    if ($flat.Count -gt 0) { return $flat[$flat.Count - 1] }
+    return $null
+}
+
+
 
 function Write-Light([string]$label, [bool]$ok, [string]$detail = '') {
     $emoji = if ($ok) { "🟢" } else { "🔴" }
@@ -130,22 +170,8 @@ function Ensure-FirewallRule {
     catch { return @{ ok = $false; created = $false; why = $_.Exception.Message } }
 }
 
-function Latest-TunnelUrl {
-    $urls = @()
-    if (Test-Path 'reports\ops\tunnel_url.txt') {
-        $line = (Get-Content reports\ops\tunnel_url.txt -TotalCount 1) -split '\s+'
-        foreach ($u in $line) { if ($u -match 'https?://\S*trycloudflare\.com') { $urls += $u } }
-    }
-    foreach ($p in @('tmp\logs\cloudflared.err.log', 'tmp\logs\cloudflared.out.log')) {
-        if (Test-Path $p) {
-            $m = Select-String -Path $p -Pattern 'https?://\S*trycloudflare\.com' -AllMatches -ErrorAction SilentlyContinue
-            if ($m) { $urls += ($m.Matches | ForEach-Object { $_.Value }) }
-        }
-    }
-    $urls = $urls | Where-Object { $_ } | Select-Object -Unique
-    if ($urls) { return $urls[-1] }
-    return $null
-}
+function Latest-TunnelUrl { return Get-TunnelUrlSafe }
+
 
 function Restart-Tunnel([string]$base, [string]$apiPath) {
     if (-not $apiPath) { return $null }
@@ -175,23 +201,95 @@ function Dump-Snapshot($snap) {
     New-Item -ItemType Directory -Force 'tmp\logs' | Out-Null
     $json = ($snap | ConvertTo-Json -Depth 6)
     Set-Content -Encoding UTF8 'tmp\logs\auto_admin_snapshot.json' $json
-    $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-    $zip = "tmp\logs\auto_admin_dump_$stamp.zip"
-    $grab = @(
+
+    $stamp = Get-Date -Format 'yyyyMMdd_HHmmssfff'
+    $staging = "tmp\logs\auto_admin_staging_$stamp"
+    New-Item -ItemType Directory -Force $staging | Out-Null
+
+    $want = @(
         'tmp\logs\auto_admin_snapshot.json',
         'tmp\logs\server.err.log', 'tmp\logs\server.out.log',
         'tmp\logs\cloudflared.err.log', 'tmp\logs\cloudflared.out.log',
         'reports\ops\watchdog_status.json',
         'reports\ops\tunnel_url.txt', 'reports\ops\phone_watchdog_url.txt',
         'config\processes.json'
-    ) | Where-Object { Test-Path $_ }
-    if ($grab) {
-        if (Test-Path $zip) { Remove-Item $zip -Force }
-        Compress-Archive -Path $grab -DestinationPath $zip -Force
-        return $zip
+    )
+
+    foreach ($src in $want) {
+        if (-not (Test-Path $src)) { continue }
+        $dst = Join-Path $staging ([IO.Path]::GetFileName($src))
+        try {
+            # First try a normal copy (fast path)
+            Copy-Item -LiteralPath $src -Destination $dst -ErrorAction Stop
+        }
+        catch {
+            # If locked, fall back to "read-and-rewrite" which works with ReadShare
+            try {
+                $bytes = [System.IO.File]::Open($src, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+                try {
+                    $fs = New-Object System.IO.FileStream($dst, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+                    try {
+                        $buffer = New-Object byte[] 65536
+                        while (($n = $bytes.Read($buffer, 0, $buffer.Length)) -gt 0) {
+                            $fs.Write($buffer, 0, $n)
+                        }
+                    }
+                    finally { $fs.Dispose() }
+                }
+                finally { $bytes.Dispose() }
+            }
+            catch {
+                # If still impossible to read, skip file (don't fail whole dump)
+                Write-Verbose "Skip locked file: $src"
+            }
+        }
+    }
+
+    $zip = "tmp\logs\auto_admin_dump_$stamp.zip"
+    try {
+        if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction SilentlyContinue }
+        Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zip -Force
+        # best-effort cleanup
+        Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
+        if (Test-Path $zip) { return $zip }
+    }
+    catch {
+        Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
     }
     return $null
 }
+
+function Get-WatchdogHeartbeatAgeSeconds {
+    $p = 'reports\ops\watchdog_status.json'
+    if (!(Test-Path $p)) { return $null }
+    try {
+        $fi = Get-Item $p
+        $age = (Get-Date).ToUniversalTime() - $fi.LastWriteTimeUtc
+        return [int]([Math]::Floor($age.TotalSeconds))
+    }
+    catch { return $null }
+}
+
+function Touch-WatchdogHeartbeat([int]$pid) {
+    $p = 'reports\ops\watchdog_status.json'
+    $now = Get-Date
+    $obj = $null
+    if (Test-Path $p) {
+        try { $obj = (Get-Content -LiteralPath $p -Raw) | ConvertFrom-Json } catch {}
+    }
+    if (-not $obj) { $obj = [ordered]@{} }
+    if (-not $obj.processes) { $obj.processes = @{} }
+    if (-not $obj.processes.watchdog) { $obj.processes.watchdog = @{} }
+
+    $obj.ok = $true
+    $obj.updated_at = $now.ToString('s')
+    $obj.processes.watchdog.pid = $pid
+    $obj.processes.watchdog.state = 'running'
+
+    New-Item -ItemType Directory -Force (Split-Path $p) | Out-Null
+    ($obj | ConvertTo-Json -Depth 8) | Set-Content -LiteralPath $p -Encoding UTF8
+}
+
 
 # -------------------- MAIN --------------------
 $base = 'http://127.0.0.1:8776'
@@ -212,9 +310,28 @@ Write-Light "Firewall rule (8776)" $fw.ok $fw.why
 $ws = Read-WatchdogStatus
 $snap.detail.watchdog_file = $ws
 $wdPid = Get-WatchdogPid
-$wdAlive = Is-ProcessAlive $wdPid
+$hbAge = Get-WatchdogHeartbeatAgeSeconds
+$byPid = Is-ProcessAlive $wdPid
+$byHb = ($hbAge -ne $null -and $hbAge -lt 60)  # consider "fresh" if updated in the last minute
+$wdAlive = ($byPid -or $byHb)
 $snap.lights.watchdog_alive = $wdAlive
-Write-Light "Watchdog running" $wdAlive ("PID {0}" -f ($wdPid ? $wdPid : 'n/a'))
+
+# Try to self-heal stale heartbeat if PID is alive
+if ($byPid -and (-not $byHb)) {
+    $before = ($hbAge -ne $null) ? $hbAge : -1
+    Touch-WatchdogHeartbeat $wdPid
+    Start-Sleep -Milliseconds 250
+    $hbAge = Get-WatchdogHeartbeatAgeSeconds
+    $byHb = ($hbAge -ne $null -and $hbAge -lt 60)
+    $wdAlive = ($byPid -or $byHb)
+    $snap.lights.watchdog_alive = $wdAlive
+    $snap.detail.watchdog_heartbeat_fix = @{ before = $before; after = $hbAge; pid = $wdPid; fixed = $byHb }
+    if ($byHb) { Write-Host ("… refreshed watchdog heartbeat (was {0}s, now {1}s)" -f $before, $hbAge) }
+}
+
+# Light with detail
+$hbTxt = ($hbAge -ne $null) ? ("; hb_age={0}s" -f $hbAge) : ""
+Write-Light "Watchdog running" $wdAlive ("PID {0}{1}" -f ($wdPid ? $wdPid : 'n/a'), $hbTxt)
 
 # Port
 $portOk = Is-PortListening 8776
@@ -314,3 +431,5 @@ Write-Host ("`nSummary: {0}/{1} green" -f $greens, $total)
 
 $zip = Dump-Snapshot $snap
 if ($zip) { Write-Host ("Saved diagnostics bundle: {0}" -f $zip) }
+
+

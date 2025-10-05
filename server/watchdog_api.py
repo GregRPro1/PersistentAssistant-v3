@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 import os, json, hmac, hashlib, subprocess, time
 
-bp = Blueprint('watchdog_api', __name__, url_prefix='/api')
+bp = Blueprint("watchdog_api", __name__, url_prefix="/api")
 
 STATUS_PATH = os.path.join('reports', 'ops', 'watchdog_status.json')
 PID_FILE    = os.path.join('tmp','pid','watchdog.pid')
@@ -105,6 +105,7 @@ def watchdog_exit():
         return jsonify({"ok": False, "error": "no_pid"}), 400
     ok = _taskkill(pid)
     return jsonify({"ok": ok, "action": "exit_watchdog"})
+
 
 
 

@@ -15,7 +15,7 @@ def maybe_mount_watchdog(app: Flask):
     # API
     try:
         from server.watchdog_api import bp as api_bp
-        app.register_blueprint(api_bp, url_prefix="/api")
+        app.register_blueprint(api_bp)
     except Exception:
         api = Blueprint("watchdog_api_fb", __name__, url_prefix="/api")
         @api.route("/watchdog")
@@ -31,7 +31,7 @@ def maybe_mount_watchdog(app: Flask):
     # UI
     try:
         from server.watchdog_ui import bp as ui_bp
-        app.register_blueprint(ui_bp, url_prefix="/app")
+        app.register_blueprint(ui_bp)
     except Exception:
         ui = Blueprint("watchdog_ui_fb", __name__, url_prefix="/app")
         @ui.route("/watchdog")
@@ -71,3 +71,4 @@ app = create_app()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8776"))
     app.run(host="0.0.0.0", port=port, debug=False)
+

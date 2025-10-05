@@ -1,6 +1,6 @@
 from flask import Blueprint, Response
 
-bp = Blueprint('watchdog_ui', __name__, url_prefix='/app')
+bp = Blueprint("watchdog_ui", __name__, url_prefix="/app")
 
 _HTML = r"""<!doctype html>
 <html>
@@ -84,7 +84,7 @@ function render(st){
     const pre = el('pre','muted','logs loading…');
     logBox.appendChild(pre);
     wrap.appendChild(logBox);
-    api(`/watchdog/logs/${name}?tail=60`).then(j=>{
+    api(`/api/watchdog/logs/${name}?tail=60`).then(j=>{
       pre.textContent = (j.stdout_tail||[]).join('\\n') + '\\n' + (j.stderr_tail||[]).join('\\n');
     }).catch(_=>{ pre.textContent='(no logs)'; });
   }
@@ -93,7 +93,7 @@ function render(st){
 
 async function tick(){
   try {
-    const st = await api('/watchdog');
+    const st = await api('/api/watchdog');
     render(st);
   } catch(e){ console.error(e); }
 }
@@ -102,15 +102,19 @@ setInterval(tick, 2000);
 
 const exitBtn = el('button','', 'Exit Watchdog'); 
 exitBtn.style.cssText = 'position:fixed; top:12px; right:12px;';
-exitBtn.onclick = async ()=>{ try{ await api('/watchdog/exit',{method:'POST'}) }catch(e){} };
+exitBtn.onclick = async ()=>{ try{ await api('/api/watchdog/exit',{method:'POST'}) }catch(e){} };
 document.body.appendChild(exitBtn);
 </script>
 </body>
 </html>"""
 
-@bp.get('/app/watchdog')
+@bp.get("/watchdog")
 def watchdog_page():
     return Response(_HTML, mimetype='text/html')
+
+
+
+
 
 
 
