@@ -1,0 +1,229 @@
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import os, re, ast, json, yaml, hashlib, math
+from collections import defaultdict
+from datetime import datetime
+
+ROOT = os.getcwd()
+OUT_DIR = os.path.join("data","insights")
+os.makedirs(OUT_DIR, exist_ok=True)
+
+SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".ruff_cache", ".idea", ".vscode"}
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path,"rb") as f:
+        for chunk in iter(lambda: f.read(1<<20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def norm_rel(path):
+    return os.path.relpath(path, ROOT).replace("\\\\","/")
+
+def collect_symbols(tree):
+    filesyms = {"functions":[], "classes":[], "imports":[], "calls":[]}
+    # map local defs for call resolution
+    def_names = set()
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+            sig = {
+                "name": node.name,
+                "args": [a.arg for a in node.args.args],
+                "vararg": getattr(node.args.vararg, "arg", None),
+                "kwonlyargs": [a.arg for a in node.args.kwonlyargs],
+                "kwarg": getattr(node.args.kwarg, "arg", None),
+                "returns": ast.unparse(node.returns) if getattr(node, "returns", None) else None,
+                "decorators": [ast.unparse(d) for d in node.decorator_list] if node.decorator_list else [],
+            }
+            doc = ast.get_docstring(node)
+            filesyms["functions"].append({"name": node.name, "signature": sig, "doc": doc or ""})
+            def_names.add(node.name)
+
+        elif isinstance(node, ast.ClassDef):
+            doc = ast.get_docstring(node)
+            methods=[]
+            for n in node.body:
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    msig = {
+                        "name": n.name,
+                        "args": [a.arg for a in n.args.args],
+                        "vararg": getattr(n.args.vararg, "arg", None),
+                        "kwonlyargs": [a.arg for a in n.args.kwonlyargs],
+                        "kwarg": getattr(n.args.kwarg, "arg", None),
+                        "returns": ast.unparse(n.returns) if getattr(n, "returns", None) else None,
+                        "decorators": [ast.unparse(d) for d in n.decorator_list] if n.decorator_list else [],
+                    }
+                    methods.append({"name": n.name, "signature": msig, "doc": ast.get_docstring(n) or ""})
+            filesyms["classes"].append({"name": node.name, "doc": doc or "", "methods": methods})
+
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            try:
+                if isinstance(node, ast.Import):
+                    for n in node.names:
+                        filesyms["imports"].append({"type":"import", "name": n.name})
+                else:
+                    mod = node.module or ""
+                    for n in node.names:
+                        filesyms["imports"].append({"type":"from", "module": mod, "name": n.name})
+            except Exception:
+                pass
+
+    # calls (very approximate): function name occurrences as Call
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            try:
+                tgt = ast.unparse(node.func)
+            except Exception:
+                tgt = None
+            if tgt:
+                filesyms["calls"].append(tgt)
+
+    return filesyms
+
+def ast_digest(src):
+    try:
+        # strip whitespace/comments for a stable digest
+        tree = ast.parse(src)
+        txt = "".join([ast.unparse(n) if hasattr(ast, "unparse") else "" for n in tree.body])
+        return hashlib.sha256(txt.encode("utf-8","ignore")).hexdigest()
+    except Exception:
+        return hashlib.sha256(src.encode("utf-8","ignore")).hexdigest()
+
+def main():
+    inventory = {
+        "generated_at": datetime.utcnow().isoformat()+"Z",
+        "root": ROOT,
+        "files": {}
+    }
+    # Collect
+    for dirpath, dirnames, filenames in os.walk(ROOT):
+        parts = set(os.path.normpath(dirpath).split(os.sep))
+        if parts & SKIP_DIRS:
+            continue
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+        for fn in filenames:
+            if not fn.endswith(".py"):
+                continue
+            p = os.path.join(dirpath, fn)
+            rel = norm_rel(p)
+            try:
+                with open(p,"r",encoding="utf-8",errors="ignore") as f:
+                    src = f.read()
+                tree = ast.parse(src)
+            except Exception as e:
+                inventory["files"][rel] = {"error": str(e)}
+                continue
+            syms = collect_symbols(tree)
+            file_doc = ast.get_docstring(tree) or ""
+            inventory["files"][rel] = {
+                "sha256": sha256_file(p),
+                "size": os.path.getsize(p),
+                "mtime": int(os.path.getmtime(p)),
+                "module_doc": file_doc,
+                "imports": syms["imports"],
+                "functions": syms["functions"],
+                "classes": syms["classes"],
+                "calls": syms["calls"],
+                "ast_digest": ast_digest(src),
+            }
+
+    # Build call graph (name-based, intra-repo heuristic)
+    # Map symbol -> defining files
+    defs = defaultdict(set)
+    for rel, meta in inventory["files"].items():
+        if "functions" in meta:
+            for f in meta["functions"]:
+                defs[f["name"]].add(rel)
+        if "classes" in meta:
+            for c in meta["classes"]:
+                defs[c["name"]].add(rel)
+                for m in c["methods"]:
+                    defs[m["name"]].add(rel)
+
+    # edges: caller_file:function -> callee_file:function (multiple edges if ambiguous)
+    edges = []
+    for rel, meta in inventory["files"].items():
+        calls = meta.get("calls", [])
+        for callexpr in calls:
+            # pick simple bare names or attr tail
+            name = callexpr.split("(")[0]
+            bare = name.split(".")[-1]
+            if bare in defs:
+                for target_file in defs[bare]:
+                    edges.append({
+                        "from_file": rel,
+                        "to_file": target_file,
+                        "symbol": bare,
+                        "expr": callexpr
+                    })
+
+    # Docstring gaps
+    doc_gaps = {"files_missing_doc": [], "functions_missing_doc": [], "methods_missing_doc": []}
+    for rel, meta in inventory["files"].items():
+        if meta.get("module_doc","").strip()=="":
+            doc_gaps["files_missing_doc"].append(rel)
+        for f in meta.get("functions", []):
+            if (f.get("doc") or "").strip()=="":
+                doc_gaps["functions_missing_doc"].append({"file": rel, "function": f["name"]})
+        for c in meta.get("classes", []):
+            for m in c.get("methods", []):
+                if (m.get("doc") or "").strip()=="":
+                    doc_gaps["methods_missing_doc"].append({"file": rel, "class": c["name"], "method": m["name"]})
+
+    # Duplication (same function name + same ast_digest across files)
+    # (very conservative; flags obvious copy-paste)
+    digest_index = defaultdict(list)
+    for rel, meta in inventory["files"].items():
+        dg = meta.get("ast_digest")
+        if dg: digest_index[dg].append(rel)
+    dups = [v for v in digest_index.values() if len(v) > 1]
+
+    # Write outputs
+    with open(os.path.join(OUT_DIR,"deep_inventory.json"),"w",encoding="utf-8") as f:
+        json.dump(inventory, f, indent=2)
+    with open(os.path.join(OUT_DIR,"deep_inventory.yaml"),"w",encoding="utf-8") as f:
+        yaml.safe_dump(inventory, f, sort_keys=False)
+
+    with open(os.path.join(OUT_DIR,"deep_calls.yaml"),"w",encoding="utf-8") as f:
+        yaml.safe_dump({"edges": edges}, f, sort_keys=False)
+
+    with open(os.path.join(OUT_DIR,"docstring_report.yaml"),"w",encoding="utf-8") as f:
+        yaml.safe_dump(doc_gaps, f, sort_keys=False)
+
+    with open(os.path.join(OUT_DIR,"duplication_report.yaml"),"w",encoding="utf-8") as f:
+        yaml.safe_dump({"duplicate_files_by_ast_digest": dups}, f, sort_keys=False)
+
+    # imports per file (easier to diff/read)
+    imports_map = {rel: meta.get("imports",[]) for rel, meta in inventory["files"].items()}
+    with open(os.path.join(OUT_DIR,"imports.yaml"),"w",encoding="utf-8") as f:
+        yaml.safe_dump(imports_map, f, sort_keys=False)
+
+    # Optional: Graphviz DOT for file->file calls
+    dot = ["digraph G {"]
+    dot.append('  rankdir=LR;')
+    # Collapse identical edges
+    edge_set = set()
+    for e in edges:
+        tup = (e["from_file"], e["to_file"])
+        if tup in edge_set: continue
+        edge_set.add(tup)
+        dot.append(f'  "{e["from_file"]}" -> "{e["to_file"]}";')
+    dot.append("}")
+    with open(os.path.join(OUT_DIR,"deep_inventory.dot"),"w",encoding="utf-8") as f:
+        f.write("\n".join(dot))
+
+    print("[DEEP INVENTORY OK]")
+    print(" - data/insights/deep_inventory.yaml")
+    print(" - data/insights/deep_calls.yaml")
+    print(" - data/insights/docstring_report.yaml")
+    print(" - data/insights/duplication_report.yaml")
+    print(" - data/insights/imports.yaml")
+    print(" - data/insights/deep_inventory.dot")
+
+if __name__ == "__main__":
+    main()

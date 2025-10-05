@@ -1,0 +1,69 @@
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import sys, yaml, os
+
+PLAN_PATH = r"project\plans\project_plan_v3.yaml"
+
+def load_plan(path):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except FileNotFoundError:
+        print(f"[PLAN ERROR] Not found: {path}")
+        sys.exit(2)
+
+def flatten(plan):
+    out = []
+    for ph in plan.get("phases", []):
+        for st in ph.get("steps", []):
+            out.append(st)
+    return out
+
+def step_key(s):
+    try:
+        a,b = s["id"].split(".")
+        return (int(a), float(b))
+    except Exception:
+        return (9999, 9999.0)
+
+def main():
+    d = load_plan(PLAN_PATH)
+    cur = (d.get("meta") or {}).get("current_step")
+    steps = flatten(d)
+    if not steps:
+        print("[PLAN] No steps found in plan.")
+        sys.exit(0)
+
+    steps = sorted(steps, key=step_key)
+    by_id = {s.get("id"): s for s in steps}
+
+    # Current
+    if cur and cur in by_id:
+        cs = by_id[cur]
+        print(f"Current: {cs['id']} - {cs.get('description','')} [{cs.get('status','?')}]")
+    else:
+        print(f"Current: {cur or 'N/A'} (not found in plan)")
+
+    # Next = first planned or in_progress after current; if no current, first planned/in_progress
+    next_s = None
+    seen_cur = cur is None
+    for s in steps:
+        if not seen_cur:
+            if s.get("id") == cur:
+                seen_cur = True
+            continue
+        if s.get("status") in ("planned","in_progress"):
+            next_s = s
+            break
+
+    if next_s:
+        print(f"Next:    {next_s['id']} - {next_s.get('description','')} [{next_s.get('status','?')}]")
+    else:
+        print("Next:    (no remaining planned/in_progress steps)")
+
+if __name__ == "__main__":
+    main()

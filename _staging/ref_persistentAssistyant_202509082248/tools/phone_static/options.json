@@ -1,0 +1,26 @@
+{
+  "version": "1.1",
+  "options": [
+    {
+      "key": "1",
+      "label": "Run next planned step",
+      "phrase": "APPROVE NEXT"
+    },
+    {
+      "key": "2",
+      "label": "Re-run last step",
+      "phrase": "APPROVE RETRY"
+    },
+    {
+      "key": "3",
+      "label": "Request diagnostics bundle",
+      "phrase": "REQUEST DIAGNOSTICS"
+    },
+    {
+      "key": "4",
+      "label": "Approve PWA enhancements",
+      "phrase": "APPROVE 7.4 PWA-ENHANCE"
+    }
+  ],
+  "generated_at": "2025-08-23T10:23:56.140207Z"
+}

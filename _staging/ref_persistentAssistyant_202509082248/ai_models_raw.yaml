@@ -1,0 +1,556 @@
+last_updated: '2025-08-19T13:51:44Z'
+providers:
+  openai:
+    models:
+      babbage-002:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/babbage-002 (raw)
+        source: raw-list
+      chatgpt-4o-latest:
+        interface: chat
+        family: chatgpt
+        probe_route: chat
+        notes: openai/chatgpt-4o-latest (raw)
+        source: raw-list
+      codex-mini-latest:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/codex-mini-latest (raw)
+        source: raw-list
+      dall-e-2:
+        interface: image
+        family: dalle
+        probe_route: null
+        notes: openai/dall-e-2 (raw)
+        source: raw-list
+      dall-e-3:
+        interface: image
+        family: dalle
+        probe_route: null
+        notes: openai/dall-e-3 (raw)
+        source: raw-list
+      davinci-002:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/davinci-002 (raw)
+        source: raw-list
+      gpt-3.5-turbo:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-3.5-turbo (raw)
+        source: raw-list
+      gpt-3.5-turbo-0125:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-3.5-turbo-0125 (raw)
+        source: raw-list
+      gpt-3.5-turbo-1106:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-3.5-turbo-1106 (raw)
+        source: raw-list
+      gpt-3.5-turbo-16k:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-3.5-turbo-16k (raw)
+        source: raw-list
+      gpt-3.5-turbo-instruct:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-3.5-turbo-instruct (raw)
+        source: raw-list
+      gpt-3.5-turbo-instruct-0914:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-3.5-turbo-instruct-0914 (raw)
+        source: raw-list
+      gpt-4:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4 (raw)
+        source: raw-list
+      gpt-4-0125-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4-0125-preview (raw)
+        source: raw-list
+      gpt-4-0613:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4-0613 (raw)
+        source: raw-list
+      gpt-4-1106-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4-1106-preview (raw)
+        source: raw-list
+      gpt-4-turbo:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4-turbo (raw)
+        source: raw-list
+      gpt-4-turbo-2024-04-09:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4-turbo-2024-04-09 (raw)
+        source: raw-list
+      gpt-4-turbo-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4-turbo-preview (raw)
+        source: raw-list
+      gpt-4.1:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4.1 (raw)
+        source: raw-list
+      gpt-4.1-2025-04-14:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4.1-2025-04-14 (raw)
+        source: raw-list
+      gpt-4.1-mini:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4.1-mini (raw)
+        source: raw-list
+      gpt-4.1-mini-2025-04-14:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4.1-mini-2025-04-14 (raw)
+        source: raw-list
+      gpt-4.1-nano:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4.1-nano (raw)
+        source: raw-list
+      gpt-4.1-nano-2025-04-14:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4.1-nano-2025-04-14 (raw)
+        source: raw-list
+      gpt-4o:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o (raw)
+        source: raw-list
+      gpt-4o-2024-05-13:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-2024-05-13 (raw)
+        source: raw-list
+      gpt-4o-2024-08-06:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-2024-08-06 (raw)
+        source: raw-list
+      gpt-4o-2024-11-20:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-2024-11-20 (raw)
+        source: raw-list
+      gpt-4o-audio-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-audio-preview (raw)
+        source: raw-list
+      gpt-4o-audio-preview-2024-10-01:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-audio-preview-2024-10-01 (raw)
+        source: raw-list
+      gpt-4o-audio-preview-2024-12-17:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-audio-preview-2024-12-17 (raw)
+        source: raw-list
+      gpt-4o-audio-preview-2025-06-03:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-audio-preview-2025-06-03 (raw)
+        source: raw-list
+      gpt-4o-mini:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini (raw)
+        source: raw-list
+      gpt-4o-mini-2024-07-18:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-2024-07-18 (raw)
+        source: raw-list
+      gpt-4o-mini-audio-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-audio-preview (raw)
+        source: raw-list
+      gpt-4o-mini-audio-preview-2024-12-17:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-audio-preview-2024-12-17 (raw)
+        source: raw-list
+      gpt-4o-mini-realtime-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-realtime-preview (raw)
+        source: raw-list
+      gpt-4o-mini-realtime-preview-2024-12-17:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-realtime-preview-2024-12-17 (raw)
+        source: raw-list
+      gpt-4o-mini-search-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-search-preview (raw)
+        source: raw-list
+      gpt-4o-mini-search-preview-2025-03-11:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-search-preview-2025-03-11 (raw)
+        source: raw-list
+      gpt-4o-mini-transcribe:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-transcribe (raw)
+        source: raw-list
+      gpt-4o-mini-tts:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-mini-tts (raw)
+        source: raw-list
+      gpt-4o-realtime-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-realtime-preview (raw)
+        source: raw-list
+      gpt-4o-realtime-preview-2024-10-01:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-realtime-preview-2024-10-01 (raw)
+        source: raw-list
+      gpt-4o-realtime-preview-2024-12-17:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-realtime-preview-2024-12-17 (raw)
+        source: raw-list
+      gpt-4o-realtime-preview-2025-06-03:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-realtime-preview-2025-06-03 (raw)
+        source: raw-list
+      gpt-4o-search-preview:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-search-preview (raw)
+        source: raw-list
+      gpt-4o-search-preview-2025-03-11:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-search-preview-2025-03-11 (raw)
+        source: raw-list
+      gpt-4o-transcribe:
+        interface: chat
+        family: gpt
+        probe_route: chat
+        notes: openai/gpt-4o-transcribe (raw)
+        source: raw-list
+      gpt-5:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/gpt-5 (raw)
+        source: raw-list
+      gpt-5-2025-08-07:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/gpt-5-2025-08-07 (raw)
+        source: raw-list
+      gpt-5-chat-latest:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/gpt-5-chat-latest (raw)
+        source: raw-list
+      gpt-5-mini:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/gpt-5-mini (raw)
+        source: raw-list
+      gpt-5-mini-2025-08-07:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/gpt-5-mini-2025-08-07 (raw)
+        source: raw-list
+      gpt-5-nano:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/gpt-5-nano (raw)
+        source: raw-list
+      gpt-5-nano-2025-08-07:
+        interface: other
+        family: other
+        probe_route: null
+        notes: openai/gpt-5-nano-2025-08-07 (raw)
+        source: raw-list
+      gpt-image-1:
+        interface: image
+        family: gpt-image
+        probe_route: null
+        notes: openai/gpt-image-1 (raw)
+        source: raw-list
+      o1:
+        interface: responses
+        family: o1
+        probe_route: responses
+        notes: openai/o1 (raw)
+        source: raw-list
+      o1-2024-12-17:
+        interface: responses
+        family: o1
+        probe_route: responses
+        notes: openai/o1-2024-12-17 (raw)
+        source: raw-list
+      o1-mini:
+        interface: responses
+        family: o1
+        probe_route: responses
+        notes: openai/o1-mini (raw)
+        source: raw-list
+      o1-mini-2024-09-12:
+        interface: responses
+        family: o1
+        probe_route: responses
+        notes: openai/o1-mini-2024-09-12 (raw)
+        source: raw-list
+      o1-pro:
+        interface: responses
+        family: o1
+        probe_route: responses
+        notes: openai/o1-pro (raw)
+        source: raw-list
+      o1-pro-2025-03-19:
+        interface: responses
+        family: o1
+        probe_route: responses
+        notes: openai/o1-pro-2025-03-19 (raw)
+        source: raw-list
+      o3:
+        interface: responses
+        family: o3
+        probe_route: responses
+        notes: openai/o3 (raw)
+        source: raw-list
+      o3-2025-04-16:
+        interface: responses
+        family: o3
+        probe_route: responses
+        notes: openai/o3-2025-04-16 (raw)
+        source: raw-list
+      o3-mini:
+        interface: responses
+        family: o3
+        probe_route: responses
+        notes: openai/o3-mini (raw)
+        source: raw-list
+      o3-mini-2025-01-31:
+        interface: responses
+        family: o3
+        probe_route: responses
+        notes: openai/o3-mini-2025-01-31 (raw)
+        source: raw-list
+      o4-mini:
+        interface: responses
+        family: o4
+        probe_route: responses
+        notes: openai/o4-mini (raw)
+        source: raw-list
+      o4-mini-2025-04-16:
+        interface: responses
+        family: o4
+        probe_route: responses
+        notes: openai/o4-mini-2025-04-16 (raw)
+        source: raw-list
+      o4-mini-deep-research:
+        interface: responses
+        family: o4
+        probe_route: responses
+        notes: openai/o4-mini-deep-research (raw)
+        source: raw-list
+      o4-mini-deep-research-2025-06-26:
+        interface: responses
+        family: o4
+        probe_route: responses
+        notes: openai/o4-mini-deep-research-2025-06-26 (raw)
+        source: raw-list
+      omni-moderation-2024-09-26:
+        interface: moderation
+        family: moderation
+        probe_route: null
+        notes: openai/omni-moderation-2024-09-26 (raw)
+        source: raw-list
+      omni-moderation-latest:
+        interface: moderation
+        family: moderation
+        probe_route: null
+        notes: openai/omni-moderation-latest (raw)
+        source: raw-list
+      text-embedding-3-large:
+        interface: embeddings
+        family: embedding
+        probe_route: null
+        notes: openai/text-embedding-3-large (raw)
+        source: raw-list
+      text-embedding-3-small:
+        interface: embeddings
+        family: embedding
+        probe_route: null
+        notes: openai/text-embedding-3-small (raw)
+        source: raw-list
+      text-embedding-ada-002:
+        interface: embeddings
+        family: embedding
+        probe_route: null
+        notes: openai/text-embedding-ada-002 (raw)
+        source: raw-list
+      tts-1:
+        interface: audio.speech
+        family: tts
+        probe_route: null
+        notes: openai/tts-1 (raw)
+        source: raw-list
+      tts-1-1106:
+        interface: audio.speech
+        family: tts
+        probe_route: null
+        notes: openai/tts-1-1106 (raw)
+        source: raw-list
+      tts-1-hd:
+        interface: audio.speech
+        family: tts
+        probe_route: null
+        notes: openai/tts-1-hd (raw)
+        source: raw-list
+      tts-1-hd-1106:
+        interface: audio.speech
+        family: tts
+        probe_route: null
+        notes: openai/tts-1-hd-1106 (raw)
+        source: raw-list
+      whisper-1:
+        interface: audio.stt
+        family: whisper
+        probe_route: null
+        notes: openai/whisper-1 (raw)
+        source: raw-list
+  anthropic:
+    models:
+      claude-haiku-3.5:
+        interface: chat
+        family: claude
+        probe_route: chat
+        notes: anthropic/claude-haiku-3.5 (raw)
+        source: raw-list
+      claude-opus-4.1:
+        interface: chat
+        family: claude
+        probe_route: chat
+        notes: anthropic/claude-opus-4.1 (raw)
+        source: raw-list
+      claude-sonnet-4:
+        interface: chat
+        family: claude
+        probe_route: chat
+        notes: anthropic/claude-sonnet-4 (raw)
+        source: raw-list
+  google:
+    models:
+      gemini-1.5-flash:
+        interface: other
+        family: gemini
+        probe_route: null
+        notes: google/gemini-1.5-flash (raw)
+        source: raw-list
+      gemini-1.5-flash-8b:
+        interface: other
+        family: gemini
+        probe_route: null
+        notes: google/gemini-1.5-flash-8b (raw)
+        source: raw-list
+      gemini-1.5-pro:
+        interface: other
+        family: gemini
+        probe_route: null
+        notes: google/gemini-1.5-pro (raw)
+        source: raw-list
+      gemini-2.5-flash:
+        interface: other
+        family: gemini
+        probe_route: null
+        notes: google/gemini-2.5-flash (raw)
+        source: raw-list
+      gemini-2.5-flash-lite:
+        interface: other
+        family: gemini
+        probe_route: null
+        notes: google/gemini-2.5-flash-lite (raw)
+        source: raw-list
+      gemini-2.5-pro:
+        interface: other
+        family: gemini
+        probe_route: null
+        notes: google/gemini-2.5-pro (raw)
+        source: raw-list
+  groq:
+    models: {}

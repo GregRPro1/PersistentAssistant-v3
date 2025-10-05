@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "file:///C:/_Repos/PersistentAssistant/project/plans/project_plan_v3.schema.json",
+  "title": "Persistent Assistant v3 Plan",
+  "type": "object",
+  "required": ["phases", "meta"],
+  "properties": {
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "steps"],
+        "properties": {
+          "name": { "type": "string" },
+          "desc": { "type": "string" },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "status", "description"],
+              "properties": {
+                "id": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+                "status": { "type": "string", "enum": ["planned","in_progress","done","blocked"] },
+                "description": { "type": "string" },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["title","status"],
+                    "properties": {
+                      "title": { "type": "string" },
+                      "status": { "type": "string", "enum": ["planned","in_progress","done","blocked"] }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "success": { "type": "array", "items": { "type": "string" } },
+                "files":   { "type": "array", "items": { "type": "string" } },
+                "tags":    { "type": "array", "items": { "type": "string" } },
+                "feature_id": { "type": "string" },
+                "autonomy_level": { "type": "string", "enum": ["low","medium","high","review_required"] },
+                "security": { "type": "string", "enum": ["free","sensitive","secret"] },
+                "depends_on": { "type": "array", "items": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" } }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["version","current_step_policy","current_step"],
+      "properties": {
+        "version": { "type": "string" },
+        "current_step_policy": { "type": "string", "enum": ["explicit","auto"] },
+        "current_step": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

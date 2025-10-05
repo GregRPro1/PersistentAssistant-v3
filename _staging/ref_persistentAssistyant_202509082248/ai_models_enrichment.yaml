@@ -1,0 +1,2538 @@
+anthropic:
+  models:
+    claude-3-opus: {}
+    claude-3-sonnet: {}
+    claude-opus-4-1-20250805:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    claude-opus-4-20250514:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    claude-sonnet-4-20250514:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    claude-3-7-sonnet-20250219:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    claude-3-5-sonnet-20241022:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    claude-3-5-haiku-20241022:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    claude-3-5-sonnet-20240620:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    claude-3-haiku-20240307:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    claude-3-opus-20240229:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 200000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+deepseek:
+  models:
+    deepseek-chat:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+openai:
+  models:
+    gpt-4-0613:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-3.5-turbo:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-5-nano:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-5:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-5-mini-2025-08-07:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-5-mini:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-5-nano-2025-08-07:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    davinci-002:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    babbage-002:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-3.5-turbo-instruct:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-3.5-turbo-instruct-0914:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    dall-e-3:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    dall-e-2:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4-1106-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-3.5-turbo-1106:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    tts-1-hd:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    tts-1-1106:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    tts-1-hd-1106:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    text-embedding-3-small:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    text-embedding-3-large:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4-0125-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4-turbo-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-3.5-turbo-0125:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4-turbo:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4-turbo-2024-04-09:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-2024-05-13:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-2024-07-18:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-2024-08-06:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    chatgpt-4o-latest:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o1-mini-2024-09-12:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o1-mini:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-realtime-preview-2024-10-01:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-audio-preview-2024-10-01:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-audio-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-realtime-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    omni-moderation-latest:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    omni-moderation-2024-09-26:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-realtime-preview-2024-12-17:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-audio-preview-2024-12-17:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-realtime-preview-2024-12-17:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-audio-preview-2024-12-17:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o1-2024-12-17:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o1:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-realtime-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-audio-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o3-mini:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o3-mini-2025-01-31:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-2024-11-20:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-search-preview-2025-03-11:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-search-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-search-preview-2025-03-11:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-search-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-transcribe:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-transcribe:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o1-pro-2025-03-19:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o1-pro:
+      Provider: openai
+      Model: o1-pro
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-mini-tts:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o3-2025-04-16:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o4-mini-2025-04-16:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o3:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o4-mini:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4.1-2025-04-14:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4.1:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4.1-mini-2025-04-14:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4.1-mini:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4.1-nano-2025-04-14:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4.1-nano:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-image-1:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    codex-mini-latest:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-realtime-preview-2025-06-03:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-4o-audio-preview-2025-06-03:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o4-mini-deep-research:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    o4-mini-deep-research-2025-06-26:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 64000
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-5-chat-latest:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-5-2025-08-07:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gpt-3.5-turbo-16k:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    tts-1:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    whisper-1:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    text-embedding-ada-002:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+groq:
+  models:
+    whisper-large-v3-turbo:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    compound-beta-mini:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    llama-3.3-70b-versatile:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    openai/gpt-oss-120b:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    compound-beta:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    gemma2-9b-it:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    qwen/qwen3-32b:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    meta-llama/llama-guard-4-12b:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    allam-2-7b:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    whisper-large-v3:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    openai/gpt-oss-20b:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    deepseek-r1-distill-llama-70b:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    playai-tts-arabic:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    playai-tts:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    meta-llama/llama-prompt-guard-2-22m:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    llama3-8b-8192:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    meta-llama/llama-4-maverick-17b-128e-instruct:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    llama-3.1-8b-instant:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    moonshotai/kimi-k2-instruct:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    meta-llama/llama-4-scout-17b-16e-instruct:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    meta-llama/llama-prompt-guard-2-86m:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    distil-whisper-large-v3-en:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    llama3-70b-8192:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+google:
+  models:
+    models/embedding-gecko-001:
+      Provider: google
+      Model: models/embedding-gecko-001
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-pro-latest:
+      Provider: google
+      Model: models/gemini-1.5-pro-latest
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-pro-002:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-pro:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-flash-latest:
+      Provider: google
+      Model: models/gemini-1.5-flash-latest
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-flash:
+      Provider: google
+      Model: models/gemini-1.5-flash
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-flash-002:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-flash-8b:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-flash-8b-001:
+      Provider: google
+      Model: models/gemini-1.5-flash-8b-001
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-1.5-flash-8b-latest:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-pro-preview-03-25:
+      Provider: google
+      Model: models/gemini-2.5-pro-preview-03-25
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-flash-preview-05-20:
+      provider: google
+      model: models/gemini-2.5-flash-preview-05-20
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-flash:
+      Provider: google
+      Model: models/gemini-2.5-flash
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-flash-lite-preview-06-17:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-pro-preview-05-06:
+      Provider: google
+      Model: models/gemini-2.5-pro-preview-05-06
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-pro-preview-06-05:
+      Provider: google
+      Model: models/gemini-2.5-pro-preview-06-05
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-pro:
+      Provider: google
+      Model: models/gemini-2.5-pro
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-exp:
+      Provider: google
+      Model: models/gemini-2.0-flash-exp
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash:
+      Provider: google
+      Model: models/gemini-2.0-flash
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-001:
+      Provider: google
+      Model: models/gemini-2.0-flash-001
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-lite-001:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-lite:
+      Provider: google
+      Model: models/gemini-2.0-flash-lite
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-lite-preview-02-05:
+      provider: google
+      model: models/gemini-2.0-flash-lite-preview-02-05
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-lite-preview:
+      Provider: google
+      Model: models/gemini-2.0-flash-lite-preview
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-pro-exp:
+      Provider: google
+      Model: models/gemini-2.0-pro-exp
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-pro-exp-02-05:
+      Provider: google
+      Model: models/gemini-2.0-pro-exp-02-05
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-exp-1206:
+      Provider: google
+      Model: models/gemini-exp-1206
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-thinking-exp-01-21:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-thinking-exp:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-thinking-exp-1219:
+      Provider: google
+      Model: models/gemini-2.0-flash-thinking-exp-1219
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-flash-preview-tts:
+      Provider: google
+      Model: models/gemini-2.5-flash-preview-tts
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-pro-preview-tts:
+      Provider: google
+      Model: models/gemini-2.5-pro-preview-tts
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/learnlm-2.0-flash-experimental:
+      Provider: google
+      Model: models/learnlm-2.0-flash-experimental
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemma-3-1b-it:
+      Provider: google
+      Model: models/gemma-3-1b-it
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemma-3-4b-it:
+      Provider: google
+      Model: models/gemma-3-4b-it
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemma-3-12b-it:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemma-3-27b-it:
+      Provider: google
+      Model: models/gemma-3-27b-it
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemma-3n-e4b-it:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemma-3n-e2b-it:
+      Provider: google
+      Model: models/gemma-3n-e2b-it
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-flash-lite:
+      provider: google
+      model: models/gemini-2.5-flash-lite
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/embedding-001:
+      Provider: google
+      Model: models/embedding-001
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/text-embedding-004:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-embedding-exp-03-07:
+      Provider: google
+      Model: models/gemini-embedding-exp-03-07
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-embedding-exp:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-embedding-001:
+      Provider: google
+      Model: models/gemini-embedding-001
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/aqa:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/imagen-3.0-generate-002:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/imagen-4.0-generate-preview-06-06:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/imagen-4.0-ultra-generate-preview-06-06:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/imagen-4.0-generate-001:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/imagen-4.0-ultra-generate-001:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/imagen-4.0-fast-generate-001:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/veo-2.0-generate-001:
+      Provider: google
+      Model: models/veo-2.0-generate-001
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/veo-3.0-generate-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/veo-3.0-fast-generate-preview:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-flash-preview-native-audio-dialog:
+      Provider: google
+      Model: models/gemini-2.5-flash-preview-native-audio-dialog
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-flash-exp-native-audio-thinking-dialog:
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.0-flash-live-001:
+      Provider: google
+      Model: models/gemini-2.0-flash-live-001
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-live-2.5-flash-preview:
+      Provider: google
+      Model: models/gemini-live-2.5-flash-preview
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''
+    models/gemini-2.5-flash-live-preview:
+      Provider: google
+      Model: models/gemini-2.5-flash-live-preview
+      pricing:
+        in: 0.0
+        out: 0.0
+      limits:
+        max_tokens: 0
+      capabilities:
+        reasoning: 1
+        coding: 1
+        long_context: 1
+        multimodal: false
+        speed: 1
+      notes: ''
+      source: ''

@@ -1,0 +1,64 @@
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+from pathlib import Path
+import re, shutil, sys
+
+CFG = Path(r"config\projects\persistent_assistant_v3.yaml").resolve()
+
+def quote_if_unquoted(value: str) -> str:
+    v = value.strip()
+    if (v.startswith("'") and v.endswith("'")) or (v.startswith('"') and v.endswith('"')):
+        return value
+    # protect inner single quotes minimally by switching to double quotes
+    if "'" in v and '"' not in v:
+        return '"%s"' % v
+    return "'%s'" % v
+
+def main():
+    if not CFG.exists():
+        print(f"[SANITIZE FAIL] Missing {CFG}")
+        return 2
+    orig = CFG.read_text(encoding="utf-8").splitlines()
+    out = []
+    fixes = []
+    for i, line in enumerate(orig, start=1):
+        L = line
+        # Rule A: quote any scalar containing asterisk after a colon (e.g., glob like *.yaml)
+        # matches: key: value-with-asterisk
+        m = re.match(r'^(\s*[A-Za-z0-9_\-]+:\s*)([^#\s].*?\*.*)$', L)
+        if m:
+            pre, val = m.group(1), m.group(2)
+            # avoid re-quoting if already quoted
+            if not (val.strip().startswith("'") or val.strip().startswith('"')):
+                L = pre + quote_if_unquoted(val)
+                fixes.append(f"line {i}: quoted glob scalar -> {val!r}")
+
+        # Rule B: inside sequences, quote ambiguous comparators like "lint_score >= 100"
+        if re.match(r'^\s*-\s+lint_score\s*[><=!]=?\s+\d+', L):
+            val = L.strip()[2:].strip()
+            L = re.sub(r'^(\s*-\s+).+$', r'\1"%s"' % val.replace('"','\\"'), L)
+            fixes.append(f"line {i}: quoted comparator scalar -> {val!r}")
+
+        out.append(L)
+
+    if out == orig:
+        print("[SANITIZE OK] No changes needed.")
+        return 0
+
+    # backup then write
+    bak = CFG.with_suffix(CFG.suffix + ".bak.sanitize")
+    shutil.copy2(str(CFG), str(bak))
+    Path(CFG).write_text("\n".join(out) + "\n", encoding="utf-8")
+    print("[SANITIZE OK] Wrote sanitized YAML.")
+    for f in fixes:
+        print(" -", f)
+    print("backup:", bak)
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

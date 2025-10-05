@@ -1,0 +1,28 @@
+project: PersistentAssistant
+version: 3.0
+root_path: "C:\\_Repos\\PersistentAssistant"
+core_path: "C:\\_Repos\\persistent_core"
+
+paths:
+  config: "C:\\_Repos\\PersistentAssistant\\config"
+  logs: "C:\\_Repos\\PersistentAssistant\\logs"
+  data: "C:\\_Repos\\PersistentAssistant\\data"
+  scripts: "C:\\_Repos\\PersistentAssistant\\scripts"
+  agents: "C:\\_Repos\\PersistentAssistant\\agents"
+  gui: "C:\\_Repos\\PersistentAssistant\\gui"
+  core_lib: "C:\\_Repos\\persistent_core"
+  interaction_logs: "C:\\_Repos\\PersistentAssistant\\data\\interactions"
+
+ai_provider: "openai"
+default_model: "gpt-4o"
+
+gui:
+  theme: "default"
+  tabs:
+    - InputTab
+    - PromptTab
+    - ResponseTab
+    - PlanTrackerTab
+
+developer_mode: true
+log_retention_days: 30

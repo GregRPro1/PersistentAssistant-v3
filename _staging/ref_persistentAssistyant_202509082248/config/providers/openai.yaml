@@ -1,0 +1,9 @@
+provider: openai
+default_model: gpt-4o-mini
+retries: 3
+delay: 2
+key_source: C:/Secure/api_keys/keys.yaml
+notes: |
+  Keys are loaded from the YAML file, not env vars.
+  CLI usage example:
+    python core/ai_client.py "Hello" default paid

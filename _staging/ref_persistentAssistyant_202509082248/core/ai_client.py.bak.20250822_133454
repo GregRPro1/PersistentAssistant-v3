@@ -1,0 +1,131 @@
+# core/ai_client.py
+# Replaced by PA Step 4.2 on 2025-08-20 — default provider/key/model + lazy imports
+
+import os
+import sys
+import time
+import logging
+from typing import Dict, Any
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+
+# -------------------------------
+# Cost tables ($ per 1K tokens)
+# -------------------------------
+COSTS = {
+    "openai": {
+        "gpt-4o-mini": {"in": 0.00000015, "out": 0.0000006},  # $0.15 / $0.60 per 1M tokens
+    },
+    # Placeholders for future providers (left here for compatibility)
+    "anthropic": {
+        "claude-3-5-sonnet-20240620": {"in": 0.000003, "out": 0.000015},
+    },
+    "groq": {
+        "llama-3.1-8b-instant": {"in": 0.00000005, "out": 0.00000008},
+        "llama-3.1-70b-versatile": {"in": 0.0000006, "out": 0.0000008},
+    },
+    "google": {
+        "gemini-1.5-pro-latest": {"in": 0.00000035, "out": 0.00000105},
+    },
+}
+
+def _load_default_key(provider: str) -> str | None:
+    # 1) env var (fastest)
+    if provider == "openai":
+        k = os.getenv("OPENAI_API_KEY")
+        if k: return k
+    # 2) shared keys file (your convention)
+    keys_path = r"C:\Secure\api_keys\keys.yaml"
+    if os.path.exists(keys_path):
+        try:
+            import yaml
+            with open(keys_path, "r", encoding="utf-8") as f:
+                keys = yaml.safe_load(f) or {}
+            return ((keys.get("keys") or {}).get("default") or {}).get(provider, {}).get("paid")
+        except Exception as e:
+            logging.warning("Failed to load keys.yaml: %s", e)
+    return None
+
+class AIClient:
+    def __init__(self, provider: str | None = None, key: str | None = None, model: str | None = None):
+        # Defaults for MVP
+        self.provider = (provider or "openai").lower()
+        self.model = model or ("gpt-4o-mini" if self.provider == "openai" else None)
+        self.key = key or _load_default_key(self.provider)
+        self._client = None  # lazy init per provider
+
+        if not self.key and self.provider == "openai":
+            # Defer hard failure to send(); allows UI to construct object without key
+            logging.info("OPENAI key not found yet; will error in send() if not provided.")
+
+    def _ensure_openai(self):
+        try:
+            from openai import OpenAI  # lazy import
+        except Exception as e:
+            raise RuntimeError(f"OpenAI SDK not available: {e}")
+        if not self.key:
+            raise RuntimeError("OPENAI_API_KEY not set and no key in C:\\Secure\\api_keys\\keys.yaml")
+        self._client = OpenAI(api_key=self.key)
+        if not self.model:
+            self.model = "gpt-4o-mini"
+
+    def send(self, prompt: str, *, provider: str | None = None, model: str | None = None) -> Dict[str, Any]:
+        """
+        Send a prompt to the selected provider and return a uniform result dict.
+        Provider/model overrideable per call.
+        """
+        if provider:
+            self.provider = provider.lower()
+        if model:
+            self.model = model
+
+        start = time.time()
+        reply = None
+        tokens_in = 0
+        tokens_out = 0
+
+        if self.provider == "openai":
+            self._ensure_openai()
+            resp = self._client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            reply = resp.choices[0].message.content
+            # usage may be absent on errors; guard
+            try:
+                tokens_in = int(getattr(resp.usage, "prompt_tokens", 0) or 0)
+                tokens_out = int(getattr(resp.usage, "completion_tokens", 0) or 0)
+            except Exception:
+                tokens_in = tokens_in or 0
+                tokens_out = tokens_out or 0
+
+        elif self.provider in ("anthropic", "groq", "google"):
+            raise NotImplementedError(f"Provider '{self.provider}' not enabled in MVP")
+
+        else:
+            raise ValueError(f"Unsupported provider: {self.provider}")
+
+        elapsed = time.time() - start
+
+        # Compute cost
+        c = (COSTS.get(self.provider, {}) or {}).get(self.model or "", {"in": 0, "out": 0})
+        cost = (float(tokens_in) * c["in"] + float(tokens_out) * c["out"]) / 1000.0
+
+        return {
+            "reply": reply,
+            "provider": self.provider,
+            "model": self.model,
+            "tokens_in": tokens_in,
+            "tokens_out": tokens_out,
+            "cost": cost,
+            "time": elapsed,
+        }
+
+if __name__ == "__main__":
+    # CLI smoke test:
+    if len(sys.argv) >= 2:
+        prompt = sys.argv[1]
+        client = AIClient()  # defaults to openai/gpt-4o-mini
+        print(client.send(prompt))
+    else:
+        print("Usage: python core/ai_client.py \"<prompt>\"")

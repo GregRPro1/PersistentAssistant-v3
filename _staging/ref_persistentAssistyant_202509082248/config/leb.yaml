@@ -1,0 +1,8 @@
+bind: 127.0.0.1
+port: 8765
+allowlist:
+  - "python --version"
+  # add your own smoke cmd(s) here, e.g.:
+  # - "pytest -q -k smoke"
+time_limits:
+  run_seconds: 30

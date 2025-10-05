@@ -1,0 +1,53 @@
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import os, sys, hashlib, argparse, time, shutil
+
+def sha256_of(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def main():
+    ap = argparse.ArgumentParser(description="Safely replace a file if expected sha256 matches current, or not in inventory.")
+    ap.add_argument("--path", required=True, help="Target file to overwrite")
+    ap.add_argument("--expected-sha", required=True, help="Expected SHA256 of the CURRENT on-disk file, or '[not in inventory]'")
+    ap.add_argument("--new", required=True, help="Path to NEW file content to install on success")
+    args = ap.parse_args()
+
+    target = os.path.abspath(args.path)
+    new_path = os.path.abspath(args.new)
+    expected = args.expected_sha.lower()
+
+    if not os.path.exists(target):
+        print(f"FAIL: target does not exist: {target}")
+        return 2
+    if not os.path.exists(new_path):
+        print(f"FAIL: new content missing: {new_path}")
+        return 3
+
+    current = sha256_of(target)
+
+    # Accept if file not in inventory (first-time add)
+    if expected != "[not in inventory]" and current.lower() != expected:
+        ts = time.strftime("%Y%m%d_%H%M%S")
+        rejected = f"{target}.reject.{ts}"
+        shutil.copy2(new_path, rejected)
+        print(f"FAIL: hash mismatch\n expected={expected}\n   actual={current}\n new saved as: {rejected}")
+        return 1
+
+    ts = time.strftime("%Y%m%d_%H%M%S")
+    backup = f"{target}.bak.{ts}"
+    shutil.copy2(target, backup)
+    shutil.copy2(new_path, target)
+    print(f"OK: replaced {target}\n backup: {backup}")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

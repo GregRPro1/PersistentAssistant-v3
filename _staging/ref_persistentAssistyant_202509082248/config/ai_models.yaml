@@ -1,0 +1,1750 @@
+last_updated: '2025-08-18T22:54:42.199068'
+providers:
+  openai:
+    models:
+      gpt-4-0613:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-3.5-turbo:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-5-nano:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-5:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-5-mini-2025-08-07:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-5-mini:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-5-nano-2025-08-07:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      davinci-002:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      babbage-002:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-3.5-turbo-instruct:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-3.5-turbo-instruct-0914:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      dall-e-3:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      dall-e-2:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4-1106-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-3.5-turbo-1106:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      tts-1-hd:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      tts-1-1106:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      tts-1-hd-1106:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      text-embedding-3-small:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      text-embedding-3-large:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4-0125-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4-turbo-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-3.5-turbo-0125:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4-turbo:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4-turbo-2024-04-09:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-2024-05-13:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-2024-07-18:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-2024-08-06:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      chatgpt-4o-latest:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o1-mini-2024-09-12:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o1-mini:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-realtime-preview-2024-10-01:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-audio-preview-2024-10-01:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-audio-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-realtime-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      omni-moderation-latest:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      omni-moderation-2024-09-26:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-realtime-preview-2024-12-17:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-audio-preview-2024-12-17:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-realtime-preview-2024-12-17:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-audio-preview-2024-12-17:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o1-2024-12-17:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o1:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-realtime-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-audio-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o3-mini:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o3-mini-2025-01-31:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-2024-11-20:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-search-preview-2025-03-11:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-search-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-search-preview-2025-03-11:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-search-preview:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-transcribe:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-transcribe:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o1-pro-2025-03-19:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o1-pro:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-mini-tts:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o3-2025-04-16:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o4-mini-2025-04-16:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o3:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o4-mini:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4.1-2025-04-14:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4.1:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4.1-mini-2025-04-14:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4.1-mini:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4.1-nano-2025-04-14:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4.1-nano:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-image-1:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      codex-mini-latest:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-realtime-preview-2025-06-03:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-4o-audio-preview-2025-06-03:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o4-mini-deep-research:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      o4-mini-deep-research-2025-06-26:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-5-chat-latest:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-5-2025-08-07:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      gpt-3.5-turbo-16k:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      tts-1:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      whisper-1:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+      text-embedding-ada-002:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from OpenAI API
+  anthropic:
+    models:
+      claude-opus-4-1-20250805:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+      claude-opus-4-20250514:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+      claude-sonnet-4-20250514:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+      claude-3-7-sonnet-20250219:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+      claude-3-5-sonnet-20241022:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+      claude-3-5-haiku-20241022:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+      claude-3-5-sonnet-20240620:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+      claude-3-haiku-20240307:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+      claude-3-opus-20240229:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Anthropic API
+  groq:
+    models:
+      moonshotai/kimi-k2-instruct:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      openai/gpt-oss-20b:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      playai-tts-arabic:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      whisper-large-v3:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      playai-tts:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      allam-2-7b:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      meta-llama/llama-guard-4-12b:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      llama3-8b-8192:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      llama-3.1-8b-instant:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      compound-beta-mini:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      whisper-large-v3-turbo:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      gemma2-9b-it:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      meta-llama/llama-4-scout-17b-16e-instruct:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      compound-beta:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      meta-llama/llama-prompt-guard-2-86m:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      meta-llama/llama-prompt-guard-2-22m:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      llama3-70b-8192:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      llama-3.3-70b-versatile:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      distil-whisper-large-v3-en:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      meta-llama/llama-4-maverick-17b-128e-instruct:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      openai/gpt-oss-120b:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      deepseek-r1-distill-llama-70b:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+      qwen/qwen3-32b:
+        pricing: {}
+        limits:
+          max_tokens: null
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Groq API
+  google:
+    models:
+      models/embedding-gecko-001:
+        pricing: {}
+        limits:
+          max_tokens: 1024
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-pro-latest:
+        pricing: {}
+        limits:
+          max_tokens: 2000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-pro-002:
+        pricing: {}
+        limits:
+          max_tokens: 2000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-pro:
+        pricing: {}
+        limits:
+          max_tokens: 2000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-flash-latest:
+        pricing: {}
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-flash:
+        pricing: {}
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-flash-002:
+        pricing: {}
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-flash-8b:
+        pricing: {}
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-flash-8b-001:
+        pricing: {}
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-1.5-flash-8b-latest:
+        pricing: {}
+        limits:
+          max_tokens: 1000000
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-pro-preview-03-25:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-flash-preview-05-20:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-flash:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-flash-lite-preview-06-17:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-pro-preview-05-06:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-pro-preview-06-05:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-pro:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-exp:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-001:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-lite-001:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-lite:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-lite-preview-02-05:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-lite-preview:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-pro-exp:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-pro-exp-02-05:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-exp-1206:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-thinking-exp-01-21:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-thinking-exp:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-thinking-exp-1219:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-flash-preview-tts:
+        pricing: {}
+        limits:
+          max_tokens: 8192
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-pro-preview-tts:
+        pricing: {}
+        limits:
+          max_tokens: 8192
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/learnlm-2.0-flash-experimental:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemma-3-1b-it:
+        pricing: {}
+        limits:
+          max_tokens: 32768
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemma-3-4b-it:
+        pricing: {}
+        limits:
+          max_tokens: 32768
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemma-3-12b-it:
+        pricing: {}
+        limits:
+          max_tokens: 32768
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemma-3-27b-it:
+        pricing: {}
+        limits:
+          max_tokens: 131072
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemma-3n-e4b-it:
+        pricing: {}
+        limits:
+          max_tokens: 8192
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemma-3n-e2b-it:
+        pricing: {}
+        limits:
+          max_tokens: 8192
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-flash-lite:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/embedding-001:
+        pricing: {}
+        limits:
+          max_tokens: 2048
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/text-embedding-004:
+        pricing: {}
+        limits:
+          max_tokens: 2048
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-embedding-exp-03-07:
+        pricing: {}
+        limits:
+          max_tokens: 8192
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-embedding-exp:
+        pricing: {}
+        limits:
+          max_tokens: 8192
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-embedding-001:
+        pricing: {}
+        limits:
+          max_tokens: 2048
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/aqa:
+        pricing: {}
+        limits:
+          max_tokens: 7168
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/imagen-3.0-generate-002:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/imagen-4.0-generate-preview-06-06:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/imagen-4.0-ultra-generate-preview-06-06:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/imagen-4.0-generate-001:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/imagen-4.0-ultra-generate-001:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/imagen-4.0-fast-generate-001:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/veo-2.0-generate-001:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/veo-3.0-generate-preview:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/veo-3.0-fast-generate-preview:
+        pricing: {}
+        limits:
+          max_tokens: 480
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-flash-preview-native-audio-dialog:
+        pricing: {}
+        limits:
+          max_tokens: 131072
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-flash-exp-native-audio-thinking-dialog:
+        pricing: {}
+        limits:
+          max_tokens: 131072
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.0-flash-live-001:
+        pricing: {}
+        limits:
+          max_tokens: 131072
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-live-2.5-flash-preview:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API
+      models/gemini-2.5-flash-live-preview:
+        pricing: {}
+        limits:
+          max_tokens: 1048576
+        capabilities:
+          reasoning: 0
+          coding: 0
+          long_context: 0
+          multimodal: false
+        notes: Auto-fetched from Google GenAI API

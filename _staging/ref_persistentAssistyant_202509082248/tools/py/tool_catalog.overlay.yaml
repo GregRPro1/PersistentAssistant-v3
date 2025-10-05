@@ -1,0 +1,32 @@
+overrides:
+  py:tools/py/pa_std_summary.py:
+    name: Std Summary
+    description: orchestrator
+    usage: python tools/py/pa_std_summary.py --level standard
+    source: overlay
+  py:tools/py/ci/ci_check.py:
+    name: CI Gate
+    description: reply-lint → guard test → std summary → build catalog → enrich →
+      verify
+    usage: python tools/py/ci/ci_check.py
+    source: overlay
+  py:tools/py/ci/reply_lint_selected.py:
+    name: Reply Lint (selected)
+    description: Windows-safe linter for heredocs/here-strings in curated files.
+    usage: python tools/py/ci/reply_lint_selected.py
+    source: overlay
+  py:tools/py/pack/enrich_pack.py:
+    name: Pack Enrich
+    description: Inject plan snapshot, tool catalog, and reporters into a pack.
+    usage: python tools/py/pack/enrich_pack.py
+    source: overlay
+  py:tools/py/pack/verify_pack.py:
+    name: Pack Verify
+    description: Verify pack contains plan/catalog/reporters; auto-picks latest.
+    usage: python tools/py/pack/verify_pack.py --include-meta --check-insights
+    source: overlay
+  py:tools/py/mvp_smoke.py:
+    name: MVP Smoke
+    description: Hit core agent endpoints and report HTTP status; nonzero on failure.
+    usage: python tools/py/mvp_smoke.py
+    source: overlay

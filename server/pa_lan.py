@@ -1,0 +1,73 @@
+import os, time, importlib
+from flask import Flask, jsonify, Blueprint, Response
+
+def ensure_base_routes(app: Flask):
+    @app.route("/healthz")
+    def healthz():
+        return jsonify(ok=True, ts=time.time())
+
+    @app.route("/__debug")
+    def debug():
+        routes = sorted([r.rule for r in app.url_map.iter_rules()])
+        return "ROUTES:\n" + "\n".join(routes)
+
+def maybe_mount_watchdog(app: Flask):
+    # API
+    try:
+        from server.watchdog_api import bp as api_bp
+        app.register_blueprint(api_bp, url_prefix="/api")
+    except Exception:
+        api = Blueprint("watchdog_api_fb", __name__, url_prefix="/api")
+        @api.route("/watchdog")
+        def _api_fb():
+            p = os.path.join("reports","ops","watchdog_status.json")
+            if os.path.exists(p):
+                import json
+                with open(p, "r", encoding="utf-8") as f:
+                    return jsonify(json.load(f))
+            return Response("watchdog_status.json missing", status=404)
+        app.register_blueprint(api)
+
+    # UI
+    try:
+        from server.watchdog_ui import bp as ui_bp
+        app.register_blueprint(ui_bp, url_prefix="/app")
+    except Exception:
+        ui = Blueprint("watchdog_ui_fb", __name__, url_prefix="/app")
+        @ui.route("/watchdog")
+        def _ui_fb():
+            return Response(
+                "<h1>Watchdog (fallback)</h1>"
+                "<p><a href='/api/watchdog'>/api/watchdog</a></p>"
+                "<p><a href='/__debug'>__debug</a> | <a href='/healthz'>healthz</a></p>",
+                mimetype="text/html"
+            )
+        app.register_blueprint(ui)
+
+def create_app() -> Flask:
+    app = None
+    # Try to reuse existing app if present (server.mobile_home)
+    try:
+        mod = importlib.import_module("server.mobile_home")
+        app = getattr(mod, "app", None)
+        if app is None:
+            for fn in ("create_app", "build"):
+                f = getattr(mod, fn, None)
+                if callable(f):
+                    app = f()
+                    break
+    except Exception:
+        app = None
+
+    if app is None:
+        app = Flask("pa_lan")
+
+    ensure_base_routes(app)
+    maybe_mount_watchdog(app)
+    return app
+
+app = create_app()
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "8776"))
+    app.run(host="0.0.0.0", port=port, debug=False)

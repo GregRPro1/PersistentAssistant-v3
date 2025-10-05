@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project Index",
+  "type": "object",
+  "required": ["project_index"],
+  "properties": {
+    "project_index": {
+      "type": "object",
+      "required": ["name", "version", "files", "rules"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "files": {
+          "type": "object",
+          "required": ["project_plan","project_plan_schema","master_tracker","project_definition"],
+          "properties": {
+            "project_plan":         { "$ref": "#/$defs/fileEntry" },
+            "project_plan_schema":  { "$ref": "#/$defs/fileEntry" },
+            "master_tracker":       { "$ref": "#/$defs/fileEntry" },
+            "project_definition":   { "$ref": "#/$defs/fileEntry" }
+          },
+          "additionalProperties": false
+        },
+        "rules": {
+          "type": "object",
+          "required": ["forbid_duplicates","enforce_sha"],
+          "properties": {
+            "forbid_duplicates": { "type": "boolean" },
+            "enforce_sha":       { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "fileEntry": {
+      "type": "object",
+      "required": ["path","sha256"],
+      "properties": {
+        "path":   { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-fA-F]{64}$" },
+        "security": { "type": "string", "enum": ["free","sensitive","secret"], "default": "sensitive" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

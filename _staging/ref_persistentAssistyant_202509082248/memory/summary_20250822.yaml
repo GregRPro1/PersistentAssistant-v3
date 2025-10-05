@@ -1,0 +1,18 @@
+name: summary_20250822
+project: ''
+date: '2025-08-22T16:35:22.065789Z'
+tokens: 0
+items:
+- timestamp: '2025-08-22T13:42:29.586239Z'
+  provider: openai
+  model: gpt-4o-mini
+  tokens_in: 0
+  tokens_out: 0
+  cost_usd: 0.0
+  elapsed_sec: 0.0
+  prompt: '[stub] bootstrap memory'
+  reply: '[stub] pipeline check'
+  topic: general
+  _source: FORCED_STUB
+tags: []
+preview: ''

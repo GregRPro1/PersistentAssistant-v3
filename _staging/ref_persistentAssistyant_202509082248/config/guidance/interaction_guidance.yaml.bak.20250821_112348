@@ -1,0 +1,40 @@
+version: "1.0"
+updated: "2025-08-21T00:00:00Z"
+name: "interaction_guidance"
+description: >
+  Human–AI interaction protocol for Persistent Assistant development loops.
+  This file is data-only and can be updated/replaced without changing code.
+principles:
+  - "Always work against the agreed project plan and show the step number in every interaction."
+  - "Prefer single cut-and-paste packages that create files, run checks, and produce a pack_*.zip."
+  - "File changes must be full-file replacements; avoid in-place insertions or patches."
+  - "Guard changes with snapshot-aware safe replace and capture backups/rejects."
+  - "Always produce a feedback pack (OK or WARN) so nothing is lost."
+engineer_prompt_template: |
+  If the whole process was successful, consider carefully what to do next based on the agreed plan,
+  but package up all the commands you want performed into a single text block to be pasted into a
+  terminal on the development machine. Any file creation should be full-file scripts, as insertions
+  have proven unreliable. If guidance or confirmation is required, present a numbered list of choices
+  with a clearly marked preferred option based on best professional practice. Keep success/failure
+  criteria explicit, and ensure the package always emits a pack_*.zip for return.
+do:
+  - "Show [Current] and [Next] plan steps at the top of every package."
+  - "Regenerate deep inventory before and after any replacement."
+  - "Use tools/safe_replace.py with the expected on-disk SHA."
+  - "Include current_step.txt, last_summary.txt, supervisor_log.txt, insights, and any backups/rejects in the pack."
+  - "Copy the resulting pack path to the clipboard for upload."
+dont:
+  - "Don’t rely on memory—always read from the latest deep inventory and project_index."
+  - "Don’t send multi-step natural-language instructions when a single package will do."
+  - "Don’t patch lines with regex—prefer full-file writes and guarded replacement."
+feedback_summary_format: |
+  === Persistent Assistant Dev Summary ===
+  Timestamp: <local time>
+  [PLAN STATUS]
+  <output of tools/show_next_step.py>
+  [INVENTORY]
+  <key lines from tools/deep_inventory.py>
+  [SHA CHECK]
+  <expected SHA or reason>
+  [LOGS]
+  <tail of key logs, last 20–40 lines each>

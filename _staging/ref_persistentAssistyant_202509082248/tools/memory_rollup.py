@@ -1,0 +1,94 @@
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import os, glob, yaml, re
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+INTERACTIONS = ROOT / "data" / "interactions"
+MEMORY_DIR   = ROOT / "memory"
+LOG_PATH     = ROOT / "logs" / "memory_rollup.log"
+
+def _ts(): return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def _short(s:str, n:int):
+    if not s: return ""
+    s=str(s)
+    return s if len(s)<=n else s[:n]+"…"
+
+def _topic_guess(prompt:str, reply:str)->str:
+    text=(prompt or "")+" "+(reply or "")
+    text=text.lower()
+    # tiny heuristic tags (extend later / pluggable)
+    if "suspension" in text: return "suspension"
+    if "cooling" in text: return "cooling"
+    if "barfield" in text: return "barfield"
+    if "pricing" in text or "model" in text: return "ai_models"
+    if "gui" in text: return "gui"
+    return "general"
+
+def main():
+    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    lines=[]
+
+    # roll-up grouped by day (UTC)
+    files = sorted(INTERACTIONS.glob("INT_*.yaml"))
+    if not files:
+        print("[MEMORY] no interactions to summarize")
+        return 0
+
+    by_day={}
+    for f in files:
+        try:
+            data = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        except Exception as e:
+            lines.append(f"[{_ts()}] WARN failed to read {f.name}: {e}")
+            continue
+        ts = data.get("timestamp") or ""
+        day = (ts[:10] if len(ts)>=10 else "unknown")
+        by_day.setdefault(day, []).append((f, data))
+
+    for day, items in by_day.items():
+        out = MEMORY_DIR / f"summary_{day.replace('-','')}.yaml"
+        existing=[]
+        if out.exists():
+            try:
+                existing = yaml.safe_load(out.read_text(encoding="utf-8")) or []
+            except Exception:
+                existing=[]
+        # build append-only records; avoid duplicates by file name
+        have = {x.get("_source","") for x in existing if isinstance(x,dict)}
+        for f, data in items:
+            if f.name in have: 
+                continue
+            rec = {
+                "timestamp": data.get("timestamp"),
+                "provider": data.get("provider"),
+                "model": data.get("model"),
+                "tokens_in": data.get("tokens_in"),
+                "tokens_out": data.get("tokens_out"),
+                "cost_usd": data.get("cost_usd"),
+                "elapsed_sec": data.get("elapsed_sec"),
+                "prompt": _short(data.get("prompt_preview"), 400),
+                "reply": _short(data.get("reply_preview"), 800),
+                "topic": _topic_guess(data.get("prompt_preview"), data.get("reply_preview")),
+                "_source": f.name,
+            }
+            existing.append(rec)
+        out.write_text(yaml.safe_dump(existing, sort_keys=False), encoding="utf-8")
+        lines.append(f"[{_ts()}] Rolled {len(items)} → {out.name} (now {len(existing)})")
+
+    LOG_PATH.write_text("\n".join(lines)+"\n", encoding="utf-8")
+    print("[MEMORY OK]")
+    for ln in lines[-5:]:
+        print(" -", ln)
+    return 0
+
+if __name__=="__main__":
+    raise SystemExit(main())

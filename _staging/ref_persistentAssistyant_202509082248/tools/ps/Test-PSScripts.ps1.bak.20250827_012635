@@ -1,0 +1,22 @@
+Set-StrictMode -Version Latest
+[CmdletBinding()]
+param(
+  [string]$Root = (Resolve-Path $PSScriptRoot).Path
+)
+$all = Get-ChildItem -Path $Root -Include *.ps1,*.psm1 -Recurse -File -ErrorAction SilentlyContinue
+$fail = @()
+foreach ($f in $all) {
+  $tokens = ; $errors = 
+  [void][System.Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$tokens, [ref]$errors)
+  if ($errors) {
+    foreach ($e in $errors) {
+      $fail += [pscustomobject]@{ File=$f.FullName; Line=$e.Extent.StartLineNumber; Column=$e.Extent.StartColumnNumber; Message=$e.Message; Snippet=$e.Extent.Text.Trim() }
+    }
+  }
+}
+if ($fail.Count) {
+  $fail | Format-Table -AutoSize | Out-String | Write-Host
+  $fail | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'parser_errors.json') -Encoding UTF8
+  exit 1
+}
+Write-Host 'All PowerShell files parsed cleanly.'

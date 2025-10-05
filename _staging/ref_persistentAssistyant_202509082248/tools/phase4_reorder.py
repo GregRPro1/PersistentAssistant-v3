@@ -1,0 +1,51 @@
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import yaml, re
+
+PLAN = r"project\plans\project_plan_v3.yaml"
+
+def norm_key(step_id: str):
+    """
+    Normalize '4.1.3b' -> [(4,''),(1,''),(3,'b')]
+    Normalize '4.2'    -> [(4,''),(2,'')]
+    Only (int,str) tuples so comparisons never mix int<->str directly.
+    """
+    out = []
+    for seg in str(step_id).split("."):
+        m = re.match(r"^(\d+)([A-Za-z]?)$", seg)
+        if m:
+            out.append((int(m.group(1)), m.group(2).lower()))
+        else:
+            # fallback: nonstandard → try int part, else 0; keep whole as suffix
+            m2 = re.match(r"^(\d+)", seg)
+            n = int(m2.group(1)) if m2 else 0
+            out.append((n, seg.lower()))
+    return tuple(out)
+
+def main():
+    with open(PLAN,"r",encoding="utf-8") as f:
+        d = yaml.safe_load(f)
+
+    for ph in d.get("phases", []):
+        name = str(ph.get("name",""))
+        if name.startswith("Phase 4"):
+            steps = ph.get("steps", [])
+            group41, other = [], []
+            for s in steps:
+                sid = str(s.get("id",""))
+                (group41 if (sid=="4.1" or sid.startswith("4.1.")) else other).append(s)
+            group41.sort(key=lambda s: norm_key(s.get("id","")))
+            other.sort(key=lambda s: norm_key(s.get("id","")))
+            ph["steps"] = group41 + other
+            break
+
+    with open(PLAN,"w",encoding="utf-8") as f:
+        yaml.safe_dump(d, f, sort_keys=False)
+    print("[PLAN OK] Phase 4 steps reordered: 4.1 & 4.1.* precede 4.2+")
+
+if __name__ == "__main__":
+    main()

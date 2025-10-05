@@ -1,0 +1,8 @@
+rules:
+  - id: no-bash-heredoc
+    title: "Disallow bash heredocs in Windows/PowerShell flows"
+    description: >
+      Do not emit snippets like:  python - << 'PY'  ...  PY
+      Use explicit Set-Content + python tools\foo.py instead.
+    status: enforced
+    rationale: "Prevents PS parser errors and keeps file creation deterministic."

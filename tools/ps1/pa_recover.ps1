@@ -1,0 +1,183 @@
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+function Ensure-Dir([string]$p){ if (-not (Test-Path $p)) { New-Item -ItemType Directory -Force -Path $p | Out-Null } }
+function Alive-Process([int]$id){ try { Get-Process -Id $id -ErrorAction Stop | Out-Null; $true } catch { $false } }
+function Test-Http([string]$url, [int]$timeout=5){
+  try { $r = Invoke-WebRequest $url -TimeoutSec $timeout -UseBasicParsing
+        return @{ ok=$true; code=[int]$r.StatusCode; body=$r.Content } }
+  catch { return @{ ok=$false; error=$_.Exception.Message } }
+}
+function Latest-TunnelUrl {
+  param([int]$windowLines=800)
+  $hits=@()
+  foreach($p in @("tmp\logs\cloudflared.err.log","tmp\logs\cloudflared.out.log")){
+    if(Test-Path $p){
+      $lines = Get-Content $p -Tail $windowLines -ErrorAction SilentlyContinue
+      foreach($ln in $lines){
+        if($ln -match '^(?<ts>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z).*?(?<url>https?://\S*trycloudflare\.com)'){
+          $hits += [PSCustomObject]@{ ts=[datetime]$Matches.ts; url=$Matches.url; file=$p }
+        } elseif($ln -match '(?<url>https?://\S*trycloudflare\.com)'){
+          $hits += [PSCustomObject]@{ ts=$null; url=$Matches.url; file=$p }
+        }
+      }
+    }
+  }
+  if(-not $hits){ return $null }
+  $cand = $hits | Sort-Object ts | Select-Object -Last 1
+  return $cand
+}
+function Detect-UiRoute {
+  $dbg = Test-Http "http://127.0.0.1:8776/__debug"
+  if(-not $dbg.ok){ return "/app/watchdog" }
+  $text = $dbg.body -as [string]
+  if($text -match "/app/app/watchdog"){ return "/app/app/watchdog" }
+  if($text -match "/app/watchdog"){     return "/app/watchdog" }
+  return "/app/watchdog"
+}
+function Restart-Server {
+  # Try API restart first
+  $api = Test-Http "http://127.0.0.1:8776/api/api/watchdog/server/restart"
+  if(-not $api.ok){
+    # Fallback: stop + start watchdog
+    if(Test-Path "tools\ps1\stop_watchdog.ps1"){ pwsh -NoProfile -ExecutionPolicy Bypass -File "tools\ps1\stop_watchdog.ps1" | Out-Null }
+    if(Test-Path "tools\ps1\run_watchdog.ps1"){  pwsh -NoProfile -ExecutionPolicy Bypass -File "tools\ps1\run_watchdog.ps1"  | Out-Null }
+  }
+  $deadline = (Get-Date).AddSeconds(25)
+  while((Get-Date) -lt $deadline){
+    Start-Sleep -Milliseconds 600
+    $h = Test-Http "http://127.0.0.1:8776/healthz"
+    if($h.ok -and $h.code -eq 200){ return @{ ok=$true } }
+  }
+  return @{ ok=$false; error="Server did not become healthy in time." }
+}
+function Restart-Tunnel {
+  param([int]$waitSec=60)
+  # Try API restart (non-fatal if missing)
+  $null = Test-Http "http://127.0.0.1:8776/api/api/watchdog/tunnel/restart"
+  # If no cloudflared appears, spawn fallback
+  $cfProc = Get-Process -Name cloudflared -ErrorAction SilentlyContinue
+  if(-not $cfProc){
+    $cf = Join-Path $env:ProgramFiles "Cloudflare\cloudflared\cloudflared.exe"
+    if(Test-Path $cf){
+      Start-Process -FilePath $cf -ArgumentList @("tunnel","--no-autoupdate","--url","http://127.0.0.1:8776") -NoNewWindow | Out-Null
+    }
+  }
+  $deadline = (Get-Date).AddSeconds($waitSec)
+  $last=$null
+  while((Get-Date) -lt $deadline){
+    Start-Sleep -Milliseconds 700
+    $last = Latest-TunnelUrl
+    if($last){ break }
+  }
+  if(-not $last){ return @{ ok=$false; error="No trycloudflare URL appeared in logs." } }
+  Ensure-Dir "reports\ops"
+  Set-Content -Encoding UTF8 "reports\ops\tunnel_url.txt" $last.url
+  return @{ ok=$true; url=$last.url }
+}
+
+# ---------------- MAIN ----------------
+Ensure-Dir "tmp\logs"; Ensure-Dir "reports\ops"
+
+# 1) Read watchdog status (if present)
+$wdFile = "reports\ops\watchdog_status.json"
+$wd = $null
+if(Test-Path $wdFile){
+  try { $wd = Get-Content $wdFile -Raw | ConvertFrom-Json } catch {}
+}
+
+# 2) Process checks
+$serverPid = $null; $tunnelPid=$null
+if($wd -and $wd.processes){
+  if($wd.processes.server){ $serverPid = $wd.processes.server.pid }
+  if($wd.processes.tunnel){ $tunnelPid = $wd.processes.tunnel.pid }
+}
+$serverAlive = $false; if($serverPid){ $serverAlive = Alive-Process $serverPid }
+$tunnelAlive = $false; if($tunnelPid){ $tunnelAlive = Alive-Process $tunnelPid }
+
+# 3) Port + health + routes
+$portOk = $false
+try { $portOk = [bool](Get-NetTCPConnection -LocalPort 8776 -State Listen -ErrorAction Stop) } catch { $portOk = $false }
+$h = Test-Http "http://127.0.0.1:8776/healthz"
+$healthOk = ($h.ok -and $h.code -eq 200)
+$uiPath = Detect-UiRoute
+$routesOk = $false
+$routesProbe = Test-Http "http://127.0.0.1:8776/__debug"
+if($routesProbe.ok -and ($routesProbe.body -as [string]) -match "watchdog"){ $routesOk = $true }
+
+# 4) Tunnel URL (latest) + external probe
+$latest = Latest-TunnelUrl
+$tunnelUrl = if($latest){ $latest.url } else { $null }
+if($tunnelUrl){
+  Set-Content -Encoding UTF8 "reports\ops\tunnel_url.txt" $tunnelUrl
+}
+$externalOk = $false
+if($tunnelUrl){
+  $ext = Test-Http ($tunnelUrl.TrimEnd('/') + "/healthz") 6
+  $externalOk = ($ext.ok -and $ext.code -eq 200)
+}
+
+# 5) Auto repair (only when needed), then recheck once
+$didRepair=$false
+if(-not $healthOk -or -not $portOk -or -not $routesOk){
+  $repair = Restart-Server
+  $didRepair = $true
+  $h = Test-Http "http://127.0.0.1:8776/healthz"
+  $healthOk = ($h.ok -and $h.code -eq 200)
+  try { $portOk = [bool](Get-NetTCPConnection -LocalPort 8776 -State Listen -ErrorAction Stop) } catch { $portOk = $false }
+  $uiPath = Detect-UiRoute
+  $routesProbe = Test-Http "http://127.0.0.1:8776/__debug"
+  if($routesProbe.ok -and ($routesProbe.body -as [string]) -match "watchdog"){ $routesOk = $true }
+}
+
+if(-not $externalOk){
+  $tfix = Restart-Tunnel
+  $didRepair = $true
+  if($tfix.ok){ $tunnelUrl = $tfix.url }
+  if($tunnelUrl){
+    $ext2 = Test-Http ($tunnelUrl.TrimEnd('/') + "/healthz") 8
+    $externalOk = ($ext2.ok -and $ext2.code -eq 200)
+  }
+}
+
+# 6) Phone URL file
+if($tunnelUrl){
+  $phone = $tunnelUrl.TrimEnd('/') + $uiPath
+  Set-Content -Encoding UTF8 "reports\ops\phone_watchdog_url.txt" $phone
+}
+
+# 7) Traffic lights + diag JSON
+function TL($ok){ if($ok){ "🟢" } else { "🔴" } }
+$summary = [ordered]@{
+  watchdog_pid   = if(Test-Path "tmp\pid\watchdog.pid"){ Get-Content "tmp\pid\watchdog.pid" -ErrorAction SilentlyContinue } else { $null }
+  server_pid     = $serverPid
+  server_alive   = $serverAlive
+  port_8776_ok   = $portOk
+  healthz_ok     = $healthOk
+  routes_ok      = $routesOk
+  ui_path        = $uiPath
+  tunnel_pid     = $tunnelPid
+  tunnel_alive   = $tunnelAlive
+  tunnel_url     = $tunnelUrl
+  external_ok    = $externalOk
+  did_repair     = $didRepair
+  phone_url      = if($tunnelUrl){ $tunnelUrl.TrimEnd('/') + $uiPath } else { $null }
+  when_utc       = (Get-Date).ToUniversalTime().ToString("s") + "Z"
+}
+Ensure-Dir "tmp\logs"
+$summary | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 "tmp\logs\recover_diag.json"
+
+Write-Host ""
+Write-Host ("{0} Watchdog running — PID {1}" -f (TL([bool]$summary.watchdog_pid)), $summary.watchdog_pid)
+Write-Host ("{0} Port 8776 listening" -f (TL $portOk))
+Write-Host ("{0} Healthz 200" -f (TL $healthOk))
+Write-Host ("{0} Routes mounted (found watchdog route: {1})" -f (TL $routesOk), $uiPath)
+Write-Host ("{0} Tunnel process alive" -f (TL $tunnelAlive))
+Write-Host ("{0} Tunnel URL present — {1}" -f (TL([bool]$tunnelUrl)), ($tunnelUrl ?? "(none)"))
+Write-Host ("{0} External /healthz via tunnel" -f (TL $externalOk))
+if($summary.phone_url){ Write-Host ("PHONE URL: {0}" -f $summary.phone_url) }
+Write-Host ""
+Write-Host "Saved diagnostics: tmp\logs\recover_diag.json"
+Write-Host "Tip: run again to retry. To force restart everything:"
+Write-Host "  pwsh tools\ps1\stop_watchdog.ps1; pwsh tools\ps1\run_watchdog.ps1"
+

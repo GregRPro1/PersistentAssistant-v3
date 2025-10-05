@@ -1,0 +1,20 @@
+forbidden:
+  - '<<\s*EOF'
+  - '<<\s*PY'
+  - '<<\s*'':?PY'''
+  - '<<\s*":?PY"'
+  - 'python\s*-\s*<<'
+  - 'cat\s*<<'
+  - '^#!\s*/bin/(ba)?sh'
+  - 'python\s+-c\s+'
+exclude_dirs:
+  - '^tmp($|[\\/])'
+  - '^tmp[\\/](archive|feedback|logs)'
+  - '^data[\\/]insights'
+  - '^\.git'
+  - '(^|[\\/])__pycache__([\\/]|$)'
+  - '([\\/])bak(\.|[\\/]|$)'
+  - '\.bak(\.|$)'
+  - '\.reject(\.|$)'
+  - '^\.(venv|env)($|[\\/])'
+  - '^config[\\/]guidance($|[\\/])'   # guidance files hold “do not do this” examples

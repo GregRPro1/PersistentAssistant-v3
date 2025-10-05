@@ -1,0 +1,17 @@
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import yaml
+PLAN = r"project\\plans\\project_plan_v3.yaml"
+d = yaml.safe_load(open(PLAN,"r",encoding="utf-8")) or {}
+for ph in d.get("phases",[]):
+    if str(ph.get("name","")).startswith("Phase 4"):
+        steps = ph.setdefault("steps",[])
+        if not any(s.get("id")=="4.1.3b" for s in steps):
+            steps.append({"id":"4.1.3b","status":"done",
+                          "description":"Path normalization + cwd-agnostic execution across runner/probe"})
+open(PLAN,"w",encoding="utf-8").write(yaml.safe_dump(d,sort_keys=False))
+print("[PLAN OK] Added 4.1.3b (path normalization).")

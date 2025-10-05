@@ -1,0 +1,182 @@
+# =============================================================================
+# File: tools/fetch_ai_models.py
+# Persistent Assistant v3 – RAW Catalogue Fetcher (robust import + logging)
+# Author: G. Rapson | GR-Analysis
+# Created: 2025-08-19 14:05 BST
+# Update History:
+#   - 2025-08-19 14:05 BST: Added path bootstrap, ASCII-safe logging/output,
+#     OpenAI model list fetch, seed sets for Anthropic/Google to align with
+#     deterministic enrichment, classification for interface/family/probe_route.
+# =============================================================================
+
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+
+# --- bootstrap for direct-script runs (so 'import tools.*' always works) ------
+import os, sys
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+# -----------------------------------------------------------------------------
+
+import json
+import time
+import yaml
+import logging
+from typing import Dict, Any
+
+# Local utilities
+from tools._env import load_keys
+from tools.model_classifier import classify
+
+# Optional: OpenAI model list (best-effort; we still seed critical ids)
+try:
+    from openai import OpenAI
+except Exception:
+    OpenAI = None  # type: ignore
+
+RAW_PATH = os.path.join(PROJECT_ROOT, "ai_models_raw.yaml")
+
+# --- Logging (ASCII to avoid cp1252 console issues) ---------------------------
+os.makedirs(os.path.join(PROJECT_ROOT, "logs"), exist_ok=True)
+logging.basicConfig(
+    filename=os.path.join(PROJECT_ROOT, "logs", "fetch_ai_models.log"),
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+log = logging.getLogger("FetchModels")
+
+def _ascii(s: str) -> str:
+    return s.encode("ascii", errors="replace").decode("ascii")
+
+def _save_yaml(path: str, data: Dict[str, Any]) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(data, f, sort_keys=False, allow_unicode=True)
+
+# -----------------------------------------------------------------------------
+# Providers
+# -----------------------------------------------------------------------------
+
+def _fetch_openai_ids(keys: Dict[str, str]) -> set[str]:
+    """
+    Fetch OpenAI model ids via API (if possible). Falls back gracefully if
+    the SDK is missing or key unavailable. We also add known important ids
+    explicitly so downstream enrichment can merge pricing/limits.
+    """
+    ids: set[str] = set()
+
+    # Seed critical ids we want priced by provider_docs.py
+    seeded = {
+        "gpt-4o", "gpt-4o-mini", "gpt-4.1", "o3", "o3-mini",
+    }
+    ids.update(seeded)
+
+    api_key = keys.get("openai")
+    if not api_key or OpenAI is None:
+        log.warning("OpenAI key or SDK missing; using seeded OpenAI ids only.")
+        return ids
+
+    try:
+        client = OpenAI(api_key=api_key)
+        # NOTE: List can be large; we include everything we get as raw candidates.
+        for m in client.models.list().data:
+            mid = getattr(m, "id", None)
+            if isinstance(mid, str) and mid:
+                ids.add(mid)
+    except Exception as e:
+        log.error("OpenAI models.list failed: %s", e)
+
+    return ids
+
+def _seed_anthropic_ids() -> set[str]:
+    """
+    Deterministic ids that match provider_docs.py parsing:
+      - claude-opus-4.1
+      - claude-sonnet-4
+      - claude-haiku-3.5
+    """
+    return {"claude-opus-4.1", "claude-sonnet-4", "claude-haiku-3.5"}
+
+def _seed_google_ids() -> set[str]:
+    """
+    Deterministic ids that match provider_docs.py parsing of Gemini pricing page.
+    """
+    return {
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-1.5-pro",
+        "gemini-1.5-flash",
+        "gemini-1.5-flash-8b",
+    }
+
+def _seed_groq_ids() -> set[str]:
+    """
+    Groq pricing scraper produces slugified names; we skip auto-adding here
+    to avoid mismatches. You can add specific Groq ids if you want to track them
+    through enrichment. For now, leave empty and let enrichment fill only those
+    present in raw (none for Groq) – or add curated ids later.
+    """
+    return set()
+
+# -----------------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------------
+
+def main() -> int:
+    t0 = time.time()
+
+    # 1) Keys
+    keys = load_keys()
+    # keys is expected as {"openai": "...", "anthropic": "...", "google": "...", "groq": "..."} or similar.
+
+    # 2) Gather raw ids
+    prov_models: Dict[str, set[str]] = {
+        "openai": _fetch_openai_ids(keys),
+        "anthropic": _seed_anthropic_ids(),
+        "google": _seed_google_ids(),
+        "groq": _seed_groq_ids(),
+    }
+
+    # 3) Build RAW structure with minimal per-model metadata + classification
+    raw: Dict[str, Any] = {"last_updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "providers": {}}
+
+    for prov, mids in prov_models.items():
+        raw["providers"].setdefault(prov, {"models": {}})
+        for mid in sorted(mids):
+            cls = classify(prov, mid)
+            raw["providers"][prov]["models"][mid] = {
+                # classification helps downstream strictness even if enrichment is absent
+                "interface": cls.get("interface"),
+                "family": cls.get("family"),
+                "probe_route": cls.get("probe_route"),
+                # no pricing/limits/capabilities here; update_ai_models.py merges those
+                "notes": f"{prov}/{mid} (raw)",
+                "source": "raw-list",
+            }
+
+    # 4) Persist
+    _save_yaml(RAW_PATH, raw)
+
+    elapsed = round(time.time() - t0, 2)
+    # Console (ASCII) + JSON summary line for GUI parser
+    print(_ascii(f"OK: wrote RAW catalogue: {RAW_PATH}"))
+    summary = {
+        "file": RAW_PATH.replace("\\", "/"),
+        "providers": {p: len(m) for p, m in prov_models.items()},
+        "total_models": sum(len(m) for m in prov_models.values()),
+        "elapsed_sec": elapsed,
+    }
+    print("SUMMARY: " + json.dumps(summary, separators=(",", ":")))
+    return 0
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        raise SystemExit(130)

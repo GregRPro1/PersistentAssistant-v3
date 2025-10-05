@@ -25,11 +25,11 @@ def _import_app():
 def _mount(app):
     try:
         wd_api = importlib.import_module("server.watchdog_api")
-        if hasattr(wd_api, "bp"): app.register_blueprint(wd_api.bp)
+        if hasattr(wd_api, "bp"): (__import__('builtins').print('bootstrap: mount watchdog_api') if 'watchdog_api' not in getattr(app,'blueprints',{}) else __import__('builtins').print('bootstrap: watchdog_api already mounted'); app.register_blueprint(wd_api.bp) if 'watchdog_api' not in getattr(app,'blueprints',{}) else None)
     except Exception: pass
     try:
         wd_ui = importlib.import_module("server.watchdog_ui")
-        if hasattr(wd_ui, "bp"): app.register_blueprint(wd_ui.bp)
+        if hasattr(wd_ui, "bp"): (__import__('builtins').print('bootstrap: mount watchdog_ui') if 'watchdog_ui' not in getattr(app,'blueprints',{}) else __import__('builtins').print('bootstrap: watchdog_ui already mounted'); app.register_blueprint(wd_ui.bp) if 'watchdog_ui' not in getattr(app,'blueprints',{}) else None)
     except Exception: pass
 
 def main():
@@ -42,3 +42,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

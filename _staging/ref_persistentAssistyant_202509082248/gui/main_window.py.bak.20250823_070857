@@ -1,0 +1,237 @@
+# main_window.py
+# Persistent Assistant v3
+# Created: 2025-08-18
+# Author: G. Rapson
+# Company: GR-Analysis
+# Description:
+#   Defines the MainWindow class which contains the tabbed interface
+#   for raw input, prompt formatting, AI response, plan tracking, chat,
+#   and a dedicated Tools tab.
+
+from PyQt6.QtWidgets import QMainWindow, QTabWidget, QApplication, QLabel, QStatusBar, QMenuBar, QMenu, QMessageBox
+from PyQt6.QtGui import QAction
+from PyQt6.QtCore import QTimer
+
+from gui.tabs.input_tab import InputTab
+from gui.tabs.prompt_tab import PromptTab
+from gui.tabs.response_tab import ResponseTab
+from gui.tabs.plan_tracker_tab import PlanTrackerTab
+from gui.tabs.chat_tab import ChatTab
+from gui.tabs.tools_tab import ToolsTab
+
+from core.prompt_formatter import format_prompt
+from core.introspection import generate_introspection_report
+from core.tasks import create_tasks_from_introspection
+from core.project_session import load_project_config, save_session, make_default_session
+from gui.dialogs.project_selector import ProjectSelectorDialog
+from core.logger import get_logger
+
+import os
+import yaml
+import datetime
+import subprocess
+import sys
+
+print(f"Interpreter: {sys.executable}")
+
+class MainWindow(QMainWindow):
+    """
+    Main window of the Persistent Assistant application.
+
+    Tabs:
+      - Input
+      - Prompt
+      - Response
+      - Plan
+      - Chat
+      - Tools (external file; preserves previous functionality + new model updater)
+    """
+    def __init__(self, project_session: dict | None = None):
+        super().__init__()
+        self.logger = getattr(self, "logger", None) or (get_logger("gui") if "get_logger" in globals() else None)
+
+        self.setWindowTitle("Persistent Assistant v3")
+        self.project_session = project_session or {}
+        self.project_config = load_project_config(self.project_session)
+
+        # Status bar
+        self.status = QStatusBar(self)
+        self.setStatusBar(self.status)
+        self._refresh_status_bar()
+
+        # Tabs
+        self.tab_widget = QTabWidget()
+        self.setCentralWidget(self.tab_widget)
+
+        self.input_tab = InputTab()
+        self.prompt_tab = PromptTab()
+        self.response_tab = ResponseTab(
+            input_tab=self.input_tab,
+            prompt_tab=self.prompt_tab
+        )
+        self.plan_tracker_tab = PlanTrackerTab(plan_path=self.project_config.get("plan_path"))
+        self.chat_tab = ChatTab()
+        self.tools_tab = ToolsTab(controller=self)  # <-- new tools tab
+
+        self.tab_widget.addTab(self.input_tab, "Input")
+        self.tab_widget.addTab(self.prompt_tab, "Prompt")
+        self.tab_widget.addTab(self.response_tab, "Response")
+        self.tab_widget.addTab(self.plan_tracker_tab, "Plan")
+        self.tab_widget.addTab(self.chat_tab, "Chat")
+        self.tab_widget.addTab(self.tools_tab, "Tools")
+
+        # Menu bar
+        self._build_menu()
+
+        self.resize(1000, 700)
+
+    # ------------------------------------------------------------------ #
+    # Status & project switching
+    # ------------------------------------------------------------------ #
+    def _refresh_status_bar(self):
+        name = self.project_config.get("project_name", "(unnamed)")
+        root = self.project_config.get("project_root", "(root?)")
+        plan = self.project_config.get("plan_path", "(plan?)")
+        self.status.showMessage(f"Project: {name} • Root: {root} • Plan: {plan}")
+
+    def _build_menu(self):
+        mb = self.menuBar() if self.menuBar() else QMenuBar(self)
+        self.setMenuBar(mb)
+        proj_menu = mb.addMenu("Project")
+
+        act_switch = QAction("Switch…", self)
+        act_switch.triggered.connect(self.switch_project)
+        proj_menu.addAction(act_switch)
+
+    def switch_project(self):
+        defaults = {
+            "project_name": self.project_config.get("project_name", "Persistent Assistant v3"),
+            "project_root": self.project_config.get("project_root", ""),
+            "plan_path":    self.project_config.get("plan_path", ""),
+        }
+        dlg = ProjectSelectorDialog(defaults, self)
+        from PyQt6.QtWidgets import QDialog
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        new_session = dlg.session_data()
+        try:
+            save_session(new_session)
+            self.project_session = new_session
+            self.project_config = load_project_config(self.project_session)
+            self.plan_tracker_tab.set_plan_path(self.project_config.get("plan_path", "project/plans/project_plan_v3.yaml"))
+            self._refresh_status_bar()
+            QMessageBox.information(self, "Project switched", "Project session saved and configuration reloaded.")
+        except Exception as e:
+            QMessageBox.critical(self, "Switch failed", f"Could not switch project:\n{e}")
+
+    # ------------------------------------------------------------------ #
+    # Actions used by ToolsTab buttons (callbacks)
+    # ------------------------------------------------------------------ #
+    def apply_prompt_formatting(self):
+        raw_input = self.input_tab.get_input_text()
+        formatted_prompt = format_prompt(raw_input)
+        self.prompt_tab.set_prompt_text(formatted_prompt)
+
+    def dummy_ai_send(self):
+        prompt_text = self.prompt_tab.get_prompt_text()
+        self.response_tab.set_response_text(f"[Simulated AI Response]\n\n{prompt_text}")
+
+    def copy_all_as_yaml(self):
+        input_text = self.input_tab.get_input_text()
+        prompt_text = self.prompt_tab.get_prompt_text()
+        response_text = self.response_tab.get_response_text()
+
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        payload = {
+            "development_stage": "1.12 of 16 to achieve MVP",
+            "timestamp": ts,
+            "source": "gui-clipboard",
+            "input_text": input_text,
+            "prompt_text": prompt_text,
+            "response_text": response_text,
+        }
+        yaml_text = yaml.dump(payload, allow_unicode=True, sort_keys=False)
+
+        log_dir = os.path.join("data", "interactions")
+        os.makedirs(log_dir, exist_ok=True)
+        filepath = os.path.join(log_dir, f"interaction_{ts}_all.yaml")
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(yaml_text)
+
+        QApplication.clipboard().setText(yaml_text)
+
+        if hasattr(self.response_tab, "status_label"):
+            self.response_tab.status_label.setText(f"Saved combined YAML and copied to clipboard: {filepath}")
+            QTimer.singleShot(5000, lambda: self.response_tab.status_label.setText(""))
+
+    def run_structure_snapshot(self):
+        try:
+            if hasattr(self.tools_tab, "set_status"):
+                self.tools_tab.set_status("Running structure snapshot…")
+
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            cmd = [sys.executable, "tools/structure_sync.py"]
+            env = dict(os.environ)
+            env.setdefault("PYTHONIOENCODING", "utf-8")
+
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False, env=env)
+            stdout = (result.stdout or "").strip()
+            stderr = (result.stderr or "").strip()
+
+            os.makedirs("logs", exist_ok=True)
+            run_log_path = os.path.join("logs", f"structure_sync_run_{ts}.log")
+            with open(run_log_path, "w", encoding="utf-8") as f:
+                f.write(f"Command: {cmd}\nReturn code: {result.returncode}\n\n")
+                if stdout:
+                    f.write("---- STDOUT ----\n")
+                    f.write(stdout + "\n\n")
+                if stderr:
+                    f.write("---- STDERR ----\n")
+                    f.write(stderr + "\n")
+
+            if result.returncode == 0:
+                msg = f"Structure snapshot OK. See {run_log_path}"
+                if self.logger: self.logger.info(msg)
+                ui_msg = stdout if stdout else "✅ Snapshot complete."
+                if hasattr(self.tools_tab, "set_status"):
+                    self.tools_tab.set_status(ui_msg)
+            else:
+                msg = f"Structure snapshot FAILED rc={result.returncode}. See {run_log_path}"
+                if self.logger: self.logger.error(msg)
+                if stderr and self.logger: self.logger.error(f"stderr: {stderr}")
+                if hasattr(self.tools_tab, "set_status"):
+                    self.tools_tab.set_status(f"❌ Snapshot failed (rc={result.returncode}). See logs.")
+        except Exception as e:
+            if self.logger: self.logger.exception(f"Exception in run_structure_snapshot: {e}")
+            if hasattr(self.tools_tab, "set_status"):
+                self.tools_tab.set_status(f"❌ Error: {e}. See logs.")
+
+    def run_introspection_report(self):
+        try:
+            report = generate_introspection_report()
+            issues = report.get("summary", {}).get("files_with_findings", 0)
+            total = report.get("summary", {}).get("total_findings", 0)
+            msg = f"Introspection OK: {issues} files with findings, {total} findings. See data/insights/introspection_report.yaml"
+            if hasattr(self.tools_tab, "set_status"):
+                self.tools_tab.set_status(msg)
+        except Exception as e:
+            err = f"Introspection FAILED: {e}"
+            if hasattr(self.tools_tab, "set_status"):
+                self.tools_tab.set_status(err)
+            if self.logger: self.logger.exception(err)
+
+    def create_improvement_tasks(self):
+        try:
+            summary = create_tasks_from_introspection()
+            msg = (f"Created {summary['created']} tasks "
+                   f"(files affected: {summary['files_affected']}). "
+                   f"Index: {summary['index_path']}")
+            if hasattr(self.tools_tab, "set_status"):
+                self.tools_tab.set_status(msg)
+            if self.logger: self.logger.info(msg)
+        except Exception as e:
+            err = f"❌ Task generation failed: {e}"
+            if hasattr(self.tools_tab, "set_status"):
+                self.tools_tab.set_status(err)
+            if self.logger: self.logger.exception(err)

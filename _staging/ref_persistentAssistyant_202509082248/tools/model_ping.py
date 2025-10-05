@@ -1,0 +1,116 @@
+from __future__ import annotations
+# --- PA_ROOT_IMPORT ---
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- /PA_ROOT_IMPORT ---
+import os, sys, yaml
+from datetime import datetime, timezone
+from tools.path_utils import ROOT, abspath, chdir_root
+
+# Run relative paths from project root to avoid path errors
+chdir_root()
+
+INSIGHTS_DIR = abspath("data","insights")
+STATUS_YAML  = abspath("data","insights","model_probe_status.yaml")
+SUMMARY_YAML = abspath("data","insights","model_probe_summary.yaml")
+SUMMARY_TXT  = abspath("tmp","model_probe_summary.txt")
+
+HELLO_PROMPT = "Hello from Persistent Assistant — model probe."
+OPENAI_ACTIVE = True  # others visible but disabled
+
+def now_iso():
+    return datetime.now(timezone.utc).isoformat()
+
+def ensure_dirs():
+    os.makedirs(INSIGHTS_DIR, exist_ok=True)
+    os.makedirs(abspath("tmp"), exist_ok=True)
+
+def load_models():
+    from tools.model_loader import load_ai_models
+    return load_ai_models()
+
+def try_openai_ping(model_id: str):
+    from core.ai_client import AIClient
+    key = os.getenv("OPENAI_API_KEY")
+    client = AIClient(provider="openai", key=key, model=model_id)
+    res = client.send(HELLO_PROMPT)
+    ok = bool(res.get("reply"))
+    return ok, res
+
+def main():
+    ensure_dirs()
+    models = load_models()
+    providers = models.get("providers", {})
+    status = {"generated_at": now_iso(),
+              "notes": "OpenAI attempted; other providers visible but disabled.",
+              "providers": {}}
+    failures, successes, skipped = [], [], []
+
+    for prov, pdata in providers.items():
+        prov_l = (prov or "").lower()
+        pentry = {"models": {}}
+        for mid, meta in (pdata.get("models") or {}).items():
+            entry = {
+                "attempted": False, "status": "skipped", "error": None, "ts": now_iso(),
+                "capabilities": meta.get("capabilities") or [],
+                "input_cost_per_1k": meta.get("input_cost_per_1k"),
+                "output_cost_per_1k": meta.get("output_cost_per_1k"),
+            }
+            if prov_l == "openai" and OPENAI_ACTIVE:
+                entry["attempted"] = True
+                try:
+                    ok, res = try_openai_ping(mid)
+                    entry["status"] = "success" if ok else "error"
+                    entry["error"] = None if ok else "empty_reply"
+                    entry["latency_s"] = float(res.get("time", 0.0))
+                    entry["tokens_in"] = int(res.get("tokens_in", 0))
+                    entry["tokens_out"] = int(res.get("tokens_out", 0))
+                    entry["computed_cost"] = float(res.get("cost", 0.0))
+                    (successes if ok else failures).append((prov, mid, entry.get("error")))
+                except Exception as e:
+                    entry["status"] = "error"; entry["error"] = f"{type(e).__name__}: {e}"
+                    failures.append((prov, mid, entry["error"]))
+            else:
+                entry["status"] = "disabled"; entry["error"] = "provider_disabled_in_mvp"
+                skipped.append((prov, mid))
+            pentry["models"][mid] = entry
+        status["providers"][prov] = pentry
+
+    with open(STATUS_YAML, "w", encoding="utf-8") as f:
+        yaml.safe_dump(status, f, sort_keys=False)
+
+    summary = {
+        "generated_at": now_iso(),
+        "success_count": len([x for x in successes if x[2] is None]),
+        "error_count": len([x for x in failures]),
+        "skipped_count": len(skipped),
+        "errors": [{"provider":p, "model":m, "reason":r} for (p,m,r) in failures],
+        "skipped": [{"provider":p, "model":m} for (p,m) in skipped],
+        "successful": [{"provider":p, "model":m} for (p,m,_) in successes if _ is None],
+    }
+    with open(SUMMARY_YAML, "w", encoding="utf-8") as f:
+        yaml.safe_dump(summary, f, sort_keys=False)
+
+    lines = []
+    lines.append("=== Model Probe Summary ===")
+    lines.append(f"Success: {summary['success_count']} | Errors: {summary['error_count']} | Skipped: {summary['skipped_count']}")
+    if summary["errors"]:
+        lines.append("\n-- Errors --")
+        for e in summary["errors"][:50]:
+            lines.append(f"  {e['provider']}:{e['model']} -> {e['reason']}")
+    if summary["skipped"]:
+        lines.append("\n-- Skipped (provider disabled) --")
+        for s in summary["skipped"][:50]:
+            lines.append(f"  {s['provider']}:{s['model']}")
+    if summary["successful"]:
+        lines.append("\n-- Success --")
+        for s in summary["successful"][:50]:
+            lines.append(f"  {s['provider']}:{s['model']}")
+    with open(SUMMARY_TXT, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    print("\n".join(lines))
+
+if __name__ == "__main__":
+    main()
