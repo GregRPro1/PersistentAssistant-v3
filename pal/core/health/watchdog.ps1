@@ -9,8 +9,7 @@ function NowIso { (Get-Date).ToString("s") }
 function Ensure-Dir([string]$p){ if (-not (Test-Path $p)) { New-Item -ItemType Directory -Force -Path $p | Out-Null } }
 
 function Tcp-Check([string]$Host, [int]$Port, [int]$TimeoutMs=1500) {
-  try {
-    $c = New-Object System.Net.Sockets.TcpClient
+  try { $c = New-Object System.Net.Sockets.TcpClient
     $iar = $c.BeginConnect($Host, $Port, $null, $null)
     if (-not $iar.AsyncWaitHandle.WaitOne($TimeoutMs)) { $c.Close(); return $false }
     $c.EndConnect($iar); $c.Close(); return $true
@@ -18,8 +17,7 @@ function Tcp-Check([string]$Host, [int]$Port, [int]$TimeoutMs=1500) {
 }
 
 function Http-Check([string]$Url, [int]$TimeoutSec=3) {
-  try {
-    $req = [System.Net.WebRequest]::Create($Url)
+  try { $req = [System.Net.WebRequest]::Create($Url)
     $req.Method = "GET"; $req.Timeout = $TimeoutSec*1000
     $resp = $req.GetResponse(); $resp.Close(); return $true
   } catch { return $false }
@@ -28,10 +26,8 @@ function Http-Check([string]$Url, [int]$TimeoutSec=3) {
 function Get-LanIp {
   try {
     $ip = (Get-NetIPAddress -AddressFamily IPv4 |
-      Where-Object {
-        $_.IPAddress -notmatch '^169\.' -and $_.IPAddress -notmatch '^127\.' -and
-        ($_.IPAddress -match '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)')
-      } |
+      Where-Object { $_.IPAddress -notmatch '^169\.' -and $_.IPAddress -notmatch '^127\.' -and
+        ($_.IPAddress -match '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)') } |
       Select-Object -First 1 -ExpandProperty IPAddress)
     return $ip
   } catch { return $null }
@@ -46,7 +42,6 @@ function Read-Json([string]$p){ try { Get-Content $p -Raw -ErrorAction Stop | Co
 
 function Is-GoodUrl([string]$u) {
   if (-not $u) { return $false }
-  # PowerShell 7+ has [Uri]::IsWellFormedUriString; also check http(s) scheme
   try {
     if ([Uri]::IsWellFormedUriString($u, [UriKind]::Absolute)) {
       $uri = [Uri]$u
@@ -82,6 +77,14 @@ function Start-Cmd([string]$key, [string]$cmdline){
     $p.StartInfo = $si
     $null = $p.Start()
     $procs[$key] = $p
+  } catch {}
+}
+
+function Stop-Tracker {
+  try {
+    if ($procs["tracker"]) { try { $procs["tracker"].Kill() } catch {} ; $procs["tracker"] = $null }
+    $procsCim = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match "pal[\\/]ui[\\/]desktop[\\/]pal_tracker\.py" }
+    foreach ($p in $procsCim) { try { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue } catch {} }
   } catch {}
 }
 
@@ -132,10 +135,11 @@ while ($true) {
       if ($obj) {
         switch ($obj.command) {
           "restart" {
-            if ($obj.target -eq "tracker" -and $procs["tracker"]) { try { $procs["tracker"].Kill() } catch {} ; $procs["tracker"] = $null }
+            if ($obj.target -eq "tracker") { Stop-Tracker }
             if ($obj.target -eq "web" -and $procs["web"]) { try { $procs["web"].Kill() } catch {} ; $procs["web"] = $null }
           }
-          "commit_plan" { }
+          "restart_tracker" { Stop-Tracker }
+          default { }
         }
       }
       Remove-Item $r.FullName -Force -ErrorAction SilentlyContinue

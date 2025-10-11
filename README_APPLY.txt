@@ -1,29 +1,18 @@
-# PAL — Tunnel URL Validation Fix
+# PAL — Full Tunnel/Phone Fix + Reset
 
-**Problem**: `tunnel_url.txt` contained a stray "m", so the watchdog published `phone.url = "m"`.  
-**Fix**: Validate the tunnel URL before using it; if invalid, prefer the LAN URL.
+This pack fixes the "m" tunnel bug permanently, gives you tools to clear bad values,
+capture a valid trycloudflare URL, and **reset** the environment under the watchdog.
 
 ## Apply
-```powershell
-cd C:\_Repos\PersistentAssistant
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_TunnelURL_Validation_Fix.zip"
-```
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Full_Tunnel_Phone_Fix_and_Reset.zip"
 
-## Use
-### A) Clear the bad tunnel value now
-```powershell
-pwsh .\pal\scripts\ps\clear_bad_tunnel.ps1
-type .\reports\ops\ops_status.json   # Phone.url should equal Phone.lan
-```
+## One-line reset (kills tracker/web/cloudflared, clears tunnel, restarts watchdog)
+pwsh .\pal\scripts\ps\pal_reset_watchdog_env.ps1
 
-### B) (Optional) Start a quick tunnel and write a proper URL
-```powershell
+## Quick tunnel (optional)
 pwsh .\pal\scripts\ps\run_quick_tunnel.ps1 -Port 8787
-type .\reports\ops\tunnel_url.txt    # should be https://*.trycloudflare.com
-```
+type .\reports\ops\tunnel_url.txt
 
-### C) Watchdog will now:
-- Only accept a tunnel URL if it’s a well-formed http(s) URL.
-- Otherwise it leaves `tunnel.ok=false` and uses the LAN URL for `phone.url`.
-
-This guarantees the tracker and WhatsApp share never see a single-letter "m" again.
+## Sanity
+pwsh .\pal\scripts\ps\pal_print_phone.ps1
+type .\reports\ops\ops_status.json
