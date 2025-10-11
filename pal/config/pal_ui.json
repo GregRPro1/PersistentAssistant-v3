@@ -1,12 +1,13 @@
 {
-  "geometry": [
-    -2549,
-    202,
-    1100,
-    680
-  ],
-  "splitter": [
-    380,
-    715
-  ]
+  "geometry": null,
+  "whatsapp": {
+    "method": "wa_me",
+    "to_number": "",
+    "cloud_api": {
+      "phone_number_id": "",
+      "access_token": "",
+      "to_number": ""
+    },
+    "message_prefix": "PAL Web: "
+  }
 }

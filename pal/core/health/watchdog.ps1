@@ -85,14 +85,15 @@ function Snapshot(){
   $tunnelUrl = ""; if ($cfg.tunnel.enabled -and (Test-Path $cfg.tunnel.url_file)) { $tunnelUrl = (Get-Content $cfg.tunnel.url_file -ErrorAction SilentlyContinue | Select-Object -First 1) }
 
   $lanIp = Get-LanIp
-  $phoneLan = if ($lanIp) { "http://$lanIp:$webPort" } else { "" }
+  $phoneLan = if ($lanIp) { "http://$($lanIp):$($webPort)" } else { "" }
+  $phoneUrl = if ($tunnelUrl) { $tunnelUrl } else { $phoneLan }
 
   $st = @{
     ts = NowIso
     web = @{ host=$webHost; port=$webPort; port_ok=$portOk; health_url=$health; health_ok=$healthOk }
     watcher = @{ on = $watchHb }
     tunnel = @{ url = $tunnelUrl; ok = ($tunnelUrl -ne "") }
-    phone = @{ lan = $phoneLan; url = (if ($tunnelUrl) { $tunnelUrl } else { $phoneLan }) }
+    phone = @{ lan = $phoneLan; url = $phoneUrl }
   }
   Write-OpsStatus $st
 }

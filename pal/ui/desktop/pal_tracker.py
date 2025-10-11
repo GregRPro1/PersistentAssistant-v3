@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-import sys, time, json
+import sys, time, json, webbrowser
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QWidget, QTreeWidget, QTreeWidgetItem, QTextEdit, QSplitter,
-    QVBoxLayout, QLabel, QStatusBar, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QMessageBox)
+    QVBoxLayout, QLabel, QStatusBar, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QMessageBox, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox)
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPalette, QColor, QFont
+import urllib.parse
+import urllib.request
 
 REFRESH_SECS = 10
 DEFAULT_PLAN_PATH = Path("pal/plan/pal_project_plan.yaml")
@@ -63,10 +65,52 @@ def apply_dark_palette(app: QApplication):
     pal.setColor(QPalette.ColorRole.HighlightedText, QColor(0,0,0))
     app.setPalette(pal)
 
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None, cfg=None):
+        super().__init__(parent)
+        self.setWindowTitle("PAL Settings")
+        self.resize(520, 300)
+        self.cfg = cfg or {}
+        form = QFormLayout(self)
+
+        self.method = QComboBox(); self.method.addItems(["wa_me","cloud_api"])
+        self.method.setCurrentText(self.cfg.get("whatsapp",{}).get("method","wa_me"))
+        self.to_number = QLineEdit(self.cfg.get("whatsapp",{}).get("to_number",""))
+        capi = self.cfg.get("whatsapp",{}).get("cloud_api",{})
+        self.capi_id = QLineEdit(capi.get("phone_number_id",""))
+        self.capi_token = QLineEdit(capi.get("access_token","")); self.capi_token.setEchoMode(QLineEdit.EchoMode.Password)
+        self.capi_to = QLineEdit(capi.get("to_number",""))
+        self.prefix = QLineEdit(self.cfg.get("whatsapp",{}).get("message_prefix","PAL Web: "))
+
+        form.addRow("WhatsApp method", self.method)
+        form.addRow("wa_me to_number (optional)", self.to_number)
+        form.addRow("Cloud API phone_number_id", self.capi_id)
+        form.addRow("Cloud API access_token", self.capi_token)
+        form.addRow("Cloud API to_number", self.capi_to)
+        form.addRow("Message prefix", self.prefix)
+
+        btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+        btns.accepted.connect(self.accept); btns.rejected.connect(self.reject)
+        form.addRow(btns)
+
+    def result_config(self):
+        return {
+            "whatsapp": {
+                "method": self.method.currentText(),
+                "to_number": self.to_number.text().strip(),
+                "cloud_api": {
+                    "phone_number_id": self.capi_id.text().strip(),
+                    "access_token": self.capi_token.text().strip(),
+                    "to_number": self.capi_to.text().strip(),
+                },
+                "message_prefix": self.prefix.text(),
+            }
+        }
+
 class PalTracker(QWidget):
     def __init__(self, plan_path: Path):
         super().__init__(); self.plan_path=plan_path; self.plan={}
-        self.setWindowTitle("PAL Tracker — Persistent Assistant Lite"); self.resize(1220,780)
+        self.setWindowTitle("PAL Tracker — Persistent Assistant Lite"); self.resize(1260,800)
         f=self.font(); f.setPointSize(10); self.setFont(f)
 
         self.goals_label = QLabel("Goals"); self.goals_label.setStyleSheet("font-weight:600; color:#e1e1e1;")
@@ -88,8 +132,9 @@ class PalTracker(QWidget):
         self.btnReview.clicked.connect(lambda: self.change_status_selected("review"))
         self.btnInProg.clicked.connect(lambda: self.change_status_selected("in_progress"))
         self.btnBlock.clicked.connect(lambda: self.change_status_selected("blocked"))
+        self.btnSettings = QPushButton("⚙ Settings"); self.btnSettings.clicked.connect(self.open_settings)
         actions = QWidget(); hb = HB(actions); hb.setContentsMargins(8,4,8,8); hb.setSpacing(8)
-        hb.addWidget(self.btnApprove); hb.addWidget(self.btnReview); hb.addWidget(self.btnInProg); hb.addWidget(self.btnBlock); hb.addStretch(1)
+        hb.addWidget(self.btnApprove); hb.addWidget(self.btnReview); hb.addWidget(self.btnInProg); hb.addWidget(self.btnBlock); hb.addStretch(1); hb.addWidget(self.btnSettings)
 
         splitter = QSplitter(); splitter.addWidget(left)
         right = QWidget(); rv = VB(right); rv.setContentsMargins(8,8,8,8); rv.setSpacing(8)
@@ -99,19 +144,23 @@ class PalTracker(QWidget):
 
         self.status = QStatusBar()
         self.status.setStyleSheet("QStatusBar { background:#242424; color:#e1e1e1; padding:0 8px; } QStatusBar::item { border: 0px; }")
-        self.status.setFixedHeight(32)
+        self.status.setFixedHeight(34)
         small = QFont(self.font()); small.setPointSize(9)
         def mk(lbl): l = QLabel(lbl); l.setFont(small); l.setStyleSheet("color:#e1e1e1;"); return l
         self.progressLabel = mk("Overall: --")
         self.webPort = mk("Port: --"); self.webHealth = mk("Health: --")
         self.phone = mk("Phone: --"); self.tunnel = mk("Tunnel: --")
         self.watch = mk("Watcher: --"); self.clock = mk("--:--:--")
+        self.btnWA = QPushButton("Send to WhatsApp"); self.btnWA.setFont(small); self.btnWA.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btnWA.clicked.connect(self.send_whatsapp)
+
         self.status.addPermanentWidget(self.progressLabel, 2)
         self.status.addPermanentWidget(self.webPort, 1)
         self.status.addPermanentWidget(self.webHealth, 1)
         self.status.addPermanentWidget(self.phone, 2)
         self.status.addPermanentWidget(self.tunnel, 2)
         self.status.addPermanentWidget(self.watch, 1)
+        self.status.addPermanentWidget(self.btnWA, 1)
         self.status.addPermanentWidget(self.clock, 1)
 
         v=QVBoxLayout(self); v.setContentsMargins(0,0,0,0); v.addWidget(splitter); v.addWidget(self.status)
@@ -119,6 +168,74 @@ class PalTracker(QWidget):
         self.timer = QTimer(self); self.timer.timeout.connect(self.refresh); self.timer.start(REFRESH_SECS*1000)
         self.restore_ui_state(); self.refresh(initial=True)
 
+    # Settings
+    def open_settings(self):
+        cfg = self.load_ui_config()
+        dlg = SettingsDialog(self, cfg)
+        if dlg.exec():
+            cfg_new = dlg.result_config()
+            # merge shallow into existing file
+            cfg.update(cfg_new)
+            UI_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+            UI_CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+
+    def load_ui_config(self):
+        try:
+            if UI_CONFIG_PATH.exists():
+                return json.loads(UI_CONFIG_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+        return {}
+
+    # WhatsApp send
+    def current_phone_url(self):
+        try:
+            d = json.loads(OPS_STATUS.read_text(encoding="utf-8")) if OPS_STATUS.exists() else {}
+        except Exception:
+            d = {}
+        url = d.get("phone",{}).get("url","") or d.get("phone",{}).get("lan","")
+        return url
+
+    def send_whatsapp(self):
+        url = self.current_phone_url()
+        if not url:
+            QMessageBox.warning(self, "WhatsApp", "No phone URL available yet."); return
+        cfg = self.load_ui_config().get("whatsapp", {})
+        method = (cfg.get("method") or "wa_me").lower()
+        prefix = cfg.get("message_prefix", "PAL Web: ")
+        msg = f"{prefix}{url}"
+        if method == "cloud_api":
+            capi = cfg.get("cloud_api", {})
+            token = capi.get("access_token","").strip()
+            phone_id = capi.get("phone_number_id","").strip()
+            to = capi.get("to_number","").strip()
+            if not (token and phone_id and to):
+                QMessageBox.warning(self, "WhatsApp Cloud API", "Missing phone_number_id / access_token / to_number in Settings."); return
+            try:
+                api_url = f"https://graph.facebook.com/v19.0/{phone_id}/messages"
+                data = {
+                    "messaging_product": "whatsapp",
+                    "to": to,
+                    "type": "text",
+                    "text": {"body": msg}
+                }
+                req = urllib.request.Request(api_url, data=json.dumps(data).encode("utf-8"),
+                                             headers={"Authorization": f"Bearer {token}", "Content-Type":"application/json"})
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    if 200 <= r.status < 300:
+                        QMessageBox.information(self, "WhatsApp", "Message sent via Cloud API.")
+                    else:
+                        QMessageBox.warning(self, "WhatsApp", f"Cloud API HTTP {r.status}")
+            except Exception as e:
+                QMessageBox.critical(self, "WhatsApp", f"Cloud API send failed: {e}")
+        else:
+            # wa.me compose
+            to = cfg.get("to_number","").strip()
+            text = urllib.parse.quote(msg)
+            link = f"https://wa.me/{to}?text={text}" if to else f"https://wa.me/?text={text}"
+            webbrowser.open(link)
+
+    # UI state
     def restore_ui_state(self):
         try:
             if UI_CONFIG_PATH.exists():
@@ -130,11 +247,12 @@ class PalTracker(QWidget):
     def save_ui_state(self):
         try:
             UI_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-            r = self.geometry(); import json; cfg = {"geometry": [int(r.x()), int(r.y()), int(r.width()), int(r.height())]}
+            r = self.geometry(); import json; cfg = self.load_ui_config(); cfg["geometry"] = [int(r.x()), int(r.y()), int(r.width()), int(r.height())]
             UI_CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
         except Exception: pass
     def closeEvent(self, e): self.save_ui_state(); super().closeEvent(e)
 
+    # Helpers
     def color_for_status(self,s): return STATUS_COLORS.get(s or "todo", STATUS_COLORS["todo"])
     def set_item_color(self,it,status):
         it.setForeground(0, self.color_for_status(status))
@@ -235,7 +353,7 @@ class PalTracker(QWidget):
         h_ok = d.get("web",{}).get("health_ok", False)
         self.webHealth.setText(f"Health: {'OK' if h_ok else 'FAIL'}")
         self.webHealth.setStyleSheet(f"color: {'#4CAF50' if h_ok else '#F44336'}; font-weight:600;")
-        # Phone URL (LAN preferred), Tunnel URL
+        # Phone/Tunnel
         phone_url = d.get("phone",{}).get("url","") or d.get("phone",{}).get("lan","")
         self.phone.setText(f"Phone: {phone_url if phone_url else 'N/A'}")
         self.phone.setStyleSheet("color:#e1e1e1; font-weight:600;" if phone_url else "color:#b0b0b0;")
