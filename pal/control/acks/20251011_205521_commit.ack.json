@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "message": "unknown command 'commit_plan'",
+  "ts": "2025-10-11T20:55:32",
+  "command": "commit_plan",
+  "target": ""
+}

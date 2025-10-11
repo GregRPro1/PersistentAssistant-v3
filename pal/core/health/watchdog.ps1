@@ -28,7 +28,10 @@ function Http-Check([string]$Url, [int]$TimeoutSec=3) {
 function Get-LanIp {
   try {
     $ip = (Get-NetIPAddress -AddressFamily IPv4 |
-      Where-Object { $_.IPAddress -notmatch '^169\.' -and $_.InterfaceAlias -match 'Wi-Fi|Ethernet' } |
+      Where-Object {
+        $_.IPAddress -notmatch '^169\.' -and $_.IPAddress -notmatch '^127\.' -and
+        ($_.IPAddress -match '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)')
+      } |
       Select-Object -First 1 -ExpandProperty IPAddress)
     return $ip
   } catch { return $null }
@@ -41,7 +44,7 @@ function Write-OpsStatus([hashtable]$st){
 
 function Read-Json([string]$p){ try { Get-Content $p -Raw -ErrorAction Stop | ConvertFrom-Json } catch { $null } }
 
-# Load config
+# Load config (tolerant defaults)
 $cfg = Read-Json $ConfigPath
 if (-not $cfg) {
   $cfg = @{
