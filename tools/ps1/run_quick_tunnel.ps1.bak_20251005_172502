@@ -9,7 +9,7 @@ function Resolve-Cloudflared {
     "C:\Program Files\Cloudflare\cloudflared\cloudflared.exe",
     "C:\Program Files (x86)\Cloudflare\cloudflared\cloudflared.exe",
     (Get-Command cloudflared.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source),
-    (Join-Path $PSScriptRoot "..\bin\cloudflared.exe"),
+    (Join-Path (Split-Path -Parent $PSCommandPath) "..\bin\cloudflared.exe"),
     (Join-Path (Get-Location) "tools\bin\cloudflared.exe")
   ) | Where-Object { $_ } | Select-Object -Unique
   foreach($p in $cands){ if(Test-Path $p){ return (Resolve-Path $p).Path } }
@@ -23,25 +23,23 @@ if(-not $cf){
   $cf = Resolve-Cloudflared
 }
 if(-not $cf){
-  Write-Error "[CF] cloudflared.exe not found after install. Set `$env:CLOUDFLARED_EXE or install Cloudflare Tunnel."
+  Write-Error "[CF] cloudflared.exe not found after install. Set `$env:CLOUDFLARED_EXE to the full path or install Cloudflare Tunnel."
   exit 1
 }
 $env:CLOUDFLARED_EXE = $cf
 
-# Stop any old instances quietly
+# Stop any old process
 Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 
-# Ensure logs
-New-Item -ItemType Directory -Force (Join-Path $PSScriptRoot "..\..\tmp\logs") | Out-Null
-$logDir = (Resolve-Path (Join-Path $PSScriptRoot "..\..\tmp\logs")).Path
-$logOut = Join-Path $logDir "cloudflared.out.log"
-$logErr = Join-Path $logDir "cloudflared.err.log"
+# Ensure logs folder
+New-Item -ItemType Directory -Force tmp\logs | Out-Null
+$logOut = "tmp\logs\cloudflared.out.log"
+$logErr = "tmp\logs\cloudflared.err.log"
 Remove-Item $logOut,$logErr -Force -ErrorAction SilentlyContinue
 
-# Build args cleanly (no AddRange)
-$args = @('tunnel','--no-autoupdate')
-if($Http2){ $args += @('--protocol','http2') }
-$args += @('--url', $Url)
+# Build args (no AddRange; just array)
+$args = @('tunnel','--no-autoupdate','--url', $Url)
+if($Http2){ $args = @('tunnel','--no-autoupdate','--protocol','http2','--url', $Url) }
 
 Write-Host "[CF] Launching: $cf $($args -join ' ')"
 Start-Process -FilePath $cf -ArgumentList $args -RedirectStandardOutput $logOut -RedirectStandardError $logErr -WindowStyle Hidden

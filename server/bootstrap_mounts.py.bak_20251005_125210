@@ -1,0 +1,45 @@
+import importlib, os, pkgutil
+
+def find_app():
+    for modname in ("pa_lan", "server.pa_lan"):
+        try:
+            mod = importlib.import_module(modname)
+            app = getattr(mod, "app", None)
+            if app is not None:
+                return app
+        except Exception:
+            pass
+    try:
+        import server
+        for _, name, _ in pkgutil.iter_modules(server.__path__):
+            try:
+                m = importlib.import_module(f"server.{name}")
+                app = getattr(m, "app", None)
+                if app is not None:
+                    return app
+            except Exception:
+                pass
+    except Exception:
+        pass
+    raise RuntimeError("Flask 'app' not found (tried pa_lan, server.pa_lan, and scanned server.*).")
+
+def mount_blueprints(app):
+    for modname in ("server.watchdog_api", "server.watchdog_ui"):
+        try:
+            m = importlib.import_module(modname)
+            bp = getattr(m, "bp", None)
+            if bp is not None:
+                app.register_blueprint(bp)
+        except Exception:
+            pass
+
+def main():
+    app = find_app()
+    mount_blueprints(app)
+    host = os.getenv("PA_HOST", "0.0.0.0")
+    port = int(os.getenv("PA_PORT", "8776"))
+    debug = os.getenv("PA_DEBUG", "0") == "1"
+    app.run(host=host, port=port, debug=debug)
+
+if __name__ == "__main__":
+    main()

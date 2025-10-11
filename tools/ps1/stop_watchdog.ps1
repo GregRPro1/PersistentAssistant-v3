@@ -1,19 +1,29 @@
+# tools\ps1\stop_watchdog.ps1
 Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'
 
 $pidFile = "tmp\pid\watchdog.pid"
-if (-not (Test-Path $pidFile)) { Write-Host "No PID file ($pidFile). Nothing to stop."; exit 0 }
-$wdPid = 0
-try { $wdPid = [int](Get-Content $pidFile -Raw) } catch {}
-$proc = $null
-if ($wdPid -gt 0) { $proc = Get-Process -Id $wdPid -ErrorAction SilentlyContinue }
-
-if ($proc) {
-  try { $proc.CloseMainWindow() | Out-Null } catch {}
-  Start-Sleep -Milliseconds 500
-  try { $proc.Kill() } catch {}
-  Write-Host "Stopped watchdog (PID $wdPid)"
-} else {
-  Write-Host "No running process found for PID $wdPid"
+if (Test-Path $pidFile) {
+  try {
+    $pid = [int]((Get-Content $pidFile -Raw).Trim())
+    $p = Get-Process -Id $pid -ErrorAction SilentlyContinue
+    if ($p) {
+      Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+      Write-Host "Stopped watchdog (PID $pid)"
+    }
+    else {
+      Write-Host "No running process found for PID $pid"
+    }
+  }
+  catch { Write-Host "No valid PID file"; }
+  Remove-Item $pidFile -Force -ErrorAction SilentlyContinue
 }
-Remove-Item $pidFile -ErrorAction SilentlyContinue
+else {
+  Write-Host "No PID file ($pidFile). Nothing to stop."
+}
+
+# Kill helper jobs if present
+foreach ($name in @("pa_watchdog_stdout", "pa_watchdog_stderr", "pa_tunnel_monitor", "pa_watchdog_heartbeat")) {
+  $j = Get-Job -Name $name -ErrorAction SilentlyContinue
+  if ($j) { Stop-Job $j -Force -ErrorAction SilentlyContinue; Remove-Job $j -Force -ErrorAction SilentlyContinue }
+}

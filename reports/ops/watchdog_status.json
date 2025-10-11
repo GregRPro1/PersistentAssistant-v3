@@ -1,28 +1,10 @@
-{
+﻿{
   "ok": true,
-  "started_at": "2025-10-01T19:58:21.257815+00:00",
+  "updated_at": "2025-10-05T22:29:32",
   "processes": {
-    "server": {
-      "name": "server",
-      "state": "healthy",
-      "pid": 32092,
-      "restarts": 0,
-      "last_exit": null,
-      "last_error": null,
-      "stdout": "tmp\\logs\\server.out.log",
-      "stderr": "tmp\\logs\\server.err.log",
-      "started_at": 1759348699.822617
-    },
-    "tunnel": {
-      "name": "tunnel",
-      "state": "running",
-      "pid": 32144,
-      "restarts": 0,
-      "last_exit": null,
-      "last_error": null,
-      "stdout": "tmp\\logs\\cloudflared.out.log",
-      "stderr": "tmp\\logs\\cloudflared.err.log",
-      "started_at": 1759348700.7576525
+    "watchdog": {
+      "state": "unknown",
+      "pid": 34488
     }
   }
 }
