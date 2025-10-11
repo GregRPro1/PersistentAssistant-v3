@@ -1,24 +1,32 @@
-# PAL Tracker Approve-in-UI + Start P2
+# PAL P3 Agentic Scaffold + Plan
 
-**Colors:** grey=todo, amber(in‑progress)=in_progress, blue=review (smoke PASS), red=blocked (smoke FAIL), green=done.
-
-This pack:
-- Adds **Approve → Done** and quick status buttons inside the tracker (right pane).
-- Shows **Last smoke: PASS/FAIL @ timestamp** per selected task.
-- Shows **Watcher: ON/OFF** in the status bar (heartbeat file).
-- Refreshes smoke watcher script to write the heartbeat.
+This pack updates your **plan** and adds a minimal, provider-agnostic **Agentic Execution (P3)** scaffold:
+- LLM adapters (`pal/adapters/llm/*`): base interface + OpenAI/Claude **stubs** (no network)
+- VCS checks stub (`pal/adapters/vcs/github_checks.py`)
+- Doc→YAML pipeline stub (`pal/pipelines/doc_to_yaml.py`) + runner (`pal/scripts/py/run_doc_to_yaml.py`)
+- Smoke tests for **PAL-020..PAL-022**
+- Convenience scripts to set P3 in-progress and run smokes
 
 ## Apply
 ```powershell
 cd C:\_Repos\PersistentAssistant
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Tracker_Approve_UI_and_P2_Start.zip"
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_P3_Agentic_Scaffold_and_Plan.zip"
 ```
 
-## Start P2 quickly (non-blocking)
+## Start P3 now (non-blocking)
 ```powershell
-pwsh .\pal\scripts\ps\pal_set_phase_inprogress.ps1 -Phase P2
-pwsh .\pal\scripts\ps\gen_smoke_for_phase.ps1 -Phase P2
-pwsh .\pal\scripts\ps\run_smoke_phase.ps1 -Phase P2
-# optional: ensure watcher running
+# turn P3 amber + refresh tracker
+pwsh .\pal\scripts\ps\pal_start_p3.ps1
+
+# run smokes in parallel (auto-flip to blue by watcher)
+pwsh .\pal\scripts\ps\pal_smoke_p3.ps1
+# ensure smoke watcher running:
 Start-Job -ScriptBlock { pwsh .\pal\scripts\ps\smoke_watch.ps1 } | Out-Null
 ```
+
+## Try doc→yaml pipeline (stubbed, no network)
+```powershell
+# Example: convert a text file using the openai stub
+python .\pal\scripts\py\run_doc_to_yaml.py README.md openai
+```
+Generated: 2025-10-11
