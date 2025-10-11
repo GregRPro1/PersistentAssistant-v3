@@ -1,0 +1,14 @@
+# --- PATCH INSTRUCTIONS ---
+# Add these to pal\core\health\watchdog.ps1:
+#
+# function Start-SmokeWatch { param($cfg, [string]$Root)
+#   if (-not $cfg.enable_smoke_watch) { return }
+#   if (-not (Get-Job -Name "pal-smoke-watch" -ErrorAction SilentlyContinue)) {
+#     Start-Job -Name "pal-smoke-watch" -ScriptBlock {
+#       Set-Location $using:Root
+#       pwsh .\pal\scripts\ps\smoke_watch.ps1
+#     } | Out-Null
+#   }
+# }
+#
+# And call Start-SmokeWatch -cfg $cfg -Root $Root in the main loop, alongside Start-Server/Start-Tracker.

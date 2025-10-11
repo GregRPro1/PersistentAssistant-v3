@@ -50,7 +50,7 @@ phases:
   - id: PAL-101
     title: PAL-Web FastAPI + WS endpoints
     priority: 1
-    status: todo
+    status: in_progress
     dod:
     - GET /healthz -> 200 {version}
     - GET /projects/:id/tree -> YAML JSON
@@ -58,7 +58,7 @@ phases:
   - id: PAL-102
     title: YAML SSOT atomic IO (pydantic + atomic writes)
     priority: 1
-    status: todo
+    status: in_progress
     dod:
     - temp-write+fsync+move
     - optimistic version field
@@ -66,14 +66,14 @@ phases:
   - id: PAL-103
     title: Minimal desktop launcher (tray/window)
     priority: 2
-    status: todo
+    status: in_progress
     dod:
     - Start/Stop, status, 'Open UI'
     - reads env.json
   - id: PAL-104
     title: Watchdog + scheduled task + rollback
     priority: 1
-    status: todo
+    status: in_progress
     dod:
     - auto-rollback to last _good
     - EventLog entries
@@ -81,14 +81,14 @@ phases:
   - id: PAL-105
     title: Health & rollback E2E tests (CI)
     priority: 1
-    status: todo
+    status: in_progress
     dod:
     - boot test <=20s
     - rollback test flips current back
   - id: PAL-106
     title: Approval & ideas endpoints (finish the small bits)
     priority: 1
-    status: todo
+    status: in_progress
     dod:
     - POST /approve {specId, commit} → sets GH status/check
     - POST /ideas {text} -> markdown; emits WS update

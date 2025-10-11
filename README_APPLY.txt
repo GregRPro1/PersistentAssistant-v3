@@ -1,29 +1,36 @@
-# PAL Parallel Smoke 101..106
+# PAL Smoke Auto-Flip + Tracker Geometry Debounce
 
-This pack adds **non-blocking, parallel smoke tests** for **PAL-101..PAL-106**, plus helpers to flip their status to `in_progress` and refresh the tracker.
-It also tweaks the tracker so **in-progress items are bold** (and already amber).
+This pack:
+- Auto-flips task status from smoke outputs (`reports/smoke/*.json`): **PASS → review**, **FAIL → blocked**.
+- Background **smoke watcher** to handle non-blocking test runs.
+- Tracker now **remembers window position/size** with a 2s debounce on move/resize (restores on restart).
+- `run_smoke_all.ps1` updated to auto-flip when using `-Wait`.
 
 ## Apply
 ```powershell
 cd C:\_Repos\PersistentAssistant
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Parallel_Smoke_101_106.zip"
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Smoke_Autoflip_and_Tracker_Geometry_Debounce.zip"
 # If your packer ignores payload/, expand manually and copy payload/* to repo root.
 ```
 
-## Mark 101..106 in progress (turns tasks amber and bold in tracker)
+## Use
 ```powershell
-pwsh .\pal\scripts\ps\pal_set_inprogress_101_106.ps1
-```
-
-## Run smoke tests in parallel (non-blocking)
-```powershell
-# fire and forget (non-blocking)
+# Run smokes non-blocking, then start watcher to auto-flip and refresh tracker:
 pwsh .\pal\scripts\ps\run_smoke_all.ps1
+Start-Job -ScriptBlock { pwsh .\pal\scripts\ps\smoke_watch.ps1 } | Out-Null
 
-# or wait for completion
+# Or run smokes and wait; statuses auto-flip at the end:
 pwsh .\pal\scripts\ps\run_smoke_all.ps1 -Wait
 ```
 
-Results land in `reports/smoke/*.json` (one per task).
+## Optional: Integrate with watchdog
+Add the following function to `pal\core\health\watchdog.ps1` and call it each loop:
+(see `pal\core\health\watchdog.PATCH.txt` included in this pack). Then set in `pal\config\pal_watchdog.json`:
+```json
+"enable_smoke_watch": true
+```
+
+## Tracker geometry persistence
+Move/resize the tracker; it writes `pal/config/pal_ui.json` after ~2s of inactivity and on close. On restart, it restores that geometry.
 
 Generated: 2025-10-11

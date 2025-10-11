@@ -1,18 +1,20 @@
 param([switch]$Wait)
-$tests = @('PAL-101','PAL-102','PAL-103','PAL-104','PAL-105','PAL-106')
+$tests = Get-ChildItem .\pal\tests\smoke\ -Filter "PAL-*.ps1" | Sort-Object Name
 $jobs = @()
 foreach ($t in $tests) {
-  $path = ".\pal\tests\smoke\$t.ps1"
-  if (Test-Path $path) {
-    $jobs += Start-Job -ScriptBlock { param($p,$n) & pwsh $p -Name $n } -ArgumentList $path, $t
-  } else {
-    Write-Warning "Missing test: $path"
-  }
+  $jobs += Start-Job -ScriptBlock { param($p,$n) & pwsh $p -Name $n } -ArgumentList $t.FullName, $t.BaseName
 }
 Write-Host "Started $($jobs.Count) smoke tests in background."
 if ($Wait) {
-  Receive-Job -Job $jobs -Wait -AutoRemoveJob
+  Receive-Job -Job $jobs -Wait -AutoRemoveJob | Out-Null
+  # after completion, auto-flip statuses
+  $python = "$env:VIRTUAL_ENV\Scripts\python.exe"; if (-not (Test-Path $python)) { $python = "python" }
+  & $python ".\pal\scripts\py\pal_update_status_from_smoke.py"
+  # restart tracker to refresh
+  $reqDir = ".\pal\control\requests"; if (-not (Test-Path $reqDir)) { New-Item -ItemType Directory -Force -Path $reqDir | Out-Null }
+  $req = Join-Path $reqDir ("{0}.json" -f (Get-Date -Format "yyyyMMdd_HHmmss_fff"))
+  '{"command":"restart","target":"tracker","note":"smoke auto-flip after wait"}' | Set-Content $req -Encoding UTF8
 } else {
-  # non-blocking; leave jobs running
-  $jobs | ForEach-Object { Write-Host ("Job {0} -> {1}" -f $_.Id, $_.Name) }
+  # non-blocking: recommend running smoke_watch.ps1 in background
+  Write-Host "Tip: run pal\\scripts\\ps\\smoke_watch.ps1 for auto-flip while tests finish."
 }
