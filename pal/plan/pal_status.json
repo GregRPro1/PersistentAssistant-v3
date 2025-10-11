@@ -1,0 +1,182 @@
+{
+  "project": "Persistent Assistant Lite",
+  "version": "0.1.0",
+  "goals": [
+    "Provide a rock-solid phone/web control surface backed by YAML SSOT.",
+    "Enable remote approvals and idea capture from phone and laptop.",
+    "Minimize churn via hard gates: tests, schema, headers, approvals.",
+    "Leverage best-in-class agent coders via provider-agnostic adapters.",
+    "Keep PAL lean; treat legacy code as harvest-only."
+  ],
+  "phases": [
+    {
+      "id": "M0",
+      "name": "Phone/Web Link Reliability (Unbreakable)",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "PAL-100",
+      "name": "",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "PAL-101",
+      "name": "",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "PAL-102",
+      "name": "",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "PAL-103",
+      "name": "",
+      "priority": 2,
+      "tasks": []
+    },
+    {
+      "id": "PAL-104",
+      "name": "",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "PAL-105",
+      "name": "",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "PAL-106",
+      "name": "",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "P1",
+      "name": "Cutover & SSOT Hardening",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "PAL-001",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "PAL-002",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "PAL-003",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "P2",
+      "name": "Phone/Web UX & Workflow",
+      "priority": 1,
+      "tasks": []
+    },
+    {
+      "id": "PAL-010",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "PAL-011",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "PAL-012",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "P3",
+      "name": "Agentic Execution (Adapters)",
+      "priority": 2,
+      "tasks": []
+    },
+    {
+      "id": "PAL-020",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "PAL-021",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "PAL-022",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "P4",
+      "name": "Telemetry & Harvest",
+      "priority": 2,
+      "tasks": []
+    },
+    {
+      "id": "PAL-030",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "PAL-031",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "P5",
+      "name": "Spec-Kit Bridge (Optional)",
+      "priority": 3,
+      "tasks": []
+    },
+    {
+      "id": "PAL-040",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "PAL-041",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    },
+    {
+      "id": "P6",
+      "name": "Desktop Base App (Optional)",
+      "priority": 3,
+      "tasks": []
+    },
+    {
+      "id": "PAL-050",
+      "name": "",
+      "priority": null,
+      "tasks": []
+    }
+  ],
+  "tasks": null
+}

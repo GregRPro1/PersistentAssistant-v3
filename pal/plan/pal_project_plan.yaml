@@ -1,0 +1,173 @@
+project: PAL
+name: Persistent Assistant Lite
+version: 0.1.0
+created: 2025-10-11
+owner: "G. Rapson (GR-Analysis)"
+goals:
+  - "Provide a rock-solid phone/web control surface backed by YAML SSOT."
+  - "Enable remote approvals and idea capture from phone and laptop."
+  - "Minimize churn via hard gates: tests, schema, headers, approvals."
+  - "Leverage best-in-class agent coders via provider-agnostic adapters."
+  - "Keep PAL lean; treat legacy code as harvest-only."
+principles:
+  - "YAML is the Single Source of Truth (SSOT)."
+  - "Everything behind a gate: validate → approve → merge."
+  - "Releases are atomic; watchdog can rollback automatically."
+  - "Spec/plan first; code second."
+  - "Provider-agnostic adapters for LLMs."
+success_metrics:
+  - ">= 30% reduction in rework commits/PR vs. last month baseline."
+  - "100% PRs gated by tests + schema + headers + remote approval."
+  - "Median PR lead-time reduced by 25%."
+  - "Cold boot to ready (phone UI connected) <= 20s."
+repo_layout:
+  root_files:
+    - "PA_CONSTITUTION.md (quality bar & coding standards)"
+  directories:
+    - "pal/core/         # schemas, validators, health"
+    - "pal/pipelines/    # doc->yaml, plan/chunk, execute, validate, PR"
+    - "pal/adapters/llm/ # provider-agnostic LLM adapters"
+    - "pal/adapters/vcs/ # GitHub checks/status/env approvals"
+    - "pal/ui/web/       # FastAPI + WebSocket app (phone/laptop UI)"
+    - "pal/ui/desktop/   # minimal desktop shell/launcher"
+    - "pal/scripts/ps/   # PowerShell wrappers (implement, approve)"
+    - "pal/ci/           # CI workflows and tests"
+    - "legacy/           # quarantined old code for harvesting"
+phases:
+  - id: M0
+    name: Phone/Web Link Reliability (Unbreakable)
+    priority: 1
+    objective: "Phone/web UI connects in <=20s; watchdog rollbacks on failure."
+    tasks:
+      - id: PAL-100
+        title: Scaffold release layout + symlinked 'current'
+        priority: 1
+        status: todo
+        dod: ["releases/<ver>/ present", "current -> releases/<ver>", "run.ps1 boots server"]
+      - id: PAL-101
+        title: PAL-Web FastAPI + WS endpoints
+        priority: 1
+        status: todo
+        dod:
+          - "GET /healthz -> 200 {version}"
+          - "GET /projects/:id/tree -> YAML JSON"
+          - "WS /ws/:id broadcasts on file change"
+      - id: PAL-102
+        title: YAML SSOT atomic IO (pydantic + atomic writes)
+        priority: 1
+        status: todo
+        dod: ["temp-write+fsync+move", "optimistic version field", "unit tests"]
+      - id: PAL-103
+        title: Minimal desktop launcher (tray/window)
+        priority: 2
+        status: todo
+        dod: ["Start/Stop, status, 'Open UI'", "reads env.json"]
+      - id: PAL-104
+        title: Watchdog + scheduled task + rollback
+        priority: 1
+        status: todo
+        dod: ["auto-rollback to last _good", "EventLog entries", "E2E verified"]
+      - id: PAL-105
+        title: Health & rollback E2E tests (CI)
+        priority: 1
+        status: todo
+        dod: ["boot test <=20s", "rollback test flips current back"]
+      - id: PAL-106
+        title: Approval & ideas endpoints (finish the small bits)
+        priority: 1
+        status: todo
+        dod:
+          - "POST /approve {specId, commit} → sets GH status/check"
+          - "POST /ideas {text} -> markdown; emits WS update"
+          - "Mobile UI buttons wired and tested"
+  - id: P1
+    name: Cutover & SSOT Hardening
+    priority: 1
+    tasks:
+      - id: PAL-001
+        title: Quarantine legacy tree and create PAL skeleton
+        status: todo
+        dod: ["legacy/ contains old code", "CI ignores legacy/**"]
+      - id: PAL-002
+        title: Define YAML schemas + Pydantic models
+        status: todo
+        dod: ["models + validators", "unit tests"]
+      - id: PAL-003
+        title: Constitution checks in CI (headers/tests/lint/format)
+        status: todo
+        dod: ["PRs blocked without checks"]
+  - id: P2
+    name: Phone/Web UX & Workflow
+    priority: 1
+    tasks:
+      - id: PAL-010
+        title: Color-coded task tree; status transitions; notes
+        status: todo
+        dod: ["todo/in_progress/review/blocked/done", "notes persisted"]
+      - id: PAL-011
+        title: Offline-safe idea capture -> promote-to-task flow
+        status: todo
+        dod: ["ideas/*.md -> YAML task with ID", "UI workflow"]
+      - id: PAL-012
+        title: AuthN/AuthZ (GitHub OAuth or signed links)
+        status: todo
+        dod: ["only approved accounts access", "audit trail"]
+  - id: P3
+    name: Agentic Execution (Adapters)
+    priority: 2
+    tasks:
+      - id: PAL-020
+        title: Doc->YAML converter (ChatGPT-5 adapter)
+        status: todo
+        dod: ["prompt templates", "unit tests on examples"]
+      - id: PAL-021
+        title: Execute work items via Claude Code 4.5
+        status: todo
+        dod: ["wrapper API", "error handling + retries"]
+      - id: PAL-022
+        title: Implement wrapper (validate -> approve -> PR)
+        status: todo
+        dod: ["single entrypoint", "fully logged"]
+  - id: P4
+    name: Telemetry & Harvest
+    priority: 2
+    tasks:
+      - id: PAL-030
+        title: Cost/time logger (per task/PR)
+        status: todo
+        dod: ["CSV/JSON logs", "dashboard in UI"]
+      - id: PAL-031
+        title: Harvest stable utilities from legacy
+        status: todo
+        dod: ["only tested modules imported", "coverage >= 80%"]
+  - id: P5
+    name: Spec-Kit Bridge (Optional)
+    priority: 3
+    tasks:
+      - id: PAL-040
+        title: Export YAML -> Spec-Kit MD
+        status: todo
+        dod: ["spec.md, plan.md, tasks.md generated"]
+      - id: PAL-041
+        title: Import Spec-Kit MD -> YAML
+        status: todo
+        dod: ["lossless mapping", "schema validation"]
+  - id: P6
+    name: Desktop Base App (Optional)
+    priority: 3
+    tasks:
+      - id: PAL-050
+        title: Qt base shell integrating phone UI and logs
+        status: todo
+        dod: ["embed web view", "health indicators"]
+governance:
+  gates:
+    - "No code lands without passing CI checks and remote approval."
+    - "Releases are immutable; watchdog can revert to last _good."
+    - "All files must include header with author/company/date."
+kill_switch:
+  - "If metrics do not improve after two sprints, pause adapters and focus on phone/web stability and SSOT quality."
+risks:
+  - "Legacy drag: mitigated by strict legacy/ quarantine and harvest-on-demand."
+  - "Provider churn: mitigated by adapter pattern for LLMs."
+  - "Mobile auth complexity: start with GitHub OAuth; move to signed links if needed."
