@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "message": "",
+  "ts": "2025-10-11T15:59:30",
+  "command": "restart",
+  "target": "tracker"
+}

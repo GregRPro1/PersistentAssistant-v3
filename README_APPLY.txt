@@ -1,32 +1,24 @@
-# PAL P1 Non-Blocking Parallel
+# PAL Tracker Approve-in-UI + Start P2
 
-This pack sets up **phase-level** helpers so you can flip every task in a phase to `in_progress`, generate smoke stubs for them, and run the smokes **in parallel** (non-blocking or with `-Wait`).
+**Colors:** grey=todo, amber(in‑progress)=in_progress, blue=review (smoke PASS), red=blocked (smoke FAIL), green=done.
 
-### Apply
+This pack:
+- Adds **Approve → Done** and quick status buttons inside the tracker (right pane).
+- Shows **Last smoke: PASS/FAIL @ timestamp** per selected task.
+- Shows **Watcher: ON/OFF** in the status bar (heartbeat file).
+- Refreshes smoke watcher script to write the heartbeat.
+
+## Apply
 ```powershell
 cd C:\_Repos\PersistentAssistant
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_P1_NonBlocking_Parallel.zip"
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Tracker_Approve_UI_and_P2_Start.zip"
 ```
 
-### Colors (tracker)
-- **Green** = `done`
-- **Amber + bold** = `in_progress`
-- **Blue/Cyan** = `review` (this is what you saw after PASS)
-- **Red** = `blocked`
-
-### Run for P1
+## Start P2 quickly (non-blocking)
 ```powershell
-# 1) Mark all P1 tasks in progress (turns amber + bold) and refresh tracker
-pwsh .\pal\scripts\ps\pal_set_phase_inprogress.ps1 -Phase P1
-
-# 2) Generate missing smoke test stubs for phase P1
-pwsh .\pal\scripts\ps\gen_smoke_for_phase.ps1 -Phase P1
-
-# 3) Fire smokes in parallel (non-blocking)
-pwsh .\pal\scripts\ps\run_smoke_phase.ps1 -Phase P1
-
-# (optional) Block and auto-flip to review/blocked at the end
-pwsh .\pal\scripts\ps\run_smoke_phase.ps1 -Phase P1 -Wait
+pwsh .\pal\scripts\ps\pal_set_phase_inprogress.ps1 -Phase P2
+pwsh .\pal\scripts\ps\gen_smoke_for_phase.ps1 -Phase P2
+pwsh .\pal\scripts\ps\run_smoke_phase.ps1 -Phase P2
+# optional: ensure watcher running
+Start-Job -ScriptBlock { pwsh .\pal\scripts\ps\smoke_watch.ps1 } | Out-Null
 ```
-
-The existing smoke watcher from the previous pack will auto-flip statuses when new results appear and restart the tracker to reflect changes.

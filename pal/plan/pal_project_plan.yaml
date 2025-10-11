@@ -99,19 +99,19 @@ phases:
   tasks:
   - id: PAL-001
     title: Quarantine legacy tree and create PAL skeleton
-    status: todo
+    status: review
     dod:
     - legacy/ contains old code
     - CI ignores legacy/**
   - id: PAL-002
     title: Define YAML schemas + Pydantic models
-    status: todo
+    status: review
     dod:
     - models + validators
     - unit tests
   - id: PAL-003
     title: Constitution checks in CI (headers/tests/lint/format)
-    status: todo
+    status: review
     dod:
     - PRs blocked without checks
 - id: P2
