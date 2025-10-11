@@ -1,36 +1,32 @@
-# PAL Smoke Auto-Flip + Tracker Geometry Debounce
+# PAL P1 Non-Blocking Parallel
 
-This pack:
-- Auto-flips task status from smoke outputs (`reports/smoke/*.json`): **PASS → review**, **FAIL → blocked**.
-- Background **smoke watcher** to handle non-blocking test runs.
-- Tracker now **remembers window position/size** with a 2s debounce on move/resize (restores on restart).
-- `run_smoke_all.ps1` updated to auto-flip when using `-Wait`.
+This pack sets up **phase-level** helpers so you can flip every task in a phase to `in_progress`, generate smoke stubs for them, and run the smokes **in parallel** (non-blocking or with `-Wait`).
 
-## Apply
+### Apply
 ```powershell
 cd C:\_Repos\PersistentAssistant
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Smoke_Autoflip_and_Tracker_Geometry_Debounce.zip"
-# If your packer ignores payload/, expand manually and copy payload/* to repo root.
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_P1_NonBlocking_Parallel.zip"
 ```
 
-## Use
+### Colors (tracker)
+- **Green** = `done`
+- **Amber + bold** = `in_progress`
+- **Blue/Cyan** = `review` (this is what you saw after PASS)
+- **Red** = `blocked`
+
+### Run for P1
 ```powershell
-# Run smokes non-blocking, then start watcher to auto-flip and refresh tracker:
-pwsh .\pal\scripts\ps\run_smoke_all.ps1
-Start-Job -ScriptBlock { pwsh .\pal\scripts\ps\smoke_watch.ps1 } | Out-Null
+# 1) Mark all P1 tasks in progress (turns amber + bold) and refresh tracker
+pwsh .\pal\scripts\ps\pal_set_phase_inprogress.ps1 -Phase P1
 
-# Or run smokes and wait; statuses auto-flip at the end:
-pwsh .\pal\scripts\ps\run_smoke_all.ps1 -Wait
+# 2) Generate missing smoke test stubs for phase P1
+pwsh .\pal\scripts\ps\gen_smoke_for_phase.ps1 -Phase P1
+
+# 3) Fire smokes in parallel (non-blocking)
+pwsh .\pal\scripts\ps\run_smoke_phase.ps1 -Phase P1
+
+# (optional) Block and auto-flip to review/blocked at the end
+pwsh .\pal\scripts\ps\run_smoke_phase.ps1 -Phase P1 -Wait
 ```
 
-## Optional: Integrate with watchdog
-Add the following function to `pal\core\health\watchdog.ps1` and call it each loop:
-(see `pal\core\health\watchdog.PATCH.txt` included in this pack). Then set in `pal\config\pal_watchdog.json`:
-```json
-"enable_smoke_watch": true
-```
-
-## Tracker geometry persistence
-Move/resize the tracker; it writes `pal/config/pal_ui.json` after ~2s of inactivity and on close. On restart, it restores that geometry.
-
-Generated: 2025-10-11
+The existing smoke watcher from the previous pack will auto-flip statuses when new results appear and restart the tracker to reflect changes.

@@ -3,6 +3,7 @@
   "enable_server": true,
   "enable_tracker": true,
   "enable_ping": true,
+  "enable_smoke_watch": true,
   "plan_path": ".\\pal\\plan\\pal_project_plan.yaml",
   "server": {
     "host": "127.0.0.1",

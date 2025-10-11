@@ -1,4 +1,12 @@
 {
-  "geometry": null,
-  "splitter": null
+  "geometry": [
+    -2578,
+    200,
+    1100,
+    680
+  ],
+  "splitter": [
+    380,
+    715
+  ]
 }
