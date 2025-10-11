@@ -1,8 +1,19 @@
-# Force-write ops_status.json with phone.lan/url computed from LAN + config, preserving existing fields if present
+# Force-write ops_status.json with phone.lan/url computed from LAN + config.
 Set-StrictMode -Version Latest
-$ErrorActionPreference = "Continue"
+$ErrorActionPreference = "Stop"
 
 function Read-Json($p){ try { Get-Content -Raw $p -ErrorAction Stop | ConvertFrom-Json } catch { $null } }
+
+function PSCustomObject-ToHashtable([object]$obj){
+  if ($null -eq $obj) { return @{} }
+  if ($obj -is [hashtable]) { return $obj }
+  $ht = @{}; foreach ($p in $obj.PSObject.Properties){
+    $val = $p.Value
+    if ($val -is [System.Management.Automation.PSCustomObject]) { $val = PSCustomObject-ToHashtable $val }
+    $ht[$p.Name] = $val
+  }
+  return $ht
+}
 
 function Get-LanIp {
   try {
@@ -18,22 +29,29 @@ function Get-LanIp {
 
 $opsPath = ".\reports\ops\ops_status.json"
 $cfgPath = ".\pal\config\pal_watchdog.json"
-$ops = Read-Json $opsPath; if (-not $ops) { $ops = [ordered]@{} }
+
+$opsObj = Read-Json $opsPath
+$ops = PSCustomObject-ToHashtable $opsObj  # <- use hashtable so we can set new keys
+
+# pull config/port
 $cfg = Read-Json $cfgPath
 $port = 8787
 if ($cfg -and $cfg.web -and $cfg.web.port) { $port = [int]$cfg.web.port }
+
+# compute urls
 $lan = Get-LanIp
 $lanUrl = if ($lan) { "http://$($lan):$($port)" } else { "" }
-
 $tunnelUrl = ""
-if ($ops -and $ops.tunnel -and $ops.tunnel.url) { $tunnelUrl = [string]$ops.tunnel.url }
+if ($ops.ContainsKey("tunnel") -and $ops.tunnel -and $ops.tunnel.url) { $tunnelUrl = [string]$ops.tunnel.url }
 
-# Build phone hashtable without inline 'if' expressions
-$phone = [ordered]@{}
+# assign phone
+$phone = @{}
 $phone.lan = $lanUrl
-if ($tunnelUrl) { $phone.url = $tunnelUrl } else { $phone.url = $lanUrl }
+$phone.url = if ($tunnelUrl) { $tunnelUrl } else { $lanUrl }
+$ops["phone"] = $phone
+$ops["ts"] = (Get-Date).ToString("s")
 
-$ops.phone = $phone
-$ops.ts = (Get-Date).ToString("s")
-$ops | ConvertTo-Json -Depth 6 | Set-Content $opsPath -Encoding UTF8
-Write-Host "ops_status.json updated. phone.url=$($ops.phone.url)"
+# write
+$ops | ConvertTo-Json -Depth 8 | Set-Content $opsPath -Encoding UTF8
+
+Write-Host ("ops_status.json updated. phone.lan={0} phone.url={1}" -f $phone.lan, $phone.url)
