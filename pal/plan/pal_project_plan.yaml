@@ -50,7 +50,7 @@ phases:
   - id: PAL-101
     title: PAL-Web FastAPI + WS endpoints
     priority: 1
-    status: done
+    status: review
     dod:
     - GET /healthz -> 200 {version}
     - GET /projects/:id/tree -> YAML JSON
@@ -58,7 +58,7 @@ phases:
   - id: PAL-102
     title: YAML SSOT atomic IO (pydantic + atomic writes)
     priority: 1
-    status: done
+    status: review
     dod:
     - temp-write+fsync+move
     - optimistic version field
@@ -66,14 +66,14 @@ phases:
   - id: PAL-103
     title: Minimal desktop launcher (tray/window)
     priority: 2
-    status: done
+    status: review
     dod:
     - Start/Stop, status, 'Open UI'
     - reads env.json
   - id: PAL-104
     title: Watchdog + scheduled task + rollback
     priority: 1
-    status: done
+    status: review
     dod:
     - auto-rollback to last _good
     - EventLog entries
@@ -81,14 +81,14 @@ phases:
   - id: PAL-105
     title: Health & rollback E2E tests (CI)
     priority: 1
-    status: done
+    status: review
     dod:
     - boot test <=20s
     - rollback test flips current back
   - id: PAL-106
     title: Approval & ideas endpoints (finish the small bits)
     priority: 1
-    status: done
+    status: review
     dod:
     - POST /approve {specId, commit} → sets GH status/check
     - POST /ideas {text} -> markdown; emits WS update
@@ -100,19 +100,19 @@ phases:
   tasks:
   - id: PAL-001
     title: Quarantine legacy tree and create PAL skeleton
-    status: done
+    status: review
     dod:
     - legacy/ contains old code
     - CI ignores legacy/**
   - id: PAL-002
     title: Define YAML schemas + Pydantic models
-    status: done
+    status: review
     dod:
     - models + validators
     - unit tests
   - id: PAL-003
     title: Constitution checks in CI (headers/tests/lint/format)
-    status: done
+    status: review
     dod:
     - PRs blocked without checks
   goalpost: Legacy quarantined; smoke harness + auto-flip stable pipeline.
@@ -122,19 +122,19 @@ phases:
   tasks:
   - id: PAL-010
     title: Color-coded task tree; status transitions; notes
-    status: done
+    status: review
     dod:
     - todo/in_progress/review/blocked/done
     - notes persisted
   - id: PAL-011
     title: Offline-safe idea capture -> promote-to-task flow
-    status: done
+    status: review
     dod:
     - ideas/*.md -> YAML task with ID
     - UI workflow
   - id: PAL-012
     title: AuthN/AuthZ (GitHub OAuth or signed links)
-    status: done
+    status: review
     dod:
     - only approved accounts access
     - audit trail
@@ -145,19 +145,19 @@ phases:
   tasks:
   - id: PAL-020
     title: Doc->YAML converter (ChatGPT-5 adapter)
-    status: done
+    status: review
     dod:
     - prompt templates
     - unit tests on examples
   - id: PAL-021
     title: Execute work items via Claude Code 4.5
-    status: done
+    status: review
     dod:
     - wrapper API
     - error handling + retries
   - id: PAL-022
     title: Implement wrapper (validate -> approve -> PR)
-    status: done
+    status: review
     dod:
     - single entrypoint
     - fully logged
@@ -169,13 +169,13 @@ phases:
   tasks:
   - id: PAL-030
     title: Cost/time logger (per task/PR)
-    status: todo
+    status: review
     dod:
     - CSV/JSON logs
     - dashboard in UI
   - id: PAL-031
     title: Harvest stable utilities from legacy
-    status: todo
+    status: review
     dod:
     - only tested modules imported
     - coverage >= 80%

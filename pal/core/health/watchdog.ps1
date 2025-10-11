@@ -6,7 +6,6 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Continue"
 
 function NowIso { (Get-Date).ToString("s") }
-
 function Ensure-Dir([string]$p){ if (-not (Test-Path $p)) { New-Item -ItemType Directory -Force -Path $p | Out-Null } }
 
 function Tcp-Check([string]$Host, [int]$Port, [int]$TimeoutMs=1500) {
@@ -20,15 +19,19 @@ function Tcp-Check([string]$Host, [int]$Port, [int]$TimeoutMs=1500) {
 
 function Http-Check([string]$Url, [int]$TimeoutSec=3) {
   try {
-    $wc = New-Object System.Net.WebClient
-    $wc.Encoding = [System.Text.Encoding]::UTF8
-    $wc.Headers.Add("User-Agent","PAL-Watchdog/1.0")
-    $wc.BaseAddress = $Url
-    $wc.CachePolicy = New-Object System.Net.Cache.RequestCachePolicy([System.Net.Cache.RequestCacheLevel]::NoCacheNoStore)
     $req = [System.Net.WebRequest]::Create($Url)
     $req.Method = "GET"; $req.Timeout = $TimeoutSec*1000
     $resp = $req.GetResponse(); $resp.Close(); return $true
   } catch { return $false }
+}
+
+function Get-LanIp {
+  try {
+    $ip = (Get-NetIPAddress -AddressFamily IPv4 |
+      Where-Object { $_.IPAddress -notmatch '^169\.' -and $_.InterfaceAlias -match 'Wi-Fi|Ethernet' } |
+      Select-Object -First 1 -ExpandProperty IPAddress)
+    return $ip
+  } catch { return $null }
 }
 
 function Write-OpsStatus([hashtable]$st){
@@ -38,20 +41,16 @@ function Write-OpsStatus([hashtable]$st){
 
 function Read-Json([string]$p){ try { Get-Content $p -Raw -ErrorAction Stop | ConvertFrom-Json } catch { $null } }
 
-# Load config (create default if missing)
-if (-not (Test-Path $ConfigPath)) {
-  $default = @{
+# Load config
+$cfg = Read-Json $ConfigPath
+if (-not $cfg) {
+  $cfg = @{
     web = @{ enabled=$true; host="127.0.0.1"; port=8787; health="http://127.0.0.1:8787/healthz"; run_script=".\\current\\run.ps1" }
-    tracker = @{ enabled=$true; run_script="python .\\pal\\ui\\desktop\\pal_tracker.py"; plan="pal\\plan\\pal_project_plan.yaml" }
+    tracker = @{ enabled=$true; run_script="python .\\pal\\ui\\desktop\\pal_tracker.py" }
     smoke_watch = @{ enabled=$true; run_script="pwsh .\\pal\\scripts\\ps\\smoke_watch.ps1" }
     tunnel = @{ enabled=$false; url_file=".\\reports\\ops\\tunnel_url.txt" }
   }
-  Ensure-Dir (Split-Path $ConfigPath -Parent)
-  ($default | ConvertTo-Json -Depth 6) | Set-Content $ConfigPath -Encoding UTF8
 }
-
-$cfg = Read-Json $ConfigPath
-if (-not $cfg) { Write-Host "Invalid config: $ConfigPath"; exit 1 }
 
 $procs = @{}
 
@@ -85,16 +84,28 @@ function Snapshot(){
   $watchHb = Test-Path ".\reports\smoke\_watcher_heartbeat.txt" -and ((Get-Date) - (Get-Item ".\reports\smoke\_watcher_heartbeat.txt").LastWriteTime).TotalSeconds -lt 20
   $tunnelUrl = ""; if ($cfg.tunnel.enabled -and (Test-Path $cfg.tunnel.url_file)) { $tunnelUrl = (Get-Content $cfg.tunnel.url_file -ErrorAction SilentlyContinue | Select-Object -First 1) }
 
+  $lanIp = Get-LanIp
+  $phoneLan = if ($lanIp) { "http://$lanIp:$webPort" } else { "" }
+
   $st = @{
     ts = NowIso
     web = @{ host=$webHost; port=$webPort; port_ok=$portOk; health_url=$health; health_ok=$healthOk }
     watcher = @{ on = $watchHb }
     tunnel = @{ url = $tunnelUrl; ok = ($tunnelUrl -ne "") }
+    phone = @{ lan = $phoneLan; url = (if ($tunnelUrl) { $tunnelUrl } else { $phoneLan }) }
   }
   Write-OpsStatus $st
 }
 
-# main loop with request queue
+function Commit-Plan([string]$Message="PAL: update plan"){
+  try {
+    git add .\pal\plan\pal_project_plan.yaml | Out-Null
+    if (Test-Path .\reports\smoke) { git add .\reports\smoke\*.json -A -f | Out-Null }
+    git commit -m $Message | Out-Null
+  } catch {}
+}
+
+# main loop
 Ensure-Dir ".\pal\control\requests"
 Ensure-Dir ".\reports\ops"
 while ($true) {
@@ -102,13 +113,21 @@ while ($true) {
     Ensure-Running
     Snapshot
 
-    # handle simple restart requests (files under pal/control/requests/*.json)
     $reqs = Get-ChildItem ".\pal\control\requests" -Filter *.json -File -ErrorAction SilentlyContinue
     foreach ($r in $reqs) {
       $obj = Read-Json $r.FullName
-      if ($obj -and $obj.command -eq "restart") {
-        if ($obj.target -eq "tracker" -and $procs["tracker"]) { try { $procs["tracker"].Kill() } catch {} ; $procs["tracker"] = $null }
-        if ($obj.target -eq "web" -and $procs["web"]) { try { $procs["web"].Kill() } catch {} ; $procs["web"] = $null }
+      if ($obj) {
+        switch ($obj.command) {
+          "restart" {
+            if ($obj.target -eq "tracker" -and $procs["tracker"]) { try { $procs["tracker"].Kill() } catch {} ; $procs["tracker"] = $null }
+            if ($obj.target -eq "web" -and $procs["web"]) { try { $procs["web"].Kill() } catch {} ; $procs["web"] = $null }
+          }
+          "commit_plan" {
+            $msg = $obj.message
+            if (-not $msg) { $msg = "PAL: plan update (watchdog)" }
+            Commit-Plan -Message $msg
+          }
+        }
       }
       Remove-Item $r.FullName -Force -ErrorAction SilentlyContinue
     }

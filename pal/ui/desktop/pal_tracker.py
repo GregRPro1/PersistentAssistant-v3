@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 import sys, time, json
 from pathlib import Path
-from PyQt6.QtWidgets import (
-    QApplication, QWidget, QTreeWidget, QTreeWidgetItem, QTextEdit, QSplitter,
-    QVBoxLayout, QLabel, QStatusBar, QListWidget, QListWidgetItem, QPushButton,
-    QHBoxLayout, QMessageBox
-)
+from PyQt6.QtWidgets import (QApplication, QWidget, QTreeWidget, QTreeWidgetItem, QTextEdit, QSplitter,
+    QVBoxLayout, QLabel, QStatusBar, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QMessageBox)
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPalette, QColor, QFont
 
@@ -69,10 +66,9 @@ def apply_dark_palette(app: QApplication):
 class PalTracker(QWidget):
     def __init__(self, plan_path: Path):
         super().__init__(); self.plan_path=plan_path; self.plan={}
-        self.setWindowTitle("PAL Tracker — Persistent Assistant Lite"); self.resize(1180,760)
+        self.setWindowTitle("PAL Tracker — Persistent Assistant Lite"); self.resize(1220,780)
         f=self.font(); f.setPointSize(10); self.setFont(f)
 
-        # Left
         self.goals_label = QLabel("Goals"); self.goals_label.setStyleSheet("font-weight:600; color:#e1e1e1;")
         self.goals_list = QListWidget(); self.goals_list.setAlternatingRowColors(True)
         self.tree = QTreeWidget(); self.tree.setHeaderLabels(["PAL Tasks"]); self.tree.setAlternatingRowColors(True)
@@ -82,7 +78,6 @@ class PalTracker(QWidget):
         left = QWidget(); lv = VB(left); lv.setContentsMargins(8,8,8,8); lv.setSpacing(6)
         lv.addWidget(self.goals_label); lv.addWidget(self.goals_list,1); lv.addWidget(self.tree,3)
 
-        # Right: details + actions
         self.details = QTextEdit(); self.details.setReadOnly(True); self.details.setStyleSheet("QTextEdit { padding:10px; color:#e1e1e1; }"); self.details.setFont(QFont("Consolas",10))
         self.btnApprove = QPushButton("Approve → Done")
         self.btnReview  = QPushButton("Set Review")
@@ -102,34 +97,28 @@ class PalTracker(QWidget):
         rv.addWidget(self.goalBanner, 0); rv.addWidget(self.details, 1); rv.addWidget(actions, 0)
         splitter.addWidget(right); splitter.setStretchFactor(0,1); splitter.setStretchFactor(1,2)
 
-        # Status bar (expanded, professional)
         self.status = QStatusBar()
         self.status.setStyleSheet("QStatusBar { background:#242424; color:#e1e1e1; padding:0 8px; } QStatusBar::item { border: 0px; }")
-        self.status.setFixedHeight(30)
+        self.status.setFixedHeight(32)
         small = QFont(self.font()); small.setPointSize(9)
-
-        def mk(lbl):
-            l = QLabel(lbl); l.setFont(small); l.setStyleSheet("color:#e1e1e1;"); return l
+        def mk(lbl): l = QLabel(lbl); l.setFont(small); l.setStyleSheet("color:#e1e1e1;"); return l
         self.progressLabel = mk("Overall: --")
         self.webPort = mk("Port: --"); self.webHealth = mk("Health: --")
-        self.tunnel = mk("Tunnel: --"); self.watch = mk("Watcher: --")
-        self.clock = mk("--:--:--")
-
+        self.phone = mk("Phone: --"); self.tunnel = mk("Tunnel: --")
+        self.watch = mk("Watcher: --"); self.clock = mk("--:--:--")
         self.status.addPermanentWidget(self.progressLabel, 2)
         self.status.addPermanentWidget(self.webPort, 1)
         self.status.addPermanentWidget(self.webHealth, 1)
+        self.status.addPermanentWidget(self.phone, 2)
         self.status.addPermanentWidget(self.tunnel, 2)
         self.status.addPermanentWidget(self.watch, 1)
         self.status.addPermanentWidget(self.clock, 1)
 
         v=QVBoxLayout(self); v.setContentsMargins(0,0,0,0); v.addWidget(splitter); v.addWidget(self.status)
-
         self.tree.currentItemChanged.connect(self.on_select_item)
         self.timer = QTimer(self); self.timer.timeout.connect(self.refresh); self.timer.start(REFRESH_SECS*1000)
-
         self.restore_ui_state(); self.refresh(initial=True)
 
-    # persistence
     def restore_ui_state(self):
         try:
             if UI_CONFIG_PATH.exists():
@@ -138,17 +127,14 @@ class PalTracker(QWidget):
                 g = cfg.get("geometry")
                 if isinstance(g, list) and len(g)==4: self.setGeometry(*[int(x) for x in g])
         except Exception: pass
-
     def save_ui_state(self):
         try:
             UI_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
             r = self.geometry(); import json; cfg = {"geometry": [int(r.x()), int(r.y()), int(r.width()), int(r.height())]}
             UI_CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
         except Exception: pass
-
     def closeEvent(self, e): self.save_ui_state(); super().closeEvent(e)
 
-    # helpers
     def color_for_status(self,s): return STATUS_COLORS.get(s or "todo", STATUS_COLORS["todo"])
     def set_item_color(self,it,status):
         it.setForeground(0, self.color_for_status(status))
@@ -156,7 +142,6 @@ class PalTracker(QWidget):
             from PyQt6.QtGui import QFont
             f = it.font(0); f.setBold(True if status=='in_progress' else False); it.setFont(0, f)
         except Exception: pass
-
     def format_task_summary(self,t): return f"[{t.get('status','todo')}] {t.get('id','')} — {t.get('title','')}"
 
     def default_selection(self):
@@ -238,28 +223,25 @@ class PalTracker(QWidget):
         self.btnBlock.setEnabled(s in ("todo","in_progress","review"))
 
     def update_status_bar_ops(self):
-        # Read ops_status.json
         try:
             d = json.loads(OPS_STATUS.read_text(encoding="utf-8")) if OPS_STATUS.exists() else {}
         except Exception:
             d = {}
         # Port
-        p_ok = d.get("web",{}).get("port_ok", False)
-        port = d.get("web",{}).get("port", 8787)
+        p_ok = d.get("web",{}).get("port_ok", False); port = d.get("web",{}).get("port", 8787)
         self.webPort.setText(f"Port {port}: {'OK' if p_ok else 'FAIL'}")
         self.webPort.setStyleSheet(f"color: {'#4CAF50' if p_ok else '#F44336'}; font-weight:600;")
-
         # Health
         h_ok = d.get("web",{}).get("health_ok", False)
         self.webHealth.setText(f"Health: {'OK' if h_ok else 'FAIL'}")
         self.webHealth.setStyleSheet(f"color: {'#4CAF50' if h_ok else '#F44336'}; font-weight:600;")
-
-        # Tunnel
-        t_url = d.get("tunnel",{}).get("url","")
-        t_ok  = d.get("tunnel",{}).get("ok", False)
-        self.tunnel.setText(f"Tunnel: {t_url if t_url else 'N/A'}")
+        # Phone URL (LAN preferred), Tunnel URL
+        phone_url = d.get("phone",{}).get("url","") or d.get("phone",{}).get("lan","")
+        self.phone.setText(f"Phone: {phone_url if phone_url else 'N/A'}")
+        self.phone.setStyleSheet("color:#e1e1e1; font-weight:600;" if phone_url else "color:#b0b0b0;")
+        tun_url = d.get("tunnel",{}).get("url",""); t_ok = d.get("tunnel",{}).get("ok", False)
+        self.tunnel.setText(f"Tunnel: {tun_url if tun_url else 'N/A'}")
         self.tunnel.setStyleSheet(f"color: {'#4CAF50' if t_ok else '#b0b0b0'}; font-weight:600;")
-
         # Watcher
         w_on = d.get("watcher",{}).get("on", False)
         self.watch.setText(f"Watcher: {'ON' if w_on else 'OFF'}")
@@ -286,6 +268,13 @@ class PalTracker(QWidget):
                     if str(tt.get("id")) == tid:
                         tt["status"] = new_status
             save_yaml(plan_path, plan)
+            # queue an optional commit via watchdog
+            try:
+                reqDir = Path("pal/control/requests"); reqDir.mkdir(parents=True, exist_ok=True)
+                msg = f"PAL: set {tid} -> {new_status}"
+                req = reqDir / (time.strftime("%Y%m%d_%H%M%S") + "_commit.json")
+                req.write_text(json.dumps({"command":"commit_plan","message":msg}), encoding="utf-8")
+            except Exception: pass
             self.refresh()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to change status: {e}")
