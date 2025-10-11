@@ -1,6 +1,6 @@
 {
-  "test": "PAL-101",
-  "notes": "stub PASS",
   "ok": true,
+  "notes": "stub PASS",
+  "test": "PAL-003",
   "ts": "2025-10-11T15:58:50"
 }
