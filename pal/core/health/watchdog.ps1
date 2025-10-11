@@ -44,7 +44,7 @@ function Write-OpsStatus([hashtable]$st){
 
 function Read-Json([string]$p){ try { Get-Content $p -Raw -ErrorAction Stop | ConvertFrom-Json } catch { $null } }
 
-# Load config (tolerant defaults)
+# Load config
 $cfg = Read-Json $ConfigPath
 if (-not $cfg) {
   $cfg = @{
@@ -70,6 +70,20 @@ function Start-Cmd([string]$key, [string]$cmdline){
     $p.StartInfo = $si
     $null = $p.Start()
     $procs[$key] = $p
+  } catch {}
+}
+
+function Stop-Tracker {
+  try {
+    # Kill tracked pwsh launcher if we have it
+    if ($procs["tracker"]) { try { $procs["tracker"].Kill() } catch {} ; $procs["tracker"] = $null }
+    # Kill any python processes running pal_tracker.py (robust)
+    $procsCim = Get-CimInstance Win32_Process | Where-Object {
+      $_.CommandLine -match "pal[\\/]ui[\\/]desktop[\\/]pal_tracker\.py"
+    }
+    foreach ($p in $procsCim) {
+      try { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue } catch {}
+    }
   } catch {}
 }
 
@@ -123,9 +137,10 @@ while ($true) {
       if ($obj) {
         switch ($obj.command) {
           "restart" {
-            if ($obj.target -eq "tracker" -and $procs["tracker"]) { try { $procs["tracker"].Kill() } catch {} ; $procs["tracker"] = $null }
+            if ($obj.target -eq "tracker") { Stop-Tracker }
             if ($obj.target -eq "web" -and $procs["web"]) { try { $procs["web"].Kill() } catch {} ; $procs["web"] = $null }
           }
+          "restart_tracker" { Stop-Tracker }
           "commit_plan" {
             $msg = $obj.message
             if (-not $msg) { $msg = "PAL: plan update (watchdog)" }

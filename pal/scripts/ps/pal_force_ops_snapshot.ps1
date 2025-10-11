@@ -24,10 +24,15 @@ $port = 8787
 if ($cfg -and $cfg.web -and $cfg.web.port) { $port = [int]$cfg.web.port }
 $lan = Get-LanIp
 $lanUrl = if ($lan) { "http://$($lan):$($port)" } else { "" }
+
 $tunnelUrl = ""
 if ($ops -and $ops.tunnel -and $ops.tunnel.url) { $tunnelUrl = [string]$ops.tunnel.url }
 
-$phone = [ordered]@{ lan=$lanUrl; url= (if ($tunnelUrl) { $tunnelUrl } else { $lanUrl }) }
+# Build phone hashtable without inline 'if' expressions
+$phone = [ordered]@{}
+$phone.lan = $lanUrl
+if ($tunnelUrl) { $phone.url = $tunnelUrl } else { $phone.url = $lanUrl }
+
 $ops.phone = $phone
 $ops.ts = (Get-Date).ToString("s")
 $ops | ConvertTo-Json -Depth 6 | Set-Content $opsPath -Encoding UTF8
