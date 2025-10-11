@@ -1,32 +1,26 @@
-# PAL P3 Agentic Scaffold + Plan
+# PAL — Tracker Goalposts + Approve-in-UI + LLM Fix
 
-This pack updates your **plan** and adds a minimal, provider-agnostic **Agentic Execution (P3)** scaffold:
-- LLM adapters (`pal/adapters/llm/*`): base interface + OpenAI/Claude **stubs** (no network)
-- VCS checks stub (`pal/adapters/vcs/github_checks.py`)
-- Doc→YAML pipeline stub (`pal/pipelines/doc_to_yaml.py`) + runner (`pal/scripts/py/run_doc_to_yaml.py`)
-- Smoke tests for **PAL-020..PAL-022**
-- Convenience scripts to set P3 in-progress and run smokes
+This pack delivers:
+- **Tracker UI**: gold **goalpost** banner (per phase), right-pane **Approve → Done** and quick status buttons, last-smoke info, watcher badge.
+- **LLM adapter fix**: `doc_to_yaml.py` now imports adapters so **Registry.get('openai')** works.
+- **Plan goalposts**: script to inject goalposts for M0..P3 and restart the tracker.
 
 ## Apply
 ```powershell
 cd C:\_Repos\PersistentAssistant
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_P3_Agentic_Scaffold_and_Plan.zip"
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Tracker_Goalposts_and_Approve_UI_FixLLM.zip"
 ```
 
-## Start P3 now (non-blocking)
+## Enable goalposts + refresh tracker
 ```powershell
-# turn P3 amber + refresh tracker
-pwsh .\pal\scripts\ps\pal_start_p3.ps1
-
-# run smokes in parallel (auto-flip to blue by watcher)
-pwsh .\pal\scripts\ps\pal_smoke_p3.ps1
-# ensure smoke watcher running:
-Start-Job -ScriptBlock { pwsh .\pal\scripts\ps\smoke_watch.ps1 } | Out-Null
+pwsh .\pal\scripts\ps\pal_add_goalposts.ps1
 ```
 
-## Try doc→yaml pipeline (stubbed, no network)
+## Re-run your doc→yaml test (fixed)
 ```powershell
-# Example: convert a text file using the openai stub
 python .\pal\scripts\py\run_doc_to_yaml.py README.md openai
 ```
-Generated: 2025-10-11
+
+## Notes
+- Colors: grey=todo, amber(in-progress), blue=review (PASS), red=blocked (FAIL), green=done (approved).
+- Approve blue items directly from the tracker via **Approve → Done** button.

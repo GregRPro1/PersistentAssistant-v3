@@ -1,9 +1,15 @@
 """
 Doc -> YAML converter pipeline using the provider-agnostic adapter.
+Ensures adapters are imported so they self-register with the Registry.
 """
 from pathlib import Path
 from typing import Dict, Any
-from pal.adapters.llm.base import Registry  # type: ignore
+
+# side-effect imports to register providers
+from pal.adapters.llm import openai_adapter as _openai  # noqa: F401
+from pal.adapters.llm import anthropic_adapter as _claude  # noqa: F401
+
+from pal.adapters.llm.base import Registry  # after imports
 
 def doc_to_yaml(doc_path: Path, provider: str="openai") -> Dict[str, Any]:
     text = Path(doc_path).read_text(encoding="utf-8")
