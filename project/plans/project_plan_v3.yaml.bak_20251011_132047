@@ -2835,11 +2835,3 @@ roadmap_order:
   - PA-382
   - PA-383
 
-
-
-# ---- Plan update appended by pack ----
-
-# Append: set PAL-101..PAL-106 to in_progress (if present in plan they should reflect this state)
-# If your plan already contains these tasks, their status should be updated separately by pal_mark_status.py.
-# This section is informative; not enforced if structure differs.
-
