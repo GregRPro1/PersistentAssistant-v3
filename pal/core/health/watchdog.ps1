@@ -44,7 +44,19 @@ function Write-OpsStatus([hashtable]$st){
 
 function Read-Json([string]$p){ try { Get-Content $p -Raw -ErrorAction Stop | ConvertFrom-Json } catch { $null } }
 
-# Load config
+function Is-GoodUrl([string]$u) {
+  if (-not $u) { return $false }
+  # PowerShell 7+ has [Uri]::IsWellFormedUriString; also check http(s) scheme
+  try {
+    if ([Uri]::IsWellFormedUriString($u, [UriKind]::Absolute)) {
+      $uri = [Uri]$u
+      if ($uri.Scheme -in @("http","https")) { return $true }
+    }
+  } catch {}
+  return $false
+}
+
+# Load config (tolerant defaults)
 $cfg = Read-Json $ConfigPath
 if (-not $cfg) {
   $cfg = @{
@@ -73,20 +85,6 @@ function Start-Cmd([string]$key, [string]$cmdline){
   } catch {}
 }
 
-function Stop-Tracker {
-  try {
-    # Kill tracked pwsh launcher if we have it
-    if ($procs["tracker"]) { try { $procs["tracker"].Kill() } catch {} ; $procs["tracker"] = $null }
-    # Kill any python processes running pal_tracker.py (robust)
-    $procsCim = Get-CimInstance Win32_Process | Where-Object {
-      $_.CommandLine -match "pal[\\/]ui[\\/]desktop[\\/]pal_tracker\.py"
-    }
-    foreach ($p in $procsCim) {
-      try { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue } catch {}
-    }
-  } catch {}
-}
-
 function Ensure-Running(){
   if ($cfg.web.enabled) { Start-Cmd "web" $cfg.web.run_script }
   if ($cfg.tracker.enabled) { Start-Cmd "tracker" $cfg.tracker.run_script }
@@ -99,7 +97,12 @@ function Snapshot(){
   $portOk  = Tcp-Check $webHost $webPort
   $healthOk= if ($health) { Http-Check $health 3 } else { $false }
   $watchHb = Test-Path ".\reports\smoke\_watcher_heartbeat.txt" -and ((Get-Date) - (Get-Item ".\reports\smoke\_watcher_heartbeat.txt").LastWriteTime).TotalSeconds -lt 20
-  $tunnelUrl = ""; if ($cfg.tunnel.enabled -and (Test-Path $cfg.tunnel.url_file)) { $tunnelUrl = (Get-Content $cfg.tunnel.url_file -ErrorAction SilentlyContinue | Select-Object -First 1) }
+
+  $tunnelUrl = ""
+  if ($cfg.tunnel.enabled -and (Test-Path $cfg.tunnel.url_file)) {
+    $raw = (Get-Content $cfg.tunnel.url_file -ErrorAction SilentlyContinue | Select-Object -First 1).Trim()
+    if (Is-GoodUrl $raw) { $tunnelUrl = $raw }
+  }
 
   $lanIp = Get-LanIp
   $phoneLan = if ($lanIp) { "http://$($lanIp):$($webPort)" } else { "" }
@@ -109,18 +112,10 @@ function Snapshot(){
     ts = NowIso
     web = @{ host=$webHost; port=$webPort; port_ok=$portOk; health_url=$health; health_ok=$healthOk }
     watcher = @{ on = $watchHb }
-    tunnel = @{ url = $tunnelUrl; ok = ($tunnelUrl -ne "") }
+    tunnel = @{ url = $tunnelUrl; ok = (Is-GoodUrl $tunnelUrl) }
     phone = @{ lan = $phoneLan; url = $phoneUrl }
   }
   Write-OpsStatus $st
-}
-
-function Commit-Plan([string]$Message="PAL: update plan"){
-  try {
-    git add .\pal\plan\pal_project_plan.yaml | Out-Null
-    if (Test-Path .\reports\smoke) { git add .\reports\smoke\*.json -A -f | Out-Null }
-    git commit -m $Message | Out-Null
-  } catch {}
 }
 
 # main loop
@@ -137,15 +132,10 @@ while ($true) {
       if ($obj) {
         switch ($obj.command) {
           "restart" {
-            if ($obj.target -eq "tracker") { Stop-Tracker }
+            if ($obj.target -eq "tracker" -and $procs["tracker"]) { try { $procs["tracker"].Kill() } catch {} ; $procs["tracker"] = $null }
             if ($obj.target -eq "web" -and $procs["web"]) { try { $procs["web"].Kill() } catch {} ; $procs["web"] = $null }
           }
-          "restart_tracker" { Stop-Tracker }
-          "commit_plan" {
-            $msg = $obj.message
-            if (-not $msg) { $msg = "PAL: plan update (watchdog)" }
-            Commit-Plan -Message $msg
-          }
+          "commit_plan" { }
         }
       }
       Remove-Item $r.FullName -Force -ErrorAction SilentlyContinue

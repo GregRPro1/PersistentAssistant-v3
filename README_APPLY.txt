@@ -1,20 +1,29 @@
-# PAL — Watchdog Restart + Geometry + Phone URL fixes
+# PAL — Tunnel URL Validation Fix
 
-This patch delivers:
-- **watchdog.ps1**: robust tracker restart (`Stop-Tracker` kills python processes whose command line includes `pal/ui/desktop/pal_tracker.py`). Handles both `{"command":"restart","target":"tracker"}` and `{"command":"restart_tracker"}`.
-- **pal_force_ops_snapshot.ps1**: fixed PowerShell hashtable (no inline `if`), writes `phone.lan/url` immediately.
-- **pal_tracker.py**: persists window geometry (saved every 5s and on close; restored on startup). Status bar computes Phone URL fallback if watchdog hasn't written it yet.
+**Problem**: `tunnel_url.txt` contained a stray "m", so the watchdog published `phone.url = "m"`.  
+**Fix**: Validate the tunnel URL before using it; if invalid, prefer the LAN URL.
 
 ## Apply
+```powershell
 cd C:\_Repos\PersistentAssistant
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Watchdog_Restart_Geometry_Fixes.zip"
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_TunnelURL_Validation_Fix.zip"
+```
 
-## Verify
-# 1) Force ops snapshot so Phone shows up immediately
-pwsh .\pal\scripts\ps\pal_force_ops_snapshot.ps1
-type .\reports\ops\ops_status.json
+## Use
+### A) Clear the bad tunnel value now
+```powershell
+pwsh .\pal\scripts\ps\clear_bad_tunnel.ps1
+type .\reports\ops\ops_status.json   # Phone.url should equal Phone.lan
+```
 
-# 2) Restart via watchdog request (now guaranteed to kill old tracker and relaunch)
-'{"command":"restart","target":"tracker"}' | Set-Content .\pal\control\requests\restart_tracker.json -Encoding UTF8
+### B) (Optional) Start a quick tunnel and write a proper URL
+```powershell
+pwsh .\pal\scripts\ps\run_quick_tunnel.ps1 -Port 8787
+type .\reports\ops\tunnel_url.txt    # should be https://*.trycloudflare.com
+```
 
-# 3) Drag tracker window somewhere, close, re-open — it should restore position/size.
+### C) Watchdog will now:
+- Only accept a tunnel URL if it’s a well-formed http(s) URL.
+- Otherwise it leaves `tunnel.ok=false` and uses the LAN URL for `phone.url`.
+
+This guarantees the tracker and WhatsApp share never see a single-letter "m" again.

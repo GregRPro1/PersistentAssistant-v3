@@ -1,16 +1,20 @@
 {
-  "ts": "2025-10-11T23:16:47",
-  "web": {
-    "host": "127.0.0.1",
-    "port": 8787,
-    "port_ok": true,
-    "health_url": "http://127.0.0.1:8787/healthz",
-    "health_ok": true
+  "phone": {
+    "url": "m",
+    "lan": "http://192.168.1.11:8787"
   },
   "tunnel": {
     "url": "m",
     "ok": true
   },
+  "web": {
+    "port": 8787,
+    "health_ok": true,
+    "health_url": "http://127.0.0.1:8787/healthz",
+    "port_ok": true,
+    "host": "127.0.0.1"
+  },
+  "ts": "2025-10-11T23:19:07",
   "watcher": {
     "on": true
   }
