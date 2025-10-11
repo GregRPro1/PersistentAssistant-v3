@@ -1,0 +1,15 @@
+{
+  "interval_secs": 15,
+  "enable_server": true,
+  "enable_tracker": true,
+  "enable_ping": true,
+  "plan_path": ".\\pal\\plan\\pal_project_plan.yaml",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8787
+  },
+  "ping": {
+    "host": "chat.openai.com",
+    "port": 443
+  }
+}
