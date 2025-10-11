@@ -1,9 +1,23 @@
-# Emits a demo smoke result and prints the Phone URL from ops status
 param([string]$TaskId = "PAL-DEMO")
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Continue"
 
-$ops = ".\reports\ops\ops_status.json"
+function Get-LanIp {
+  try {
+    $ip = (Get-NetIPAddress -AddressFamily IPv4 |
+      Where-Object {
+        $_.IPAddress -notmatch '^169\.' -and $_.IPAddress -notmatch '^127\.' -and
+        ($_.IPAddress -match '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)')
+      } |
+      Select-Object -First 1 -ExpandProperty IPAddress)
+    return $ip
+  } catch { return $null }
+}
+
+function Read-Json($p){ try { Get-Content -Raw $p -ErrorAction Stop | ConvertFrom-Json } catch { $null } }
+
+$opsPath = ".\reports\ops\ops_status.json"
+$cfgPath = ".\pal\config\pal_watchdog.json"
 $smokeDir = ".\reports\smoke"
 if (-not (Test-Path $smokeDir)) { New-Item -ItemType Directory -Force -Path $smokeDir | Out-Null }
 
@@ -12,17 +26,28 @@ $ts = (Get-Date).ToString("s")
 $data = @{ test=$TaskId; ts=$ts; ok=$true; notes="Demo PASS" }
 ($data | ConvertTo-Json -Depth 4) | Set-Content (Join-Path $smokeDir "$TaskId.json") -Encoding UTF8
 
-# Nudge tracker + commit
+# Restart tracker + commit
 $reqDir = ".\pal\control\requests"; if (-not (Test-Path $reqDir)) { New-Item -ItemType Directory -Force -Path $reqDir | Out-Null }
 ('{"command":"restart","target":"tracker"}') | Set-Content (Join-Path $reqDir ("{0}_restart.json" -f (Get-Date -Format "yyyyMMdd_HHmmss"))) -Encoding UTF8
 ('{"command":"commit_plan","message":"PAL: demo smoke"}') | Set-Content (Join-Path $reqDir ("{0}_commit.json" -f (Get-Date -Format "yyyyMMdd_HHmmss"))) -Encoding UTF8
 
-# Print the Phone URL if present
-if (Test-Path $ops) {
-  $o = Get-Content -Raw $ops | ConvertFrom-Json
-  $url = $o.phone.url
-  if (-not $url) { $url = $o.phone.lan }
-  if ($url) { Write-Host "Phone URL: $url" -ForegroundColor Green } else { Write-Warning "Phone URL not available yet." }
-} else {
-  Write-Warning "ops_status.json not found. Start the watchdog first."
+$ops = Read-Json $opsPath
+$phoneUrl = $null
+if ($ops -and $ops.phone) {
+  $phoneUrl = $ops.phone.url; if (-not $phoneUrl) { $phoneUrl = $ops.phone.lan }
 }
+
+if (-not $phoneUrl) {
+  # Fallback: compute from config + LAN IP
+  $cfg = Read-Json $cfgPath
+  $port = 8787
+  if ($cfg -and $cfg.web -and $cfg.web.port) { $port = [int]$cfg.web.port }
+  $lan = Get-LanIp
+  if ($lan) { $phoneUrl = "http://$lan:$port" }
+  # final fallback: health host:port
+  if (-not $phoneUrl -and $cfg -and $cfg.web -and $cfg.web.host -and $cfg.web.port) {
+    $phoneUrl = "http://$($cfg.web.host):$($cfg.web.port)"
+  }
+}
+
+if ($phoneUrl) { Write-Host "Phone URL: $phoneUrl" -ForegroundColor Green } else { Write-Warning "Phone URL not available yet." }

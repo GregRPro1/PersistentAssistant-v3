@@ -1,24 +1,12 @@
-# PAL — Watchdog Fix + Demo Smoke
+# PAL — Demo Fix & Force Ops
 
-This patch:
-- Replaces **pal/core/health/watchdog.ps1** with a robust LAN-IP detector and ensures it writes:
-  ```json
-  "phone": { "lan": "http://<lan-ip>:<port>", "url": "http://<lan-ip>:<port>" or tunnel }
-  ```
-- Adds **pal/scripts/ps/pal_demo_verify.ps1** to create a demo smoke PASS and print the **Phone URL**.
+This pack includes:
+- Updated **watchdog.ps1** (again, with robust LAN-IP) — writes phone.lan + phone.url.
+- Resilient **pal_demo_verify.ps1** — prints Phone URL even if ops_status.json has no 'phone' yet by computing LAN host:port from config.
 
 ## Apply
-```powershell
-cd C:\_Repos\PersistentAssistant
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Watchdog_Fix_and_Demo_Smoke.zip"
-```
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Demo_Fix_and_Force_Ops.zip"
 
 ## Run
-```powershell
-# Start watchdog (it will populate reports\ops\ops_status.json)
 pwsh .\pal\core\health\watchdog.ps1
-
-# In another terminal, emit demo smoke and show the Phone URL
 pwsh .\pal\scripts\ps\pal_demo_verify.ps1 -TaskId PAL-DEMO
-```
-You should see: `Phone URL: http://192.168.x.x:8787` (or your tunnel URL), and the tracker will refresh showing **Phone** instead of N/A.
