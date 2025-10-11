@@ -50,7 +50,7 @@ phases:
   - id: PAL-101
     title: PAL-Web FastAPI + WS endpoints
     priority: 1
-    status: review
+    status: done
     dod:
     - GET /healthz -> 200 {version}
     - GET /projects/:id/tree -> YAML JSON
@@ -58,7 +58,7 @@ phases:
   - id: PAL-102
     title: YAML SSOT atomic IO (pydantic + atomic writes)
     priority: 1
-    status: review
+    status: done
     dod:
     - temp-write+fsync+move
     - optimistic version field
@@ -66,14 +66,14 @@ phases:
   - id: PAL-103
     title: Minimal desktop launcher (tray/window)
     priority: 2
-    status: review
+    status: done
     dod:
     - Start/Stop, status, 'Open UI'
     - reads env.json
   - id: PAL-104
     title: Watchdog + scheduled task + rollback
     priority: 1
-    status: review
+    status: done
     dod:
     - auto-rollback to last _good
     - EventLog entries
@@ -81,83 +81,88 @@ phases:
   - id: PAL-105
     title: Health & rollback E2E tests (CI)
     priority: 1
-    status: review
+    status: done
     dod:
     - boot test <=20s
     - rollback test flips current back
   - id: PAL-106
     title: Approval & ideas endpoints (finish the small bits)
     priority: 1
-    status: review
+    status: done
     dod:
     - POST /approve {specId, commit} → sets GH status/check
     - POST /ideas {text} -> markdown; emits WS update
     - Mobile UI buttons wired and tested
+  goalpost: Unbreakable phone/web control; watchdog + tracker healthy.
 - id: P1
   name: Cutover & SSOT Hardening
   priority: 1
   tasks:
   - id: PAL-001
     title: Quarantine legacy tree and create PAL skeleton
-    status: review
+    status: done
     dod:
     - legacy/ contains old code
     - CI ignores legacy/**
   - id: PAL-002
     title: Define YAML schemas + Pydantic models
-    status: review
+    status: done
     dod:
     - models + validators
     - unit tests
   - id: PAL-003
     title: Constitution checks in CI (headers/tests/lint/format)
-    status: review
+    status: done
     dod:
     - PRs blocked without checks
+  goalpost: Legacy quarantined; smoke harness + auto-flip stable pipeline.
 - id: P2
   name: Phone/Web UX & Workflow
   priority: 1
   tasks:
   - id: PAL-010
     title: Color-coded task tree; status transitions; notes
-    status: review
+    status: done
     dod:
     - todo/in_progress/review/blocked/done
     - notes persisted
   - id: PAL-011
     title: Offline-safe idea capture -> promote-to-task flow
-    status: review
+    status: done
     dod:
     - ideas/*.md -> YAML task with ID
     - UI workflow
   - id: PAL-012
     title: AuthN/AuthZ (GitHub OAuth or signed links)
-    status: review
+    status: done
     dod:
     - only approved accounts access
     - audit trail
+  goalpost: 'Operator UX: color tree, status transitions, desktop approvals.'
 - id: P3
   name: Agentic Execution (Adapters)
   priority: 2
   tasks:
   - id: PAL-020
     title: Doc->YAML converter (ChatGPT-5 adapter)
-    status: review
+    status: done
     dod:
     - prompt templates
     - unit tests on examples
   - id: PAL-021
     title: Execute work items via Claude Code 4.5
-    status: review
+    status: done
     dod:
     - wrapper API
     - error handling + retries
   - id: PAL-022
     title: Implement wrapper (validate -> approve -> PR)
-    status: review
+    status: done
     dod:
     - single entrypoint
     - fully logged
+  goalpost: 'Phone/Web approvals: approve from phone; minimal web dashboard; notes
+    captured.'
 - id: P4
   name: Telemetry & Harvest
   priority: 2

@@ -1,16 +1,22 @@
 {
-  "interval_secs": 15,
-  "enable_server": true,
-  "enable_tracker": true,
-  "enable_ping": true,
-  "enable_smoke_watch": true,
-  "plan_path": ".\\pal\\plan\\pal_project_plan.yaml",
-  "server": {
+  "web": {
+    "enabled": true,
     "host": "127.0.0.1",
-    "port": 8787
+    "port": 8787,
+    "health": "http://127.0.0.1:8787/healthz",
+    "run_script": ".\\current\\run.ps1"
   },
-  "ping": {
-    "host": "chat.openai.com",
-    "port": 443
+  "tracker": {
+    "enabled": true,
+    "run_script": "python .\\pal\\ui\\desktop\\pal_tracker.py",
+    "plan": "pal\\plan\\pal_project_plan.yaml"
+  },
+  "smoke_watch": {
+    "enabled": true,
+    "run_script": "pwsh .\\pal\\scripts\\ps\\smoke_watch.ps1"
+  },
+  "tunnel": {
+    "enabled": false,
+    "url_file": ".\\reports\\ops\\tunnel_url.txt"
   }
 }

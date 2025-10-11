@@ -6,21 +6,21 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QLabel, QStatusBar, QListWidget, QListWidgetItem, QPushButton,
     QHBoxLayout, QMessageBox
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPalette, QColor, QFont
 
-REFRESH_SECS = 15
+REFRESH_SECS = 10
 DEFAULT_PLAN_PATH = Path("pal/plan/pal_project_plan.yaml")
 UI_CONFIG_PATH = Path("pal/config/pal_ui.json")
 SMOKE_DIR = Path("reports/smoke")
-WATCHER_HEARTBEAT = SMOKE_DIR / "_watcher_heartbeat.txt"
+OPS_STATUS = Path("reports/ops/ops_status.json")
 
 STATUS_COLORS = {
-    "done": QColor(76, 175, 80),        # green
-    "in_progress": QColor(255, 193, 7), # amber
-    "review": QColor(0, 188, 212),      # blue/cyan
-    "blocked": QColor(244, 67, 54),     # red
-    "todo": QColor(158, 158, 158),      # grey
+    "done": QColor(76, 175, 80),
+    "in_progress": QColor(255, 193, 7),
+    "review": QColor(0, 188, 212),
+    "blocked": QColor(244, 67, 54),
+    "todo": QColor(158, 158, 158),
 }
 
 def pick_plan_path() -> Path:
@@ -35,40 +35,7 @@ def load_yaml(path: Path):
     try:
         import yaml; return yaml.safe_load(txt)
     except Exception:
-        lines = txt.splitlines(); i = 0
-        def parse_block(indent=0):
-            nonlocal i
-            obj = {}; arr = None
-            while i < len(lines):
-                raw = lines[i]; i += 1
-                if not raw.strip(): continue
-                cur = len(raw) - len(raw.lstrip())
-                if cur < indent: i -= 1; break
-                line = raw.strip()
-                if line.startswith("- "):
-                    if arr is None: arr = []
-                    tail = line[2:]
-                    if ": " in tail:
-                        k,v = tail.split(": ",1); item = {k: v.strip().strip('"')}
-                        nested = parse_block(cur+2)
-                        if isinstance(nested, dict) and nested: item.update(nested)
-                        arr.append(item)
-                    else:
-                        arr.append(tail.strip().strip('"'))
-                else:
-                    if ": " in line:
-                        k,v = line.split(": ",1)
-                        if v in ("", "|"):
-                            nested = parse_block(cur+2); obj[k] = nested
-                        else:
-                            sval = v.strip().strip('"')
-                            try: obj[k] = int(sval)
-                            except: obj[k] = sval
-                    elif line.endswith(":"):
-                        k = line[:-1].strip(); nested = parse_block(cur+2); obj[k] = nested
-            return arr if arr is not None else obj
-        i = 0
-        return parse_block(0)
+        return {}
 
 def save_yaml(path: Path, data: dict):
     try:
@@ -86,14 +53,6 @@ def last_smoke_for(task_id: str):
     except Exception:
         return None
 
-def watcher_on():
-    try:
-        if not WATCHER_HEARTBEAT.exists(): return False
-        age = time.time() - WATCHER_HEARTBEAT.stat().st_mtime
-        return age < 20
-    except Exception:
-        return False
-
 def apply_dark_palette(app: QApplication):
     pal = QPalette()
     base = QColor(30,30,30); panel = QColor(36,36,36); text = QColor(225,225,225); accent = QColor(100,149,237)
@@ -105,14 +64,12 @@ def apply_dark_palette(app: QApplication):
     pal.setColor(QPalette.ColorRole.ButtonText, text)
     pal.setColor(QPalette.ColorRole.Highlight, accent)
     pal.setColor(QPalette.ColorRole.HighlightedText, QColor(0,0,0))
-    pal.setColor(QPalette.ColorRole.ToolTipBase, panel)
-    pal.setColor(QPalette.ColorRole.ToolTipText, text)
     app.setPalette(pal)
 
 class PalTracker(QWidget):
     def __init__(self, plan_path: Path):
         super().__init__(); self.plan_path=plan_path; self.plan={}
-        self.setWindowTitle("PAL Tracker — Persistent Assistant Lite"); self.resize(1140,720)
+        self.setWindowTitle("PAL Tracker — Persistent Assistant Lite"); self.resize(1180,760)
         f=self.font(); f.setPointSize(10); self.setFont(f)
 
         # Left
@@ -121,14 +78,12 @@ class PalTracker(QWidget):
         self.tree = QTreeWidget(); self.tree.setHeaderLabels(["PAL Tasks"]); self.tree.setAlternatingRowColors(True)
         self.tree.setRootIsDecorated(True); self.tree.setColumnCount(1); self.tree.setIndentation(18)
 
-        left = QWidget(); from PyQt6.QtWidgets import QVBoxLayout as VB; lv = VB(left); lv.setContentsMargins(8,8,8,8); lv.setSpacing(6)
+        from PyQt6.QtWidgets import QVBoxLayout as VB, QHBoxLayout as HB
+        left = QWidget(); lv = VB(left); lv.setContentsMargins(8,8,8,8); lv.setSpacing(6)
         lv.addWidget(self.goals_label); lv.addWidget(self.goals_list,1); lv.addWidget(self.tree,3)
 
-        # Right: goalpost banner + details + actions
-        self.goalBanner = QLabel("")
-        self.goalBanner.setStyleSheet("QLabel { background: #d4af37; color: #111; padding: 6px 10px; font-weight: 700; border-radius: 4px;}")
+        # Right: details + actions
         self.details = QTextEdit(); self.details.setReadOnly(True); self.details.setStyleSheet("QTextEdit { padding:10px; color:#e1e1e1; }"); self.details.setFont(QFont("Consolas",10))
-
         self.btnApprove = QPushButton("Approve → Done")
         self.btnReview  = QPushButton("Set Review")
         self.btnInProg  = QPushButton("Set In-Progress")
@@ -138,27 +93,39 @@ class PalTracker(QWidget):
         self.btnReview.clicked.connect(lambda: self.change_status_selected("review"))
         self.btnInProg.clicked.connect(lambda: self.change_status_selected("in_progress"))
         self.btnBlock.clicked.connect(lambda: self.change_status_selected("blocked"))
-
-        actions = QWidget(); from PyQt6.QtWidgets import QHBoxLayout as HB; hb = HB(actions); hb.setContentsMargins(8,4,8,8); hb.setSpacing(8)
+        actions = QWidget(); hb = HB(actions); hb.setContentsMargins(8,4,8,8); hb.setSpacing(8)
         hb.addWidget(self.btnApprove); hb.addWidget(self.btnReview); hb.addWidget(self.btnInProg); hb.addWidget(self.btnBlock); hb.addStretch(1)
 
         splitter = QSplitter(); splitter.addWidget(left)
         right = QWidget(); rv = VB(right); rv.setContentsMargins(8,8,8,8); rv.setSpacing(8)
+        self.goalBanner = QLabel(""); self.goalBanner.setStyleSheet("QLabel { background: #d4af37; color: #111; padding: 6px 10px; font-weight: 700; border-radius: 4px;}")
         rv.addWidget(self.goalBanner, 0); rv.addWidget(self.details, 1); rv.addWidget(actions, 0)
         splitter.addWidget(right); splitter.setStretchFactor(0,1); splitter.setStretchFactor(1,2)
 
-        # Status
-        self.status = QStatusBar(); self.status.setStyleSheet("QStatusBar { background:#242424; color:#e1e1e1; padding:0 6px; } QStatusBar::item { border: 0px; }"); self.status.setFixedHeight(24)
+        # Status bar (expanded, professional)
+        self.status = QStatusBar()
+        self.status.setStyleSheet("QStatusBar { background:#242424; color:#e1e1e1; padding:0 8px; } QStatusBar::item { border: 0px; }")
+        self.status.setFixedHeight(30)
         small = QFont(self.font()); small.setPointSize(9)
-        self.progressLabel=QLabel(""); self.progressLabel.setFont(small); self.progressLabel.setStyleSheet("color:#e1e1e1;")
-        self.watchLabel=QLabel("Watcher: …"); self.watchLabel.setFont(small); self.watchLabel.setStyleSheet("color:#b0b0b0;")
-        self.timeLabel=QLabel(""); self.timeLabel.setFont(small); self.timeLabel.setStyleSheet("color:#b0b0b0;")
-        self.status.addPermanentWidget(self.progressLabel,2); self.status.addPermanentWidget(self.watchLabel,1); self.status.addPermanentWidget(self.timeLabel,1)
+
+        def mk(lbl):
+            l = QLabel(lbl); l.setFont(small); l.setStyleSheet("color:#e1e1e1;"); return l
+        self.progressLabel = mk("Overall: --")
+        self.webPort = mk("Port: --"); self.webHealth = mk("Health: --")
+        self.tunnel = mk("Tunnel: --"); self.watch = mk("Watcher: --")
+        self.clock = mk("--:--:--")
+
+        self.status.addPermanentWidget(self.progressLabel, 2)
+        self.status.addPermanentWidget(self.webPort, 1)
+        self.status.addPermanentWidget(self.webHealth, 1)
+        self.status.addPermanentWidget(self.tunnel, 2)
+        self.status.addPermanentWidget(self.watch, 1)
+        self.status.addPermanentWidget(self.clock, 1)
 
         v=QVBoxLayout(self); v.setContentsMargins(0,0,0,0); v.addWidget(splitter); v.addWidget(self.status)
 
         self.tree.currentItemChanged.connect(self.on_select_item)
-        from PyQt6.QtCore import QTimer; self.timer=QTimer(self); self.timer.timeout.connect(self.refresh); self.timer.start(REFRESH_SECS*1000)
+        self.timer = QTimer(self); self.timer.timeout.connect(self.refresh); self.timer.start(REFRESH_SECS*1000)
 
         self.restore_ui_state(); self.refresh(initial=True)
 
@@ -228,15 +195,13 @@ class PalTracker(QWidget):
     def phase_goalpost(self, phase_id: str):
         for ph in (self.plan.get("phases") or []):
             if str(ph.get("id")) == str(phase_id):
-                gp = ph.get("goalpost") or ""
-                return str(gp) if gp else ""
+                return str(ph.get("goalpost",""))
         return ""
 
     def details_for(self, ph: dict, t: dict) -> str:
         lines = [f"Phase: {ph.get('id','')} — {ph.get('name','')}",
                  f"Task: {t.get('id','')}", f"Title: {t.get('title','')}",
                  f"Status: {t.get('status','todo')}"]
-        # last smoke if present
         sm = last_smoke_for(str(t.get("id","")))
         if t.get("status")=="review" and not sm:
             lines.append("Last smoke: (none found) — WARNING: status=review without artifact")
@@ -272,15 +237,39 @@ class PalTracker(QWidget):
         self.btnInProg.setEnabled(s in ("todo","review","blocked"))
         self.btnBlock.setEnabled(s in ("todo","in_progress","review"))
 
+    def update_status_bar_ops(self):
+        # Read ops_status.json
+        try:
+            d = json.loads(OPS_STATUS.read_text(encoding="utf-8")) if OPS_STATUS.exists() else {}
+        except Exception:
+            d = {}
+        # Port
+        p_ok = d.get("web",{}).get("port_ok", False)
+        port = d.get("web",{}).get("port", 8787)
+        self.webPort.setText(f"Port {port}: {'OK' if p_ok else 'FAIL'}")
+        self.webPort.setStyleSheet(f"color: {'#4CAF50' if p_ok else '#F44336'}; font-weight:600;")
+
+        # Health
+        h_ok = d.get("web",{}).get("health_ok", False)
+        self.webHealth.setText(f"Health: {'OK' if h_ok else 'FAIL'}")
+        self.webHealth.setStyleSheet(f"color: {'#4CAF50' if h_ok else '#F44336'}; font-weight:600;")
+
+        # Tunnel
+        t_url = d.get("tunnel",{}).get("url","")
+        t_ok  = d.get("tunnel",{}).get("ok", False)
+        self.tunnel.setText(f"Tunnel: {t_url if t_url else 'N/A'}")
+        self.tunnel.setStyleSheet(f"color: {'#4CAF50' if t_ok else '#b0b0b0'}; font-weight:600;")
+
+        # Watcher
+        w_on = d.get("watcher",{}).get("on", False)
+        self.watch.setText(f"Watcher: {'ON' if w_on else 'OFF'}")
+        self.watch.setStyleSheet(f"color: {'#4CAF50' if w_on else '#F44336'}; font-weight:600;")
+
     def update_status_bar(self):
         d,t,p = self.compute_progress()
         self.progressLabel.setText(f"Overall: {d}/{t} ({p}%)")
-        # watcher
-        if watcher_on():
-            self.watchLabel.setText("Watcher: ON"); self.watchLabel.setStyleSheet("color:#4CAF50; font-weight:600;")
-        else:
-            self.watchLabel.setText("Watcher: OFF"); self.watchLabel.setStyleSheet("color:#F44336; font-weight:600;")
-        self.timeLabel.setText(time.strftime("%H:%M:%S"))
+        self.clock.setText(time.strftime("%H:%M:%S"))
+        self.update_status_bar_ops()
 
     def change_status_selected(self, new_status: str):
         item = self.tree.currentItem()
