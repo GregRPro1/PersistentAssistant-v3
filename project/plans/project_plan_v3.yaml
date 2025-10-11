@@ -2310,3 +2310,178 @@ roadmap_order:
   - PA-382
   - PA-383
 
+
+
+# ---- Plan update appended by pack (PA-365) ----
+
+---  # PLAN UPDATE 2025-10-01
+meta:
+  id: PA-365
+  title: Plan Update – QA, CI, Tunnels, Publishing, Auth, Diagnostics
+  updated: 2025-10-01T00:00:00Z
+  owner: Greg
+  repo: PersistentAssistant-v3
+
+epics:
+
+  - key: PA-361
+    title: UI Status Card (/app/watchdog)
+    status: shipped
+    desc: Status lights, restart buttons, log tails, exit watchdog, heartbeat freshness.
+    acceptance:
+      - GET /api/watchdog returns JSON with per-process state & file_age_s
+      - /app/watchdog shows pills (green/amber/red/gray), restart count, PID, log tail
+      - POST /api/watchdog/<name>/restart restarts target process
+      - POST /api/watchdog/exit terminates watchdog
+    smokes:
+      - name: watchdog_api_200
+        step: curl -sS http://127.0.0.1:8776/api/watchdog | jq -e '.ok!=null'
+      - name: watchdog_ui_route
+        step: curl -sSI http://127.0.0.1:8776/app/watchdog | grep "200"
+
+  - key: PA-370
+    title: Watchdog Supervisor
+    status: shipped
+    desc: Non-blocking process supervisor with health checks, backoff restarts, status JSON.
+    acceptance:
+      - reports/ops/watchdog_status.json updates at least once per 2s while running
+      - restart policy "always/on-failure/never" honored per process
+    smokes:
+      - name: watchdog_status_file
+        step: test -f reports/ops/watchdog_status.json
+
+  - key: PA-371
+    title: Codex Bootstrap
+    status: shipped
+    desc: Codex CLI prompts & helper scripts (smokes, watchdog ops, pack cycle).
+    acceptance:
+      - codex prompts installed or available under codex/prompts
+      - tools/ps1/codex/* scripts runnable locally
+    smokes:
+      - name: codex_scripts_exist
+        step: test -f tools/ps1/codex/smoke.ps1
+
+  - key: PA-372
+    title: Pack Linter (QA gate)
+    status: planned
+    depends_on: [PA-370]
+    desc: Preflight parser checks for PowerShell, dry-run apply in temp clone, run smokes before shipping packs.
+    tasks:
+      - add tools/ps1/pack_linter.ps1 (PS parser, optional PSScriptAnalyzer)
+      - add tests/smoke/test_pack_integrity.py
+      - wire into pack builder pipeline
+    acceptance:
+      - packs with PS syntax errors are rejected
+      - dry-run apply + pytest -q -m smoke must pass before pack is produced
+
+  - key: PA-373
+    title: Git Hooks (local guard rails)
+    status: planned
+    desc: pre-commit (ruff/PS parse), pre-push (pytest -q -m smoke)
+    tasks:
+      - add .git/hooks/pre-commit (fast lint & PS parse)
+      - add .git/hooks/pre-push (smoke suite)
+    acceptance:
+      - pushing with failing smokes is blocked (overridable with --no-verify)
+
+  - key: PA-374
+    title: CI Smoke Workflow
+    status: planned
+    desc: GitHub Actions workflow on push/PR; uploads logs as artifacts.
+    tasks:
+      - .github/workflows/smoke.yml with windows-latest, Python 3.12/3.13
+      - cache venv/wheels; run pytest -q -m smoke
+      - upload tmp/logs/* and reports/ops/* as artifacts
+    acceptance:
+      - green CI required for merge to main
+
+  - key: PA-375
+    title: Release Publishing
+    status: planned
+    desc: After apply/smoke, attach STATUS.md and results.zip to the same GitHub Release.
+    tasks:
+      - tools/ps1/publish_results.ps1
+      - STATUS.md summarizing versions, test results, tunnel URL, restarts
+    acceptance:
+      - GitHub Release shows STATUS.md and results.zip with logs
+
+  - key: PA-376
+    title: Named Cloudflare Tunnel
+    status: planned
+    desc: Stable subdomain via cloudflared named tunnel; watchdog manages 'tunnel run <name>'.
+    tasks:
+      - tools/ps1/setup_named_tunnel.ps1 (one-time login + create)
+      - update config/processes.json for named tunnel
+      - add smoke verifying public /healthz reachable
+    acceptance:
+      - stable URL present and reachable; rotates creds safely
+
+  - key: PA-377
+    title: Auth Hardening (HMAC)
+    status: planned
+    desc: Protect mutating endpoints (restart/exit/apply) with HMAC header using config/hmac.key.
+    acceptance:
+      - POST without valid X-PA-Signature returns 401 when key present
+      - desktop/phone/web able to send signed requests
+
+  - key: PA-378
+    title: Watchdog Diagnostics & Circuit Breaker
+    status: planned
+    desc: Circuit-breaker on flapping; crash classifier; one-click "Collect Diagnostics" zip.
+    tasks:
+      - failure window & max_restarts with tripped state + cooldown
+      - classifier for common errors (AddrInUse, ImportError, OOM, PermDenied)
+      - zip collector for tmp/logs/*, reports/ops/*, config/processes.json
+    acceptance:
+      - flapping process enters tripped; restart disabled until manual reset
+      - crash report includes labeled reason and last 200 lines
+
+  - key: PA-379
+    title: Log Rotation & JSON Logs
+    status: planned
+    desc: Size/time rotation (e.g., 5×5MB) and JSON lines for server/fetchers.
+    acceptance:
+      - logs rotate; no single file exceeds configured size
+      - optional JSON mode toggle in config; UI still tails text
+
+  - key: PA-380
+    title: Metrics Endpoint
+    status: planned
+    desc: /api/metrics (Prometheus text) for restarts/uptime; disabled by default.
+    acceptance:
+      - GET /api/metrics emits counters for each process
+      - off by default; toggled via config
+
+  - key: PA-381
+    title: Startup Task (Windows)
+    status: planned
+    desc: Task Scheduler auto-start for watchdog at user logon; unregister script included.
+    acceptance:
+      - run_watchdog registered; survives reboot; unregister works
+
+  - key: PA-382
+    title: Secrets & .env
+    status: planned
+    desc: Load environment from .env; redact secrets from logs and crash reports.
+    acceptance:
+      - secrets excluded from persisted logs; .env overrides documented
+
+  - key: PA-383
+    title: Repro Harness
+    status: planned
+    desc: Collect exact repro bundle on failures (env info, wheels, failing tests, config).
+    acceptance:
+      - single zip contains enough to reproduce the failure elsewhere
+
+roadmap_order:
+  - PA-372
+  - PA-376
+  - PA-375
+  - PA-374
+  - PA-378
+  - PA-379
+  - PA-380
+  - PA-381
+  - PA-382
+  - PA-383
+
