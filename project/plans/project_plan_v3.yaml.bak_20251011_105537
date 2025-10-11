@@ -1,0 +1,1962 @@
+phases:
+- name: 'Phase 0: Foundation Setup'
+  steps:
+  - id: '0.1'
+    status: done
+    title: Define root project directory layout (C:\_Repos\PersistentAssistant)
+    description: Define root project directory layout (C:\_Repos\PersistentAssistant)
+  - id: 0.1.a
+    status: done
+    title: Confirm base folders created
+  - id: 0.1.b
+    status: done
+    title: Confirm Windows + VSCode env
+  - id: '0.2'
+    status: done
+    title: Initialize new Git repository and first commit
+    description: Initialize new Git repository and first commit
+  - id: 0.2.a
+    status: done
+    title: .gitignore and README present
+  - id: '0.3'
+    status: done
+    title: Create venv, requirements, and lock PyQt6 environment
+    description: Create venv, requirements, and lock PyQt6 environment
+  - id: 0.3.a
+    status: done
+    title: PyQt6 + PyQt6-WebEngine installed
+  - id: '7.0'
+    status: in_progress
+    title: MVP v0.1 Sprint
+    description: Lock scope; smoke-testable agent; pack+CI green.
+  - id: '7.6'
+    status: planned
+    title: LLM provider adapter (stub→API by config)
+    description: File stub now; API later; same interface.
+  - id: '10'
+    title: Phase 10
+    status: planned
+    desc: Agentic development loop (MCP-lite).
+  - id: '10.0'
+    title: Agentic development loop (MCP-lite)
+    status: in_progress
+    desc: 'End-to-end: pick plan step → build context → propose patch → micro-test
+      → human approval → safe apply → commit/PR → CI gate.'
+  - id: '10.1'
+    title: Tool registry export for AI
+    status: planned
+    desc: Unify tools into discoverable registry (commands, endpoints, scripts) so
+      the agent can query/run them. Build on tool_catalog.
+  - id: '10.2'
+    title: Local Exec Bridge (LEB) service
+    status: planned
+    desc: 'FastAPI on localhost: /run-tests, /apply-patch, /lint, /smoke. Token auth.
+      Mirrors CI locally for fast feedback.'
+  - id: '10.3'
+    title: Context pack + proposal generator (skeleton)
+    status: in_progress
+    desc: 'Given a step id: collect plan text, referenced files, structure/index reports,
+      recent commits, and diagnostics into a prompt pack.'
+  - id: '10.4'
+    title: Change proposal + diff + approval (proxy/LEB)
+    status: in_progress
+    desc: Generate a minimal plan-of-change and unified diff; surface alternatives/risk;
+      require explicit approval before touching disk.
+  - id: '10.5'
+    title: Executor + micro-tests via LEB (pytest)
+    status: in_progress
+    desc: Apply patch in a temp workspace, run targeted micro-tests/smokes, capture
+      logs/artifacts, implement backoff/retry rules.
+  - id: '10.6'
+    title: Git branch/commit/PR + CI gate
+    status: planned
+    desc: Safe replace with expected SHA, create feature branch, commit with Feature-ID,
+      open PR, block until CI green.
+  - id: '10.7'
+    title: 'Plan UI: Develop selected step'
+    status: planned
+    desc: 'Button in Plan details: build context → run proposer → show diff → approve
+      → execute via LEB; live logs/status.'
+  - id: '10.8'
+    title: 'Safety: approvals, tokens, dry-runs'
+    status: planned
+    desc: Human-in-the-loop approval, token/time budgets, dry-run mode, red/green
+      status surfacing in UI.
+  - id: '12.0'
+    status: in_progress
+    title: 'Project: Suspension Optimization'
+    description: Initialize workspace, baseline calc, smoke.
+  - id: '13.0'
+    status: planned
+    title: 'Project: BarSim'
+    description: Initialize workspace, minimal loop, smoke.
+- name: 'Phase 1: MVP Interface Foundations'
+  steps:
+  - id: '1.1'
+    status: done
+    title: Create main
+    description: Create main.py with minimal startup logic
+  - id: 1.1.a
+    status: done
+    title: App boots
+  - id: '1.2'
+    status: done
+    title: Create main_window
+    description: Create main_window.py with tabbed layout
+  - id: 1.2.a
+    status: done
+    title: Tabs mount without errors
+  - id: '1.3'
+    status: done
+    title: Create input_tab
+    description: Create input_tab.py with editable text + copy button
+  - id: 1.3.a
+    status: done
+    title: Copy to clipboard works
+  - id: '1.4'
+    status: done
+    title: Create prompt_tab
+    description: Create prompt_tab.py with editable prompt + copy button
+  - id: 1.4.a
+    status: done
+    title: Copy to clipboard works
+  - id: '1.5'
+    status: done
+    title: Create chat_tab
+    description: Create chat_tab.py with embedded ChatGPT browser pane
+  - id: 1.5.a
+    status: done
+    title: Loads chat.openai.com (manual login)
+  - id: '1.6'
+    status: done
+    title: Create response_tab
+    description: Create response_tab.py with paste + log
+  - id: 1.6.a
+    status: done
+    title: Paste from clipboard works
+  - id: 1.6.b
+    status: done
+    title: Manual log to YAML works
+  - id: '1.7'
+    status: done
+    title: Implement autosave on paste to YAML
+    description: Implement autosave on paste to YAML
+  - id: 1.7.a
+    status: done
+    title: Auto-write to data/interactions/
+  - id: '1.8'
+    status: done
+    title: Add visual confirmation (status label) for saves/copies
+    description: Add visual confirmation (status label) for saves/copies
+  - id: 1.8.a
+    status: done
+    title: Timed status messages visible
+  - id: '1.9'
+    status: done
+    title: Enforce file headers and docstrings
+    description: Enforce file headers and docstrings
+  - id: 1.9.a
+    status: done
+    title: Headers present in all GUI/core files
+  - id: '1.10'
+    status: done
+    title: Create core/prompt_formatter
+    description: Create core/prompt_formatter.py and hook Format button
+  - id: 1.10.a
+    status: done
+    title: Minimal structured prompt wrapper
+  - id: '1.11'
+    status: done
+    title: Simulate AI send (Prompt → Response)
+    description: Simulate AI send (Prompt → Response)
+  - id: 1.11.a
+    status: done
+    title: Dummy response writer working
+  - id: '1.12'
+    status: done
+    title: Copy All as YAML (Input+Prompt+Response)
+    description: Copy All as YAML (Input+Prompt+Response)
+  - id: 1.12.a
+    status: done
+    title: Writes combined YAML and copies to clipboard
+  - id: '1.13'
+    status: done
+    title: Plan tab (read-only) loads plan YAML and shows current
+    description: Plan tab (read-only) loads plan YAML and shows current
+  - id: 1.13.a
+    status: done
+    title: Show phases/steps with statuses
+  - id: 1.13.b
+    status: done
+    title: Show progress string (Phase/Step/Items)
+  - id: '1.14'
+    status: done
+    title: Plan controls (Advance / Rollback)
+    description: Plan controls (Advance / Rollback)
+  - id: 1.14.a
+    status: done
+    title: Update plan YAML in place
+  - id: 1.14.b
+    status: done
+    title: Immediate UI refresh
+  - id: '1.15'
+    status: done
+    title: Structure Runner (launch tools/structure_sync
+    description: Structure Runner (launch tools/structure_sync.py from UI)
+  - id: 1.15.a
+    status: done
+    title: Show file counts and link to snapshot
+  - id: '1.16'
+    status: done
+    title: Self-Introspection v1 (write insights report from snapshot)
+    description: Self-Introspection v1 (write insights report from snapshot)
+  - id: 1.16.a
+    status: done
+    title: data/insights/introspection_report.yaml
+  - id: '1.17'
+    status: done
+    title: Self-Development Loop v1 (open improvement tasks)
+    description: Self-Development Loop v1 (open improvement tasks)
+  - id: 1.17.a
+    status: done
+    title: data/tickets/task_*.yaml (created via UI)
+- name: 'Phase 2: Project Context + Selection'
+  steps:
+  - id: '2.1'
+    status: done
+    title: Project selector at startup (multi-project support)
+    description: Project selector at startup (multi-project support)
+  - id: 2.1.a
+    status: done
+    title: Persist last project choice
+  - id: '2.2'
+    status: done
+    title: Load project metadata (paths, plan path) from simple YAML
+    description: Load project metadata (paths, plan path) from simple YAML
+  - id: 2.2.a
+    status: done
+    title: Show project name/path in status bar
+  - id: '2.3'
+    status: done
+    title: Project switching entry point (menu)
+    description: Project switching entry point (menu)
+  - id: 2.3.a
+    status: done
+    title: Project → Switch… menu opens selector and persists session
+  - id: '2.4'
+    status: planned
+    title: File-integrity protocol (manifest + safe replace + drift verify)
+    description: File-integrity protocol (manifest + safe replace + drift verify)
+  - id: 2.4.a
+    status: planned
+    title: tools/file_manifest.py → project/structure/file_manifest.yaml
+  - id: 2.4.b
+    status: planned
+    title: tools/safe_replace.py gated by expected sha256
+  - id: 2.4.c
+    status: planned
+    title: tools/verify_against_manifest.py drift checker
+  - id: '2.8'
+    status: done
+    title: Deep inventory + dependency audit in place
+    description: Deep inventory + dependency audit in place
+  - id: 2.8.a
+    status: done
+    title: tools/deep_inventory.py generates reports
+  - id: 2.8.b
+    status: done
+    title: 'Reports present: deep_inventory, deep_calls, docstring, imports, duplication'
+  - id: '2.9'
+    status: done
+    title: Snapshot-aware safe replace (use existing tools/safe_replace
+    description: Snapshot-aware safe replace (use existing tools/safe_replace.py +
+      get_expected_sha.py)
+  - id: 2.9.a
+    status: done
+    title: tools/get_expected_sha.py created
+  - id: 2.9.b
+    status: planned
+    title: (optional) git pre-commit regenerates deep inventory
+  - id: '2.10'
+    status: planned
+    title: Deep inventory includes dunder files (e
+    description: Deep inventory includes dunder files (e.g., __init__.py) and reflects
+      them in insights.
+- name: 'Phase 3: Model Catalogue & Providers'
+  steps:
+  - id: '3.1'
+    status: done
+    title: Keys loader + sanity checks
+    description: Keys loader + sanity checks
+  - id: 3.1.a
+    status: done
+    title: tools/_env.py + tools/check_api_keys.py
+  - id: '3.2'
+    status: done
+    title: Fetch raw provider models
+    description: Fetch raw provider models
+  - id: 3.2.a
+    status: done
+    title: tools/fetch_ai_models.py → ai_models_raw.yaml
+  - id: '3.3'
+    status: done
+    title: Schema validator with JSON SUMMARY
+    description: Schema validator with JSON SUMMARY
+  - id: 3.3.a
+    status: done
+    title: tools/check_ai_models.py validates ai_models.yaml
+  - id: '3.4'
+    status: done
+    title: Provider docs + curated pricing/caps (override/scrape/baseline)
+    description: Provider docs + curated pricing/caps (override/scrape/baseline)
+  - id: 3.4.a
+    status: done
+    title: tools/provider_docs.py produces curated dynamic entries
+  - id: '3.5'
+    status: done
+    title: Update & promote models safely
+    description: Update & promote models safely
+  - id: 3.5.a
+    status: done
+    title: tools/update_ai_models.py → ai_models_tmp.yaml → ai_models.yaml
+  - id: '3.6'
+    status: done
+    title: Probe models (ping) and mark health
+    description: Probe models (ping) and mark health
+  - id: 3.6.a
+    status: done
+    title: tools/probe_models.py → data/insights/probe_report.json
+  - id: '3.7'
+    status: done
+    title: 'GUI tools tab: busy cursor, per-run logs, summaries'
+    description: 'GUI tools tab: busy cursor, per-run logs, summaries'
+  - id: 3.7.a
+    status: done
+    title: Update/Probe/Check Keys buttons wired
+  - id: 3.7.b
+    status: done
+    title: Per-run logs logs/tool_run_*.log
+  - id: '3.8'
+    status: planned
+    title: Optional pricing overrides file
+    description: Optional pricing overrides file
+  - id: 3.8.a
+    status: planned
+    title: config/provider_pricing_overrides.yaml supported
+- name: 'Phase 4: OpenAI-first API Send Path'
+  steps:
+  - id: '4.1'
+    status: in_progress
+    title: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown from
+      ai_models'
+    description: 'Model & Mode UI (OpenAI-only now): provider lock, model dropdown
+      from ai_models.yaml, Browser/API toggle'
+  - id: 4.1.1
+    status: in_progress
+    title: 'Model probe matrix (parallel): ping status per model; summarize failures
+      for parallel fixes'
+    description: 'Model probe matrix (parallel): ping status per model; summarize
+      failures for parallel fixes'
+  - id: 4.1.2
+    status: in_progress
+    title: 'Capability cataloging: record model capability tags after successful ping'
+    description: 'Capability cataloging: record model capability tags after successful
+      ping'
+  - id: 4.1.3
+    status: done
+    title: Centralized error-capture runner integrated into inventory/reflection/model
+      probe pipeline
+    description: Centralized error-capture runner integrated into inventory/reflection/model
+      probe pipeline
+  - id: 4.1.4
+    status: in_progress
+    title: UI shows traffic-light status for models from probe matrix
+    description: UI shows traffic-light status for models from probe matrix
+  - id: 4.1.5
+    status: done
+    title: Wire Browser/API toggle; persist provider/model/mode to project_session
+    description: Wire Browser/API toggle; persist provider/model/mode to project_session.yaml
+  - id: 4.1.3b
+    status: done
+    title: Path normalization + cwd-agnostic execution across runner/probe
+    description: Path normalization + cwd-agnostic execution across runner/probe
+  - id: 4.1.3c
+    status: done
+    title: Hardened runner with robust argv parsing + insights export
+    description: Hardened runner with robust argv parsing + insights export
+  - id: 4.1.3d
+    status: done
+    title: UI traffic-light models safe-replaced; SKIP logging explicit
+    description: UI traffic-light models safe-replaced; SKIP logging explicit
+  - id: 4.1.a
+    status: planned
+    title: Filter to chat-capable & healthy models
+  - id: 4.1.b
+    status: planned
+    title: Persist selection in project_session.yaml
+  - id: '4.2'
+    status: done
+    title: Wire ai_client to 'Send to AI (API)' button
+    description: Wire ai_client to 'Send to AI (API)' button
+  - id: 4.2.a
+    status: planned
+    title: Reply → Response tab; errors → Tools status/log
+  - id: 4.2.b
+    status: planned
+    title: OpenAI-only gate via UI toggle
+  - id: '4.3'
+    status: done
+    title: Auto-log token usage and cost to interaction YAML
+    description: Auto-log token usage and cost to interaction YAML
+  - id: 4.3.a
+    status: planned
+    title: Append provider/model/tokens/cost
+  - id: '4.4'
+    status: done
+    title: Robust error surfacing (keys/quota/4xx/5xx) with succinct user summary
+    description: Robust error surfacing (keys/quota/4xx/5xx) with succinct user summary
+  - id: 4.4.a
+    status: planned
+    title: One-line UI summary + detailed log file
+  - id: '4.5'
+    status: done
+    title: Unit tests for ai_client pricing and selection
+    description: Unit tests for ai_client pricing and selection
+  - id: 4.5.a
+    status: planned
+    title: tests/test_ai_client_costs.py
+  - id: 4.0R
+    status: done
+    title: 'Reflection Gate: verify existing GUI capability and handlers before any
+      UI change'
+    description: 'Reflection Gate: verify existing GUI capability and handlers before
+      any UI change'
+  - id: 4.0R.a
+    status: done
+    title: deep_inventory refreshed
+  - id: 4.0R.b
+    status: done
+    title: reflection_report.yaml created
+  - id: 4.0R.c
+    status: done
+    title: pack_reflection created
+- name: 'Phase 5: Memory & Persistence'
+  steps:
+  - id: '5.1'
+    status: done
+    title: Persistent memory (summarize interactions → memory store)
+    description: Persistent memory (summarize interactions → memory store)
+  - id: 5.1.a
+    status: planned
+    title: memory/summary_*.yaml
+  - id: '5.2'
+    status: done
+    title: Retrieve memory into prompt_formatter context window
+    description: Retrieve memory into prompt_formatter context window
+  - id: 5.2.a
+    status: planned
+    title: Configurable include rules
+  - id: '5.3'
+    status: done
+    title: Memory viewer in Plan tab (read-only first)
+    description: Memory viewer in Plan tab (read-only first)
+  - id: 5.3.a
+    status: planned
+    title: List & open summaries
+- name: 'Phase 6: Orchestration Roles & Local Execution'
+  steps:
+  - id: '6.1'
+    status: done
+    title: Enable Role GPTs (Architect / CodeGen / Reviewer) with pinned policies
+    description: Enable Role GPTs (Architect / CodeGen / Reviewer) with pinned policies
+    files:
+    - docs/gpt/architect.md
+    - docs/gpt/codegen.md
+    - docs/gpt/reviewer.md
+    tags:
+    - role_gpts
+    success:
+    - Architect emits module.yaml + acceptance tests + Feature-ID
+    - CodeGen emits full files + tests + unified diff
+    - Reviewer returns checklist + schema validation notes
+  - id: 6.1.a
+    status: planned
+    title: docs/gpt/architect.md, codegen.md, reviewer.md created
+  - id: 6.1.b
+    status: planned
+    title: Headers with Feature-ID enforced in outputs
+  - id: '6.2'
+    status: done
+    title: Local Exec Bridge (LEB) service online
+    description: Local Exec Bridge (LEB) service for local run & safe patch apply
+    files:
+    - leb/main.py
+    - gui/core/leb_client.py
+    tags:
+    - local_exec_bridge
+    success:
+    - /run-tests returns json {returncode, stdout, stderr}
+    - /apply-patch enforces SHA + backup + atomic write
+    desc: 'Stdlib HTTP service on 127.0.0.1:8765; endpoints: /ping, /run, /logs; allowlist+timeouts
+      via config\\leb.yaml.'
+  - id: 6.2.a
+    status: planned
+    title: 'leb/main.py FastAPI: /run-tests, /apply-patch'
+  - id: 6.2.b
+    status: planned
+    title: Token auth; localhost bind only
+  - id: 6.2.c
+    title: LEB smoketest passes
+    status: done
+    desc: Ping OK; run 'python --version' rc=0; logs accessible.
+  - id: 6.2.d
+    title: LEB pytest smoke passes
+    status: planned
+    desc: Allowlist 'pytest -q -k smoke'; run via /run and surface green/red in UI.
+  - id: '6.3'
+    status: done
+    title: GUI Run tab wired to LEB with live logs and status
+    description: GUI Run tab wired to LEB with live logs and status
+    files:
+    - gui/tabs/run_tab.py
+    tags:
+    - local_exec_bridge
+    success:
+    - Timeout handled; logs scroll
+    - Non-zero exit flips UI to red
+  - id: 6.3.a
+    status: planned
+    title: One-click local test; red/green badge
+  - id: 6.3.c
+    status: done
+    title: Wire Run tab to LEB (GUI verified)
+    description: Wire Run tab to LEB (GUI verified)
+  - id: '6.4'
+    status: in_progress
+    title: CI parity (GitHub Actions on windows-latest)
+    description: CI parity (GitHub Actions on windows-latest)
+    files:
+    - .github/workflows/ci.yml
+    tags:
+    - repo_ci_integration
+    success:
+    - PRs blocked on failing tests
+    - Local and CI results match for baseline suite
+  - id: 6.4.a
+    status: planned
+    title: .github/workflows/ci.yml mirrors local command
+  - id: 6.4.a
+    status: in_progress
+    title: Add Windows CI workflow (GitHub Actions)
+    description: Add Windows CI workflow (GitHub Actions)
+  - id: 6.4.b
+    status: planned
+    title: 'Artifacts: logs, JUnit XML, coverage HTML'
+  - id: 6.4.b
+    status: planned
+    title: Run CI smoke (tests minimal) and upload logs
+    description: Run CI smoke (tests minimal) and upload logs
+  - id: 6.4.c
+    status: planned
+    title: Add Agent Watchdog + Alerting
+    description: 'Gate on main: CI must pass'
+    desc: Install watchdog; schedule; backoff.
+  - id: 6.4.e
+    status: planned
+    title: Consolidate inventory/report tools
+    description: 'Keep: file_manifest + deep_inventory (+reporters). Deprecate: audit_inventory
+      & structure_sync (soft). Add report_index.py; extend deep_inventory with extras.
+      Wire tool_catalog + CI check.'
+  - id: 6.4.f
+    status: done
+    title: Standardize project summary pipeline
+    description: Create reporters; add pa_std_summary orchestrator; ensure pack contains
+      index+headers; wire into tool catalog.
+  - id: 6.4.g
+    status: planned
+    title: CI gate + verify in Actions
+    description: GH Actions mirrors local ci_check.py and blocks PRs if pack incomplete.
+  - id: '6.5'
+    status: planned
+    title: Apply patch (local) workflow via LEB using unified diff
+    description: Apply patch (local) workflow via LEB using unified diff
+    tags:
+    - local_exec_bridge
+    - file_integrity
+  - id: 6.5.a
+    status: planned
+    title: Parse diff → per-file expected SHA → safe replace
+- name: 'Phase 7: Research & Registry (Enable later)'
+  steps:
+  - id: '7.1'
+    status: done
+    title: Agent endpoints up (fallback acceptable)
+    description: Central research registry (store structured summaries + citations)
+    tags:
+    - research_registry
+  - id: 7.1.a
+    status: planned
+    title: No full-document storage
+  - id: '7.2'
+    status: done
+    title: MVP Smoke Test tool
+    description: Deep Research integration (cited digests on demand)
+    tags:
+    - deep_research
+  - id: 7.2.a
+    status: planned
+    title: Wire ingest to registry entries
+  - id: '7.3'
+    status: done
+    title: 'UI: Plan viewer reachable'
+    description: Phone Digest microservice (LAN-only) with token header
+  - id: '7.4'
+    status: planned
+    title: Watchdog schedule + backoff
+    description: PWA shell hits /phone/digest and renders cards
+  - id: '7.5'
+    status: done
+    title: CI + Pack completeness
+    description: Action buttons (Approve/Reject Next Pack) with audit log
+- name: 'Phase 8: Agentic Automation (Non-code chores)'
+  steps:
+  - id: '8.1'
+    status: done
+    title: ChatGPT Agent for multistep non-code tasks (report/notes assembly)
+    description: ChatGPT Agent for multistep non-code tasks (report/notes assembly)
+    tags:
+    - agent_automation
+  - id: 8.1.a
+    status: planned
+    title: Guarded by project autonomy policy
+- name: 'Phase 9: Repo-aware PR Flow'
+  steps:
+  - id: '9.1'
+    status: planned
+    title: Codex Agent for repo edits/tests/PRs (human approval required)
+    description: Codex Agent for repo edits/tests/PRs (human approval required)
+    tags:
+    - codex_prs
+    - repo_ci_integration
+  - id: 9.1.a
+    status: planned
+    title: PR template with Feature-ID and checklist
+  - id: 9.1.b
+    status: planned
+    title: CI must pass
+meta:
+  version: '3.2'
+  current_step_policy: explicit
+  current_step: 6.4.a
+state:
+  current: '9.5'
+  cursor: '9.1'
+active_step: '9.5'
+steps:
+- id: '7.8'
+  name: PWA Diagnostics v2 (secure, token prompt, buttons)
+  status: planned
+  title: Phone approvals E2E hook
+  desc: Tie approvals to simple plan action.
+- id: '7.9'
+  name: Approvals watchdog for 8781/8770 (LAN bind recovery)
+  status: done
+- id: '7.10'
+  name: Preflight runner uplift (countdowns, bind assert)
+  status: done
+- id: '9.7'
+  name: Lessons loop and schema modification process
+  desc: Install schema_modifications and lessons process. Gate prehook linter. Lessons
+    captured from failures and enforced.
+  status: planned
+  tags:
+  - quality
+  - governance
+  children:
+  - id: 9.7.1
+    name: schemas_current lessons+process
+    status: planned
+  - id: 9.7.2
+    name: assistant_reply_contract lessons
+    status: planned
+  - id: 9.7.3
+    name: gate prehook linter
+    status: planned
+- id: '9.8'
+  name: Inbound AI processing pipeline v1
+  desc: 'PA pipeline when receiving AI input: UI notify start; update schemas; update
+    lessons; parse scripts; run; system diagnostics; code tests; UI endpoint tests;
+    summary per schema; push status to UIs.'
+  status: planned
+  tags:
+  - pipeline
+  - mvp
+  children:
+  - id: 9.8.1
+    name: UI notify start (desktop+phone)
+    status: planned
+  - id: 9.8.2
+    name: schema update + lessons apply
+    status: planned
+  - id: 9.8.3
+    name: pre-exec parser for fixable errors
+    status: planned
+  - id: 9.8.4
+    name: script run (non-interactive)
+    status: planned
+  - id: 9.8.5
+    name: system diagnostics + logs pack
+    status: planned
+  - id: 9.8.6
+    name: code tests/smoke where applicable
+    status: planned
+  - id: 9.8.7
+    name: UI endpoint tests + health
+    status: planned
+  - id: 9.8.8
+    name: schema-compliant summary + push to UIs
+    status: planned
+- id: '9.9'
+  name: UI signals and traffic lights
+  desc: Status bar with thinking timer and traffic lights (green ready, yellow waiting,
+    red error). Re-run Health button and per-endpoint panel.
+  status: planned
+  tags:
+  - ux
+  - observability
+- id: '9.10'
+  name: Tooling consolidation policy (Python primary)
+  desc: Prefer Python for logic, parsing, tests. Use PowerShell only for Windows-native
+    ops (firewall, netsh, processes, services). Document tool registry and avoid duplicate
+    tools.
+  status: planned
+  tags:
+  - tooling
+  - policy
+  children:
+  - id: 9.10.1
+    name: tool registry and discovery
+    status: planned
+  - id: 9.10.2
+    name: avoid duplicates enforcement
+    status: planned
+- id: '9.11'
+  name: Outbound prompt contractor v2
+  desc: Outbound prompt includes schemas, lessons, tool catalog, plan snapshot and
+    contract reminders.
+  status: planned
+  tags:
+  - prompt
+  - contract
+- id: '9.12'
+  name: MVP alignment checkpoint
+  desc: Review plan, ensure active step correct, commit and tag. No silent shifts.
+  status: planned
+  tags:
+  - mvp
+  - governance
+schemas:
+  status_enum_v1:
+    allowed:
+    - planned
+    - in_progress
+    - done
+    - blocked
+    - warn
+    - deprecated
+  plan_schema_v1:
+    step:
+      required:
+      - id
+      - name
+      - status
+      optional:
+      - desc
+      - owner
+      - tags
+      - dependencies
+      - children
+      - acceptance
+      - artifacts
+      - evidence
+      - risks
+      - metrics
+      - created_utc
+      - updated_utc
+      constraints:
+      - id unique
+      - dependencies refer to existing ids
+      - status ∈ status_enum_v1.allowed
+  plan_ops_v1:
+    add_step:
+      required:
+      - id
+      - name
+      - status
+      optional:
+      - parent_id
+      - desc
+      - tags
+      - dependencies
+      - acceptance
+      - artifacts
+    update_step:
+      required:
+      - id
+      optional:
+      - name
+      - desc
+      - status
+      - tags
+      - dependencies
+      - acceptance
+      - artifacts
+      - metrics
+    move_step:
+      required:
+      - id
+      - new_parent_id
+    mark_status:
+      required:
+      - id
+      - status
+    attach_evidence:
+      required:
+      - id
+      - path
+    rules:
+    - validate against plan_schema_v1 before write
+    - updated_utc set on mutation
+  paste_script_v1:
+    header:
+      script_id: string
+      step_id: string
+      title: string
+      version: string
+    constraints:
+    - ASCII-only status lines
+    - 'PowerShell: no inline if()/try{} in expressions'
+    - 'PowerShell: do not reuse 24164 as a loop var'
+    - Idempotent; non-interactive
+    footer:
+      must_print:
+      - 'PACK: <path or [NOT CREATED]>'
+      - 'STATUS: <OK|WARN|FAIL> (<reason>)'
+      echo_script_id: true
+  assistant_reply_v2:
+    required:
+    - PACK
+    - STATUS
+    optional:
+    - NEXT
+    - BRIEF
+    - FS
+    order:
+    - PACK
+    - STATUS
+    - NEXT
+    - BRIEF
+    - FS
+    fields:
+      PACK:
+        type: string
+        must_start_with: 'PACK:'
+      STATUS:
+        type: string
+        must_start_with: 'STATUS:'
+        allowed_states:
+        - OK
+        - WARN
+        - FAIL
+      NEXT:
+        type: array_of_strings
+        max_len: 5
+      BRIEF:
+        type: string
+        max_lines: 4
+      FS:
+        type: string
+        constraints:
+        - ASCII only
+        - ≤ 5 lines
+        - no promises/new requirements
+    rules:
+    - PACK and STATUS must be first, in that order
+    - If STATUS != OK → at most 3 NEXT items; do not advance plan
+pack_schema_v3:
+  must_include:
+  - schemas_current.yaml
+  - plan_snapshot_*.yaml
+  - tools/_registry/tools_catalog.json
+  - agent_ui_wiretest_full_*.json
+  nice_to_include:
+  - __routes__ dump
+  - tmp/logs/sidecar_8782.(out|err).log tail
+  - tools/prompt_log.txt tail
+  naming:
+  - pack_<task>_<timestamp>.zip
+endpoints_contract_v1:
+  agent_required_get:
+  - /agent/summary
+  - /agent/plan
+  - /agent/recent
+  - /agent/next2
+  - /agent/worker_status
+  - /agent/approvals_count
+  agent_optional_get:
+  - /agent/tools
+  binder_rules:
+  - register_extensions(app) is called right after Flask(...) in sidecar + wrapper
+protocols:
+  contract_v1:
+  - 'Run gate: tools/pa_gate.ps1 -In .\last_paste.ps1 -Run'
+  - No interactive prompts
+  - End with PACK and STATUS
+  reply_protocol_v2:
+  - All assistant messages conform to schemas.assistant_reply_v2
+  advance_rule_v1:
+  - Advance only when wire test PASS and STATUS == OK
+  pack_policy_v1:
+  - Every step produces a pack conforming to pack_schema_v3
+  reuse_over_rewrite_v1:
+  - Gate consults catalog; duplicates blocked with reuse suggestion
+milestones:
+- id: '7.5'
+  name: Phone approvals + diagnostics
+  status: done
+  children:
+  - id: 7.5b
+    name: Secure HTTP approvals
+    status: done
+    acceptance:
+    - Bearer + IP allow-list + timestamp+nonce
+  - id: 7.5c
+    name: Diagnostics page
+    status: done
+- id: '7.7'
+  name: Preflight parser/runner
+  status: planned
+  title: Promote server package
+  desc: server/app.py with create_app(); wrapper fallback retained.
+- id: '7.10'
+  name: LAN bind + watchdog
+  status: done
+- id: '8.1'
+  name: Agent console base
+  status: done
+- id: '9.0'
+  name: Agent UX/Worker
+  status: in_progress
+- id: '9.1'
+  name: Recent panel
+  status: done
+- id: '9.2'
+  name: Worker + plan endpoints
+  status: done
+  artifacts:
+  - server/agent_sidecar.py
+  - web/pwa/agent.html
+- id: '9.3'
+  name: Auto-poll + counts
+  status: done
+  artifacts:
+  - web/pwa/agent.html
+  - web/pwa/agent_tabs_v1.js
+- id: '9.4'
+  name: Agent UI extension
+  status: done
+  artifacts:
+  - web/pwa/agent.html
+  - server/agent_sidecar_wrapper.py
+- id: '9.5'
+  name: Agent UX harden
+  status: in_progress
+  children:
+  - id: 9.5a
+    name: Status lights + thinking timer
+    status: in_progress
+  - id: 9.5b
+    name: Auto-process cadence toggle
+    status: in_progress
+  - id: 9.5c
+    name: Plan counts + foldable tree
+    status: in_progress
+  - id: 9.5d
+    name: Agent UI wiring test (wiretest v1/v2)
+    status: done
+  - id: 9.5e
+    name: Agent UI bind fix
+    status: warn
+  - id: 9.5f
+    name: Agent endpoints hardbind
+    status: warn
+  - id: 9.5g
+    name: Parser deferred attach (agent actions + parser v1.1)
+    status: warn
+  - id: 9.5h
+    name: Agent hardensure v3
+    status: warn
+  - id: 9.5j
+    name: Agent bind scan v4
+    status: warn
+  - id: 9.5k
+    name: Flask monkeypatch bind v1
+    status: warn
+  - id: 9.5m
+    name: Agent bind appfile v1
+    status: warn
+  - id: 9.5m2
+    name: Agent bind appfile v2 + plan sync 9.5
+    status: warn
+  - id: 9.5n
+    name: Wrapper bind appvars v1 + full wiretest
+    status: warn
+  - id: 9.5q
+    name: App registry bind v1 + reverify
+    status: warn
+- id: '9.6'
+  name: Tooling and process hardening
+  status: in_progress
+  children:
+  - id: 9.6-P4
+    name: Centralize plan path (remove hard-coded references)
+    desc: Introduce a single source for plan path and refactor all consumers to use
+      it.
+    status: planned
+    acceptance:
+    - 'config/project.yaml contains: plan_path: project/plans/project_plan_v3.yaml'
+    - 'Helper: core.project_session.get_plan_path() resolves ENV PLAN_PATH → config
+      → discovery'
+    - All listed callers use helper (0 hard-coded mentions remain)
+    - Wire test verifies /agent/plan and UI Plan tab still load
+    - 'Pack includes: grep before/after, refactor map, tests/ui_wiretest.json'
+    artifacts:
+    - config/project.yaml
+    - core/project_session.py
+    - server/agent_sidecar.py
+    - server/agent_sidecar_wrapper.py
+    - server/agent_bp.py
+    - server/agent_injector.py
+    - server/plan_view.py
+    - server/agent_actions_v7.py
+    - gui/main_window.py
+    - gui/tabs/plan_tree_tab.py
+    notes:
+    - Do NOT rename project_plan_v3.yaml in this step; only centralize path.
+    - Provide ENV override PLAN_PATH for dev/test.
+  - id: 9.6-P0
+    name: Registry + Gate + Pack discipline
+    status: in_progress
+    acceptance:
+    - /agent/tools returns OK
+    - gate blocks duplicate ids/titles
+    - every pack carries schemas_current.yaml + plan snapshot + catalog + wiretest
+      JSON
+  - id: 9.6-P1
+    name: Docs (TOOLS.md, PROCESS.md)
+    status: planned
+  - id: 9.6-P2
+    name: UI Tools panel
+    status: planned
+  - id: 9.6-P3
+    name: Reply enforcement (assistant_reply_v2 director)
+    status: planned
+    acceptance:
+    - Director wraps all LLM calls
+    - Schema violations → rewrite then reject
+    - Wire test verifies PACK/STATUS order
+last_updated_utc: '2025-08-26T06:52:59.352599Z'
+history:
+  tags_done:
+  - id: '8.1'
+    tag: pa-8.1-agent-console
+    desc: Agent Console base + approvals/NEXT wired
+  - id: '9.2'
+    tag: pa-9.2-worker
+    desc: Worker + plan endpoints
+  - id: '9.3'
+    tag: pa-9.3-autopoll
+    desc: Auto-poll + counts
+  - id: '9.4'
+    tag: pa-9.4-agent-ui-ext
+    desc: UI extension + endpoints live
+  done:
+  - 7.5b
+  - 7.5c
+  - '7.7'
+  - '7.10'
+  - '8.1'
+  - '9.1'
+schema_version: 3
+extensions:
+- dev_steps
+- ci_policy
+- board
+dev_steps:
+- id: PA-101
+  title: Basemap + board scaffold
+  status: proposed
+  owner: greg
+  touches:
+  - index/board.yaml
+  - dev_steps/README.md
+- id: PA-102
+  title: Plan file extensions (dev_steps, ci_policy, board)
+  status: proposed
+  owner: greg
+  touches:
+  - project/plans/project_plan_v3.yaml
+- id: PA-201
+  title: Pack workflow spec (A→D)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/workflow/**
+  - dev_steps/**/manifest.yaml
+  phone_approval: required
+  smoke_targets:
+  - tests/smoke/**
+- id: PA-202
+  title: CI results publishing policy
+  status: proposed
+  owner: greg
+  touches:
+  - specs/ci_policy.yaml
+  - specs/workflow/PUBLISHING.md
+- id: PA-203
+  title: Phone approvals contract (status gating)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/approvals/**
+  - dev_steps/**/dev_step.yaml
+- id: PA-204
+  title: Parallel orchestration (collisions, locks, board)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/parallel/**
+  - index/board.yaml
+  - index/locks.yaml
+- id: PA-205
+  title: AST & file-map pack spec
+  status: proposed
+  owner: greg
+  touches:
+  - specs/analysis/**
+- id: PA-206
+  title: Smoke tiers & markers
+  status: proposed
+  owner: greg
+  touches:
+  - specs/tests/**
+- id: PA-207
+  title: RAG baseline + doc policy + retrieval tests
+  status: proposed
+  owner: greg
+  touches:
+  - specs/rag/**
+  - docs/**
+  - specs/doc_policy.yaml
+- id: PA-209
+  title: CI gate matrix (schema + smoke + approval)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/ci_policy.yaml
+  - specs/governance/**
+- id: PA-210
+  title: Qt6 base shell (themes, panels, config schema)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/ui/UI_BASE_SPEC.yaml
+  - specs/ui/GUI_CONFIG_SCHEMA.yaml
+- id: PA-211
+  title: Figma-lite YAML layout editor (preview)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/ui/FIGMALITE_SPEC.yaml
+- id: PA-212
+  title: Unused file audit & archive policy (spec)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/tidy/**
+- id: PA-213
+  title: Pack-intake automation (auto-apply OUT zips)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/workflow/PACK_INTAKE.md
+- id: PA-220
+  title: Regression test strategy & matrix
+  status: proposed
+  owner: greg
+  touches:
+  - specs/tests/REG_MATRIX.yaml
+  - specs/tests/REG_POLICY.md
+- id: PA-221
+  title: Test selection & coverage mapping
+  status: proposed
+  owner: greg
+  touches:
+  - specs/tests/SELECTION_RULES.yaml
+  - specs/tests/COVERAGE_MAP.md
+- id: PA-222
+  title: Flaky test policy & quarantine
+  status: proposed
+  owner: greg
+  touches:
+  - specs/tests/FLAKE_POLICY.yaml
+- id: PA-223
+  title: Test data, golden files, non-determinism policy
+  status: proposed
+  owner: greg
+  touches:
+  - specs/tests/DATA_POLICY.md
+  - specs/tests/GOLDEN_RULES.md
+- id: PA-224
+  title: Bug report form (intake)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/intake/BUG_SCHEMA.yaml
+  - intake/**
+- id: PA-225
+  title: Feature request form (intake)
+  status: proposed
+  owner: greg
+  touches:
+  - specs/intake/FEATURE_SCHEMA.yaml
+  - intake/**
+- id: PA-226
+  title: Intake→DevStep auto-scaffold
+  status: proposed
+  owner: greg
+  touches:
+  - specs/intake/INTAKE_TO_STEP.md
+  - dev_steps/**
+- id: PA-227
+  title: Regression gate matrix integration
+  status: proposed
+  owner: greg
+  touches:
+  - specs/governance/GATE_MATRIX.yaml
+- id: PA-230
+  title: File usage analyzer (report-only)
+  status: proposed
+  owner: greg
+  touches:
+  - dev_steps/PA-230/results/**
+  - specs/tidy/**
+- id: PA-231
+  title: Archive apply (controlled move)
+  status: proposed
+  owner: greg
+  touches:
+  - archive/**
+  - specs/tidy/**
+ci_policy: {}
+board: {}
+
+
+# ---- Plan update appended by pack (PA-365) ----
+
+---  # PLAN UPDATE 2025-10-01
+meta:
+  id: PA-365
+  title: Plan Update – QA, CI, Tunnels, Publishing, Auth, Diagnostics
+  updated: 2025-10-01T00:00:00Z
+  owner: Greg
+  repo: PersistentAssistant-v3
+
+epics:
+
+  - key: PA-361
+    title: UI Status Card (/app/watchdog)
+    status: shipped
+    desc: Status lights, restart buttons, log tails, exit watchdog, heartbeat freshness.
+    acceptance:
+      - GET /api/watchdog returns JSON with per-process state & file_age_s
+      - /app/watchdog shows pills (green/amber/red/gray), restart count, PID, log tail
+      - POST /api/watchdog/<name>/restart restarts target process
+      - POST /api/watchdog/exit terminates watchdog
+    smokes:
+      - name: watchdog_api_200
+        step: curl -sS http://127.0.0.1:8776/api/watchdog | jq -e '.ok!=null'
+      - name: watchdog_ui_route
+        step: curl -sSI http://127.0.0.1:8776/app/watchdog | grep "200"
+
+  - key: PA-370
+    title: Watchdog Supervisor
+    status: shipped
+    desc: Non-blocking process supervisor with health checks, backoff restarts, status JSON.
+    acceptance:
+      - reports/ops/watchdog_status.json updates at least once per 2s while running
+      - restart policy "always/on-failure/never" honored per process
+    smokes:
+      - name: watchdog_status_file
+        step: test -f reports/ops/watchdog_status.json
+
+  - key: PA-371
+    title: Codex Bootstrap
+    status: shipped
+    desc: Codex CLI prompts & helper scripts (smokes, watchdog ops, pack cycle).
+    acceptance:
+      - codex prompts installed or available under codex/prompts
+      - tools/ps1/codex/* scripts runnable locally
+    smokes:
+      - name: codex_scripts_exist
+        step: test -f tools/ps1/codex/smoke.ps1
+
+  - key: PA-372
+    title: Pack Linter (QA gate)
+    status: planned
+    depends_on: [PA-370]
+    desc: Preflight parser checks for PowerShell, dry-run apply in temp clone, run smokes before shipping packs.
+    tasks:
+      - add tools/ps1/pack_linter.ps1 (PS parser, optional PSScriptAnalyzer)
+      - add tests/smoke/test_pack_integrity.py
+      - wire into pack builder pipeline
+    acceptance:
+      - packs with PS syntax errors are rejected
+      - dry-run apply + pytest -q -m smoke must pass before pack is produced
+
+  - key: PA-373
+    title: Git Hooks (local guard rails)
+    status: planned
+    desc: pre-commit (ruff/PS parse), pre-push (pytest -q -m smoke)
+    tasks:
+      - add .git/hooks/pre-commit (fast lint & PS parse)
+      - add .git/hooks/pre-push (smoke suite)
+    acceptance:
+      - pushing with failing smokes is blocked (overridable with --no-verify)
+
+  - key: PA-374
+    title: CI Smoke Workflow
+    status: planned
+    desc: GitHub Actions workflow on push/PR; uploads logs as artifacts.
+    tasks:
+      - .github/workflows/smoke.yml with windows-latest, Python 3.12/3.13
+      - cache venv/wheels; run pytest -q -m smoke
+      - upload tmp/logs/* and reports/ops/* as artifacts
+    acceptance:
+      - green CI required for merge to main
+
+  - key: PA-375
+    title: Release Publishing
+    status: planned
+    desc: After apply/smoke, attach STATUS.md and results.zip to the same GitHub Release.
+    tasks:
+      - tools/ps1/publish_results.ps1
+      - STATUS.md summarizing versions, test results, tunnel URL, restarts
+    acceptance:
+      - GitHub Release shows STATUS.md and results.zip with logs
+
+  - key: PA-376
+    title: Named Cloudflare Tunnel
+    status: planned
+    desc: Stable subdomain via cloudflared named tunnel; watchdog manages 'tunnel run <name>'.
+    tasks:
+      - tools/ps1/setup_named_tunnel.ps1 (one-time login + create)
+      - update config/processes.json for named tunnel
+      - add smoke verifying public /healthz reachable
+    acceptance:
+      - stable URL present and reachable; rotates creds safely
+
+  - key: PA-377
+    title: Auth Hardening (HMAC)
+    status: planned
+    desc: Protect mutating endpoints (restart/exit/apply) with HMAC header using config/hmac.key.
+    acceptance:
+      - POST without valid X-PA-Signature returns 401 when key present
+      - desktop/phone/web able to send signed requests
+
+  - key: PA-378
+    title: Watchdog Diagnostics & Circuit Breaker
+    status: planned
+    desc: Circuit-breaker on flapping; crash classifier; one-click "Collect Diagnostics" zip.
+    tasks:
+      - failure window & max_restarts with tripped state + cooldown
+      - classifier for common errors (AddrInUse, ImportError, OOM, PermDenied)
+      - zip collector for tmp/logs/*, reports/ops/*, config/processes.json
+    acceptance:
+      - flapping process enters tripped; restart disabled until manual reset
+      - crash report includes labeled reason and last 200 lines
+
+  - key: PA-379
+    title: Log Rotation & JSON Logs
+    status: planned
+    desc: Size/time rotation (e.g., 5×5MB) and JSON lines for server/fetchers.
+    acceptance:
+      - logs rotate; no single file exceeds configured size
+      - optional JSON mode toggle in config; UI still tails text
+
+  - key: PA-380
+    title: Metrics Endpoint
+    status: planned
+    desc: /api/metrics (Prometheus text) for restarts/uptime; disabled by default.
+    acceptance:
+      - GET /api/metrics emits counters for each process
+      - off by default; toggled via config
+
+  - key: PA-381
+    title: Startup Task (Windows)
+    status: planned
+    desc: Task Scheduler auto-start for watchdog at user logon; unregister script included.
+    acceptance:
+      - run_watchdog registered; survives reboot; unregister works
+
+  - key: PA-382
+    title: Secrets & .env
+    status: planned
+    desc: Load environment from .env; redact secrets from logs and crash reports.
+    acceptance:
+      - secrets excluded from persisted logs; .env overrides documented
+
+  - key: PA-383
+    title: Repro Harness
+    status: planned
+    desc: Collect exact repro bundle on failures (env info, wheels, failing tests, config).
+    acceptance:
+      - single zip contains enough to reproduce the failure elsewhere
+
+roadmap_order:
+  - PA-372
+  - PA-376
+  - PA-375
+  - PA-374
+  - PA-378
+  - PA-379
+  - PA-380
+  - PA-381
+  - PA-382
+  - PA-383
+
+
+
+# ---- Plan update appended (PA-365) ----
+
+---  # PLAN UPDATE 2025-10-01
+meta:
+  id: PA-365
+  title: Plan Update – QA, CI, Tunnels, Publishing, Auth, Diagnostics
+  updated: 2025-10-01T00:00:00Z
+  owner: Greg
+  repo: PersistentAssistant-v3
+
+epics:
+
+  - key: PA-361
+    title: UI Status Card (/app/watchdog)
+    status: shipped
+    desc: Status lights, restart buttons, log tails, exit watchdog, heartbeat freshness.
+    acceptance:
+      - GET /api/watchdog returns JSON with per-process state & file_age_s
+      - /app/watchdog shows pills (green/amber/red/gray), restart count, PID, log tail
+      - POST /api/watchdog/<name>/restart restarts target process
+      - POST /api/watchdog/exit terminates watchdog
+    smokes:
+      - name: watchdog_api_200
+        step: curl -sS http://127.0.0.1:8776/api/watchdog | jq -e '.ok!=null'
+      - name: watchdog_ui_route
+        step: curl -sSI http://127.0.0.1:8776/app/watchdog | grep "200"
+
+  - key: PA-370
+    title: Watchdog Supervisor
+    status: shipped
+    desc: Non-blocking process supervisor with health checks, backoff restarts, status JSON.
+    acceptance:
+      - reports/ops/watchdog_status.json updates at least once per 2s while running
+      - restart policy "always/on-failure/never" honored per process
+    smokes:
+      - name: watchdog_status_file
+        step: test -f reports/ops/watchdog_status.json
+
+  - key: PA-371
+    title: Codex Bootstrap
+    status: shipped
+    desc: Codex CLI prompts & helper scripts (smokes, watchdog ops, pack cycle).
+    acceptance:
+      - codex prompts installed or available under codex/prompts
+      - tools/ps1/codex/* scripts runnable locally
+    smokes:
+      - name: codex_scripts_exist
+        step: test -f tools/ps1/codex/smoke.ps1
+
+  - key: PA-372
+    title: Pack Linter (QA gate)
+    status: planned
+    depends_on: [PA-370]
+    desc: Preflight parser checks for PowerShell, dry-run apply in temp clone, run smokes before shipping packs.
+    tasks:
+      - add tools/ps1/pack_linter.ps1 (PS parser, optional PSScriptAnalyzer)
+      - add tests/smoke/test_pack_integrity.py
+      - wire into pack builder pipeline
+    acceptance:
+      - packs with PS syntax errors are rejected
+      - dry-run apply + pytest -q -m smoke must pass before pack is produced
+
+  - key: PA-373
+    title: Git Hooks (local guard rails)
+    status: planned
+    desc: pre-commit (ruff/PS parse), pre-push (pytest -q -m smoke)
+    tasks:
+      - add .git/hooks/pre-commit (fast lint & PS parse)
+      - add .git/hooks/pre-push (smoke suite)
+    acceptance:
+      - pushing with failing smokes is blocked (overridable with --no-verify)
+
+  - key: PA-374
+    title: CI Smoke Workflow
+    status: planned
+    desc: GitHub Actions workflow on push/PR; uploads logs as artifacts.
+    tasks:
+      - .github/workflows/smoke.yml with windows-latest, Python 3.12/3.13
+      - cache venv/wheels; run pytest -q -m smoke
+      - upload tmp/logs/* and reports/ops/* as artifacts
+    acceptance:
+      - green CI required for merge to main
+
+  - key: PA-375
+    title: Release Publishing
+    status: planned
+    desc: After apply/smoke, attach STATUS.md and results.zip to the same GitHub Release.
+    tasks:
+      - tools/ps1/publish_results.ps1
+      - STATUS.md summarizing versions, test results, tunnel URL, restarts
+    acceptance:
+      - GitHub Release shows STATUS.md and results.zip with logs
+
+  - key: PA-376
+    title: Named Cloudflare Tunnel
+    status: planned
+    desc: Stable subdomain via cloudflared named tunnel; watchdog manages 'tunnel run <name>'.
+    tasks:
+      - tools/ps1/setup_named_tunnel.ps1 (one-time login + create)
+      - update config/processes.json for named tunnel
+      - add smoke verifying public /healthz reachable
+    acceptance:
+      - stable URL present and reachable; rotates creds safely
+
+  - key: PA-377
+    title: Auth Hardening (HMAC)
+    status: planned
+    desc: Protect mutating endpoints (restart/exit/apply) with HMAC header using config/hmac.key.
+    acceptance:
+      - POST without valid X-PA-Signature returns 401 when key present
+      - desktop/phone/web able to send signed requests
+
+  - key: PA-378
+    title: Watchdog Diagnostics & Circuit Breaker
+    status: planned
+    desc: Circuit-breaker on flapping; crash classifier; one-click "Collect Diagnostics" zip.
+    tasks:
+      - failure window & max_restarts with tripped state + cooldown
+      - classifier for common errors (AddrInUse, ImportError, OOM, PermDenied)
+      - zip collector for tmp/logs/*, reports/ops/*, config/processes.json
+    acceptance:
+      - flapping process enters tripped; restart disabled until manual reset
+      - crash report includes labeled reason and last 200 lines
+
+  - key: PA-379
+    title: Log Rotation & JSON Logs
+    status: planned
+    desc: Size/time rotation (e.g., 5×5MB) and JSON lines for server/fetchers.
+    acceptance:
+      - logs rotate; no single file exceeds configured size
+      - optional JSON mode toggle in config; UI still tails text
+
+  - key: PA-380
+    title: Metrics Endpoint
+    status: planned
+    desc: /api/metrics (Prometheus text) for restarts/uptime; disabled by default.
+    acceptance:
+      - GET /api/metrics emits counters for each process
+      - off by default; toggled via config
+
+  - key: PA-381
+    title: Startup Task (Windows)
+    status: planned
+    desc: Task Scheduler auto-start for watchdog at user logon; unregister script included.
+    acceptance:
+      - run_watchdog registered; survives reboot; unregister works
+
+  - key: PA-382
+    title: Secrets & .env
+    status: planned
+    desc: Load environment from .env; redact secrets from logs and crash reports.
+    acceptance:
+      - secrets excluded from persisted logs; .env overrides documented
+
+  - key: PA-383
+    title: Repro Harness
+    status: planned
+    desc: Collect exact repro bundle on failures (env info, wheels, failing tests, config).
+    acceptance:
+      - single zip contains enough to reproduce the failure elsewhere
+
+roadmap_order:
+  - PA-372
+  - PA-376
+  - PA-375
+  - PA-374
+  - PA-378
+  - PA-379
+  - PA-380
+  - PA-381
+  - PA-382
+  - PA-383
+
+
+
+# ---- Plan update appended by pack (PA-365) ----
+
+---  # PLAN UPDATE 2025-10-01
+meta:
+  id: PA-365
+  title: Plan Update – QA, CI, Tunnels, Publishing, Auth, Diagnostics
+  updated: 2025-10-01T00:00:00Z
+  owner: Greg
+  repo: PersistentAssistant-v3
+
+epics:
+
+  - key: PA-361
+    title: UI Status Card (/app/watchdog)
+    status: shipped
+    desc: Status lights, restart buttons, log tails, exit watchdog, heartbeat freshness.
+    acceptance:
+      - GET /api/watchdog returns JSON with per-process state & file_age_s
+      - /app/watchdog shows pills (green/amber/red/gray), restart count, PID, log tail
+      - POST /api/watchdog/<name>/restart restarts target process
+      - POST /api/watchdog/exit terminates watchdog
+    smokes:
+      - name: watchdog_api_200
+        step: curl -sS http://127.0.0.1:8776/api/watchdog | jq -e '.ok!=null'
+      - name: watchdog_ui_route
+        step: curl -sSI http://127.0.0.1:8776/app/watchdog | grep "200"
+
+  - key: PA-370
+    title: Watchdog Supervisor
+    status: shipped
+    desc: Non-blocking process supervisor with health checks, backoff restarts, status JSON.
+    acceptance:
+      - reports/ops/watchdog_status.json updates at least once per 2s while running
+      - restart policy "always/on-failure/never" honored per process
+    smokes:
+      - name: watchdog_status_file
+        step: test -f reports/ops/watchdog_status.json
+
+  - key: PA-371
+    title: Codex Bootstrap
+    status: shipped
+    desc: Codex CLI prompts & helper scripts (smokes, watchdog ops, pack cycle).
+    acceptance:
+      - codex prompts installed or available under codex/prompts
+      - tools/ps1/codex/* scripts runnable locally
+    smokes:
+      - name: codex_scripts_exist
+        step: test -f tools/ps1/codex/smoke.ps1
+
+  - key: PA-372
+    title: Pack Linter (QA gate)
+    status: planned
+    depends_on: [PA-370]
+    desc: Preflight parser checks for PowerShell, dry-run apply in temp clone, run smokes before shipping packs.
+    tasks:
+      - add tools/ps1/pack_linter.ps1 (PS parser, optional PSScriptAnalyzer)
+      - add tests/smoke/test_pack_integrity.py
+      - wire into pack builder pipeline
+    acceptance:
+      - packs with PS syntax errors are rejected
+      - dry-run apply + pytest -q -m smoke must pass before pack is produced
+
+  - key: PA-373
+    title: Git Hooks (local guard rails)
+    status: planned
+    desc: pre-commit (ruff/PS parse), pre-push (pytest -q -m smoke)
+    tasks:
+      - add .git/hooks/pre-commit (fast lint & PS parse)
+      - add .git/hooks/pre-push (smoke suite)
+    acceptance:
+      - pushing with failing smokes is blocked (overridable with --no-verify)
+
+  - key: PA-374
+    title: CI Smoke Workflow
+    status: planned
+    desc: GitHub Actions workflow on push/PR; uploads logs as artifacts.
+    tasks:
+      - .github/workflows/smoke.yml with windows-latest, Python 3.12/3.13
+      - cache venv/wheels; run pytest -q -m smoke
+      - upload tmp/logs/* and reports/ops/* as artifacts
+    acceptance:
+      - green CI required for merge to main
+
+  - key: PA-375
+    title: Release Publishing
+    status: planned
+    desc: After apply/smoke, attach STATUS.md and results.zip to the same GitHub Release.
+    tasks:
+      - tools/ps1/publish_results.ps1
+      - STATUS.md summarizing versions, test results, tunnel URL, restarts
+    acceptance:
+      - GitHub Release shows STATUS.md and results.zip with logs
+
+  - key: PA-376
+    title: Named Cloudflare Tunnel
+    status: planned
+    desc: Stable subdomain via cloudflared named tunnel; watchdog manages 'tunnel run <name>'.
+    tasks:
+      - tools/ps1/setup_named_tunnel.ps1 (one-time login + create)
+      - update config/processes.json for named tunnel
+      - add smoke verifying public /healthz reachable
+    acceptance:
+      - stable URL present and reachable; rotates creds safely
+
+  - key: PA-377
+    title: Auth Hardening (HMAC)
+    status: planned
+    desc: Protect mutating endpoints (restart/exit/apply) with HMAC header using config/hmac.key.
+    acceptance:
+      - POST without valid X-PA-Signature returns 401 when key present
+      - desktop/phone/web able to send signed requests
+
+  - key: PA-378
+    title: Watchdog Diagnostics & Circuit Breaker
+    status: planned
+    desc: Circuit-breaker on flapping; crash classifier; one-click "Collect Diagnostics" zip.
+    tasks:
+      - failure window & max_restarts with tripped state + cooldown
+      - classifier for common errors (AddrInUse, ImportError, OOM, PermDenied)
+      - zip collector for tmp/logs/*, reports/ops/*, config/processes.json
+    acceptance:
+      - flapping process enters tripped; restart disabled until manual reset
+      - crash report includes labeled reason and last 200 lines
+
+  - key: PA-379
+    title: Log Rotation & JSON Logs
+    status: planned
+    desc: Size/time rotation (e.g., 5×5MB) and JSON lines for server/fetchers.
+    acceptance:
+      - logs rotate; no single file exceeds configured size
+      - optional JSON mode toggle in config; UI still tails text
+
+  - key: PA-380
+    title: Metrics Endpoint
+    status: planned
+    desc: /api/metrics (Prometheus text) for restarts/uptime; disabled by default.
+    acceptance:
+      - GET /api/metrics emits counters for each process
+      - off by default; toggled via config
+
+  - key: PA-381
+    title: Startup Task (Windows)
+    status: planned
+    desc: Task Scheduler auto-start for watchdog at user logon; unregister script included.
+    acceptance:
+      - run_watchdog registered; survives reboot; unregister works
+
+  - key: PA-382
+    title: Secrets & .env
+    status: planned
+    desc: Load environment from .env; redact secrets from logs and crash reports.
+    acceptance:
+      - secrets excluded from persisted logs; .env overrides documented
+
+  - key: PA-383
+    title: Repro Harness
+    status: planned
+    desc: Collect exact repro bundle on failures (env info, wheels, failing tests, config).
+    acceptance:
+      - single zip contains enough to reproduce the failure elsewhere
+
+roadmap_order:
+  - PA-372
+  - PA-376
+  - PA-375
+  - PA-374
+  - PA-378
+  - PA-379
+  - PA-380
+  - PA-381
+  - PA-382
+  - PA-383
+
+
+
+# ---- Plan update appended by pack (PA-365) ----
+
+---  # PLAN UPDATE 2025-10-01
+meta:
+  id: PA-365
+  title: Plan Update – QA, CI, Tunnels, Publishing, Auth, Diagnostics
+  updated: 2025-10-01T00:00:00Z
+  owner: Greg
+  repo: PersistentAssistant-v3
+
+epics:
+
+  - key: PA-361
+    title: UI Status Card (/app/watchdog)
+    status: shipped
+    desc: Status lights, restart buttons, log tails, exit watchdog, heartbeat freshness.
+    acceptance:
+      - GET /api/watchdog returns JSON with per-process state & file_age_s
+      - /app/watchdog shows pills (green/amber/red/gray), restart count, PID, log tail
+      - POST /api/watchdog/<name>/restart restarts target process
+      - POST /api/watchdog/exit terminates watchdog
+    smokes:
+      - name: watchdog_api_200
+        step: curl -sS http://127.0.0.1:8776/api/watchdog | jq -e '.ok!=null'
+      - name: watchdog_ui_route
+        step: curl -sSI http://127.0.0.1:8776/app/watchdog | grep "200"
+
+  - key: PA-370
+    title: Watchdog Supervisor
+    status: shipped
+    desc: Non-blocking process supervisor with health checks, backoff restarts, status JSON.
+    acceptance:
+      - reports/ops/watchdog_status.json updates at least once per 2s while running
+      - restart policy "always/on-failure/never" honored per process
+    smokes:
+      - name: watchdog_status_file
+        step: test -f reports/ops/watchdog_status.json
+
+  - key: PA-371
+    title: Codex Bootstrap
+    status: shipped
+    desc: Codex CLI prompts & helper scripts (smokes, watchdog ops, pack cycle).
+    acceptance:
+      - codex prompts installed or available under codex/prompts
+      - tools/ps1/codex/* scripts runnable locally
+    smokes:
+      - name: codex_scripts_exist
+        step: test -f tools/ps1/codex/smoke.ps1
+
+  - key: PA-372
+    title: Pack Linter (QA gate)
+    status: planned
+    depends_on: [PA-370]
+    desc: Preflight parser checks for PowerShell, dry-run apply in temp clone, run smokes before shipping packs.
+    tasks:
+      - add tools/ps1/pack_linter.ps1 (PS parser, optional PSScriptAnalyzer)
+      - add tests/smoke/test_pack_integrity.py
+      - wire into pack builder pipeline
+    acceptance:
+      - packs with PS syntax errors are rejected
+      - dry-run apply + pytest -q -m smoke must pass before pack is produced
+
+  - key: PA-373
+    title: Git Hooks (local guard rails)
+    status: planned
+    desc: pre-commit (ruff/PS parse), pre-push (pytest -q -m smoke)
+    tasks:
+      - add .git/hooks/pre-commit (fast lint & PS parse)
+      - add .git/hooks/pre-push (smoke suite)
+    acceptance:
+      - pushing with failing smokes is blocked (overridable with --no-verify)
+
+  - key: PA-374
+    title: CI Smoke Workflow
+    status: planned
+    desc: GitHub Actions workflow on push/PR; uploads logs as artifacts.
+    tasks:
+      - .github/workflows/smoke.yml with windows-latest, Python 3.12/3.13
+      - cache venv/wheels; run pytest -q -m smoke
+      - upload tmp/logs/* and reports/ops/* as artifacts
+    acceptance:
+      - green CI required for merge to main
+
+  - key: PA-375
+    title: Release Publishing
+    status: planned
+    desc: After apply/smoke, attach STATUS.md and results.zip to the same GitHub Release.
+    tasks:
+      - tools/ps1/publish_results.ps1
+      - STATUS.md summarizing versions, test results, tunnel URL, restarts
+    acceptance:
+      - GitHub Release shows STATUS.md and results.zip with logs
+
+  - key: PA-376
+    title: Named Cloudflare Tunnel
+    status: planned
+    desc: Stable subdomain via cloudflared named tunnel; watchdog manages 'tunnel run <name>'.
+    tasks:
+      - tools/ps1/setup_named_tunnel.ps1 (one-time login + create)
+      - update config/processes.json for named tunnel
+      - add smoke verifying public /healthz reachable
+    acceptance:
+      - stable URL present and reachable; rotates creds safely
+
+  - key: PA-377
+    title: Auth Hardening (HMAC)
+    status: planned
+    desc: Protect mutating endpoints (restart/exit/apply) with HMAC header using config/hmac.key.
+    acceptance:
+      - POST without valid X-PA-Signature returns 401 when key present
+      - desktop/phone/web able to send signed requests
+
+  - key: PA-378
+    title: Watchdog Diagnostics & Circuit Breaker
+    status: planned
+    desc: Circuit-breaker on flapping; crash classifier; one-click "Collect Diagnostics" zip.
+    tasks:
+      - failure window & max_restarts with tripped state + cooldown
+      - classifier for common errors (AddrInUse, ImportError, OOM, PermDenied)
+      - zip collector for tmp/logs/*, reports/ops/*, config/processes.json
+    acceptance:
+      - flapping process enters tripped; restart disabled until manual reset
+      - crash report includes labeled reason and last 200 lines
+
+  - key: PA-379
+    title: Log Rotation & JSON Logs
+    status: planned
+    desc: Size/time rotation (e.g., 5×5MB) and JSON lines for server/fetchers.
+    acceptance:
+      - logs rotate; no single file exceeds configured size
+      - optional JSON mode toggle in config; UI still tails text
+
+  - key: PA-380
+    title: Metrics Endpoint
+    status: planned
+    desc: /api/metrics (Prometheus text) for restarts/uptime; disabled by default.
+    acceptance:
+      - GET /api/metrics emits counters for each process
+      - off by default; toggled via config
+
+  - key: PA-381
+    title: Startup Task (Windows)
+    status: planned
+    desc: Task Scheduler auto-start for watchdog at user logon; unregister script included.
+    acceptance:
+      - run_watchdog registered; survives reboot; unregister works
+
+  - key: PA-382
+    title: Secrets & .env
+    status: planned
+    desc: Load environment from .env; redact secrets from logs and crash reports.
+    acceptance:
+      - secrets excluded from persisted logs; .env overrides documented
+
+  - key: PA-383
+    title: Repro Harness
+    status: planned
+    desc: Collect exact repro bundle on failures (env info, wheels, failing tests, config).
+    acceptance:
+      - single zip contains enough to reproduce the failure elsewhere
+
+roadmap_order:
+  - PA-372
+  - PA-376
+  - PA-375
+  - PA-374
+  - PA-378
+  - PA-379
+  - PA-380
+  - PA-381
+  - PA-382
+  - PA-383
+
