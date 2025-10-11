@@ -1,0 +1,7 @@
+{
+  "command": "health_check",
+  "target": "",
+  "ok": true,
+  "ts": "2025-10-11T11:52:08",
+  "message": "health=True"
+}
