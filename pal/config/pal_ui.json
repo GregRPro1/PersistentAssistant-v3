@@ -1,5 +1,10 @@
 {
-  "geometry": null,
+  "geometry": [
+    -2494,
+    159,
+    1258,
+    798
+  ],
   "whatsapp": {
     "method": "wa_me",
     "to_number": "07894798589",

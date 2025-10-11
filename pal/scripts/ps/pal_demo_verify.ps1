@@ -43,8 +43,7 @@ if (-not $phoneUrl) {
   $port = 8787
   if ($cfg -and $cfg.web -and $cfg.web.port) { $port = [int]$cfg.web.port }
   $lan = Get-LanIp
-  if ($lan) { $phoneUrl = "http://$lan:$port" }
-  # final fallback: health host:port
+  if ($lan) { $phoneUrl = "http://$($lan):$($port)" }
   if (-not $phoneUrl -and $cfg -and $cfg.web -and $cfg.web.host -and $cfg.web.port) {
     $phoneUrl = "http://$($cfg.web.host):$($cfg.web.port)"
   }

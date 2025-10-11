@@ -1,12 +1,19 @@
-# PAL — Demo Fix & Force Ops
+# PAL — Immediate Phone URL Fix Pack
 
-This pack includes:
-- Updated **watchdog.ps1** (again, with robust LAN-IP) — writes phone.lan + phone.url.
-- Resilient **pal_demo_verify.ps1** — prints Phone URL even if ops_status.json has no 'phone' yet by computing LAN host:port from config.
+This pack fixes the demo script interpolation error and makes the tracker show the Phone URL immediately, even if the watchdog hasn't populated it yet.
 
 ## Apply
-pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_Demo_Fix_and_Force_Ops.zip"
+cd C:\_Repos\PersistentAssistant
+pwsh .\scripts\apply_pack.ps1 -ZipPath "$env:USERPROFILE\Downloads\PAL_PhoneURL_Immediate_Fix_Zip.zip"
 
-## Run
-pwsh .\pal\core\health\watchdog.ps1
+## Use
+# A) Force ops_status to include phone.* now (optional)
+pwsh .\pal\scripts\ps\pal_force_ops_snapshot.ps1
+
+# B) Demo: create a smoke PASS and print the Phone URL (robust)
 pwsh .\pal\scripts\ps\pal_demo_verify.ps1 -TaskId PAL-DEMO
+
+# C) Restart tracker via watchdog (if needed)
+'{"command":"restart","target":"tracker"}' | Set-Content .\pal\control\requests\restart_tracker.json -Encoding UTF8
+
+Tracker status bar now shows Phone: <url>. The WhatsApp button will use this URL.
