@@ -11,3 +11,14 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
 .bad{background:#2a1717;color:var(--bad);border:1px solid #4d2020}
 pre{background:#0e1116;border:1px solid #1f252b;border-radius:8px;padding:10px;max-height:360px;overflow:auto}
 small.m{color:var(--muted)}
+
+/* PAL-UX-APPEND B.3 */
+@media (min-width: 980px) {
+  .pal-grid { display:grid; grid-template-columns: repeat(2, minmax(440px,1fr)); gap:20px; align-items:start; }
+}
+.card, .pal-card { border-radius:18px; padding:18px; }
+.btnrow, .btn-row { display:flex; flex-wrap:wrap; gap:8px; }
+.btnrow .btn, .btn-row .btn, .card .btn { min-width:160px; display:inline-flex; align-items:center; justify-content:center; }
+.btnrow .btn.small, .btn-row .btn.small { min-width:120px; }
+.settings-form { display:grid; grid-template-columns:220px 1fr; gap:10px 16px; }
+.settings-form label { align-self:center; }
