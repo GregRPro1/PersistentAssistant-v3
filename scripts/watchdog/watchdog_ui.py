@@ -33,15 +33,21 @@ _LOGFILES = {}
 def ts(): return datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 def log_path_for(name): return (CF_LOG_DIR if name=="quick-tunnel" else WD_LOG) / f"{name}_{ts()}.log"
 
-TEMPLATE = """<html><head><meta charset="utf-8"><title>PAL Watchdog UI</title>
+TEMPLATE = """<html><head><meta charset="utf-8"><title>PAL Watchdog</title>
 <style>
-body{{font-family:Segoe UI,Arial;margin:12px}}
-button{{margin:4px;padding:8px}}
-pre{{background:#111;color:#bfb;padding:8px;max-height:360px;overflow:auto}}
-</style>
-</head><body>
+:root{{--bg:#0b0d10;--fg:#e6e8eb;--muted:#9aa3ad;--card:#12161a;--accent:#4ea1ff;--good:#46d369;--bad:#ff6b6b}}
+*{{box-sizing:border-box}} body{{font-family:Segoe UI,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:24px}}
+h2{{margin:0 0 8px 0}} p.small{{color:var(--muted);margin:0 0 16px 0}}
+.card{{background:var(--card);border:1px solid #1f252b;border-radius:12px;padding:14px 16px;margin:10px 0}}
+button{{border:1px solid #2a3138;background:#171c21;color:var(--fg);padding:8px 12px;border-radius:8px;margin-right:8px;cursor:pointer}}
+a{{color:var(--accent);text-decoration:none}} a:hover{{text-decoration:underline}}
+.tag{{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;margin-left:8px}}
+.ok{{background:#0f2a19;color:var(--good);border:1px solid #204d33}} .bad{{background:#2a1717;color:var(--bad);border:1px solid #4d2020}}
+pre{{background:#0e1116;border:1px solid #1f252b;border-radius:8px;padding:10px;max-height:360px;overflow:auto}}
+hr{{border:0;border-top:1px solid #20262d;margin:18px 0}}
+</style></head><body>
 <h2>PAL Watchdog</h2>
-<p>Controls and live logs (localhost only).</p>
+<p class="small">Controls and live logs (localhost only).</p>
 {services}
 <hr/>
 <h3>Log tail</h3>
@@ -53,8 +59,11 @@ pre{{background:#111;color:#bfb;padding:8px;max-height:360px;overflow:auto}}
 </body></html>"""
 
 SERVICE_BLOCK = """
-<div style="border:1px solid #ddd;padding:8px;margin:8px 0">
-<b>{name}</b> — pid:{pid} running:{running} health:{health}<br/>
+<div class="card">
+<b>{name}</b>
+<span class="tag {okcls}">{oktxt}</span>
+<div style="margin-top:8px;color:var(--muted)">pid:{pid} • running:{running} • health:{health}</div>
+<div style="margin-top:10px">
 <form method="POST" action="/control" style="display:inline">
 <input type="hidden" name="service" value="{name}">
 <button name="action" value="start">Start</button>
@@ -62,6 +71,7 @@ SERVICE_BLOCK = """
 <button name="action" value="restart">Restart</button>
 </form>
 <a href="/download?service={name}">Download latest log</a>
+</div>
 </div>
 """
 
@@ -72,7 +82,12 @@ def start_service(name):
     logfile = log_path_for(name)
     f = open(logfile, "a", buffering=1, encoding="utf-8", errors="replace")
     cmd = " ".join(svc["cmd"]) if os.name=="nt" else svc["cmd"]
-    proc = subprocess.Popen(cmd, cwd=svc["cwd"], stdout=f, stderr=f, stdin=subprocess.DEVNULL, shell=(os.name=="nt"))
+    # Force UTF-8 for child process stdout/stderr to avoid banner encode errors
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    proc = subprocess.Popen(cmd, cwd=svc["cwd"], stdout=f, stderr=f, stdin=subprocess.DEVNULL,
+                            shell=(os.name=="nt"), env=env)
     _HANDLES[name] = proc; _LOGFILES[name] = logfile
     return f"started {name} pid={proc.pid} log={logfile.name}"
 
@@ -101,15 +116,13 @@ def service_status(name):
         except Exception: health = False
     return {"running": bool(running), "pid": pid, "health": bool(health)}
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import parse_qs
-
 class Handler(BaseHTTPRequestHandler):
     def _send(self, html, code=200):
         self.send_response(code); self.send_header("Content-type","text/html; charset=utf-8"); self.end_headers()
         self.wfile.write(html.encode("utf-8"))
 
     def do_GET(self):
+        from pathlib import Path
         if self.path.startswith("/download"):
             q = parse_qs(self.path.split("?",1)[1]) if "?" in self.path else {}
             svc = q.get("service", ["pal-dev-server"])[0]
@@ -121,7 +134,9 @@ class Handler(BaseHTTPRequestHandler):
         blocks, options, tail = [], [], ""
         for name in SERVICES.keys():
             st = service_status(name)
-            blocks.append(SERVICE_BLOCK.format(name=name, pid=st["pid"], running=st["running"], health=st["health"]))
+            oktxt = "OK" if (st["running"] and st["health"]) else "ISSUE"
+            okcls = "ok" if (st["running"] and st["health"]) else "bad"
+            blocks.append(SERVICE_BLOCK.format(name=name, pid=st["pid"], running=st["running"], health=st["health"], oktxt=oktxt, okcls=okcls))
             options.append(f"<option value='{name}'>{name}</option>")
         content = TEMPLATE.format(services="".join(blocks), options="".join(options), tail=tail)
         self._send(content)
@@ -139,7 +154,7 @@ class Handler(BaseHTTPRequestHandler):
             from pathlib import Path
             if not lf or not Path(lf).exists(): self._send(f"<pre>No logfile for {svc}</pre>",404); return
             try:
-                with open(lf, "r", encoding="utf-8", errors="replace") as f: data = f.read().splitlines()[-200:]
+                with open(lf, "r", encoding="utf-8", errors="replace") as f: data = f.read().splitlines()[-250:]
                 self._send("<html><body><pre>\n"+ "\n".join(data) + "\n</pre><p><a href='/'>Back</a></p></body></html>")
             except Exception as e:
                 self._send(f"<pre>Error reading log: {e}</pre>",500)
