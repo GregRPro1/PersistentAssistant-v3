@@ -1,5 +1,5 @@
 from __future__ import annotations
-import os, sys, json, time, subprocess, signal
+import os, sys, json, time, subprocess, signal, threading
 from pathlib import Path
 
 REPO = Path(os.environ.get('PA_REPO', r'C:\\_Repos\\PersistentAssistant')).resolve()
@@ -12,14 +12,21 @@ LOG = TMP_DIR / 'bridge_tracker.log'
 
 def _log(msg: str):
     ts = time.strftime('%H:%M:%S')
-    try:
-        with LOG.open('a', encoding='utf-8') as f:
-            f.write(f'[TrackerWrap {ts}] {msg}\\n')
-    except Exception:
-        pass
+    with LOG.open('a', encoding='utf-8') as f:
+        f.write(f'[Sidecar {ts}] {msg}\\n')
 
-pre = {'ts': int(time.time()), 'selected_plan': 'Phase-R1 (pre)'}
-(STATE_DIR/'plan_status.json').write_text(json.dumps(pre, indent=2), encoding='utf-8')
+def _sidecar_writer():
+    f = STATE_DIR / 'plan_status.json'
+    while True:
+        try:
+            data = {'ts': int(time.time()), 'selected_plan': 'Phase-R1'}
+            f.write_text(json.dumps(data, indent=2), encoding='utf-8')
+        except Exception as e:
+            _log(f'write fail: {e}')
+        time.sleep(5)
+
+threading.Thread(target=_sidecar_writer, daemon=True).start()
+
 _log(f'start with plan={PLAN}')
 
 target = REPO/'pal'/'ui'/'desktop'/'pal_tracker.py'
