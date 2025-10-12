@@ -1,0 +1,6 @@
+master_id: PALYYYYMMDD
+created: 2025-10-12 00:00:00
+children:
+  - PALYYYYMMDD.A
+  - PALYYYYMMDD.B
+last_child: PALYYYYMMDD.B
