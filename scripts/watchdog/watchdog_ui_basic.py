@@ -112,7 +112,7 @@ try:
         if p is None:
             return ""
         p = str(p).strip().strip('"').strip("'")
-        return str(_PA_Path(p)).replace("/", "\")
+        return str(_PA_Path(p)).replace("/", "\\\\")
 
     def upsert(section: str, key: str, value: str):
         cfg = _pa_load_yaml(_PA_SETTINGS_PATH)
@@ -132,3 +132,4 @@ except Exception as _e:
     # Do not break server if hotfix fails to import
     pass
 # === END HOTFIX ===
+
