@@ -1,5 +1,0 @@
-project_id: default-project
-auto_revise:
-  enabled: true
-  default_iters: 1
-  ui_soft_max: 5

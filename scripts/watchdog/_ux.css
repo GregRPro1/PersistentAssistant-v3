@@ -1,13 +1,11 @@
-/* === PAL20251012B UX hotfix === */
-/* Two-column desktop grid */
+
+/* PAL-UX B.2 */
 @media (min-width: 980px) {
   .pal-grid { display:grid; grid-template-columns: repeat(2, minmax(440px,1fr)); gap:20px; align-items:start; }
 }
 .pal-card { border-radius:18px; padding:18px; }
-/* Force buttons inline */
 .pal-card .btn { display:inline-flex; align-items:center; justify-content:center; min-width:160px; margin:0 8px 8px 0; }
 .pal-card .btn.small { min-width:120px; }
-/* Settings form tidy */
 .settings-form { display:grid; grid-template-columns:220px 1fr; gap:10px 16px; }
 .settings-form label { align-self:center; }
 input[type="text"], input[type="search"] { width:100%; }

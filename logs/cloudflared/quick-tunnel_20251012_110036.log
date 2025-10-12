@@ -35,3 +35,13 @@
 2025-10-12T11:00:41Z DBG QUIC MTU updated to 1355 connIndex=0 event=0 ip=198.41.192.77
 2025-10-12T11:00:41Z DBG QUIC MTU updated to 1375 connIndex=0 event=0 ip=198.41.192.77
 2025-10-12T11:00:41Z INF Registered tunnel connection connIndex=0 connection=71752366-a73b-4080-ba07-7534681daabb event=0 ip=198.41.192.77 location=lhr18 protocol=quic
+2025-10-12T14:13:25Z INF Initiating graceful shutdown due to signal terminated ...
+2025-10-12T14:13:25Z DBG Graceful shutdown signalled
+2025-10-12T14:13:25Z ERR failed to run the datagram handler error="context canceled" connIndex=0 event=0 ip=198.41.192.77
+2025-10-12T14:13:25Z ERR failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.192.77
+2025-10-12T14:13:25Z ERR Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.192.77
+2025-10-12T14:13:25Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.192.77
+2025-10-12T14:13:25Z ERR Connection terminated connIndex=0
+2025-10-12T14:13:25Z ERR no more connections active and exiting
+2025-10-12T14:13:25Z INF Tunnel server stopped
+2025-10-12T14:13:25Z INF Metrics server stopped

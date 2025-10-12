@@ -1,21 +1,8 @@
 {
-  "ts": "2025-10-12T09:01:52",
-  "web": {
-    "host": "127.0.0.1",
-    "port": 8787,
-    "port_ok": true,
-    "health_url": "http://127.0.0.1:8787/healthz",
-    "health_ok": true
-  },
-  "tunnel": {
-    "url": "",
-    "ok": false
-  },
-  "watcher": {
-    "on": true
-  },
-  "phone": {
-    "lan": "http://192.168.1.11:8787",
-    "url": "http://192.168.1.11:8787"
+  "ts": 1760285537,
+  "urls": {},
+  "env": {
+    "PAL_MASTER": null,
+    "PAL_CHILD": null
   }
 }

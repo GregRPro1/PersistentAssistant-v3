@@ -7,11 +7,11 @@
     "logfile": "C:\\_Repos\\PersistentAssistant\\logs\\watchdog\\pal-dev-server_20251012_113813.log"
   },
   "pal-tracker": {
-    "pid": 27164,
+    "pid": 2144,
     "last_ok": null,
     "restarts": 1,
     "backoff_until": null,
-    "logfile": "C:\\_Repos\\PersistentAssistant\\logs\\watchdog\\pal-tracker_20251012_113820.log"
+    "logfile": "C:\\_Repos\\PersistentAssistant\\logs\\watchdog\\pal-tracker_20251012_114146.log"
   },
   "cloudflared-tunnel": {
     "pid": null,
