@@ -1,0 +1,18 @@
+id: Phase-R1
+title: PA Reliability & Discipline Plan (R1)
+description: >
+  Stabilise workflow: codex diffs, syntax gates, python smokes, context capture.
+  Tracker should present this plan and allow selection before any execution.
+items:
+  - id: R1.ENV.1
+    title: Enforce single entry via Watchdog
+    check: python scripts/smoke/smoke_watchdog_up.py
+  - id: R1.CODE.1
+    title: Codex-only patches
+    check: python scripts/smoke/smoke_codex_available.py
+  - id: R1.VER.1
+    title: Pre-commit syntax gate
+    check: python scripts/smoke/smoke_pycompile_tree.py
+  - id: R1.DIAG.1
+    title: Bridge heartbeat fresh (<=15s)
+    check: python scripts/smoke/smoke_heartbeat_fresh.py

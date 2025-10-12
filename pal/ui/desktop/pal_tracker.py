@@ -244,3 +244,11 @@ try:
 except Exception:
     pass
 # === PAL_BRIDGE_HOOK END ===
+
+# === PAL_PLAN_LOADER_HOOK START ===
+try:
+    from .pal_tracker_plan_loader import install as _pal_plan_install
+    _pal_plan_install()
+except Exception:
+    pass
+# === PAL_PLAN_LOADER_HOOK END ===
