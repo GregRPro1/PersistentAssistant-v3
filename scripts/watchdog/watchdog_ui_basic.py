@@ -1,6 +1,6 @@
 
 # -*- coding: utf-8 -*-
-This file contains only the patched helpers used by settings save.
+# This file contains only the patched helpers used by settings save.
 Integrate into existing watchdog_ui_basic.py.
 
 from pathlib import Path
@@ -133,3 +133,44 @@ except Exception as _e:
     pass
 # === END HOTFIX ===
 
+
+# === PAL20251012B YAML-SAVE HELPERS (override regex) ===
+try:
+    from pathlib import Path as _PA_Path
+    import yaml as _PA_yaml
+    _PA_SETTINGS_PATH = _PA_Path(r"C:\_Repos\PersistentAssistant\config\pal_settings.yaml")
+
+    def _pa_load_yaml(_p):
+        try:
+            return _PA_yaml.safe_load(_PA_Path(_p).read_text(encoding="utf-8")) or {}
+        except Exception:
+            return {}
+
+    def _pa_dump_yaml(_p, _data):
+        _p = _PA_Path(_p)
+        _p.parent.mkdir(parents=True, exist_ok=True)
+        _p.write_text(_PA_yaml.safe_dump(_data, sort_keys=False, allow_unicode=True), encoding="utf-8")
+
+    def _pa_norm_win_path(p: str) -> str:
+        if p is None:
+            return ""
+        p = str(p).strip().strip('"').strip("'")
+        return str(_PA_Path(p)).replace("/", "\\")
+
+    def upsert(section: str, key: str, value: str):
+        cfg = _pa_load_yaml(_PA_SETTINGS_PATH)
+        if section not in cfg or not isinstance(cfg.get(section), dict):
+            cfg[section] = {}
+        if key == "tracker_script":
+            value = _pa_norm_win_path(value)
+        if key == "number":
+            value = (value or "").replace(" ", "")
+        cfg[section][key] = value
+        _pa_dump_yaml(_PA_SETTINGS_PATH, cfg)
+
+    def save_settings_number_and_tracker(number: str, tracker: str):
+        upsert("whatsapp", "number", number)
+        upsert("paths", "tracker_script", tracker)
+except Exception as _e:
+    pass
+# === END HELPERS ===
