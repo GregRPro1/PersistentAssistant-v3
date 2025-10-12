@@ -1,4 +1,3 @@
-# THEME_LOCK:DARK_UI
 #!/usr/bin/env python3
 import os, re, time, threading, subprocess
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
@@ -306,48 +305,3 @@ def main():
 
 if __name__=="__main__":
     main()
-
-
-# PAL20251012B_TRACKER_PATH_GUARD
-try:
-    from pathlib import Path as _PALPath
-    def _pal_tracker_fallback(p: str) -> str:
-        # if missing or wrong, fallback to repo\pal\ui\desktop\pal_tracker.py
-        try:
-            rp = _PALPath(__file__).resolve().parents[2] / "pal" / "ui" / "desktop" / "pal_tracker.py"
-            cand = str(rp)
-            if not p or not _PALPath(p).exists():
-                return cand
-        except Exception:
-            pass
-        return p
-except Exception:
-    pass
-
-# === PAL_UX_DYNAMIC_INJECT START ===
-try:
-    import importlib.util, pathlib
-    _p = pathlib.Path(__file__).with_name("_ux_inject.py")
-    if _p.exists():
-        _spec = importlib.util.spec_from_file_location("pal_ux_inject", str(_p))
-        _mod  = importlib.util.module_from_spec(_spec)
-        _spec.loader.exec_module(_mod)  # type: ignore
-        if 'app' in globals():
-            _mod.install_ux(app)
-except Exception:
-    pass
-# === PAL_UX_DYNAMIC_INJECT END ===
-
-# === PAL_BRIDGE_PANEL_HOOK START ===
-try:
-    import importlib.util, pathlib
-    _bp = pathlib.Path(__file__).with_name("_bridge_panel.py")
-    if _bp.exists():
-        _spec = importlib.util.spec_from_file_location("pal_bridge_panel", str(_bp))
-        _mod  = importlib.util.module_from_spec(_spec)
-        _spec.loader.exec_module(_mod)  # type: ignore
-        if 'app' in globals():
-            app.register_blueprint(_mod.bp)
-except Exception:
-    pass
-# === PAL_BRIDGE_PANEL_HOOK END ===
