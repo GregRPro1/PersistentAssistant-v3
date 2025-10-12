@@ -1,0 +1,8 @@
+
+web:
+  host: 127.0.0.1
+  port: 8787
+  health: http://127.0.0.1:8787/healthz
+tunnel:
+  enabled: true
+  url_file: reports/ops/tunnel_url.txt
