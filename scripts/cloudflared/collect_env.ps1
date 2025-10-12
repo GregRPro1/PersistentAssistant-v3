@@ -10,7 +10,8 @@ $log = Join-Path $OutDir "env_$stamp.txt"
 "`n# Firewall state" | Tee-Object -FilePath $log -Append; netsh advfirewall show allprofiles 2>&1 | Tee-Object -FilePath $log -Append
 "`n# Listeners" | Tee-Object -FilePath $log -Append; netstat -ano | Select-String -Pattern "LISTENING" | Tee-Object -FilePath $log -Append
 "`n# DNS test" | Tee-Object -FilePath $log -Append; nslookup www.cloudflare.com 2>&1 | Tee-Object -FilePath $log -Append
+"`n# curl localhost:8787" | Tee-Object -FilePath $log -Append; try { curl.exe -s -I http://localhost:8787 | Tee-Object -FilePath $log -Append } catch { $_ | Out-String | Tee-Object -FilePath $log -Append }
 "`n# curl 127.0.0.1:8787" | Tee-Object -FilePath $log -Append; try { curl.exe -s -I http://127.0.0.1:8787 | Tee-Object -FilePath $log -Append } catch { $_ | Out-String | Tee-Object -FilePath $log -Append }
-"`n# Processes" | Tee-Object -FilePath $log -Append; Get-Process | Where-Object { $_.Name -match "cloudflared|python|server" } | Format-Table -AutoSize | Out-String | Tee-Object -FilePath $log -Append
+"`n# Processes (cloudflared/server/python)" | Tee-Object -FilePath $log -Append; Get-Process | Where-Object { $_.Name -match "cloudflared|python|server" } | Format-Table -AutoSize | Out-String | Tee-Object -FilePath $log -Append
 "`n# cloudflared version" | Tee-Object -FilePath $log -Append; ($c=Get-Command cloudflared -ErrorAction SilentlyContinue) ? (cloudflared --version 2>&1 | Tee-Object -FilePath $log -Append) : ("cloudflared not found" | Tee-Object -FilePath $log -Append)
 "`nDone -> $log" | Tee-Object -FilePath $log -Append; Write-Host "Wrote $log"
