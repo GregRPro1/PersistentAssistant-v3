@@ -4,7 +4,6 @@ PLAN = r"C:\_Repos\PersistentAssistant\pal_project_plan.yaml"
 def set_phase(text, pid, status):
     return re.sub(rf"(^\s*-\s*id:\s*{re.escape(pid)}\s*$.*?^\s*status:\s*)\w+", rf"\1{status}", text, flags=re.M|re.S)
 def set_task(text, pid, tid, status):
-    import re
     m = re.search(rf"(^\s*-\s*id:\s*{re.escape(pid)}\s*$.*?)(?=^\s*-\s*id:|\Z)", text, flags=re.M|re.S)
     if not m: return text
     block = m.group(1)

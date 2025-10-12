@@ -33,6 +33,38 @@ _LOGFILES = {}
 def ts(): return datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 def log_path_for(name): return (CF_LOG_DIR if name=="quick-tunnel" else WD_LOG) / f"{name}_{ts()}.log"
 
+TEMPLATE = """<html><head><meta charset="utf-8"><title>PAL Watchdog UI</title>
+<style>
+body{{font-family:Segoe UI,Arial;margin:12px}}
+button{{margin:4px;padding:8px}}
+pre{{background:#111;color:#bfb;padding:8px;max-height:360px;overflow:auto}}
+</style>
+</head><body>
+<h2>PAL Watchdog</h2>
+<p>Controls and live logs (localhost only).</p>
+{services}
+<hr/>
+<h3>Log tail</h3>
+<form method="POST" action="/tail">
+<select name="service">{options}</select>
+<button type="submit">Tail log</button>
+</form>
+{tail}
+</body></html>"""
+
+SERVICE_BLOCK = """
+<div style="border:1px solid #ddd;padding:8px;margin:8px 0">
+<b>{name}</b> — pid:{pid} running:{running} health:{health}<br/>
+<form method="POST" action="/control" style="display:inline">
+<input type="hidden" name="service" value="{name}">
+<button name="action" value="start">Start</button>
+<button name="action" value="stop">Stop</button>
+<button name="action" value="restart">Restart</button>
+</form>
+<a href="/download?service={name}">Download latest log</a>
+</div>
+"""
+
 def start_service(name):
     if name in _HANDLES and _HANDLES[name] and _HANDLES[name].poll() is None:
         return f"{name} already running (pid {_HANDLES[name].pid})"
@@ -69,33 +101,8 @@ def service_status(name):
         except Exception: health = False
     return {"running": bool(running), "pid": pid, "health": bool(health)}
 
-TEMPLATE = """<html><head><meta charset="utf-8"><title>PAL Watchdog UI</title>
-<style>body{font-family:Segoe UI,Arial;margin:12px} button{margin:4px;padding:8px} pre{background:#111;color:#bfb;padding:8px;max-height:360px;overflow:auto}</style>
-</head><body>
-<h2>PAL Watchdog</h2>
-<p>Controls and live logs (localhost only).</p>
-{services}
-<hr/>
-<h3>Log tail</h3>
-<form method="POST" action="/tail">
-<select name="service">{options}</select>
-<button type="submit">Tail log</button>
-</form>
-{tail}
-</body></html>"""
-
-SERVICE_BLOCK = """
-<div style="border:1px solid #ddd;padding:8px;margin:8px 0">
-<b>{name}</b> — pid:{pid} running:{running} health:{health}<br/>
-<form method="POST" action="/control" style="display:inline">
-<input type="hidden" name="service" value="{name}">
-<button name="action" value="start">Start</button>
-<button name="action" value="stop">Stop</button>
-<button name="action" value="restart">Restart</button>
-</form>
-<a href="/download?service={name}">Download latest log</a>
-</div>
-"""
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs
 
 class Handler(BaseHTTPRequestHandler):
     def _send(self, html, code=200):
@@ -129,6 +136,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(303); self.send_header("Location","/"); self.end_headers(); return
         if self.path == "/tail":
             svc = params.get("service", ["pal-dev-server"])[0]; lf = _LOGFILES.get(svc)
+            from pathlib import Path
             if not lf or not Path(lf).exists(): self._send(f"<pre>No logfile for {svc}</pre>",404); return
             try:
                 with open(lf, "r", encoding="utf-8", errors="replace") as f: data = f.read().splitlines()[-200:]

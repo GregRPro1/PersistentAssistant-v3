@@ -1,29 +1,22 @@
 plan_id: PAL20251012
 title: PAL: Cloudflared Tunnel + Watchdog UI Bring-Up
-last_updated_utc: 2025-10-12T09:52:09.359848
+last_updated_utc: 2025-10-12T09:57:46.864732
 phases:
-  - id: P1
-    title: Baseline Local Service
-    status: Done
-    tasks:
-      - id: P1.T1
-        desc: Start minimal local HTTP service on 127.0.0.1:8787
-        status: Done
-      - id: P1.T2
-        desc: Verify curl -I http://127.0.0.1:8787 returns HTTP 200
-        status: Done
   - id: P2
     title: Quick Tunnel Smoke (no login)
     status: InProgress
     tasks:
       - id: P2.T1
-        desc: Free port 8787, ensure only one server instance
+        desc: Ensure dev server healthy on 127.0.0.1:8787
         status: Done
       - id: P2.T2
-        desc: Run Quick Tunnel to 127.0.0.1:8787 and capture URL
+        desc: Start Quick Tunnel via Watchdog UI (logs in logs/cloudflared)
         status: InProgress
       - id: P2.T3
-        desc: Verify 200 via Quick Tunnel URL
+        desc: Parse latest log for trycloudflare URL
+        status: NotStarted
+      - id: P2.T4
+        desc: Smoke: HEAD https://<trycloudflare> returns 200
         status: NotStarted
   - id: P3
     title: Named Tunnel Auth & Creation
@@ -48,40 +41,18 @@ phases:
       - id: P4.T2
         desc: cloudflared tunnel route dns pal-dev <HOSTNAME>
         status: NotStarted
-  - id: P5
-    title: Smoke Tests (Local + Tunnel)
-    status: Done
-    tasks:
-      - id: P5.T1
-        desc: Local health: curl -I http://127.0.0.1:8787
-        status: Done
-      - id: P5.T2
-        desc: Tunnel run: cloudflared tunnel run pal-dev (no early exit)
-        status: Done
-      - id: P5.T3
-        desc: HTTPS probe: curl -I https://<HOSTNAME>
-        status: Done
   - id: P6
     title: Watchdog Integration (Single-Supervisor)
     status: NotStarted
     tasks:
       - id: P6.T1
-        desc: Enable tunnel in watchdog UI (named-tunnel mode)
+        desc: Enable named tunnel in watchdog UI
         status: NotStarted
       - id: P6.T2
         desc: Start/Stop/Restart via UI; verify logs/health
         status: NotStarted
-  - id: P7
-    title: CI-Style Snapshots & Logs
-    status: NotStarted
-    tasks:
-      - id: P7.T1
-        desc: Snapshot processes/listeners and commit logs for remote inspection
-        status: NotStarted
-      - id: P7.T2
-        desc: Automate after each restart
-        status: NotStarted
 notes:
-  - Status is tracked here (source of truth).
-  - One terminal; Watchdog UI owns lifecycle after P2.
-  - If any step fails, halt and fix that single step before proceeding.
+  - Status tracked here. Update via scripts/plan/mark_task.py
+  - Pass criteria:
+    - P2.T1: curl -I http://127.0.0.1:8787 -> 200
+    - P2.T4: curl -I https://<trycloudflare> -> 200
