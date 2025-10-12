@@ -5,34 +5,52 @@ from urllib.parse import parse_qs, urlparse
 from pathlib import Path
 
 # -------- Settings --------
-CFG = json.loads(Path(r"C:\_Repos\PersistentAssistant\config\pal_settings.yaml").read_text(encoding="utf-8")) if False else None
-# Minimal loader to avoid PyYAML dependency here
+CFG_PATH = Path(r"C:\_Repos\PersistentAssistant\config\pal_settings.yaml")
+
 def load_yaml_map(path: Path):
-    # super-simple YAML subset loader: key: value pairs only (no nesting beyond 1 level used here)
+    """
+    Minimal YAML loader:
+    - top-level keys -> nested dicts
+    - supports two-level mapping with indentation (2 spaces or more)
+    - preserves backslashes and spaces in values
+    - ignores comments and blank lines
+    """
     data = {}
-    curmap = None
+    stack = [(0, data)]
     if not path.exists():
         return {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.strip() or line.strip().startswith("#"): continue
-        if not line.startswith(" "):
-            # top level
-            if ":" in line:
-                k = line.split(":",1)[0].strip()
-                data[k] = {}
-                curmap = data[k]
-        else:
-            if ":" in line and curmap is not None:
-                k,v = line.strip().split(":",1)
-                curmap[k.strip()] = v.strip().strip('"').strip("'")
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.rstrip("\r\n")
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(' '))
+        while stack and indent < stack[-1][0]:
+            stack.pop()
+        current = stack[-1][1]
+
+        if ":" in line:
+            k, v = line.lstrip().split(":", 1)
+            k = k.strip()
+            v = v.strip()
+            if v == "":  # new nested map
+                new_map = {}
+                current[k] = new_map
+                stack.append((indent+2, new_map))
+            else:
+                # strip only outer quotes
+                if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+                    v = v[1:-1]
+                current[k] = v
     return data
 
-SET = load_yaml_map(Path(r"C:\_Repos\PersistentAssistant\config\pal_settings.yaml"))
+SET = load_yaml_map(CFG_PATH)
+
 REPO = Path(SET.get("paths",{}).get("repo_root", r"C:\_Repos\PersistentAssistant"))
 PORT = int(SET.get("ports",{}).get("watchdog_ui", "9001") or "9001")
 DEV_PORT = int(SET.get("ports",{}).get("dev_server", "8787") or "8787")
 TRACKER_PORT = int(SET.get("ports",{}).get("tracker", "9002") or "9002")
-TRACKER_SCRIPT = Path(SET.get("paths",{}).get("tracker_script", r"C:\_Repos\PersistentAssistant\scripts\tracker\pal_tracker.py"))
+TRACKER_SCRIPT_STR = SET.get("paths",{}).get("tracker_script", r"C:\_Repos\PersistentAssistant\scripts\tracker\pal_tracker.py")
+TRACKER_SCRIPT = Path(TRACKER_SCRIPT_STR)
 
 WA = SET.get("whatsapp",{})
 WA_NUMBER = WA.get("number","")
@@ -77,7 +95,7 @@ def start_dev_bg():
     if _DEV and _DEV.poll() is None: return
     log = DEV_LOGS/f"basic_{int(time.time())}.log"
     f = open(log, "a", encoding="utf-8", errors="replace")
-    _DEV_LOG = log
+    _DEV_LOG = str(log)
     _DEV = subprocess.Popen(["python","current/server_wrapper.py"], cwd=str(REPO),
                             stdout=f, stderr=f, stdin=subprocess.DEVNULL, env=_env_utf8())
 
@@ -102,8 +120,10 @@ def _start_tunnel(port, label):
     f = open(log, "a", encoding="utf-8", errors="replace")
     p = subprocess.Popen(["cloudflared","tunnel","--url",f"http://127.0.0.1:{port}","--loglevel","debug"],
                          cwd=str(REPO), stdout=f, stderr=f, stdin=subprocess.DEVNULL)
-    if label=="dev": _TUN_DEV, _TUN_DEV_LOG[:] = p, log  # noqa
-    else: _TUN_TRK, _TUN_TRK_LOG[:] = p, log             # noqa
+    if label=="dev":
+        _TUN_DEV = p; _TUN_DEV_LOG = str(log)
+    else:
+        _TUN_TRK = p; _TUN_TRK_LOG = str(log)
 
 def _stop_tunnel(which):
     global _TUN_DEV, _TUN_TRK
@@ -117,7 +137,7 @@ def _stop_tunnel(which):
 
 def _extract_url(log_path: Path):
     try:
-        txt = log_path.read_text(encoding="utf-8", errors="replace")
+        txt = Path(log_path).read_text(encoding="utf-8", errors="replace")
         m = URL_PAT.search(txt)
         return m.group(0) if m else None
     except Exception:
@@ -126,9 +146,9 @@ def _extract_url(log_path: Path):
 def refresh_urls():
     global _URL_DEV, _URL_TRK
     if _TUN_DEV_LOG and Path(_TUN_DEV_LOG).exists():
-        _URL_DEV = _extract_url(Path(_TUN_DEV_LOG))
+        _URL_DEV = _extract_url(_TUN_DEV_LOG)
     if _TUN_TRK_LOG and Path(_TUN_TRK_LOG).exists():
-        _URL_TRK = _extract_url(Path(_TUN_TRK_LOG))
+        _URL_TRK = _extract_url(_TUN_TRK_LOG)
 
 # ---------- Tracker ----------
 _TRK = None; _TRK_LOG = None
@@ -138,7 +158,7 @@ def start_tracker_bg():
     if not TRACKER_SCRIPT.exists():
         return
     log = TRK_LOGS/f"basic_{int(time.time())}.log"
-    f = open(log, "a", encoding="utf-8", errors="replace"); _TRK_LOG = log
+    f = open(log, "a", encoding="utf-8", errors="replace"); _TRK_LOG = str(log)
     cmd = ["python", str(TRACKER_SCRIPT), "--port", str(TRACKER_PORT)]
     _TRK = subprocess.Popen(cmd, cwd=str(REPO), stdout=f, stderr=f, stdin=subprocess.DEVNULL, env=_env_utf8())
 
@@ -157,7 +177,7 @@ def tracker_health():
 def share_wa_link(url):
     if not url: return ""
     base = "https://wa.me/"
-    if WA_NUMBER:
+    if WA_NUMBER := WA.get("number",""):
         base += WA_NUMBER
     text = urllib.parse.quote(f"PAL URL: {url}")
     return f"{base}?text={text}"
@@ -196,6 +216,7 @@ def ago(ts):
 def page():
     refresh_urls()
     dev_ok = dev_health(); trk_ok = tracker_health()
+    trk_info = f"Tracker script: {TRACKER_SCRIPT}" if TRACKER_SCRIPT.exists() else "<span style='color:#ff8b8b'>Tracker script path invalid — update config/pal_settings.yaml</span><br><small class='m'>Currently parsed path: {}</small>".format(TRACKER_SCRIPT)
     html = f"""<!doctype html><html><head><meta charset='utf-8'><title>PAL Watchdog (Basic)</title>
 <link rel="stylesheet" href="/static/style.css"></head>
 <body>
@@ -210,9 +231,7 @@ def page():
 </div></div>
 
 <div class="card"><b>Dev Tunnel</b>
-<div style="margin-top:6px">URL: { _URL_DEV or '(none yet)' } {'• <a target="_blank" href="'+share_wa_link(_URL_DEV)+'">WhatsApp</a>' if _URL_DEV else ''}
-{'• <form method="POST" action="/wa-cloud" style="display:inline"><input type="hidden" name="which" value="dev"><button>Send via Cloud API</button></form>' if _URL_DEV else ''}
-</div>
+<div style="margin-top:6px">URL: { _URL_DEV or '(none yet)' } {'• <a target="_blank" href="'+share_wa_link(_URL_DEV)+'">WhatsApp</a>' if _URL_DEV else ''}</div>
 <div style="margin-top:10px">
 <form method="POST" action="/start-tunnel-dev" style="display:inline"><button>Start Dev Tunnel</button></form>
 <form method="POST" action="/stop-tunnel-dev" style="display:inline"><button>Stop Dev Tunnel</button></form>
@@ -221,7 +240,7 @@ def page():
 </div></div>
 
 <div class="card"><b>Tracker</b> {tag(trk_ok)} <small class="m">last hb: {ago(HB['tracker'])}</small>
-<div style="margin-top:6px">{'Tracker script: '+str(TRACKER_SCRIPT) if TRACKER_SCRIPT.exists() else '<span style="color:#ff8b8b">Tracker script path invalid — update config/pal_settings.yaml</span>'}</div>
+<div style="margin-top:6px">{trk_info}</div>
 <div style="margin-top:10px">
 <form method="POST" action="/start-tracker" style="display:inline"><button>Start Tracker</button></form>
 <form method="POST" action="/stop-tracker" style="display:inline"><button>Stop Tracker</button></form>
@@ -229,9 +248,7 @@ def page():
 </div></div>
 
 <div class="card"><b>Tracker Tunnel</b>
-<div style="margin-top:6px">URL: { _URL_TRK or '(none yet)' } {'• <a target="_blank" href="'+share_wa_link(_URL_TRK)+'">WhatsApp</a>' if _URL_TRK else ''}
-{'• <form method="POST" action="/wa-cloud" style="display:inline"><input type="hidden" name="which" value="trk"><button>Send via Cloud API</button></form>' if _URL_TRK else ''}
-</div>
+<div style="margin-top:6px">URL: { _URL_TRK or '(none yet)' } {'• <a target="_blank" href="'+share_wa_link(_URL_TRK)+'">WhatsApp</a>' if _URL_TRK else ''}</div>
 <div style="margin-top:10px">
 <form method="POST" action="/start-tunnel-trk" style="display:inline"><button>Start Tracker Tunnel</button></form>
 <form method="POST" action="/stop-tunnel-trk" style="display:inline"><button>Stop Tracker Tunnel</button></form>
@@ -270,16 +287,15 @@ class H(BaseHTTPRequestHandler):
         elif self.path == "/stop-dev": bg(stop_dev_bg)
         elif self.path == "/start-tracker": bg(start_tracker_bg)
         elif self.path == "/stop-tracker": bg(stop_tracker_bg)
-        elif self.path == "/start-tunnel-dev": bg(lambda: _start_tunnel(DEV_PORT,"dev"))
+        elif self.path == "/start-tunnel-dev": bg(lambda: _start_tunnel(int(SET.get("ports",{}).get("dev_server", DEV_PORT)), "dev"))
         elif self.path == "/stop-tunnel-dev": bg(lambda: _stop_tunnel("dev"))
-        elif self.path == "/start-tunnel-trk": bg(lambda: _start_tunnel(TRACKER_PORT,"trk"))
+        elif self.path == "/start-tunnel-trk": bg(lambda: _start_tunnel(int(SET.get("ports",{}).get("tracker", TRACKER_PORT)), "trk"))
         elif self.path == "/stop-tunnel-trk": bg(lambda: _stop_tunnel("trk"))
         elif self.path == "/refresh-url": refresh_urls()
         elif self.path == "/wa-cloud":
             which = p.get("which",["dev"])[0]
             url = _URL_DEV if which=="dev" else _URL_TRK
-            ok,msg = share_via_cloud_api(url)
-            # ignore result in UI for now
+            share_via_cloud_api(url)
         self.send_response(303); self.send_header("Location","/"); self.end_headers()
 
 def main():
