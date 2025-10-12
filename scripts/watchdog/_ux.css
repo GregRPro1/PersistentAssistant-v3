@@ -1,16 +1,13 @@
-/* === PAL20251012B UX: desktop two-column grid + horizontal buttons === */
+/* === PAL20251012B UX hotfix === */
+/* Two-column desktop grid */
 @media (min-width: 980px) {
-  .pal-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(440px, 1fr));
-    gap: 20px;
-    align-items: start;
-  }
+  .pal-grid { display:grid; grid-template-columns: repeat(2, minmax(440px,1fr)); gap:20px; align-items:start; }
 }
-.pal-card { border-radius: 18px; padding: 18px; }
-.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.btn-row .btn { flex: 0 0 160px; /* equal width */ }
-.btn-row .btn.small { flex-basis: 120px; }
-.settings-form { display: grid; grid-template-columns: 220px 1fr; gap: 10px 16px; }
-.settings-form label { align-self: center; }
-input[type="text"], input[type="search"] { width: 100%; }
+.pal-card { border-radius:18px; padding:18px; }
+/* Force buttons inline */
+.pal-card .btn { display:inline-flex; align-items:center; justify-content:center; min-width:160px; margin:0 8px 8px 0; }
+.pal-card .btn.small { min-width:120px; }
+/* Settings form tidy */
+.settings-form { display:grid; grid-template-columns:220px 1fr; gap:10px 16px; }
+.settings-form label { align-self:center; }
+input[type="text"], input[type="search"] { width:100%; }
