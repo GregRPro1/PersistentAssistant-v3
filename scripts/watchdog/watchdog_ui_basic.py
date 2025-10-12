@@ -1,7 +1,7 @@
 
 # -*- coding: utf-8 -*-
 # This file contains only the patched helpers used by settings save.
-Integrate into existing watchdog_ui_basic.py.
+# Integrate into existing watchdog_ui_basic.py.
 
 from pathlib import Path
 import io
@@ -174,4 +174,5 @@ try:
 except Exception as _e:
     pass
 # === END HELPERS ===
+
 
