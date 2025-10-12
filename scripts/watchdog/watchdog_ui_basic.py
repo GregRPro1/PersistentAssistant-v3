@@ -307,3 +307,19 @@ def main():
 if __name__=="__main__":
     main()
 
+
+# PAL20251012B_TRACKER_PATH_GUARD
+try:
+    from pathlib import Path as _PALPath
+    def _pal_tracker_fallback(p: str) -> str:
+        # if missing or wrong, fallback to repo\pal\ui\desktop\pal_tracker.py
+        try:
+            rp = _PALPath(__file__).resolve().parents[2] / "pal" / "ui" / "desktop" / "pal_tracker.py"
+            cand = str(rp)
+            if not p or not _PALPath(p).exists():
+                return cand
+        except Exception:
+            pass
+        return p
+except Exception:
+    pass
