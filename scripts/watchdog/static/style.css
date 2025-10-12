@@ -1,0 +1,13 @@
+
+:root{--bg:#0b0d10;--fg:#e6e8eb;--muted:#9aa3ad;--card:#12161a;--accent:#4ea1ff;--good:#46d369;--bad:#ff6b6b}
+*{box-sizing:border-box}
+body{font-family:Segoe UI,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:24px}
+h1{margin:0 0 8px 0} p.small{color:var(--muted);margin:0 0 16px 0}
+.card{background:var(--card);border:1px solid #1f252b;border-radius:12px;padding:14px 16px;margin:10px 0}
+button{border:1px solid #2a3138;background:#171c21;color:var(--fg);padding:8px 12px;border-radius:8px;margin-right:8px;cursor:pointer}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;margin-left:8px}
+.ok{background:#0f2a19;color:var(--good);border:1px solid #204d33}
+.bad{background:#2a1717;color:var(--bad);border:1px solid #4d2020}
+pre{background:#0e1116;border:1px solid #1f252b;border-radius:8px;padding:10px;max-height:360px;overflow:auto}
+small.m{color:var(--muted)}
