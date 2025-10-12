@@ -1,0 +1,5 @@
+watchdog:
+  enable_context_banner: true
+  banner_prefix: "PAL"
+  log_dir: "logs/cloudflared"
+  include_context_in_heartbeat: true
