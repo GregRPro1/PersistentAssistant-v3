@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, sys, re, json, time, subprocess, threading
+import os, sys, re, json, time, subprocess, threading, urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
 from pathlib import Path
@@ -8,6 +8,7 @@ REPO = Path(r"C:\_Repos\PersistentAssistant")
 PORT = 9001
 DEV_PORT = 8787
 TRACKER_PORT = 9002
+
 LOGS = REPO/"logs"; LOGS.mkdir(parents=True, exist_ok=True)
 DEV_LOGS = LOGS/"dev_server"; DEV_LOGS.mkdir(parents=True, exist_ok=True)
 TRK_LOGS = LOGS/"tracker"; TRK_LOGS.mkdir(parents=True, exist_ok=True)
@@ -15,11 +16,15 @@ CF_LOGS = LOGS/"cloudflared"; CF_LOGS.mkdir(parents=True, exist_ok=True)
 STATIC = REPO/"scripts"/"watchdog"/"static"
 URL_PAT = re.compile(r"https://[A-Za-z0-9\-\.]+\.trycloudflare\.com")
 URL_FILE = CF_LOGS/"basic_quicktunnel_url.txt"
+HB = {"dev": None, "tracker": None}  # heartbeat timestamps
 
 def _env_utf8():
     env = os.environ.copy()
     env["PYTHONUTF8"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
+    # Ensure repo root on module path so 'utils.*' imports work
+    sep = ";" if os.name == "nt" else ":"
+    env["PYTHONPATH"] = (env.get("PYTHONPATH","") + (sep if env.get("PYTHONPATH") else "") + str(REPO))
     return env
 
 def head_ok(url):
@@ -53,7 +58,9 @@ def stop_dev():
     _DEV = None; return "stopped"
 
 def dev_health():
-    return "OK" if head_ok(f"http://127.0.0.1:{DEV_PORT}") else "ISSUE"
+    ok = head_ok(f"http://127.0.0.1:{DEV_PORT}")
+    HB["dev"] = time.time()
+    return "OK" if ok else "ISSUE"
 
 # ---------------- Quick tunnel ----------------
 _TUNNEL = None
@@ -88,20 +95,32 @@ def latest_tunnel_url():
         return None
     return None
 
+def whatsapp_link(url):
+    if not url: return None
+    text = urllib.parse.quote(f"PAL Quick Tunnel: {url}")
+    return f"https://wa.me/?text={text}"
+
 # ---------------- Tracker ----------------
 _TRK = None
 _TRK_LOG = None
+
+def find_tracker_script():
+    # scan repo for 'pal_tracker.py'
+    for p in REPO.rglob("pal_tracker.py"):
+        # prefer scripts/... path if present
+        return p
+    return None
+
 def start_tracker():
     global _TRK, _TRK_LOG
     if _TRK and _TRK.poll() is None: return "running"
+    script = find_tracker_script()
+    if not script:
+        return "missing"
     log = TRK_LOGS/f"basic_{int(time.time())}.log"
     f = open(log, "a", encoding="utf-8", errors="replace")
     _TRK_LOG = log
-    script = REPO/"scripts"/"tracker"/"pal_tracker.py"
-    if script.exists():
-        cmd = ["python", str(script), "--port", str(TRACKER_PORT)]
-    else:
-        cmd = ["python", str(script)]  # fallback
+    cmd = ["python", str(script), "--port", str(TRACKER_PORT)]
     _TRK = subprocess.Popen(cmd, cwd=str(REPO), stdout=f, stderr=f, stdin=subprocess.DEVNULL, env=_env_utf8())
     return "started"
 
@@ -114,30 +133,41 @@ def stop_tracker():
     _TRK = None; return "stopped"
 
 def tracker_health():
-    return "OK" if head_ok(f"http://127.0.0.1:{TRACKER_PORT}") else "ISSUE"
+    ok = head_ok(f"http://127.0.0.1:{TRACKER_PORT}")
+    HB["tracker"] = time.time()
+    return "OK" if ok else "ISSUE"
 
 # ---------------- Page ----------------
 def tag(ok): return f"<span class='tag {'ok' if ok=='OK' else 'bad'}'>{ok}</span>"
+def ago(t):
+    if not t: return "never"
+    s = int(time.time()-t)
+    if s<60: return f"{s}s ago"
+    m = s//60; return f"{m}m ago"
 
 def page():
     url = latest_tunnel_url() or "(no URL yet)"
     dev = dev_health()
     trk = tracker_health()
+    wa = whatsapp_link(url)
+    trk_script = find_tracker_script()
+    trk_note = "" if trk_script else "<div style='color:#ff9393;margin-top:6px'>pal_tracker.py not found in repo.</div>"
     html = f"""<!doctype html><html><head><meta charset='utf-8'><title>PAL Watchdog (Basic)</title>
 <link rel="stylesheet" href="/static/style.css"></head>
 <body>
 <h1>PAL Watchdog</h1>
 <p class="small">Basic dark UI • explicit Dev / Tracker / Quick Tunnel control.</p>
 
-<div class="card"><b>Dev server</b> {tag(dev)}
+<div class="card"><b>Dev server</b> {tag(dev)} <small class="m">last hb: {ago(HB['dev'])}</small>
 <div style="margin-top:10px">
 <form method="POST" action="/start-dev" style="display:inline"><button>Start Dev</button></form>
 <form method="POST" action="/stop-dev" style="display:inline"><button>Stop Dev</button></form>
 <a href="/tail?what=dev" style="margin-left:10px">Tail log</a>
 </div></div>
 
-<div class="card"><b>Tracker</b> {tag(trk)}
+<div class="card"><b>Tracker</b> {tag(trk)} <small class="m">last hb: {ago(HB['tracker'])}</small>
 <div style="margin-top:6px">Open: <a href="http://127.0.0.1:{TRACKER_PORT}" target="_blank">http://127.0.0.1:{TRACKER_PORT}</a></div>
+{trk_note}
 <div style="margin-top:10px">
 <form method="POST" action="/start-tracker" style="display:inline"><button>Start Tracker</button></form>
 <form method="POST" action="/stop-tracker" style="display:inline"><button>Stop Tracker</button></form>
@@ -145,7 +175,7 @@ def page():
 </div></div>
 
 <div class="card"><b>Quick Tunnel</b>
-<div style="margin-top:8px">URL: {url}</div>
+<div style="margin-top:8px">URL: {url} {'• <a target=\"_blank\" href=\"'+wa+'\">Share via WhatsApp Web</a>' if wa else ''}</div>
 <div style="margin-top:10px">
 <form method="POST" action="/start-tunnel" style="display:inline"><button>Start Tunnel</button></form>
 <form method="POST" action="/stop-tunnel" style="display:inline"><button>Stop Tunnel</button></form>
