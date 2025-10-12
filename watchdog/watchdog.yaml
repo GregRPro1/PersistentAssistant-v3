@@ -1,0 +1,26 @@
+watchdog:
+  log_dir: "logs/watchdog"
+  mutex_name: "PAL_WATCHDOG_MUTEX"
+  poll_seconds: 3
+
+services:
+  - name: pal-dev-server
+    ports: [8787]
+    start:
+      type: process
+      cwd: "C:\_Repos\PersistentAssistant"
+      command: "python .\current\server_wrapper.py"
+    health:
+      url: "http://127.0.0.1:8787"
+      expect_http: true
+
+  # Enable only AFTER P3/P4 are completed (named tunnel configured)
+  # - name: cloudflared
+  #   ports: []
+  #   start:
+  #     type: process
+  #     cwd: "C:\_Repos\PersistentAssistant"
+  #     command: "cloudflared tunnel --loglevel info run pal-dev"
+  #   health:
+  #     url: ""
+  #     expect_http: false

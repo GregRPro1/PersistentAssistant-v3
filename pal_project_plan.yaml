@@ -1,0 +1,90 @@
+plan_id: PAL20251012
+title: PAL: Cloudflared Tunnel + Watchdog Bring-Up
+last_updated_utc: 2025-10-12T09:29:57.730475
+phases:
+  - id: P1
+    title: Baseline Local Service
+    status: Done
+    tasks:
+      - id: P1.T1
+        desc: Start minimal local HTTP service on 127.0.0.1:8787
+        status: Done
+      - id: P1.T2
+        desc: Verify curl -I http://127.0.0.1:8787 returns HTTP 200
+        status: Done
+  - id: P2
+    title: Quick Tunnel Smoke (no login)
+    status: NotStarted
+    tasks:
+      - id: P2.T1
+        desc: Free port 8787, ensure only one server instance
+        status: NotStarted
+      - id: P2.T2
+        desc: Run: cloudflared tunnel --url http://127.0.0.1:8787
+        status: NotStarted
+      - id: P2.T3
+        desc: Open printed https://<random>.trycloudflare.com and verify 200
+        status: NotStarted
+  - id: P3
+    title: Named Tunnel Auth & Creation
+    status: NotStarted
+    tasks:
+      - id: P3.T1
+        desc: cloudflared tunnel login (browser auth)
+        status: NotStarted
+      - id: P3.T2
+        desc: cloudflared tunnel create pal-dev
+        status: NotStarted
+      - id: P3.T3
+        desc: Record generated UUID
+        status: NotStarted
+  - id: P4
+    title: Config + DNS Route
+    status: NotStarted
+    tasks:
+      - id: P4.T1
+        desc: Write %USERPROFILE%\.cloudflared\config.yml for pal-dev to 127.0.0.1:8787
+        status: NotStarted
+      - id: P4.T2
+        desc: cloudflared tunnel route dns pal-dev <HOSTNAME>
+        status: NotStarted
+  - id: P5
+    title: Smoke Tests (Local + Tunnel)
+    status: Done
+    tasks:
+      - id: P5.T1
+        desc: Local health: curl -I http://127.0.0.1:8787
+        status: Done
+      - id: P5.T2
+        desc: Tunnel run: cloudflared tunnel run pal-dev (no early exit)
+        status: Done
+      - id: P5.T3
+        desc: HTTPS probe: curl -I https://<HOSTNAME>
+        status: Done
+  - id: P6
+    title: Watchdog Integration (Single-Supervisor)
+    status: NotStarted
+    tasks:
+      - id: P6.T1
+        desc: Install watchdog files; configure commands and ports
+        status: NotStarted
+      - id: P6.T2
+        desc: watchdog killports; start; status
+        status: NotStarted
+      - id: P6.T3
+        desc: watchdog run (supervise)
+        status: NotStarted
+  - id: P7
+    title: CI-Style Snapshots & Logs
+    status: NotStarted
+    tasks:
+      - id: P7.T1
+        desc: Snapshot processes/listeners and commit logs for remote inspection
+        status: NotStarted
+      - id: P7.T2
+        desc: Automate after each restart
+        status: NotStarted
+notes:
+  - Status is tracked here (source of truth).
+  - Only one terminal used; watchdog owns process lifecycle post P6.
+  - If any step fails, halt and fix that step before proceeding.
