@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, yaml
+import yaml
 from pathlib import Path
 
 DEFAULTS = {
@@ -13,12 +13,10 @@ def load_settings():
     data = {}
     try:
         if cfg_path.exists():
-            import yaml as _yaml  # type: ignore
             with open(cfg_path, "r", encoding="utf-8") as f:
-                data = _yaml.safe_load(f) or {}
+                data = yaml.safe_load(f) or {}
     except Exception:
         data = {}
-    # shallow merge defaults
     out = DEFAULTS.copy()
     for k, v in (data or {}).items():
         if isinstance(v, dict) and k in out:
@@ -28,11 +26,10 @@ def load_settings():
     return out
 
 def get(path, default=None):
-    parts = path.split(".")
     cur = load_settings()
-    for p in parts:
-        if isinstance(cur, dict) and p in cur:
-            cur = cur[p]
+    for part in path.split("."):
+        if isinstance(cur, dict) and part in cur:
+            cur = cur[part]
         else:
             return default
     return cur
