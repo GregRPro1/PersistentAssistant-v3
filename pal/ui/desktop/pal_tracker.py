@@ -236,3 +236,11 @@ def main():
     w = PalTracker(plan); w.show(); sys.exit(app.exec())
 
 if __name__=="__main__": main()
+
+# === PAL_BRIDGE_HOOK START ===
+try:
+    from ._bridge_hook import start_bridge as _pal_start_bridge
+    _pal_start_bridge()
+except Exception:
+    pass
+# === PAL_BRIDGE_HOOK END ===

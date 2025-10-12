@@ -337,3 +337,17 @@ try:
 except Exception:
     pass
 # === PAL_UX_DYNAMIC_INJECT END ===
+
+# === PAL_BRIDGE_PANEL_HOOK START ===
+try:
+    import importlib.util, pathlib
+    _bp = pathlib.Path(__file__).with_name("_bridge_panel.py")
+    if _bp.exists():
+        _spec = importlib.util.spec_from_file_location("pal_bridge_panel", str(_bp))
+        _mod  = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)  # type: ignore
+        if 'app' in globals():
+            app.register_blueprint(_mod.bp)
+except Exception:
+    pass
+# === PAL_BRIDGE_PANEL_HOOK END ===
