@@ -10,7 +10,8 @@ def set_task(text, pid, tid, status):
     block2 = re.sub(rf"(^\s*-\s*id:\s*{re.escape(tid)}\s*$.*?^\s*status:\s*)\w+", rf"\1{status}", block, flags=re.M|re.S)
     return text[:m.start(1)] + block2 + text[m.end(1):]
 def main():
-    if len(sys.argv)!=3: print("usage: mark_task.py <Id> <Status>"); sys.exit(2)
+    if len(sys.argv)!=3:
+        print("usage: mark_task.py <Id> <Status>"); sys.exit(2)
     Id, Status = sys.argv[1], sys.argv[2]
     p = pathlib.Path(PLAN); text = p.read_text(encoding="utf-8")
     text = set_task(text, *Id.split(".",1), Status) if "." in Id else set_phase(text, Id, Status)

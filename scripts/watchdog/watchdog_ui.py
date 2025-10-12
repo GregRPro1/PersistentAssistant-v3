@@ -12,9 +12,9 @@ WD_LOG = LOG_DIR / "watchdog"
 CF_LOG_DIR = LOG_DIR / "cloudflared"
 PLAN = REPO / "pal_project_plan.yaml"
 POLL_SECONDS = 5
-AUTORESTART_ENABLED = False          # can toggle from UI
-AUTORESTART_INTERVAL_SEC = 60        # check no more than once per N seconds
-AUTORESTART_MAX = 5                  # restarts per process per run; -1 for infinite
+AUTORESTART_ENABLED = False          # toggle in UI
+AUTORESTART_INTERVAL_SEC = 60        # min interval between restart checks
+AUTORESTART_MAX = 5                  # restarts per process per run; -1 = infinite
 
 # --- ensure dirs ---
 WD_LOG.mkdir(parents=True, exist_ok=True)
@@ -136,30 +136,23 @@ def update_trycloudflare_url():
 
 # --- Monitor thread ---
 def monitor_loop():
-    global AUTORESTART_ENABLED
     while not _MONITOR_STOP:
-        # check statuses
         for name in SERVICES.keys():
             running, pid, ok = service_status(name)
-            # autorestart policy
-            if AUTORESTART_ENABLED:
-                last_ck = _LAST_CHECK.get(name)
-                if (last_ck is None) or ((now() - last_ck).total_seconds() >= AUTORESTART_INTERVAL_SEC):
-                    if not ok:
-                        if AUTORESTART_MAX < 0 or _RESTARTS[name] < AUTORESTART_MAX:
-                            restart_service(name)
-                            _RESTARTS[name] += 1
-        # update URL if tunnel running
+            if AUTORESTART_ENABLED and not ok:
+                if AUTORESTART_MAX < 0 or _RESTARTS[name] < AUTORESTART_MAX:
+                    # rate-limit restarts
+                    last = _LAST_CHECK.get(name)
+                    if not last or (now()-last).total_seconds() >= AUTORESTART_INTERVAL_SEC:
+                        restart_service(name); _RESTARTS[name] += 1
         update_trycloudflare_url()
         time.sleep(POLL_SECONDS)
 
 # --- Plan helpers ---
 def mark_task(task_id, status):
     try:
-        # call our python updater if present; else no-op
         updater = REPO / "scripts" / "plan" / "mark_task.py"
         if updater.exists():
-            # use venv python if running inside
             py = sys.executable or "python"
             subprocess.run([py, str(updater), task_id, status], cwd=str(REPO), check=False)
     except Exception:
@@ -172,6 +165,35 @@ def git_commit_logs(message):
         return True
     except Exception:
         return False
+
+# --- Minimal YAML display (no deps) ---
+def render_plan_html():
+    if not PLAN.exists():
+        return "<i>No pal_project_plan.yaml found.</i>"
+    lines = PLAN.read_text(encoding="utf-8", errors="replace").splitlines()
+    html = ["<table style='width:100%;border-collapse:collapse'>"]
+    html.append("<tr><th style='text-align:left;border-bottom:1px solid #333'>Phase</th><th style='text-align:left;border-bottom:1px solid #333'>Task</th><th style='text-align:left;border-bottom:1px solid #333'>Status</th><th style='text-align:left;border-bottom:1px solid #333'>Desc</th></tr>")
+    phase = None; phase_status = ""
+    for i,l in enumerate(lines):
+        m = re.match(r'\s*-\s*id:\s*([A-Za-z0-9\.]+)', l)
+        if m and '.' not in m.group(1):
+            phase = m.group(1); phase_status = ""
+            continue
+        if phase and 'status:' in l and not phase_status:
+            phase_status = l.split(':',1)[1].strip()
+            continue
+        tm = re.match(r'\s*-\s*id:\s*([A-Za-z0-9\.]+)', l)
+        if tm and '.' in tm.group(1):
+            task = tm.group(1); desc=""; status=""
+            # look ahead a few lines
+            for j in range(i+1, min(i+8,len(lines))):
+                if re.match(r'\s*-\s*id:', lines[j]):
+                    break
+                if 'desc:' in lines[j]: desc = lines[j].split(':',1)[1].strip()
+                if 'status:' in lines[j]: status = lines[j].split(':',1)[1].strip()
+            html.append(f"<tr><td style='vertical-align:top'>{phase} <span style='color:#9aa3ad'>[{phase_status}]</span></td><td>{task}</td><td>{status}</td><td>{desc}</td></tr>")
+    html.append("</table>")
+    return "\n".join(html)
 
 # --- UI ---
 CSS = """
@@ -196,7 +218,7 @@ def fmt_age(dt):
     if mins < 60: return f"{mins}m ago"
     return f"{mins//60}h ago"
 
-def page():
+def main_page():
     blocks = []
     for name in SERVICES.keys():
         running, pid, ok = service_status(name)
@@ -235,26 +257,13 @@ def page():
         <input type="hidden" name="toggle" value="1">
         <button>{"Disable" if AUTORESTART_ENABLED else "Enable"} Autorestart</button>
       </form>
+      <form method="GET" action="/tracker" target="_blank" style="display:inline;margin-left:10px">
+        <button>Open Tracker</button>
+      </form>
       <form method="POST" action="/commitlogs" style="display:inline;margin-left:10px">
         <button>Commit Logs</button>
       </form>
       <div style="margin-top:6px"><small class="m">Autorestart: {AUTORESTART_ENABLED}, interval={AUTORESTART_INTERVAL_SEC}s, max={AUTORESTART_MAX}</small></div>
-    </div>
-    """
-    tracker = """
-    <div class="card">
-      <b>Plan tracker</b><br>
-      <form method="POST" action="/plan" style="margin-top:6px">
-        <input name="task" placeholder="P2.T2" style="padding:6px;border-radius:6px;border:1px solid #2a3138;color:#e6e8eb;background:#171c21">
-        <select name="status">
-          <option>NotStarted</option>
-          <option>InProgress</option>
-          <option>Done</option>
-          <option>Blocked</option>
-        </select>
-        <button>Update</button>
-      </form>
-      <div style="margin-top:6px"><small class="m">Updates pal_project_plan.yaml via mark_task.py</small></div>
     </div>
     """
     logtail = """
@@ -269,10 +278,20 @@ def page():
     """
     html = f"""<html><head><meta charset='utf-8'><title>PAL Watchdog</title>
     <style>{CSS}</style></head><body>
-    <h2>PAL Watchdog</h2><p class="small">Controller, heartbeat, logs, and plan updates (localhost only).</p>
-    {''.join(blocks)}{url_block}{controls}{tracker}{logtail}
+    <h2>PAL Watchdog</h2><p class="small">Controller, heartbeat, logs, URL extraction, tracker link (localhost only).</p>
+    {''.join(blocks)}{url_block}{controls}{logtail}
     </body></html>"""
     return html
+
+def tracker_page():
+    return f"""<html><head><meta charset='utf-8'><title>PAL Tracker</title>
+    <meta http-equiv="refresh" content="5">
+    <style>{CSS}</style></head><body>
+    <h2>PAL Tracker</h2>
+    <p class="small">Auto-refresh every 5s. Source: pal_project_plan.yaml</p>
+    <div class="card">{render_plan_html()}</div>
+    <div class="card"><b>Quick Tunnel URL</b><br>{_TRYCLOUDFLARE_URL or '<i>(not yet detected)</i>'}</div>
+    </body></html>"""
 
 class Handler(BaseHTTPRequestHandler):
     def _send(self, html, code=200, ctype="text/html; charset=utf-8"):
@@ -289,7 +308,9 @@ class Handler(BaseHTTPRequestHandler):
                     data = f.read()
                 self._send(data, 200, "text/plain; charset=utf-8"); return
             self._send("<pre>No logfile</pre>",404); return
-        self._send(page())
+        if self.path.startswith("/tracker"):
+            self._send(tracker_page()); return
+        self._send(main_page())
 
     def do_POST(self):
         length = int(self.headers.get("content-length",0)); body = self.rfile.read(length).decode("utf-8"); params = parse_qs(body)
@@ -306,7 +327,6 @@ class Handler(BaseHTTPRequestHandler):
             with open(lf, "r", encoding="utf-8", errors="replace") as f: data = f.read().splitlines()[-250:]
             self._send("<html><body><pre>\n"+ "\n".join(data) + "\n</pre><p><a href='/'>Back</a></p></body></html>"); return
         if self.path == "/init":
-            # Start server then tunnel, wait for health and URL
             start_service("pal-dev-server")
             for _ in range(30):
                 running, _, ok = service_status("pal-dev-server")
@@ -328,15 +348,14 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/plan":
             task = params.get("task", [""])[0]; status = params.get("status", ["NotStarted"])[0]
             if task: mark_task(task, status)
-            self.send_response(303); self.send_header("Location","/"); self.endheaders(); return
+            self.send_response(303); self.send_header("Location","/"); self.end_headers(); return
 
 def run_ui(host="127.0.0.1", port=9001):
-    # start monitor
     t = threading.Thread(target=monitor_loop, daemon=True); t.start()
     httpd = HTTPServer((host, port), Handler)
     print(f"Watchdog UI listening at http://{host}:{port}")
     try: httpd.serve_forever()
-    except KeyboardInterrupt: 
+    except KeyboardInterrupt:
         global _MONITOR_STOP; _MONITOR_STOP = True
         print("Stopping UI")
 
