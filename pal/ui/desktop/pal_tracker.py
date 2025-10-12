@@ -252,3 +252,24 @@ try:
 except Exception:
     pass
 # === PAL_PLAN_LOADER_HOOK END ===
+
+# === PAL_PLAN_LOADER_DYN_HOOK START ===
+try:
+    import importlib.util, pathlib
+    _here = pathlib.Path(__file__).resolve().parent
+    _modp = _here / "pal_tracker_plan_loader.py"
+    if _modp.exists():
+        _spec = importlib.util.spec_from_file_location("pal_tracker_plan_loader_dyn", str(_modp))
+        _mod  = importlib.util.module_from_spec(_spec)
+        assert _spec and _spec.loader
+        _spec.loader.exec_module(_mod)  # type: ignore[attr-defined]
+        if hasattr(_mod, "install"):
+            _mod.install()
+except Exception as _e:
+    try:
+        (_here.parent.parent / "tmp").mkdir(parents=True, exist_ok=True)
+        with (_here.parent.parent/"tmp"/"bridge_tracker.log").open("a", encoding="utf-8") as f:
+            f.write(f"[PlanLoader][hook ERR] {type(_e).__name__}: {_e}\n")
+    except Exception:
+        pass
+# === PAL_PLAN_LOADER_DYN_HOOK END ===
