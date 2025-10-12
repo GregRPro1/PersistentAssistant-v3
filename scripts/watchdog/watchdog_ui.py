@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, sys, time, subprocess, datetime, shutil, re, threading
+import os, sys, time, subprocess, datetime, shutil, re, threading, urllib.parse, webbrowser, json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 from pathlib import Path
@@ -10,11 +10,21 @@ REPO = Path(r"C:\_Repos\PersistentAssistant")
 LOG_DIR = REPO / "logs"
 WD_LOG = LOG_DIR / "watchdog"
 CF_LOG_DIR = LOG_DIR / "cloudflared"
-PLAN = REPO / "pal_project_plan.yaml"
+CFG_PATH = REPO / "watchdog" / "watchdog.json"
 POLL_SECONDS = 5
 AUTORESTART_ENABLED = False
 AUTORESTART_INTERVAL_SEC = 60
 AUTORESTART_MAX = 5  # -1 for infinite
+
+def load_cfg():
+    try:
+        return json.loads(CFG_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {"tracker_script_path": str(REPO/"scripts"/"tracker"/"pal_tracker.py"),
+                "tracker_port": 9002,
+                "tracker_open_url": "http://127.0.0.1:{port}"}
+
+CFG = load_cfg()
 
 # ---------- Setup ----------
 for d in (WD_LOG, CF_LOG_DIR):
@@ -167,6 +177,26 @@ def git_commit_logs(msg):
     except Exception:
         return False
 
+def start_tracker():
+    starter = REPO / "scripts" / "tracker" / "start_pal_tracker.py"
+    if not starter.exists():
+        return "starter missing"
+    env = _child_env()
+    p = subprocess.Popen(["python", str(starter)], cwd=str(starter.parent), env=env,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return f"tracker-starter pid={p.pid}"
+
+def tracker_url():
+    port = CFG.get("tracker_port", 9002)
+    template = CFG.get("tracker_open_url", "http://127.0.0.1:{port}")
+    return template.format(port=port)
+
+def whatsapp_redirect_url():
+    if not _TRYCLOUDFLARE_URL:
+        return None
+    msg = f"PAL tunnel: {_TRYCLOUDFLARE_URL}"
+    return "https://wa.me/?text=" + urllib.parse.quote(msg)
+
 # ---------- UI ----------
 CSS = """
 :root{{--bg:#0b0d10;--fg:#e6e8eb;--muted:#9aa3ad;--card:#12161a;--accent:#4ea1ff;--good:#46d369;--bad:#ff6b6b}}
@@ -217,7 +247,9 @@ def main_page():
       <b>Global controls</b><br>
       <form method="POST" action="/init" style="display:inline"><button name="action" value="initall">Initialize All</button></form>
       <form method="POST" action="/autorestart" style="display:inline;margin-left:10px"><button>{"Disable" if AUTORESTART_ENABLED else "Enable"} Autorestart</button></form>
-      <form method="GET" action="/tracker" target="_blank" style="display:inline;margin-left:10px"><button>Open Tracker</button></form>
+      <form method="POST" action="/start-tracker" style="display:inline;margin-left:10px"><button>Start Tracker</button></form>
+      <a href="{tracker_url()}" target="_blank" style="margin-left:10px"><button type="button">Open Tracker</button></a>
+      <form method="GET" action="/share-wa" style="display:inline;margin-left:10px"><button type="submit">Send URL via WhatsApp</button></form>
       <form method="POST" action="/commitlogs" style="display:inline;margin-left:10px"><button>Commit Logs</button></form>
       <div style="margin-top:6px"><small class="m">Autorestart: {AUTORESTART_ENABLED}, interval={AUTORESTART_INTERVAL_SEC}s, max={AUTORESTART_MAX}</small></div>
     </div>
@@ -229,43 +261,9 @@ def main_page():
       <button type="submit">Tail log</button>
     </form>"""
     html = f"""<html><head><meta charset='utf-8'><title>PAL Watchdog</title><style>{CSS}</style></head>
-    <body><h2>PAL Watchdog</h2><p class="small">Controller, heartbeat, logs, URL extraction, tracker link (localhost only).</p>
+    <body><h2>PAL Watchdog</h2><p class="small">Controller, heartbeat, logs, URL sharing, and tracker linkage (localhost only).</p>
     {''.join(blocks)}{url_block}{controls}{logtail}</body></html>"""
     return html
-
-def render_plan():
-    if not PLAN.exists():
-        return "<i>No pal_project_plan.yaml found.</i>"
-    lines = PLAN.read_text(encoding="utf-8", errors="replace").splitlines()
-    html = ["<table style='width:100%;border-collapse:collapse'>"]
-    html.append("<tr><th style='text-align:left;border-bottom:1px solid #333'>Phase</th><th style='text-align:left;border-bottom:1px solid #333'>Task</th><th style='text-align:left;border-bottom:1px solid #333'>Status</th><th style='text-align:left;border-bottom:1px solid #333'>Desc</th></tr>")
-    phase = None; phase_status = ""
-    for i,l in enumerate(lines):
-        m = re.match(r'\s*-\s*id:\s*([A-Za-z0-9\.]+)', l)
-        if m and '.' not in m.group(1):
-            phase = m.group(1); phase_status = ""
-            continue
-        if phase and 'status:' in l and not phase_status:
-            phase_status = l.split(':',1)[1].strip()
-            continue
-        tm = re.match(r'\s*-\s*id:\s*([A-Za-z0-9\.]+)', l)
-        if tm and '.' in tm.group(1):
-            task = tm.group(1); desc=""; status=""
-            for j in range(i+1, min(i+8,len(lines))):
-                if re.match(r'\s*-\s*id:', lines[j]): break
-                if 'desc:' in lines[j]: desc = lines[j].split(':',1)[1].strip()
-                if 'status:' in lines[j]: status = lines[j].split(':',1)[1].strip()
-            html.append(f"<tr><td style='vertical-align:top'>{phase} <span style='color:#9aa3ad'>[{phase_status}]</span></td><td>{task}</td><td>{status}</td><td>{desc}</td></tr>")
-    html.append("</table>")
-    return "\n".join(html)
-
-def tracker_page():
-    return f"""<html><head><meta charset='utf-8'><title>PAL Tracker</title>
-    <meta http-equiv="refresh" content="5"><style>{CSS}</style></head>
-    <body><h2>PAL Tracker</h2><p class="small">Auto-refresh every 5s. Source: pal_project_plan.yaml</p>
-    <div class="card">{render_plan()}</div>
-    <div class="card"><b>Quick Tunnel URL</b><br>{_TRYCLOUDFLARE_URL or '<i>(not yet detected)</i>'}</div>
-    </body></html>"""
 
 class Handler(BaseHTTPRequestHandler):
     def _send(self, html, code=200, ctype="text/html; charset=utf-8"):
@@ -281,8 +279,11 @@ class Handler(BaseHTTPRequestHandler):
                 with open(lf, "rb") as f: data = f.read()
                 self._send(data, 200, "text/plain; charset=utf-8"); return
             self._send("<pre>No logfile</pre>",404); return
-        if self.path.startswith("/tracker"):
-            self._send(tracker_page()); return
+        if self.path.startswith("/share-wa"):
+            link = whatsapp_redirect_url()
+            if not link:
+                self._send("<html><body><pre>No tunnel URL yet.</pre><a href='/'>Back</a></body></html>"); return
+            self.send_response(303); self.send_header("Location", link); self.end_headers(); return
         self._send(main_page())
 
     def do_POST(self):
@@ -315,18 +316,12 @@ class Handler(BaseHTTPRequestHandler):
             global AUTORESTART_ENABLED
             AUTORESTART_ENABLED = not AUTORESTART_ENABLED
             self.send_response(303); self.send_header("Location","/"); self.end_headers(); return
+        if self.path == "/start-tracker":
+            start_tracker()
+            self.send_response(303); self.send_header("Location","/"); self.end_headers(); return
         if self.path == "/commitlogs":
             ok = git_commit_logs("PAL: commit logs via watchdog UI")
             self._send(f"<html><body><pre>commit {'ok' if ok else 'failed'}</pre><a href='/'>Back</a></body></html>"); return
-        if self.path == "/plan":
-            # POST only updates plan via separate mark_task.py already present in repo.
-            task = params.get("task", [""])[0]; status = params.get("status", ["NotStarted"])[0]
-            if task:
-                updater = REPO / "scripts" / "plan" / "mark_task.py"
-                if updater.exists():
-                    py = sys.executable or "python"
-                    subprocess.run([py, str(updater), task, status], cwd=str(REPO), check=False)
-            self.send_response(303); self.send_header("Location","/"); self.end_headers(); return
 
 def run_ui(host="127.0.0.1", port=9001):
     t = threading.Thread(target=monitor_loop, daemon=True); t.start()

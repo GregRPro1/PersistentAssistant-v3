@@ -1,58 +1,33 @@
 plan_id: PAL20251012
-title: PAL: Cloudflared Tunnel + Watchdog UI Bring-Up
-last_updated_utc: 2025-10-12T09:57:46.864732
+title: PAL: Tunnel + Watchdog + Full Tracker
+last_updated_utc: 2025-10-12T10:49:54.999604
 phases:
   - id: P2
     title: Quick Tunnel Smoke (no login)
     status: InProgress
     tasks:
       - id: P2.T1
-        desc: Ensure dev server healthy on 127.0.0.1:8787
+        desc: Local dev server healthy on 127.0.0.1:8787
         status: Done
       - id: P2.T2
-        desc: Start Quick Tunnel via Watchdog UI (logs in logs/cloudflared)
+        desc: Start Quick Tunnel (URL detected)
         status: InProgress
       - id: P2.T3
-        desc: Parse latest log for trycloudflare URL
+        desc: Remote HEAD on trycloudflare URL returns 200
         status: NotStarted
-      - id: P2.T4
-        desc: Smoke: HEAD https://<trycloudflare> returns 200
-        status: NotStarted
-  - id: P3
-    title: Named Tunnel Auth & Creation
-    status: NotStarted
+  - id: P7
+    title: Watchdog + Full Tracker + Sharing
+    status: InProgress
     tasks:
-      - id: P3.T1
-        desc: cloudflared tunnel login (browser auth)
-        status: NotStarted
-      - id: P3.T2
-        desc: cloudflared tunnel create pal-dev
-        status: NotStarted
-      - id: P3.T3
-        desc: Record generated UUID
-        status: NotStarted
-  - id: P4
-    title: Config + DNS Route
-    status: NotStarted
-    tasks:
-      - id: P4.T1
-        desc: Write %USERPROFILE%\.cloudflared\config.yml mapping 127.0.0.1:8787
-        status: NotStarted
-      - id: P4.T2
-        desc: cloudflared tunnel route dns pal-dev <HOSTNAME>
-        status: NotStarted
-  - id: P6
-    title: Watchdog Integration (Single-Supervisor)
-    status: NotStarted
-    tasks:
-      - id: P6.T1
-        desc: Enable named tunnel in watchdog UI
-        status: NotStarted
-      - id: P6.T2
-        desc: Start/Stop/Restart via UI; verify logs/health
-        status: NotStarted
+      - id: P7.T1
+        desc: Integrate pal_tracker.py (start from watchdog, open tab, auto-refresh)
+        status: InProgress
+      - id: P7.T2
+        desc: WhatsApp share button sends current tunnel URL via wa.me
+        status: InProgress
+      - id: P7.T3
+        desc: Commit logs flow from watchdog
+        status: InProgress
 notes:
-  - Status tracked here. Update via scripts/plan/mark_task.py
-  - Pass criteria:
-    - P2.T1: curl -I http://127.0.0.1:8787 -> 200
-    - P2.T4: curl -I https://<trycloudflare> -> 200
+  - Tracker config is in watchdog\watchdog.json (tracker_script_path, tracker_port).
+  - Share uses https://wa.me/?text= prefilled message (WhatsApp Web).
