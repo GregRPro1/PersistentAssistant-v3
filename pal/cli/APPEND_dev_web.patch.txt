@@ -1,0 +1,17 @@
+
+# pal/cli/main.py (append-only patch for dev-web command)
+from pathlib import Path
+import subprocess, sys, os
+import typer
+from rich.console import Console
+
+app: typer.Typer  # declared in original file
+console = Console()
+
+@app.command("dev-web")
+def dev_web(host: str = typer.Option("127.0.0.1"), port: int = typer.Option(8787), version: str = typer.Option("pal-0.1.0")):
+    """Run the minimal placeholder web with /healthz (for local testing)."""
+    py = sys.executable or "python"
+    cmd = [py, "current/server.py", host, str(port), version]
+    console.print(f"[cyan]Starting dev web:[/cyan] {' '.join(cmd)}")
+    subprocess.run(cmd)
