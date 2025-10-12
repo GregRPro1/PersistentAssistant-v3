@@ -1,0 +1,35 @@
+{
+  "pal-dev-server": {
+    "cmd": [
+      "python",
+      "current/server_wrapper.py"
+    ],
+    "port": 8787,
+    "health": "http://127.0.0.1:8787",
+    "restart": true
+  },
+  "pal-tracker": {
+    "cmd": [
+      "python",
+      "scripts/tracker/pal_tracker.py",
+      "--port",
+      "9002"
+    ],
+    "port": 9002,
+    "health": "http://127.0.0.1:9002",
+    "restart": true
+  },
+  "cloudflared-tunnel": {
+    "cmd": [
+      "cloudflared",
+      "tunnel",
+      "--url",
+      "http://127.0.0.1:8787",
+      "--loglevel",
+      "debug"
+    ],
+    "port": null,
+    "health": "logmatch:https://[A-Za-z0-9\\-\\.]+\\.trycloudflare\\.com",
+    "restart": true
+  }
+}

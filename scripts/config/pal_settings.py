@@ -5,15 +5,25 @@ from pathlib import Path
 DEFAULTS = {
     "ports": {"watchdog_ui": 9001, "dev_server": 8787, "tracker": 9002},
     "paths": {"repo_root": r"C:\_Repos\PersistentAssistant",
-              "tracker_script": r"C:\_Repos\PersistentAssistant\scripts\tracker\pal_tracker.py"}
+              "tracker_script": r"C:\_Repos\PersistentAssistant\scripts\tracker\pal_tracker.py"},
+    "lifecycle": {
+        "check_interval_sec": 30,
+        "restart_limit_count": 3,
+        "restart_limit_window_sec": 300,
+        "backoff_sec": 120,
+        "auto_run_smoke": True,
+        "auto_git_push": True
+    },
+    "autostart": {"enabled": False, "task_name": "PAL_Watchdog"}
 }
 
+CFG_PATH = Path(r"C:\_Repos\PersistentAssistant\config\pal_settings.yaml")
+
 def load_settings():
-    cfg_path = Path(r"C:\_Repos\PersistentAssistant\config\pal_settings.yaml")
     data = {}
     try:
-        if cfg_path.exists():
-            with open(cfg_path, "r", encoding="utf-8") as f:
+        if CFG_PATH.exists():
+            with open(CFG_PATH, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
     except Exception:
         data = {}
