@@ -1,0 +1,17 @@
+
+/* Desktop layout polish */
+@media (min-width: 900px) {
+  .pal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(420px, 1fr));
+    gap: 18px;
+    align-items: start;
+  }
+}
+.pal-card { border-radius: 18px; padding: 18px; }
+.pal-card .btn { min-width: 120px; }
+.pal-card .btn + .btn { margin-left: 8px; }
+.settings-form { display: grid; grid-template-columns: 200px 1fr; gap: 10px 14px; }
+.settings-form label { align-self: center; }
+input[type="text"], input[type="search"] { width: 100%; }
+

@@ -323,3 +323,17 @@ try:
         return p
 except Exception:
     pass
+
+# === PAL_UX_DYNAMIC_INJECT START ===
+try:
+    import importlib.util, pathlib
+    _p = pathlib.Path(__file__).with_name("_ux_inject.py")
+    if _p.exists():
+        _spec = importlib.util.spec_from_file_location("pal_ux_inject", str(_p))
+        _mod  = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)  # type: ignore
+        if 'app' in globals():
+            _mod.install_ux(app)
+except Exception:
+    pass
+# === PAL_UX_DYNAMIC_INJECT END ===
