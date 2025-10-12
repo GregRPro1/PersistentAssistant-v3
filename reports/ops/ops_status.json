@@ -1,11 +1,11 @@
 {
-  "ts": "2025-10-12T09:00:32",
+  "ts": "2025-10-12T09:01:52",
   "web": {
     "host": "127.0.0.1",
     "port": 8787,
-    "port_ok": false,
+    "port_ok": true,
     "health_url": "http://127.0.0.1:8787/healthz",
-    "health_ok": false
+    "health_ok": true
   },
   "tunnel": {
     "url": "",

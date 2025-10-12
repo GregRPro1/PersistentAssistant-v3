@@ -46,6 +46,11 @@ def main(argv):
     with socketserver.TCPServer((host, port), Handler) as httpd:
         httpd.version = version
         print(f"PAL Dev Server listening on http://{host}:{port} (version {version})")
+        print(
+          "BLOCKING: PAL Dev Server is running. "
+          "Press Ctrl+C to stop. If you stop it, the tunnel and remote access will fail "
+          "until a web server is listening again on this port."
+        )
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
