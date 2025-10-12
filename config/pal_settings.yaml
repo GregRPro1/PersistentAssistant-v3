@@ -1,0 +1,8 @@
+# PAL centralized settings
+ports:
+  watchdog_ui: 9001
+  dev_server: 8787
+  tracker: 9002   # change here if pal_tracker uses a different port
+paths:
+  repo_root: C:\_Repos\PersistentAssistant
+  tracker_script: C:\_Repos\PersistentAssistant\scripts\tracker\pal_tracker.py

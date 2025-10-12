@@ -1,52 +1,48 @@
 #!/usr/bin/env python3
-import os, sys, time, subprocess, datetime, shutil, re, threading, urllib.parse, webbrowser, json
+import os, sys, time, subprocess, datetime, shutil, re, threading, urllib.parse, json, socket
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 from pathlib import Path
 import urllib.request
 
-# ---------- Config ----------
-REPO = Path(r"C:\_Repos\PersistentAssistant")
+sys.path.insert(0, str(Path(r"C:\_Repos\PersistentAssistant\scripts\config")))
+import pal_settings  # type: ignore
+
+SET = pal_settings.load_settings()
+REPO = Path(SET["paths"]["repo_root"])
+DEV_PORT = int(SET["ports"]["dev_server"])
+WD_PORT = int(SET["ports"]["watchdog_ui"])
+TRACKER_PORT_PREF = int(SET["ports"]["tracker"])
+
 LOG_DIR = REPO / "logs"
 WD_LOG = LOG_DIR / "watchdog"
 CF_LOG_DIR = LOG_DIR / "cloudflared"
-CFG_PATH = REPO / "watchdog" / "watchdog.json"
+TRACKER_LOG_DIR = LOG_DIR / "tracker"
+TRACKER_ENDPOINT = TRACKER_LOG_DIR / "endpoint.json"
+
 POLL_SECONDS = 5
 AUTORESTART_ENABLED = False
 AUTORESTART_INTERVAL_SEC = 60
-AUTORESTART_MAX = 5  # -1 for infinite
+AUTORESTART_MAX = 5
 
-def load_cfg():
-    try:
-        return json.loads(CFG_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        return {"tracker_script_path": str(REPO/"scripts"/"tracker"/"pal_tracker.py"),
-                "tracker_port": 9002,
-                "tracker_open_url": "http://127.0.0.1:{port}"}
-
-CFG = load_cfg()
-
-# ---------- Setup ----------
-for d in (WD_LOG, CF_LOG_DIR):
+for d in (WD_LOG, CF_LOG_DIR, TRACKER_LOG_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 def utcnow():
     return datetime.datetime.now(datetime.timezone.utc)
 
-def ts():
-    return utcnow().strftime("%Y%m%d_%H%M%S")
+def ts(): return utcnow().strftime("%Y%m%d_%H%M%S")
 
-# ---------- Services ----------
 SERVICES = {
     "pal-dev-server": {
         "cmd": ["python", str(REPO / "current" / "server_wrapper.py")],
         "cwd": str(REPO),
-        "ports": [8787],
-        "health": "http://127.0.0.1:8787",
+        "ports": [DEV_PORT],
+        "health": f"http://127.0.0.1:{DEV_PORT}",
         "logdir": WD_LOG,
     },
     "quick-tunnel": {
-        "cmd": ["cloudflared", "tunnel", "--url", "http://127.0.0.1:8787", "--loglevel", "debug"],
+        "cmd": ["cloudflared", "tunnel", "--url", f"http://127.0.0.1:{DEV_PORT}", "--loglevel", "debug"],
         "cwd": str(REPO),
         "ports": [],
         "health": "",
@@ -68,8 +64,7 @@ def log_path_for(name):
 
 def _child_env():
     env = os.environ.copy()
-    env["PYTHONUTF8"] = "1"
-    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUTF8"] = "1"; env["PYTHONIOENCODING"] = "utf-8"
     return env
 
 def start_service(name):
@@ -81,16 +76,13 @@ def start_service(name):
     cmd = " ".join(svc["cmd"]) if os.name == "nt" else svc["cmd"]
     p = subprocess.Popen(cmd, cwd=svc["cwd"], stdout=f, stderr=f, stdin=subprocess.DEVNULL,
                          shell=(os.name=="nt"), env=_child_env())
-    _HANDLES[name] = p
-    _LOGFILES[name] = logfile
-    _RESTARTS[name] = 0
+    _HANDLES[name] = p; _LOGFILES[name] = logfile; _RESTARTS[name] = 0
     return f"started {name} pid={p.pid} log={logfile.name}"
 
 def stop_service(name):
     p = _HANDLES.get(name)
     if not p or p.poll() is not None:
-        _HANDLES[name] = None
-        return f"{name} not running"
+        _HANDLES[name] = None; return f"{name} not running"
     try:
         p.terminate()
         for _ in range(25):
@@ -99,13 +91,10 @@ def stop_service(name):
         if p.poll() is None: p.kill()
     except Exception as e:
         return f"error stopping {name}: {e}"
-    _HANDLES[name] = None
-    return f"stopped {name}"
+    _HANDLES[name] = None; return f"stopped {name}"
 
 def restart_service(name):
-    stop_service(name)
-    time.sleep(0.2)
-    return start_service(name)
+    stop_service(name); time.sleep(0.2); return start_service(name)
 
 def _head_ok(url, timeout=2.5):
     try:
@@ -119,35 +108,25 @@ def service_status(name):
     p = _HANDLES.get(name)
     running = bool(p and p.poll() is None)
     pid = p.pid if running else None
-    healthy = False
-    url = SERVICES[name].get("health") or ""
-    if url and running:
-        healthy = _head_ok(url)
-    elif running:
-        healthy = True
-    if healthy:
-        _LAST_OK[name] = utcnow()
-    _LAST_CHECK[name] = utcnow()
-    return running, pid, healthy
+    ok = False; url = SERVICES[name].get("health") or ""
+    if url and running: ok = _head_ok(url)
+    elif running: ok = True
+    if ok: _LAST_OK[name] = utcnow()
+    _LAST_CHECK[name] = utcnow(); return running, pid, ok
 
-# ---------- URL extraction ----------
 URL_PAT = re.compile(r"https://[A-Za-z0-9\-\.]+\.trycloudflare\.com")
 def update_trycloudflare_url():
     global _TRYCLOUDFLARE_URL, _URL_LAST_SEEN
     logs = sorted(CF_LOG_DIR.glob("quick-tunnel_*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
     if not logs: return
-    path = logs[0]
     try:
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
+        with open(logs[0], "r", encoding="utf-8", errors="replace") as f:
             for line in f:
                 m = URL_PAT.search(line)
                 if m:
-                    _TRYCLOUDFLARE_URL = m.group(0)
-                    _URL_LAST_SEEN = utcnow()
-    except Exception:
-        pass
+                    _TRYCLOUDFLARE_URL = m.group(0); _URL_LAST_SEEN = utcnow()
+    except Exception: pass
 
-# ---------- Monitor ----------
 def monitor_loop():
     while not _MONITOR_STOP:
         for name in SERVICES:
@@ -157,10 +136,8 @@ def monitor_loop():
                 if not last or (utcnow()-last).total_seconds() >= AUTORESTART_INTERVAL_SEC:
                     if AUTORESTART_MAX < 0 or _RESTARTS[name] < AUTORESTART_MAX:
                         restart_service(name); _RESTARTS[name] += 1
-        update_trycloudflare_url()
-        time.sleep(POLL_SECONDS)
+        update_trycloudflare_url(); time.sleep(POLL_SECONDS)
 
-# ---------- Helpers ----------
 def fmt_age(dt):
     if not dt: return "never"
     secs = int((utcnow()-dt).total_seconds())
@@ -174,30 +151,31 @@ def git_commit_logs(msg):
         subprocess.run(["git","-C",str(REPO),"add","logs"], check=False)
         subprocess.run(["git","-C",str(REPO),"commit","-m",msg], check=False)
         return True
-    except Exception:
-        return False
+    except Exception: return False
+
+def read_tracker_endpoint():
+    if TRACKER_ENDPOINT.exists():
+        try:
+            data = json.loads(TRACKER_ENDPOINT.read_text(encoding="utf-8"))
+            url = data.get("url")
+            if url: return url
+        except Exception: pass
+    # fallback to configured preferred
+    return f"http://127.0.0.1:{TRACKER_PORT_PREF}"
 
 def start_tracker():
     starter = REPO / "scripts" / "tracker" / "start_pal_tracker.py"
-    if not starter.exists():
-        return "starter missing"
+    if not starter.exists(): return "starter missing"
     env = _child_env()
     p = subprocess.Popen(["python", str(starter)], cwd=str(starter.parent), env=env,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return f"tracker-starter pid={p.pid}"
 
-def tracker_url():
-    port = CFG.get("tracker_port", 9002)
-    template = CFG.get("tracker_open_url", "http://127.0.0.1:{port}")
-    return template.format(port=port)
-
 def whatsapp_redirect_url():
-    if not _TRYCLOUDFLARE_URL:
-        return None
+    if not _TRYCLOUDFLARE_URL: return None
     msg = f"PAL tunnel: {_TRYCLOUDFLARE_URL}"
     return "https://wa.me/?text=" + urllib.parse.quote(msg)
 
-# ---------- UI ----------
 CSS = """
 :root{{--bg:#0b0d10;--fg:#e6e8eb;--muted:#9aa3ad;--card:#12161a;--accent:#4ea1ff;--good:#46d369;--bad:#ff6b6b}}
 *{{box-sizing:border-box}} body{{font-family:Segoe UI,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:24px}}
@@ -242,13 +220,14 @@ def main_page():
       <div style="margin-top:6px">{_TRYCLOUDFLARE_URL or '<i>(not yet detected)</i>'}</div>
       <div style="margin-top:6px"><small class="m">last seen: {fmt_age(_URL_LAST_SEEN)}</small></div>
     </div>"""
+    turl = read_tracker_endpoint()
     controls = f"""
     <div class="card">
       <b>Global controls</b><br>
       <form method="POST" action="/init" style="display:inline"><button name="action" value="initall">Initialize All</button></form>
       <form method="POST" action="/autorestart" style="display:inline;margin-left:10px"><button>{"Disable" if AUTORESTART_ENABLED else "Enable"} Autorestart</button></form>
       <form method="POST" action="/start-tracker" style="display:inline;margin-left:10px"><button>Start Tracker</button></form>
-      <a href="{tracker_url()}" target="_blank" style="margin-left:10px"><button type="button">Open Tracker</button></a>
+      <a href="{turl}" target="_blank" style="margin-left:10px"><button type="button">Open Tracker</button></a>
       <form method="GET" action="/share-wa" style="display:inline;margin-left:10px"><button type="submit">Send URL via WhatsApp</button></form>
       <form method="POST" action="/commitlogs" style="display:inline;margin-left:10px"><button>Commit Logs</button></form>
       <div style="margin-top:6px"><small class="m">Autorestart: {AUTORESTART_ENABLED}, interval={AUTORESTART_INTERVAL_SEC}s, max={AUTORESTART_MAX}</small></div>
@@ -261,7 +240,7 @@ def main_page():
       <button type="submit">Tail log</button>
     </form>"""
     html = f"""<html><head><meta charset='utf-8'><title>PAL Watchdog</title><style>{CSS}</style></head>
-    <body><h2>PAL Watchdog</h2><p class="small">Controller, heartbeat, logs, URL sharing, and tracker linkage (localhost only).</p>
+    <body><h2>PAL Watchdog</h2><p class="small">Dark UI • Central config • URL sharing • Tracker linkage.</p>
     {''.join(blocks)}{url_block}{controls}{logtail}</body></html>"""
     return html
 
@@ -280,9 +259,9 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(data, 200, "text/plain; charset=utf-8"); return
             self._send("<pre>No logfile</pre>",404); return
         if self.path.startswith("/share-wa"):
-            link = whatsapp_redirect_url()
-            if not link:
+            if not _TRYCLOUDFLARE_URL:
                 self._send("<html><body><pre>No tunnel URL yet.</pre><a href='/'>Back</a></body></html>"); return
+            link = "https://wa.me/?text=" + urllib.parse.quote(f"PAL tunnel: {_TRYCLOUDFLARE_URL}")
             self.send_response(303); self.send_header("Location", link); self.end_headers(); return
         self._send(main_page())
 
@@ -323,12 +302,11 @@ class Handler(BaseHTTPRequestHandler):
             ok = git_commit_logs("PAL: commit logs via watchdog UI")
             self._send(f"<html><body><pre>commit {'ok' if ok else 'failed'}</pre><a href='/'>Back</a></body></html>"); return
 
-def run_ui(host="127.0.0.1", port=9001):
+def run_ui(host="127.0.0.1", port=WD_PORT):
     t = threading.Thread(target=monitor_loop, daemon=True); t.start()
     httpd = HTTPServer((host, port), Handler)
     print(f"Watchdog UI listening at http://{host}:{port}")
-    try:
-        httpd.serve_forever()
+    try: httpd.serve_forever()
     except KeyboardInterrupt:
         global _MONITOR_STOP; _MONITOR_STOP = True
         print("Stopping UI")
