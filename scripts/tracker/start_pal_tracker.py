@@ -1,50 +1,71 @@
-#!/usr/bin/env python3
-import os, sys, subprocess, time, json, socket
+from __future__ import annotations
+import os, sys, time, json, subprocess, threading
 from pathlib import Path
 
-sys.path.insert(0, str(Path(r"C:\_Repos\PersistentAssistant\scripts\config")))
-import pal_settings  # type: ignore
-
-REPO = Path(pal_settings.get("paths.repo_root"))
-TRACKER = Path(pal_settings.get("paths.tracker_script"))
-PORT = int(pal_settings.get("ports.tracker", 9002))
-LOG_DIR = REPO / "logs" / "tracker"
+REPO = Path(os.environ.get('PA_REPO', r'C:\_Repos\PersistentAssistant')).resolve()
+PY   = sys.executable or "python"
+TRACKER = REPO / 'pal' / 'ui' / 'desktop' / 'pal_tracker.py'
+LOG_DIR = REPO / 'tmp'
 LOG_DIR.mkdir(parents=True, exist_ok=True)
-ENDPOINT_JSON = LOG_DIR / "endpoint.json"
+LOG_FILE = LOG_DIR / 'bridge_tracker.log'
+OPS_DIR = REPO / 'reports' / 'ops'
+OPS_DIR.mkdir(parents=True, exist_ok=True)
+OPS_JSON = OPS_DIR / 'ops_status.json'
 
-def is_listening(port, host="127.0.0.1"):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.settimeout(0.3)
-        try: s.connect((host, port)); return True
-        except Exception: return False
+def _append(msg: str):
+    ts = time.strftime('%Y-%m-%d %H:%M:%S')
+    with LOG_FILE.open('a', encoding='utf-8') as f:
+        f.write(f"[{ts}] {msg}\n")
 
-def write_endpoint(port):
-    ENDPOINT_JSON.write_text(json.dumps({"host":"127.0.0.1","port":port,"url":f"http://127.0.0.1:{port}"}), encoding="utf-8")
+def _read_url_candidates():
+    urls = {}
+    for name in ('tracker_tunnel_url.txt', 'dev_tunnel_url.txt', 'tunnel_url.txt'):
+        p = REPO/'tmp'/name
+        if p.exists():
+            try:
+                v = p.read_text(encoding='utf-8').strip()
+                if v:
+                    key = 'tracker' if 'tracker' in name else ('dev' if 'dev' in name else 'unknown')
+                    urls[key] = v
+            except Exception:
+                pass
+    return urls
+
+def _emit_ops():
+    payload = {
+        'ts': int(time.time()),
+        'heartbeat': {'tracker':'alive'},
+        'env': {'PAL_MASTER': os.environ.get('PAL_MASTER'), 'PAL_CHILD': os.environ.get('PAL_CHILD')},
+        'urls': _read_url_candidates(),
+    }
+    OPS_JSON.write_text(json.dumps(payload, indent=2), encoding='utf-8')
+    _append(f"[Bridge] ops_status updated: {payload['urls']}")
+
+def _hb_loop():
+    while True:
+        try:
+            _emit_ops()
+        except Exception as e:
+            _append(f"[Bridge][ERR] {e!r}")
+        time.sleep(5)
 
 def main():
     if not TRACKER.exists():
-        print("pal_tracker.py not found:", TRACKER); sys.exit(2)
-    env = os.environ.copy()
-    env["PYTHONUTF8"] = "1"; env["PYTHONIOENCODING"] = "utf-8"
-    # Try preferred port from central config
+        _append(f"[ERR] tracker not found at {TRACKER}")
+        sys.exit(2)
+    _append(f"[Start] launching {TRACKER}")
+    t = threading.Thread(target=_hb_loop, name='PAL-Bridge-HB', daemon=True)
+    t.start()
+    # Launch tracker and mirror stdout/stderr into our log
+    proc = subprocess.Popen([PY, str(TRACKER)], cwd=str(TRACKER.parent), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     try:
-        p = subprocess.Popen(["python", str(TRACKER), "--port", str(PORT)], cwd=str(TRACKER.parent), env=env,
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for line in proc.stdout:
+            _append(line.rstrip())
     except Exception:
-        p = subprocess.Popen(["python", str(TRACKER)], cwd=str(TRACKER.parent), env=env,
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    # Wait for it to come up and discover port
-    candidates = [PORT] + list(range(PORT, PORT+6))  # small window if tracker increments port on collision
-    start = time.time()
-    found = None
-    while time.time()-start < 8:
-        for c in candidates:
-            if is_listening(c):
-                found = c; break
-        if found: break
-        time.sleep(0.4)
-    if found: write_endpoint(found); print("tracker on", found)
-    else: print("tracker not detected yet")
-    sys.exit(0)
+        pass
+    rc = proc.wait()
+    _append(f"[Exit] tracker rc={rc}")
+    sys.exit(rc)
 
-if __name__=="__main__": main()
+if __name__ == '__main__':
+    main()

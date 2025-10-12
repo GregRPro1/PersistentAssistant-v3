@@ -4,7 +4,7 @@ ports:
   tracker: 9002
 paths:
   repo_root: C:\_Repos\PersistentAssistant
-  tracker_script: C:\\_Repos\\PersistentAssistant\\pal\\ui\\desktop\\pal_tracker.py
+  tracker_script: C:\\_Repos\\PersistentAssistant\\scripts\\tracker\\start_pal_tracker.py
 whatsapp:
   number: 447XXXXXXXXX
   cloud_api_enabled: false
