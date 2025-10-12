@@ -1,0 +1,11 @@
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\_Repos\PersistentAssistant\tools\py\agentic\patch_apply.py", line 144, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "C:\_Repos\PersistentAssistant\tools\py\agentic\patch_apply.py", line 55, in main
+    with open(args.proposal, "r", encoding="utf-8") as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'tmp/patches/proposal_for_test.json'

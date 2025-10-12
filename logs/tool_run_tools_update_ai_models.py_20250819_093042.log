@@ -1,0 +1,15 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/update_ai_models.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+RETURNCODE: 1
+
+---- STDERR ----
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\update_ai_models.py", line 140, in <module>
+    main()
+    ~~~~^^
+  File "C:\_Repos\PersistentAssistant\tools\update_ai_models.py", line 133, in main
+    print("SUMMARY: " + json.dumps({"enriched":enriched,"cached":cached,"failed":failed,"promoted":True}, separators=(",", ":")))
+                        ^^^^
+NameError: name 'json' is not defined. Did you forget to import 'json'?
+

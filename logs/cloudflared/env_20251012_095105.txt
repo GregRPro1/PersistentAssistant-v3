@@ -1,0 +1,280 @@
+=== ENV DIAGNOSTICS 20251012_095105 ===
+
+# PowerShell
+
+Name                           Value
+----                           -----
+PSVersion                      7.5.3
+PSEdition                      Core
+GitCommitId                    7.5.3
+OS                             Microsoft Windows 10.0.26120
+Platform                       Win32NT
+PSCompatibleVersions           {1.0, 2.0, 3.0, 4.0…}
+PSRemotingProtocolVersion      2.3
+SerializationVersion           1.1.0.1
+WSManStackVersion              3.0
+
+
+
+# Network config
+
+Windows IP Configuration
+
+   Host Name . . . . . . . . . . . . : Gregs-PC1
+   Primary Dns Suffix  . . . . . . . : 
+   Node Type . . . . . . . . . . . . : Hybrid
+   IP Routing Enabled. . . . . . . . : No
+   WINS Proxy Enabled. . . . . . . . : No
+
+Ethernet adapter Ethernet 2:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . : 
+   Description . . . . . . . . . . . : ExpressVPN TAP Adapter
+   Physical Address. . . . . . . . . : 00-FF-52-95-99-03
+   DHCP Enabled. . . . . . . . . . . : Yes
+   Autoconfiguration Enabled . . . . : Yes
+
+Unknown adapter Secure VPN:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . : 
+   Description . . . . . . . . . . . : AVG Secure VPN Wintun Adapter
+   Physical Address. . . . . . . . . : 
+   DHCP Enabled. . . . . . . . . . . : No
+   Autoconfiguration Enabled . . . . : Yes
+
+Unknown adapter Local Area Connection:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . : 
+   Description . . . . . . . . . . . : ExpressVPN TUN Driver
+   Physical Address. . . . . . . . . : 
+   DHCP Enabled. . . . . . . . . . . : No
+   Autoconfiguration Enabled . . . . : Yes
+
+Ethernet adapter Ethernet:
+
+   Connection-specific DNS Suffix  . : 
+   Description . . . . . . . . . . . : Realtek PCIe GbE Family Controller
+   Physical Address. . . . . . . . . : 3C-7C-3F-26-E1-E8
+   DHCP Enabled. . . . . . . . . . . : Yes
+   Autoconfiguration Enabled . . . . : Yes
+   IPv4 Address. . . . . . . . . . . : 192.168.1.11(Preferred) 
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Lease Obtained. . . . . . . . . . : 12 October 2025 02:04:33
+   Lease Expires . . . . . . . . . . : 13 October 2025 02:04:33
+   Default Gateway . . . . . . . . . : 192.168.1.1
+   DHCP Server . . . . . . . . . . . : 192.168.1.1
+   DNS Servers . . . . . . . . . . . : 192.168.1.1
+   NetBIOS over Tcpip. . . . . . . . : Enabled
+
+# Routes
+===========================================================================
+Interface List
+ 10...00 ff 52 95 99 03 ......ExpressVPN TAP Adapter
+  8...........................AVG Secure VPN Wintun Adapter
+ 12...........................ExpressVPN TUN Driver
+ 17...3c 7c 3f 26 e1 e8 ......Realtek PCIe GbE Family Controller
+  1...........................Software Loopback Interface 1
+===========================================================================
+
+IPv4 Route Table
+===========================================================================
+Active Routes:
+Network Destination        Netmask          Gateway       Interface  Metric
+          0.0.0.0          0.0.0.0      192.168.1.1     192.168.1.11     25
+        127.0.0.0        255.0.0.0         On-link         127.0.0.1    331
+        127.0.0.1  255.255.255.255         On-link         127.0.0.1    331
+  127.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+      192.168.1.0    255.255.255.0         On-link      192.168.1.11    281
+     192.168.1.11  255.255.255.255         On-link      192.168.1.11    281
+    192.168.1.255  255.255.255.255         On-link      192.168.1.11    281
+        224.0.0.0        240.0.0.0         On-link         127.0.0.1    331
+        224.0.0.0        240.0.0.0         On-link      192.168.1.11    281
+  255.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+  255.255.255.255  255.255.255.255         On-link      192.168.1.11    281
+===========================================================================
+Persistent Routes:
+  None
+
+IPv6 Route Table
+===========================================================================
+Active Routes:
+ If Metric Network Destination      Gateway
+  1    331 ::1/128                  On-link
+  1    331 ff00::/8                 On-link
+===========================================================================
+Persistent Routes:
+  None
+
+# Firewall state
+
+Domain Profile Settings: 
+----------------------------------------------------------------------
+State                                 ON
+Firewall Policy                       BlockInbound,AllowOutbound
+LocalFirewallRules                    N/A (GPO-store only)
+LocalConSecRules                      N/A (GPO-store only)
+InboundUserNotification               Enable
+RemoteManagement                      Disable
+UnicastResponseToMulticast            Enable
+
+Logging:
+LogAllowedConnections                 Disable
+LogDroppedConnections                 Disable
+FileName                              %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+MaxFileSize                           4096
+
+
+Private Profile Settings: 
+----------------------------------------------------------------------
+State                                 ON
+Firewall Policy                       BlockInbound,AllowOutbound
+LocalFirewallRules                    N/A (GPO-store only)
+LocalConSecRules                      N/A (GPO-store only)
+InboundUserNotification               Enable
+RemoteManagement                      Disable
+UnicastResponseToMulticast            Enable
+
+Logging:
+LogAllowedConnections                 Disable
+LogDroppedConnections                 Disable
+FileName                              %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+MaxFileSize                           4096
+
+
+Public Profile Settings: 
+----------------------------------------------------------------------
+State                                 ON
+Firewall Policy                       BlockInbound,AllowOutbound
+LocalFirewallRules                    N/A (GPO-store only)
+LocalConSecRules                      N/A (GPO-store only)
+InboundUserNotification               Enable
+RemoteManagement                      Disable
+UnicastResponseToMulticast            Enable
+
+Logging:
+LogAllowedConnections                 Disable
+LogDroppedConnections                 Disable
+FileName                              %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+MaxFileSize                           4096
+
+Ok.
+
+
+# Listeners
+
+  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       1728
+  TCP    0.0.0.0:445            0.0.0.0:0              LISTENING       4
+  TCP    0.0.0.0:3389           0.0.0.0:0              LISTENING       2004
+  TCP    0.0.0.0:5040           0.0.0.0:0              LISTENING       3836
+  TCP    0.0.0.0:5357           0.0.0.0:0              LISTENING       4
+  TCP    0.0.0.0:7680           0.0.0.0:0              LISTENING       9420
+  TCP    0.0.0.0:9012           0.0.0.0:0              LISTENING       6084
+  TCP    0.0.0.0:9013           0.0.0.0:0              LISTENING       6084
+  TCP    0.0.0.0:49664          0.0.0.0:0              LISTENING       1396
+  TCP    0.0.0.0:49665          0.0.0.0:0              LISTENING       1284
+  TCP    0.0.0.0:49666          0.0.0.0:0              LISTENING       3112
+  TCP    0.0.0.0:49667          0.0.0.0:0              LISTENING       2836
+  TCP    0.0.0.0:49668          0.0.0.0:0              LISTENING       3396
+  TCP    0.0.0.0:49688          0.0.0.0:0              LISTENING       5836
+  TCP    0.0.0.0:49759          0.0.0.0:0              LISTENING       1368
+  TCP    0.0.0.0:57187          0.0.0.0:0              LISTENING       29432
+  TCP    0.0.0.0:57621          0.0.0.0:0              LISTENING       29432
+  TCP    0.0.0.0:59878          0.0.0.0:0              LISTENING       25664
+  TCP    127.0.0.1:1042         0.0.0.0:0              LISTENING       8232
+  TCP    127.0.0.1:1043         0.0.0.0:0              LISTENING       8232
+  TCP    127.0.0.1:2015         0.0.0.0:0              LISTENING       8572
+  TCP    127.0.0.1:3973         0.0.0.0:0              LISTENING       23776
+  TCP    127.0.0.1:5354         0.0.0.0:0              LISTENING       7632
+  TCP    127.0.0.1:7768         0.0.0.0:0              LISTENING       29432
+  TCP    127.0.0.1:8787         0.0.0.0:0              LISTENING       416
+  TCP    127.0.0.1:11434        0.0.0.0:0              LISTENING       18940
+  TCP    127.0.0.1:12025        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:12110        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:12119        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:12143        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:12465        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:12563        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:12993        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:12995        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:13030        0.0.0.0:0              LISTENING       7708
+  TCP    127.0.0.1:13031        0.0.0.0:0              LISTENING       10620
+  TCP    127.0.0.1:13032        0.0.0.0:0              LISTENING       10620
+  TCP    127.0.0.1:17648        0.0.0.0:0              LISTENING       24556
+  TCP    127.0.0.1:20150        0.0.0.0:0              LISTENING       34644
+  TCP    127.0.0.1:21530        0.0.0.0:0              LISTENING       21416
+  TCP    127.0.0.1:22112        0.0.0.0:0              LISTENING       7708
+  TCP    127.0.0.1:25118        0.0.0.0:0              LISTENING       32120
+  TCP    127.0.0.1:25443        0.0.0.0:0              LISTENING       28072
+  TCP    127.0.0.1:27275        0.0.0.0:0              LISTENING       5736
+  TCP    127.0.0.1:41761        0.0.0.0:0              LISTENING       26544
+  TCP    127.0.0.1:50100        0.0.0.0:0              LISTENING       7596
+  TCP    127.0.0.1:51100        0.0.0.0:0              LISTENING       10620
+  TCP    127.0.0.1:52026        0.0.0.0:0              LISTENING       6572
+  TCP    127.0.0.1:52829        0.0.0.0:0              LISTENING       28072
+  TCP    127.0.0.1:65001        0.0.0.0:0              LISTENING       7812
+  TCP    192.168.1.11:139       0.0.0.0:0              LISTENING       4
+  TCP    [::]:135               [::]:0                 LISTENING       1728
+  TCP    [::]:445               [::]:0                 LISTENING       4
+  TCP    [::]:3389              [::]:0                 LISTENING       2004
+  TCP    [::]:5357              [::]:0                 LISTENING       4
+  TCP    [::]:7680              [::]:0                 LISTENING       9420
+  TCP    [::]:49664             [::]:0                 LISTENING       1396
+  TCP    [::]:49665             [::]:0                 LISTENING       1284
+  TCP    [::]:49666             [::]:0                 LISTENING       3112
+  TCP    [::]:49667             [::]:0                 LISTENING       2836
+  TCP    [::]:49668             [::]:0                 LISTENING       3396
+  TCP    [::]:49688             [::]:0                 LISTENING       5836
+  TCP    [::]:49759             [::]:0                 LISTENING       1368
+  TCP    [::1]:12025            [::]:0                 LISTENING       5736
+  TCP    [::1]:12110            [::]:0                 LISTENING       5736
+  TCP    [::1]:12119            [::]:0                 LISTENING       5736
+  TCP    [::1]:12143            [::]:0                 LISTENING       5736
+  TCP    [::1]:12465            [::]:0                 LISTENING       5736
+  TCP    [::1]:12563            [::]:0                 LISTENING       5736
+  TCP    [::1]:12993            [::]:0                 LISTENING       5736
+  TCP    [::1]:12995            [::]:0                 LISTENING       5736
+  TCP    [::1]:27275            [::]:0                 LISTENING       5736
+
+
+# DNS test
+Non-authoritative answer:
+
+Server:  Gigaclear01123
+Address:  192.168.1.1
+
+Name:    www.cloudflare.com
+Addresses:  2606:4700::6810:7b60
+	  2606:4700::6810:7c60
+	  104.16.123.96
+	  104.16.124.96
+
+
+# curl 127.0.0.1:8787
+HTTP/1.0 200 OK
+Server: SimpleHTTP/0.6 Python/3.13.3
+Date: Sun, 12 Oct 2025 08:51:05 GMT
+Content-type: text/html; charset=utf-8
+Content-Length: 9542
+
+
+# Processes
+
+NPM(K) PM(M) WS(M) CPU(s)    Id SI ProcessName
+------ ----- ----- ------    -- -- -----------
+    18  3.68  0.98   0.05  6084  1 ArmourySocketServer
+    13 11.94 19.62   0.25   416  1 python
+    29 26.80 60.46   3.16  3544  1 python
+     5  0.90  4.09   0.02 15580  1 python
+     5  0.90  4.08   0.00 21844  1 python
+     5  0.90  4.08   0.00 23168  1 python
+    22 32.34 48.44  18.12 33784  1 python
+
+
+
+# cloudflared version
+cloudflared version 2025.8.1 (built 2025-08-21-1534 UTC)
+
+Done -> C:\_Repos\PersistentAssistant\logs\cloudflared\env_20251012_095105.txt

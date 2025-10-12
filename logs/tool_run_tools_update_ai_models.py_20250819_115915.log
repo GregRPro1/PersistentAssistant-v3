@@ -1,0 +1,10 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/update_ai_models.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+META: file=tools/update_ai_models.py lines=146 functions=9
+RETURNCODE: 0
+
+---- STDOUT ----
+SUMMARY: {"enriched":0,"cached":175,"failed":0,"promoted":true}
+
+

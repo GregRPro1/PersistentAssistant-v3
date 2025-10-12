@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "feature_id": "DEV-DRY-RUN",
+  "dry_run": true,
+  "policy_apply_enabled": false,
+  "really_apply": false,
+  "ts": 1756663803,
+  "results": [
+    {
+      "path": "docs/USER_GUIDE.md",
+      "ok": true,
+      "dry_run": true,
+      "mode": "append",
+      "before_sha": "e2a0e9b264a81e6152608ce04ec1da3a8fc13f390e4f397b972ac4fc75c6cd39",
+      "bytes": 569
+    }
+  ]
+}

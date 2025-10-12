@@ -1,0 +1,10 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/self_check.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+META: file=tools/self_check.py lines=34 functions=1
+RETURNCODE: 0
+
+---- STDOUT ----
+SUMMARY: {"project_root":"C:\\_Repos\\PersistentAssistant","pythonpath_contains_project":true,"missing_files":[]}
+
+

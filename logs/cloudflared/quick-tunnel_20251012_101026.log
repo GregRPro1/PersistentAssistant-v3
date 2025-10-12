@@ -1,0 +1,49 @@
+2025-10-12T10:10:26Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+2025-10-12T10:10:26Z INF Requesting new quick Tunnel on trycloudflare.com...
+2025-10-12T10:10:30Z INF +--------------------------------------------------------------------------------------------+
+2025-10-12T10:10:30Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+2025-10-12T10:10:30Z INF |  https://comics-letting-dale-fare.trycloudflare.com                                        |
+2025-10-12T10:10:30Z INF +--------------------------------------------------------------------------------------------+
+2025-10-12T10:10:30Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp]
+2025-10-12T10:10:30Z INF Version 2025.8.1 (Checksum b5d598b00cc3a28cabc5812d9f762819334614bae452db4e7f23eefe7b081556)
+2025-10-12T10:10:30Z INF GOOS: windows, GOVersion: go1.24.2, GoArch: amd64
+2025-10-12T10:10:30Z INF Settings: map[ha-connections:1 loglevel:debug protocol:quic url:http://127.0.0.1:8787]
+2025-10-12T10:10:30Z INF cloudflared will not automatically update on Windows systems.
+2025-10-12T10:10:30Z INF Generated Connector ID: c6111975-ba60-4977-8190-45ab5ceaa6b3
+2025-10-12T10:10:30Z DBG Fetched protocol: quic
+2025-10-12T10:10:30Z INF Initial protocol quic
+2025-10-12T10:10:30Z INF ICMP proxy will use 192.168.1.11 as source for IPv4
+2025-10-12T10:10:30Z INF ICMP proxy will use ::1 in zone Loopback Pseudo-Interface 1 as source for IPv6
+2025-10-12T10:10:31Z DBG edge discovery: looking up edge SRV record domain=_v2-origintunneld._tcp.argotunnel.com event=0
+2025-10-12T10:10:31Z DBG edge discovery: resolved edge addresses addresses=["198.41.192.27","198.41.192.57","198.41.192.47","198.41.192.37","198.41.192.67","198.41.192.167","198.41.192.227","198.41.192.77","198.41.192.107","198.41.192.7"] event=0
+2025-10-12T10:10:31Z DBG edge discovery: resolved edge addresses addresses=["198.41.200.13","198.41.200.43","198.41.200.23","198.41.200.193","198.41.200.33","198.41.200.233","198.41.200.113","198.41.200.63","198.41.200.53","198.41.200.73"] event=0
+2025-10-12T10:10:31Z ERR Cannot determine default origin certificate path. No file cert.pem in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp]. You need to specify the origin certificate path by specifying the origincert option in the configuration file, or set TUNNEL_ORIGIN_CERT environment variable originCertPath=
+2025-10-12T10:10:31Z INF cloudflared does not support loading the system root certificate pool on Windows. Please use --origin-ca-pool <PATH> to specify the path to the certificate pool
+2025-10-12T10:10:31Z DBG edge discovery: looking up edge SRV record domain=_v2-origintunneld._tcp.argotunnel.com event=0
+2025-10-12T10:10:31Z INF ICMP proxy will use 192.168.1.11 as source for IPv4
+2025-10-12T10:10:31Z DBG edge discovery: resolved edge addresses addresses=["198.41.192.27","198.41.192.57","198.41.192.47","198.41.192.37","198.41.192.67","198.41.192.167","198.41.192.227","198.41.192.77","198.41.192.107","198.41.192.7"] event=0
+2025-10-12T10:10:31Z DBG edge discovery: resolved edge addresses addresses=["198.41.200.13","198.41.200.43","198.41.200.23","198.41.200.193","198.41.200.33","198.41.200.233","198.41.200.113","198.41.200.63","198.41.200.53","198.41.200.73"] event=0
+2025-10-12T10:10:31Z DBG edge discovery: giving new address to connection connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:10:31Z DBG Tunnel connection options connIndex=0 event=0 features=["support_datagram_v2","support_quic_eof","management_logs","allow_remote_config","serialized_headers"] ip=198.41.200.63
+2025-10-12T10:10:31Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:10:31Z DBG Updating DNS local resolver: 192.168.1.1:53
+2025-10-12T10:10:31Z INF ICMP proxy will use ::1 in zone Loopback Pseudo-Interface 1 as source for IPv6
+2025-10-12T10:10:31Z INF Starting metrics server on 127.0.0.1:20241/metrics
+2025-10-12T10:10:31Z DBG Received transport parameters: MaxUDPPayloadSize=1396, MaxIdleTimeout=5s, MaxDatagramFrameSize=16383 connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:10:31Z DBG Registering tunnel connection connIndex=0 event=0 ip=198.41.200.63 protocol=quic
+2025-10-12T10:10:31Z DBG QUIC MTU updated to 1314 connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:10:31Z DBG QUIC MTU updated to 1355 connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:10:31Z DBG QUIC MTU updated to 1375 connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:10:31Z INF Registered tunnel connection connIndex=0 connection=7b45d72d-9135-4a49-9066-41b507f75905 event=0 ip=198.41.200.63 location=lhr01 protocol=quic
+2025-10-12T10:12:34Z DBG HEAD https://comics-letting-dale-fare.trycloudflare.com/ HTTP/1.1 connIndex=0 content-length=0 event=1 headers={"Accept-Encoding":["gzip"],"Cdn-Loop":["cloudflare; loops=1; subreqs=1"],"Cf-Connecting-Ip":["195.180.34.207"],"Cf-Ew-Via":["15"],"Cf-Ipcountry":["GB"],"Cf-Ray":["98d5d1d422f7cd0d-LHR"],"Cf-Visitor":["{\"scheme\":\"https\"}"],"Cf-Warp-Tag-Id":["c6111975-ba60-4977-8190-45ab5ceaa6b3"],"Cf-Worker":["trycloudflare.com"],"User-Agent":["Python-urllib/3.13"],"X-Forwarded-For":["195.180.34.207"],"X-Forwarded-Proto":["https"]} host=comics-letting-dale-fare.trycloudflare.com ingressRule=0 originService=http://127.0.0.1:8787 path=/
+2025-10-12T10:12:34Z DBG 200 OK connIndex=0 content-length=10272 event=1 ingressRule=0 originService=http://127.0.0.1:8787
+2025-10-12T10:21:06Z INF Initiating graceful shutdown due to signal interrupt ...
+2025-10-12T10:21:06Z DBG Graceful shutdown signalled
+2025-10-12T10:21:06Z ERR failed to run the datagram handler error="context canceled" connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:21:06Z ERR failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:21:06Z ERR Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:21:06Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=198.41.200.63
+2025-10-12T10:21:06Z ERR Connection terminated connIndex=0
+2025-10-12T10:21:06Z ERR no more connections active and exiting
+2025-10-12T10:21:06Z INF Tunnel server stopped
+2025-10-12T10:21:06Z INF Metrics server stopped

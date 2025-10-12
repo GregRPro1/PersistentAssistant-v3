@@ -1,0 +1,26 @@
+2025-08-18 19:55:29,774 [ERROR] gui: Structure snapshot FAILED rc=1. See logs\structure_sync_run_20250818_195529.log
+2025-08-18 19:55:29,774 [ERROR] gui: stderr: Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\structure_sync.py", line 288, in <module>
+    sys.exit(main(sys.argv))
+             ~~~~^^^^^^^^^^
+  File "C:\_Repos\PersistentAssistant\tools\structure_sync.py", line 282, in main
+    print(f"\u2705 Snapshot complete: {res['count']} files")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\GPRap\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+2025-08-18 20:07:23,288 [ERROR] gui: Exception in run_structure_snapshot: name 'cmd' is not defined
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\gui\main_window.py", line 175, in run_structure_snapshot
+    f.write(f"Command: {cmd}\nReturn code: {result.returncode}\n\n")
+                        ^^^
+NameError: name 'cmd' is not defined. Did you forget to import 'cmd'?
+2025-08-18 20:09:01,589 [INFO] gui: Structure snapshot OK. See logs\structure_sync_run_20250818_200901.log
+2025-08-18 20:17:14,614 [INFO] gui: Structure snapshot OK. See logs\structure_sync_run_20250818_201714.log
+2025-08-18 20:17:23,976 [INFO] gui: Introspection OK: 12 files with findings, 35 findings. See data/insights/introspection_report.yaml
+2025-08-18 20:26:58,296 [INFO] gui: Created 35 tasks (files affected: 0). Index: data\tickets\index.yaml
+2025-08-19 08:11:41,449 [INFO] gui: Structure snapshot OK. See logs\structure_sync_run_20250819_081140.log
+2025-08-19 08:11:53,111 [INFO] gui: Created 104 tasks (files affected: 0). Index: data\tickets\index.yaml
+2025-08-19 08:49:38,601 [INFO] gui: Structure snapshot OK. See logs\structure_sync_run_20250819_084937.log
+2025-08-19 08:49:47,069 [INFO] gui: Created 114 tasks (files affected: 0). Index: data\tickets\index.yaml

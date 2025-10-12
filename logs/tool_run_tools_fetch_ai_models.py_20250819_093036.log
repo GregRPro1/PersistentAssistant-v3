@@ -1,0 +1,9 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/fetch_ai_models.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+RETURNCODE: 0
+
+---- STDOUT ----
+SUMMARY: {"raw_counts":{"openai":82,"anthropic":9,"groq":23,"google":60,"deepseek":1,"total_models":175}}
+
+

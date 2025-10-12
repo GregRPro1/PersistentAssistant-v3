@@ -1,0 +1,8 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/update_ai_models.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+META: file=tools/update_ai_models.py lines=113 functions=8
+---- STREAM ----
+INFO: update_ai_models.py (lines=113, functions=8)
+SUMMARY: SUMMARY: {"valid":true,"error_count":0,"errors":[],"counts":{"providers":3,"models":0},"meta":{"timestamp":"2025-08-19T13:49:53.715134+00:00","file":"C:/_Repos/PersistentAssistant/tools/check_ai_models.py","lines":146,"functions":6},"target":"C:\\_Repos\\PersistentAssistant\\ai_models_tmp.yaml"}
+OK: promoted C:\_Repos\PersistentAssistant\ai_models.yaml

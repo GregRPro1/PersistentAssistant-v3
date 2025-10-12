@@ -1,0 +1,6 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/probe_models.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+META: file=tools/probe_models.py lines=151 functions=6
+---- STREAM ----
+SUMMARY: {"totals":{"ok":0,"fail":0,"permission":0,"endpoint_mismatch":0,"not_probed":0},"total_models":0}

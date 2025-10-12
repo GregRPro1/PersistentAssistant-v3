@@ -1,0 +1,562 @@
+2025-08-19 08:11:40,258 [INFO] Running structure snapshot…
+2025-08-19 08:11:41,449 [INFO] Snapshot complete: 82 files
+YAML: C:\_Repos\PersistentAssistant\project\structure\project_structure_snapshot_full.yaml
+MD  : C:\_Repos\PersistentAssistant\project\structure\project_structure_snapshot_index.md
+2025-08-19 08:11:47,767 [INFO] Introspection OK: 21 files with findings, 104 findings. See data/insights/introspection_report.yaml
+2025-08-19 08:11:53,110 [INFO] Created 104 tasks (files affected: 0). Index: data\tickets\index.yaml
+2025-08-19 08:11:56,786 [INFO] Running AI Models pipeline...
+2025-08-19 08:12:02,676 [ERROR] FAIL (1): C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/fetch_ai_models.py
+STDOUT:
+
+STDERR:
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\fetch_ai_models.py", line 130, in <module>
+    main()
+    ~~~~^^
+  File "C:\_Repos\PersistentAssistant\tools\fetch_ai_models.py", line 127, in main
+    print(f"\u2705 Wrote RAW catalogue: {RAW_FILE}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\GPRap\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+2025-08-19 08:12:02,677 [INFO] FAIL: Fetch RAW failed (code 1). See logs.
+2025-08-19 08:12:06,838 [INFO] Probing models (ping)...
+2025-08-19 08:12:08,712 [INFO] OK: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/probe_models.py
+STDOUT:
+FAIL: Schema check failed after merge; keeping previous catalogue.
+FAIL: ai_models_tmp.yaml has 15 errors:
+ - anthropic/claude-3-opus missing section pricing
+ - anthropic/claude-3-opus missing section limits
+ - anthropic/claude-3-opus missing section capabilities
+ - anthropic/claude-3-opus missing section notes
+ - anthropic/claude-3-opus missing section source
+ - anthropic/claude-3-sonnet missing section pricing
+ - anthropic/claude-3-sonnet missing section limits
+ - anthropic/claude-3-sonnet missing section capabilities
+ - anthropic/claude-3-sonnet missing section notes
+ - anthropic/claude-3-sonnet missing section source
+ - deepseek/deepseek-chat missing section pricing
+ - deepseek/deepseek-chat missing section limits
+ - deepseek/deepseek-chat missing section capabilities
+ - deepseek/deepseek-chat missing section notes
+ - deepseek/deepseek-chat missing section source
+
+2025-08-19 08:12:08,712 [INFO] FAIL: Schema check failed after merge; keeping previous catalogue.
+FAIL: ai_models_tmp.yaml has 15 errors:
+ - anthropic/claude-3-opus missing section pricing
+ - anthropic/claude-3-opus missing section limits
+ - anthropic/claude-3-opus missing section capabilities
+ - anthropic/claude-3-opus missing section notes
+ - anthropic/claude-3-opus missing section source
+ - anthropic/claude-3-sonnet missing section pricing
+ - anthropic/claude-3-sonnet missing section limits
+ - anthropic/claude-3-sonnet missing section capabilities
+ - anthropic/claude-3-sonnet missing section notes
+ - anthropic/claude-3-sonnet missing section source
+ - deepseek/deepseek-chat missing section pricing
+ - deepseek/deepseek-chat missing section limits
+ - deepseek/deepseek-chat missing section capabilities
+ - deepseek/deepseek-chat missing section notes
+ - deepseek/deepseek-chat missing section source
+2025-08-19 08:12:24,398 [INFO] Running AI Models pipeline...
+2025-08-19 08:12:30,276 [ERROR] FAIL (1): C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/fetch_ai_models.py
+STDOUT:
+
+STDERR:
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\fetch_ai_models.py", line 130, in <module>
+    main()
+    ~~~~^^
+  File "C:\_Repos\PersistentAssistant\tools\fetch_ai_models.py", line 127, in main
+    print(f"\u2705 Wrote RAW catalogue: {RAW_FILE}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\GPRap\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+2025-08-19 08:12:30,276 [INFO] FAIL: Fetch RAW failed (code 1). See logs.
+2025-08-19 08:45:03,245 [INFO] Running AI Models pipeline...
+2025-08-19 08:45:04,453 [ERROR] FAIL (1): C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/fetch_ai_models.py
+STDOUT:
+
+STDERR:
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\fetch_ai_models.py", line 14, in <module>
+    from tools._env import load_keys
+ModuleNotFoundError: No module named 'tools'
+
+2025-08-19 08:45:04,453 [INFO] FAIL: Fetch RAW failed (code 1). See logs.
+2025-08-19 08:45:07,547 [INFO] Probing models...
+2025-08-19 08:45:08,283 [ERROR] FAIL (1): C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/probe_models.py
+STDOUT:
+
+STDERR:
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\probe_models.py", line 13, in <module>
+    from tools._env import load_keys
+ModuleNotFoundError: No module named 'tools'
+
+2025-08-19 08:45:08,283 [INFO] FAIL: Probe failed. See logs.
+2025-08-19 08:45:11,537 [ERROR] FAIL (1): C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/check_api_keys.py
+STDOUT:
+
+STDERR:
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\check_api_keys.py", line 9, in <module>
+    from tools._env import load_keys, mask_key
+ModuleNotFoundError: No module named 'tools'
+
+2025-08-19 08:45:11,537 [INFO] FAIL: Key check failed. See logs.
+2025-08-19 08:45:47,305 [INFO] Running AI Models pipeline...
+2025-08-19 08:45:48,509 [ERROR] FAIL (1): C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/fetch_ai_models.py
+STDOUT:
+
+STDERR:
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\fetch_ai_models.py", line 14, in <module>
+    from tools._env import load_keys
+ModuleNotFoundError: No module named 'tools'
+
+2025-08-19 08:45:48,509 [INFO] FAIL: Fetch RAW failed (code 1). See logs.
+2025-08-19 08:49:37,067 [INFO] Running structure snapshot…
+2025-08-19 08:49:38,601 [INFO] Snapshot complete: 190 files
+YAML: C:\_Repos\PersistentAssistant\project\structure\project_structure_snapshot_full.yaml
+MD  : C:\_Repos\PersistentAssistant\project\structure\project_structure_snapshot_index.md
+2025-08-19 08:49:44,149 [INFO] Introspection OK: 23 files with findings, 114 findings. See data/insights/introspection_report.yaml
+2025-08-19 08:49:47,069 [INFO] Created 114 tasks (files affected: 0). Index: data\tickets\index.yaml
+2025-08-19 08:49:49,779 [INFO] Running AI Models pipeline...
+2025-08-19 08:49:51,028 [ERROR] FAIL (1): C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/fetch_ai_models.py
+STDOUT:
+
+STDERR:
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\tools\fetch_ai_models.py", line 14, in <module>
+    from tools._env import load_keys
+ModuleNotFoundError: No module named 'tools'
+
+2025-08-19 08:49:51,028 [INFO] FAIL: Fetch RAW failed (code 1). See logs.
+2025-08-19 08:55:23,887 [INFO] Running AI Models pipeline...
+2025-08-19 08:55:25,089 [ERROR] FAIL fetch_ai_models.py (1); log: C:\_Repos\PersistentAssistant\logs\tool_run_fetch_ai_models.py_20250819_085523.log
+2025-08-19 08:55:25,089 [INFO] Fetch RAW failed. See C:\_Repos\PersistentAssistant\logs\tool_run_fetch_ai_models.py_20250819_085523.log
+2025-08-19 09:02:40,702 [INFO] Running AI Models pipeline...
+2025-08-19 09:02:53,362 [INFO] OK fetch_ai_models.py; log: C:\_Repos\PersistentAssistant\logs\tool_run_fetch_ai_models.py_20250819_090240.log
+2025-08-19 09:02:54,757 [INFO] OK update_ai_models.py; log: C:\_Repos\PersistentAssistant\logs\tool_run_update_ai_models.py_20250819_090253.log
+2025-08-19 09:02:54,996 [INFO] OK check_ai_models.py; log: C:\_Repos\PersistentAssistant\logs\tool_run_check_ai_models.py_20250819_090254.log
+2025-08-19 09:02:54,996 [INFO] Models pipeline complete. See C:\_Repos\PersistentAssistant\logs\tool_run_update_ai_models.py_20250819_090253.log
+2025-08-19 09:03:06,208 [INFO] Probing models...
+2025-08-19 09:05:14,679 [INFO] OK probe_models.py; log: C:\_Repos\PersistentAssistant\logs\tool_run_probe_models.py_20250819_090306.log
+2025-08-19 09:05:14,680 [INFO] Probe finished. See C:\_Repos\PersistentAssistant\logs\tool_run_probe_models.py_20250819_090306.log
+2025-08-19 09:06:36,313 [INFO] Checking API keys...
+2025-08-19 09:06:36,425 [INFO] OK check_api_keys.py; log: C:\_Repos\PersistentAssistant\logs\tool_run_check_api_keys.py_20250819_090636.log
+2025-08-19 09:06:36,425 [INFO] Keys checked. See C:\_Repos\PersistentAssistant\logs\tool_run_check_api_keys.py_20250819_090636.log
+2025-08-19 09:27:54,717 [INFO] AI Models pipeline running… please wait
+2025-08-19 09:28:00,726 [INFO] OK: tools/fetch_ai_models.py | log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_092754.log
+2025-08-19 09:28:02,147 [ERROR] FAIL(1): tools/update_ai_models.py | log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_092800.log
+2025-08-19 09:28:02,148 [INFO] AI Models pipeline failed at: tools/update_ai_models.py. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_092800.log
+2025-08-19 09:28:48,941 [INFO] AI Models pipeline running… please wait
+2025-08-19 09:28:54,728 [INFO] OK: tools/fetch_ai_models.py | log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_092848.log
+2025-08-19 09:28:56,104 [ERROR] FAIL(1): tools/update_ai_models.py | log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_092854.log
+2025-08-19 09:28:56,105 [INFO] AI Models pipeline failed at: tools/update_ai_models.py. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_092854.log
+2025-08-19 09:30:36,295 [INFO] AI Models pipeline running… please wait
+2025-08-19 09:30:42,076 [INFO] OK: tools/fetch_ai_models.py | log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_093036.log
+2025-08-19 09:30:43,463 [ERROR] FAIL(1): tools/update_ai_models.py | log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_093042.log
+2025-08-19 09:30:43,463 [INFO] AI Models pipeline failed at: tools/update_ai_models.py. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_093042.log
+2025-08-19 11:47:00,233 [INFO] AI Models pipeline running… please wait
+2025-08-19 11:47:07,868 [INFO] AI Models pipeline completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_114707.log
+2025-08-19 11:49:42,619 [INFO] AI Models pipeline running… please wait
+2025-08-19 11:49:50,085 [INFO] AI Models pipeline completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_114949.log
+2025-08-19 11:58:58,647 [INFO] META tools_tab.py: lines=419 functions=17
+2025-08-19 11:59:03,526 [INFO] AI Models pipeline running… please wait
+2025-08-19 11:59:17,322 [INFO] AI Models pipeline completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_115917.log
+2025-08-19 12:00:57,922 [INFO] Probe models running… please wait
+2025-08-19 12:02:17,901 [INFO] Probe models completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_probe_models.py_20250819_120057.log
+2025-08-19 12:03:17,791 [INFO] Check API keys running… please wait
+2025-08-19 12:03:17,893 [INFO] Check API keys completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_api_keys.py_20250819_120317.log
+2025-08-19 12:03:22,548 [INFO] Verify tools wiring running… please wait
+2025-08-19 12:03:22,629 [INFO] Verify tools wiring completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_self_check.py_20250819_120322.log
+2025-08-19 13:12:21,970 [INFO] META tools_tab.py: lines=451 functions=25
+2025-08-19 13:12:26,450 [INFO] AI Models: fetch (RAW) running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_131226.log)
+2025-08-19 13:12:32,718 [INFO] AI Models: fetch (RAW) completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_131226.log
+2025-08-19 13:12:42,816 [INFO] AI Models: enrich/merge running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_131242.log)
+2025-08-19 13:12:44,191 [INFO] AI Models: enrich/merge completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_131242.log
+2025-08-19 13:12:57,044 [INFO] AI Models: final check running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_131257.log)
+2025-08-19 13:12:57,286 [INFO] AI Models: final check completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_131257.log
+2025-08-19 13:13:10,315 [INFO] Probe models running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_probe_models.py_20250819_131310.log)
+2025-08-19 13:13:12,588 [INFO] Probe models… 1/175 • ok:1 fail:0 skip:0 • openai/gpt-4-0613
+2025-08-19 13:13:13,697 [INFO] Probe models… 2/175 • ok:2 fail:0 skip:0 • openai/gpt-4
+2025-08-19 13:13:14,635 [INFO] Probe models… 3/175 • ok:3 fail:0 skip:0 • openai/gpt-3.5-turbo
+2025-08-19 13:13:15,112 [INFO] Probe models… 4/175 • ok:3 fail:1 skip:0 • openai/gpt-5-nano
+2025-08-19 13:13:15,763 [INFO] Probe models… 5/175 • ok:3 fail:2 skip:0 • openai/gpt-5
+2025-08-19 13:13:16,273 [INFO] Probe models… 6/175 • ok:3 fail:3 skip:0 • openai/gpt-5-mini-2025-08-07
+2025-08-19 13:13:16,993 [INFO] Probe models… 7/175 • ok:3 fail:4 skip:0 • openai/gpt-5-mini
+2025-08-19 13:13:17,708 [INFO] Probe models… 8/175 • ok:3 fail:5 skip:0 • openai/gpt-5-nano-2025-08-07
+2025-08-19 13:13:18,209 [INFO] Probe models… 9/175 • ok:3 fail:6 skip:0 • openai/davinci-002
+2025-08-19 13:13:18,721 [INFO] Probe models… 10/175 • ok:3 fail:7 skip:0 • openai/babbage-002
+2025-08-19 13:13:19,347 [INFO] Probe models… 11/175 • ok:3 fail:8 skip:0 • openai/gpt-3.5-turbo-instruct
+2025-08-19 13:13:19,834 [INFO] Probe models… 12/175 • ok:3 fail:9 skip:0 • openai/gpt-3.5-turbo-instruct-0914
+2025-08-19 13:13:20,426 [INFO] Probe models… 13/175 • ok:3 fail:10 skip:0 • openai/dall-e-3
+2025-08-19 13:13:20,865 [INFO] Probe models… 14/175 • ok:3 fail:11 skip:0 • openai/dall-e-2
+2025-08-19 13:13:21,669 [INFO] Probe models… 15/175 • ok:4 fail:11 skip:0 • openai/gpt-4-1106-preview
+2025-08-19 13:13:22,364 [INFO] Probe models… 16/175 • ok:5 fail:11 skip:0 • openai/gpt-3.5-turbo-1106
+2025-08-19 13:13:22,843 [INFO] Probe models… 17/175 • ok:5 fail:12 skip:0 • openai/tts-1-hd
+2025-08-19 13:13:23,336 [INFO] Probe models… 18/175 • ok:5 fail:13 skip:0 • openai/tts-1-1106
+2025-08-19 13:13:23,852 [INFO] Probe models… 19/175 • ok:5 fail:14 skip:0 • openai/tts-1-hd-1106
+2025-08-19 13:13:24,349 [INFO] Probe models… 20/175 • ok:5 fail:15 skip:0 • openai/text-embedding-3-small
+2025-08-19 13:13:24,794 [INFO] Probe models… 21/175 • ok:5 fail:16 skip:0 • openai/text-embedding-3-large
+2025-08-19 13:13:25,770 [INFO] Probe models… 22/175 • ok:6 fail:16 skip:0 • openai/gpt-4-0125-preview
+2025-08-19 13:13:26,867 [INFO] Probe models… 23/175 • ok:7 fail:16 skip:0 • openai/gpt-4-turbo-preview
+2025-08-19 13:13:27,577 [INFO] Probe models… 24/175 • ok:8 fail:16 skip:0 • openai/gpt-3.5-turbo-0125
+2025-08-19 13:13:28,687 [INFO] Probe models… 25/175 • ok:9 fail:16 skip:0 • openai/gpt-4-turbo
+2025-08-19 13:13:30,002 [INFO] Probe models… 26/175 • ok:10 fail:16 skip:0 • openai/gpt-4-turbo-2024-04-09
+2025-08-19 13:13:30,851 [INFO] Probe models… 27/175 • ok:11 fail:16 skip:0 • openai/gpt-4o
+2025-08-19 13:13:31,581 [INFO] Probe models… 28/175 • ok:12 fail:16 skip:0 • openai/gpt-4o-2024-05-13
+2025-08-19 13:13:32,484 [INFO] Probe models… 29/175 • ok:13 fail:16 skip:0 • openai/gpt-4o-mini-2024-07-18
+2025-08-19 13:13:33,425 [INFO] Probe models… 30/175 • ok:14 fail:16 skip:0 • openai/gpt-4o-mini
+2025-08-19 13:13:34,518 [INFO] Probe models… 31/175 • ok:15 fail:16 skip:0 • openai/gpt-4o-2024-08-06
+2025-08-19 13:13:35,152 [INFO] Probe models… 32/175 • ok:16 fail:16 skip:0 • openai/chatgpt-4o-latest
+2025-08-19 13:13:35,675 [INFO] Probe models… 33/175 • ok:16 fail:17 skip:0 • openai/o1-mini-2024-09-12
+2025-08-19 13:13:36,171 [INFO] Probe models… 34/175 • ok:16 fail:18 skip:0 • openai/o1-mini
+2025-08-19 13:13:36,883 [INFO] Probe models… 35/175 • ok:16 fail:19 skip:0 • openai/gpt-4o-realtime-preview-2024-10-01
+2025-08-19 13:13:37,424 [INFO] Probe models… 36/175 • ok:16 fail:20 skip:0 • openai/gpt-4o-audio-preview-2024-10-01
+2025-08-19 13:13:37,909 [INFO] Probe models… 37/175 • ok:16 fail:21 skip:0 • openai/gpt-4o-audio-preview
+2025-08-19 13:13:38,602 [INFO] Probe models… 38/175 • ok:16 fail:22 skip:0 • openai/gpt-4o-realtime-preview
+2025-08-19 13:13:39,300 [INFO] Probe models… 39/175 • ok:16 fail:23 skip:0 • openai/omni-moderation-latest
+2025-08-19 13:13:39,769 [INFO] Probe models… 40/175 • ok:16 fail:24 skip:0 • openai/omni-moderation-2024-09-26
+2025-08-19 13:13:40,479 [INFO] Probe models… 41/175 • ok:16 fail:25 skip:0 • openai/gpt-4o-realtime-preview-2024-12-17
+2025-08-19 13:13:41,032 [INFO] Probe models… 42/175 • ok:16 fail:26 skip:0 • openai/gpt-4o-audio-preview-2024-12-17
+2025-08-19 13:13:41,542 [INFO] Probe models… 43/175 • ok:16 fail:27 skip:0 • openai/gpt-4o-mini-realtime-preview-2024-12-17
+2025-08-19 13:13:42,098 [INFO] Probe models… 44/175 • ok:16 fail:28 skip:0 • openai/gpt-4o-mini-audio-preview-2024-12-17
+2025-08-19 13:13:42,639 [INFO] Probe models… 45/175 • ok:16 fail:29 skip:0 • openai/o1-2024-12-17
+2025-08-19 13:13:43,127 [INFO] Probe models… 46/175 • ok:16 fail:30 skip:0 • openai/o1
+2025-08-19 13:13:43,671 [INFO] Probe models… 47/175 • ok:16 fail:31 skip:0 • openai/gpt-4o-mini-realtime-preview
+2025-08-19 13:13:44,382 [INFO] Probe models… 48/175 • ok:16 fail:32 skip:0 • openai/gpt-4o-mini-audio-preview
+2025-08-19 13:13:44,841 [INFO] Probe models… 49/175 • ok:16 fail:33 skip:0 • openai/o3-mini
+2025-08-19 13:13:45,323 [INFO] Probe models… 50/175 • ok:16 fail:34 skip:0 • openai/o3-mini-2025-01-31
+2025-08-19 13:13:46,116 [INFO] Probe models… 51/175 • ok:17 fail:34 skip:0 • openai/gpt-4o-2024-11-20
+2025-08-19 13:13:46,602 [INFO] Probe models… 52/175 • ok:17 fail:35 skip:0 • openai/gpt-4o-search-preview-2025-03-11
+2025-08-19 13:13:47,080 [INFO] Probe models… 53/175 • ok:17 fail:36 skip:0 • openai/gpt-4o-search-preview
+2025-08-19 13:13:47,602 [INFO] Probe models… 54/175 • ok:17 fail:37 skip:0 • openai/gpt-4o-mini-search-preview-2025-03-11
+2025-08-19 13:13:48,108 [INFO] Probe models… 55/175 • ok:17 fail:38 skip:0 • openai/gpt-4o-mini-search-preview
+2025-08-19 13:13:48,567 [INFO] Probe models… 56/175 • ok:17 fail:39 skip:0 • openai/gpt-4o-transcribe
+2025-08-19 13:13:49,048 [INFO] Probe models… 57/175 • ok:17 fail:40 skip:0 • openai/gpt-4o-mini-transcribe
+2025-08-19 13:13:49,536 [INFO] Probe models… 58/175 • ok:17 fail:41 skip:0 • openai/o1-pro-2025-03-19
+2025-08-19 13:13:49,987 [INFO] Probe models… 59/175 • ok:17 fail:42 skip:0 • openai/o1-pro
+2025-08-19 13:13:50,471 [INFO] Probe models… 60/175 • ok:17 fail:43 skip:0 • openai/gpt-4o-mini-tts
+2025-08-19 13:13:51,009 [INFO] Probe models… 61/175 • ok:17 fail:44 skip:0 • openai/o3-2025-04-16
+2025-08-19 13:13:51,461 [INFO] Probe models… 62/175 • ok:17 fail:45 skip:0 • openai/o4-mini-2025-04-16
+2025-08-19 13:13:51,958 [INFO] Probe models… 63/175 • ok:17 fail:46 skip:0 • openai/o3
+2025-08-19 13:13:52,458 [INFO] Probe models… 64/175 • ok:17 fail:47 skip:0 • openai/o4-mini
+2025-08-19 13:13:53,345 [INFO] Probe models… 65/175 • ok:18 fail:47 skip:0 • openai/gpt-4.1-2025-04-14
+2025-08-19 13:13:54,562 [INFO] Probe models… 66/175 • ok:19 fail:47 skip:0 • openai/gpt-4.1
+2025-08-19 13:13:55,387 [INFO] Probe models… 67/175 • ok:20 fail:47 skip:0 • openai/gpt-4.1-mini-2025-04-14
+2025-08-19 13:13:56,112 [INFO] Probe models… 68/175 • ok:21 fail:47 skip:0 • openai/gpt-4.1-mini
+2025-08-19 13:13:57,644 [INFO] Probe models… 69/175 • ok:22 fail:47 skip:0 • openai/gpt-4.1-nano-2025-04-14
+2025-08-19 13:13:58,447 [INFO] Probe models… 70/175 • ok:23 fail:47 skip:0 • openai/gpt-4.1-nano
+2025-08-19 13:14:01,889 [INFO] Probe models… 71/175 • ok:23 fail:48 skip:0 • openai/gpt-image-1
+2025-08-19 13:14:02,359 [INFO] Probe models… 72/175 • ok:23 fail:49 skip:0 • openai/codex-mini-latest
+2025-08-19 13:14:02,883 [INFO] Probe models… 73/175 • ok:23 fail:50 skip:0 • openai/gpt-4o-realtime-preview-2025-06-03
+2025-08-19 13:14:03,348 [INFO] Probe models… 74/175 • ok:23 fail:51 skip:0 • openai/gpt-4o-audio-preview-2025-06-03
+2025-08-19 13:14:03,919 [INFO] Probe models… 75/175 • ok:23 fail:52 skip:0 • openai/o4-mini-deep-research
+2025-08-19 13:14:04,442 [INFO] Probe models… 76/175 • ok:23 fail:53 skip:0 • openai/o4-mini-deep-research-2025-06-26
+2025-08-19 13:14:05,316 [INFO] Probe models… 77/175 • ok:24 fail:53 skip:0 • openai/gpt-5-chat-latest
+2025-08-19 13:14:05,809 [INFO] Probe models… 78/175 • ok:24 fail:54 skip:0 • openai/gpt-5-2025-08-07
+2025-08-19 13:14:06,467 [INFO] Probe models… 79/175 • ok:25 fail:54 skip:0 • openai/gpt-3.5-turbo-16k
+2025-08-19 13:14:06,993 [INFO] Probe models… 80/175 • ok:25 fail:55 skip:0 • openai/tts-1
+2025-08-19 13:14:07,456 [INFO] Probe models… 81/175 • ok:25 fail:56 skip:0 • openai/whisper-1
+2025-08-19 13:14:07,981 [INFO] Probe models… 82/175 • ok:25 fail:57 skip:0 • openai/text-embedding-ada-002
+2025-08-19 13:14:38,989 [INFO] Probe models… 83/175 • ok:25 fail:58 skip:0 • anthropic/claude-opus-4-1-20250805
+2025-08-19 13:14:41,609 [INFO] Probe models… 84/175 • ok:26 fail:58 skip:0 • anthropic/claude-opus-4-20250514
+2025-08-19 13:14:43,241 [INFO] Probe models… 85/175 • ok:27 fail:58 skip:0 • anthropic/claude-sonnet-4-20250514
+2025-08-19 13:14:44,986 [INFO] Probe models… 86/175 • ok:28 fail:58 skip:0 • anthropic/claude-3-7-sonnet-20250219
+2025-08-19 13:14:47,396 [INFO] Probe models… 87/175 • ok:29 fail:58 skip:0 • anthropic/claude-3-5-sonnet-20241022
+2025-08-19 13:14:48,351 [INFO] Probe models… 88/175 • ok:30 fail:58 skip:0 • anthropic/claude-3-5-haiku-20241022
+2025-08-19 13:14:49,303 [INFO] Probe models… 89/175 • ok:31 fail:58 skip:0 • anthropic/claude-3-5-sonnet-20240620
+2025-08-19 13:14:50,058 [INFO] Probe models… 90/175 • ok:32 fail:58 skip:0 • anthropic/claude-3-haiku-20240307
+2025-08-19 13:14:51,334 [INFO] Probe models… 91/175 • ok:33 fail:58 skip:0 • anthropic/claude-3-opus-20240229
+2025-08-19 13:14:51,335 [INFO] Probe models… 92/175 • ok:33 fail:58 skip:1 • groq/whisper-large-v3
+2025-08-19 13:14:51,335 [INFO] Probe models… 93/175 • ok:33 fail:58 skip:2 • groq/meta-llama/llama-4-maverick-17b-128e-instruct
+2025-08-19 13:14:51,336 [INFO] Probe models… 94/175 • ok:33 fail:58 skip:3 • groq/playai-tts-arabic
+2025-08-19 13:14:51,336 [INFO] Probe models… 95/175 • ok:33 fail:58 skip:4 • groq/playai-tts
+2025-08-19 13:14:51,336 [INFO] Probe models… 96/175 • ok:33 fail:58 skip:5 • groq/llama3-8b-8192
+2025-08-19 13:14:51,336 [INFO] Probe models… 97/175 • ok:33 fail:58 skip:6 • groq/llama3-70b-8192
+2025-08-19 13:14:51,337 [INFO] Probe models… 98/175 • ok:33 fail:58 skip:7 • groq/meta-llama/llama-prompt-guard-2-22m
+2025-08-19 13:14:51,337 [INFO] Probe models… 99/175 • ok:33 fail:58 skip:8 • groq/allam-2-7b
+2025-08-19 13:14:51,337 [INFO] Probe models… 100/175 • ok:33 fail:58 skip:9 • groq/compound-beta
+2025-08-19 13:14:51,338 [INFO] Probe models… 101/175 • ok:33 fail:58 skip:10 • groq/openai/gpt-oss-20b
+2025-08-19 13:14:51,338 [INFO] Probe models… 102/175 • ok:33 fail:58 skip:11 • groq/deepseek-r1-distill-llama-70b
+2025-08-19 13:14:51,338 [INFO] Probe models… 103/175 • ok:33 fail:58 skip:12 • groq/qwen/qwen3-32b
+2025-08-19 13:14:51,339 [INFO] Probe models… 104/175 • ok:33 fail:58 skip:13 • groq/meta-llama/llama-guard-4-12b
+2025-08-19 13:14:51,339 [INFO] Probe models… 105/175 • ok:33 fail:58 skip:14 • groq/llama-3.3-70b-versatile
+2025-08-19 13:14:51,339 [INFO] Probe models… 106/175 • ok:33 fail:58 skip:15 • groq/llama-3.1-8b-instant
+2025-08-19 13:14:51,339 [INFO] Probe models… 107/175 • ok:33 fail:58 skip:16 • groq/meta-llama/llama-4-scout-17b-16e-instruct
+2025-08-19 13:14:51,340 [INFO] Probe models… 108/175 • ok:33 fail:58 skip:17 • groq/compound-beta-mini
+2025-08-19 13:14:51,340 [INFO] Probe models… 109/175 • ok:33 fail:58 skip:18 • groq/distil-whisper-large-v3-en
+2025-08-19 13:14:51,340 [INFO] Probe models… 110/175 • ok:33 fail:58 skip:19 • groq/gemma2-9b-it
+2025-08-19 13:14:51,341 [INFO] Probe models… 111/175 • ok:33 fail:58 skip:20 • groq/whisper-large-v3-turbo
+2025-08-19 13:14:51,341 [INFO] Probe models… 112/175 • ok:33 fail:58 skip:21 • groq/meta-llama/llama-prompt-guard-2-86m
+2025-08-19 13:14:51,341 [INFO] Probe models… 113/175 • ok:33 fail:58 skip:22 • groq/openai/gpt-oss-120b
+2025-08-19 13:14:51,341 [INFO] Probe models… 114/175 • ok:33 fail:58 skip:23 • groq/moonshotai/kimi-k2-instruct
+2025-08-19 13:14:51,342 [INFO] Probe models… 115/175 • ok:33 fail:58 skip:24 • google/models/embedding-gecko-001
+2025-08-19 13:14:51,342 [INFO] Probe models… 116/175 • ok:33 fail:58 skip:25 • google/models/gemini-1.5-pro-latest
+2025-08-19 13:14:51,342 [INFO] Probe models… 117/175 • ok:33 fail:58 skip:26 • google/models/gemini-1.5-pro-002
+2025-08-19 13:14:51,343 [INFO] Probe models… 118/175 • ok:33 fail:58 skip:27 • google/models/gemini-1.5-pro
+2025-08-19 13:14:51,343 [INFO] Probe models… 119/175 • ok:33 fail:58 skip:28 • google/models/gemini-1.5-flash-latest
+2025-08-19 13:14:51,343 [INFO] Probe models… 120/175 • ok:33 fail:58 skip:29 • google/models/gemini-1.5-flash
+2025-08-19 13:14:51,343 [INFO] Probe models… 121/175 • ok:33 fail:58 skip:30 • google/models/gemini-1.5-flash-002
+2025-08-19 13:14:51,344 [INFO] Probe models… 122/175 • ok:33 fail:58 skip:31 • google/models/gemini-1.5-flash-8b
+2025-08-19 13:14:51,344 [INFO] Probe models… 123/175 • ok:33 fail:58 skip:32 • google/models/gemini-1.5-flash-8b-001
+2025-08-19 13:14:51,344 [INFO] Probe models… 124/175 • ok:33 fail:58 skip:33 • google/models/gemini-1.5-flash-8b-latest
+2025-08-19 13:14:51,345 [INFO] Probe models… 125/175 • ok:33 fail:58 skip:34 • google/models/gemini-2.5-pro-preview-03-25
+2025-08-19 13:14:51,345 [INFO] Probe models… 126/175 • ok:33 fail:58 skip:35 • google/models/gemini-2.5-flash-preview-05-20
+2025-08-19 13:14:51,345 [INFO] Probe models… 127/175 • ok:33 fail:58 skip:36 • google/models/gemini-2.5-flash
+2025-08-19 13:14:51,346 [INFO] Probe models… 128/175 • ok:33 fail:58 skip:37 • google/models/gemini-2.5-flash-lite-preview-06-17
+2025-08-19 13:14:51,346 [INFO] Probe models… 129/175 • ok:33 fail:58 skip:38 • google/models/gemini-2.5-pro-preview-05-06
+2025-08-19 13:14:51,346 [INFO] Probe models… 130/175 • ok:33 fail:58 skip:39 • google/models/gemini-2.5-pro-preview-06-05
+2025-08-19 13:14:51,347 [INFO] Probe models… 131/175 • ok:33 fail:58 skip:40 • google/models/gemini-2.5-pro
+2025-08-19 13:14:51,347 [INFO] Probe models… 132/175 • ok:33 fail:58 skip:41 • google/models/gemini-2.0-flash-exp
+2025-08-19 13:14:51,347 [INFO] Probe models… 133/175 • ok:33 fail:58 skip:42 • google/models/gemini-2.0-flash
+2025-08-19 13:14:51,348 [INFO] Probe models… 134/175 • ok:33 fail:58 skip:43 • google/models/gemini-2.0-flash-001
+2025-08-19 13:14:51,348 [INFO] Probe models… 135/175 • ok:33 fail:58 skip:44 • google/models/gemini-2.0-flash-lite-001
+2025-08-19 13:14:51,348 [INFO] Probe models… 136/175 • ok:33 fail:58 skip:45 • google/models/gemini-2.0-flash-lite
+2025-08-19 13:14:51,349 [INFO] Probe models… 137/175 • ok:33 fail:58 skip:46 • google/models/gemini-2.0-flash-lite-preview-02-05
+2025-08-19 13:14:51,349 [INFO] Probe models… 138/175 • ok:33 fail:58 skip:47 • google/models/gemini-2.0-flash-lite-preview
+2025-08-19 13:14:51,349 [INFO] Probe models… 139/175 • ok:33 fail:58 skip:48 • google/models/gemini-2.0-pro-exp
+2025-08-19 13:14:51,349 [INFO] Probe models… 140/175 • ok:33 fail:58 skip:49 • google/models/gemini-2.0-pro-exp-02-05
+2025-08-19 13:14:51,350 [INFO] Probe models… 141/175 • ok:33 fail:58 skip:50 • google/models/gemini-exp-1206
+2025-08-19 13:14:51,350 [INFO] Probe models… 142/175 • ok:33 fail:58 skip:51 • google/models/gemini-2.0-flash-thinking-exp-01-21
+2025-08-19 13:14:51,350 [INFO] Probe models… 143/175 • ok:33 fail:58 skip:52 • google/models/gemini-2.0-flash-thinking-exp
+2025-08-19 13:14:51,351 [INFO] Probe models… 144/175 • ok:33 fail:58 skip:53 • google/models/gemini-2.0-flash-thinking-exp-1219
+2025-08-19 13:14:51,351 [INFO] Probe models… 145/175 • ok:33 fail:58 skip:54 • google/models/gemini-2.5-flash-preview-tts
+2025-08-19 13:14:51,351 [INFO] Probe models… 146/175 • ok:33 fail:58 skip:55 • google/models/gemini-2.5-pro-preview-tts
+2025-08-19 13:14:51,351 [INFO] Probe models… 147/175 • ok:33 fail:58 skip:56 • google/models/learnlm-2.0-flash-experimental
+2025-08-19 13:14:51,352 [INFO] Probe models… 148/175 • ok:33 fail:58 skip:57 • google/models/gemma-3-1b-it
+2025-08-19 13:14:51,352 [INFO] Probe models… 149/175 • ok:33 fail:58 skip:58 • google/models/gemma-3-4b-it
+2025-08-19 13:14:51,352 [INFO] Probe models… 150/175 • ok:33 fail:58 skip:59 • google/models/gemma-3-12b-it
+2025-08-19 13:14:51,353 [INFO] Probe models… 151/175 • ok:33 fail:58 skip:60 • google/models/gemma-3-27b-it
+2025-08-19 13:14:51,353 [INFO] Probe models… 152/175 • ok:33 fail:58 skip:61 • google/models/gemma-3n-e4b-it
+2025-08-19 13:14:51,353 [INFO] Probe models… 153/175 • ok:33 fail:58 skip:62 • google/models/gemma-3n-e2b-it
+2025-08-19 13:14:51,353 [INFO] Probe models… 154/175 • ok:33 fail:58 skip:63 • google/models/gemini-2.5-flash-lite
+2025-08-19 13:14:51,354 [INFO] Probe models… 155/175 • ok:33 fail:58 skip:64 • google/models/embedding-001
+2025-08-19 13:14:51,354 [INFO] Probe models… 156/175 • ok:33 fail:58 skip:65 • google/models/text-embedding-004
+2025-08-19 13:14:51,354 [INFO] Probe models… 157/175 • ok:33 fail:58 skip:66 • google/models/gemini-embedding-exp-03-07
+2025-08-19 13:14:51,355 [INFO] Probe models… 158/175 • ok:33 fail:58 skip:67 • google/models/gemini-embedding-exp
+2025-08-19 13:14:51,355 [INFO] Probe models… 159/175 • ok:33 fail:58 skip:68 • google/models/gemini-embedding-001
+2025-08-19 13:14:51,355 [INFO] Probe models… 160/175 • ok:33 fail:58 skip:69 • google/models/aqa
+2025-08-19 13:14:51,355 [INFO] Probe models… 161/175 • ok:33 fail:58 skip:70 • google/models/imagen-3.0-generate-002
+2025-08-19 13:14:51,356 [INFO] Probe models… 162/175 • ok:33 fail:58 skip:71 • google/models/imagen-4.0-generate-preview-06-06
+2025-08-19 13:14:51,356 [INFO] Probe models… 163/175 • ok:33 fail:58 skip:72 • google/models/imagen-4.0-ultra-generate-preview-06-06
+2025-08-19 13:14:51,356 [INFO] Probe models… 164/175 • ok:33 fail:58 skip:73 • google/models/imagen-4.0-generate-001
+2025-08-19 13:14:51,356 [INFO] Probe models… 165/175 • ok:33 fail:58 skip:74 • google/models/imagen-4.0-ultra-generate-001
+2025-08-19 13:14:51,357 [INFO] Probe models… 166/175 • ok:33 fail:58 skip:75 • google/models/imagen-4.0-fast-generate-001
+2025-08-19 13:14:51,357 [INFO] Probe models… 167/175 • ok:33 fail:58 skip:76 • google/models/veo-2.0-generate-001
+2025-08-19 13:14:51,357 [INFO] Probe models… 168/175 • ok:33 fail:58 skip:77 • google/models/veo-3.0-generate-preview
+2025-08-19 13:14:51,358 [INFO] Probe models… 169/175 • ok:33 fail:58 skip:78 • google/models/veo-3.0-fast-generate-preview
+2025-08-19 13:14:51,358 [INFO] Probe models… 170/175 • ok:33 fail:58 skip:79 • google/models/gemini-2.5-flash-preview-native-audio-dialog
+2025-08-19 13:14:51,358 [INFO] Probe models… 171/175 • ok:33 fail:58 skip:80 • google/models/gemini-2.5-flash-exp-native-audio-thinking-dialog
+2025-08-19 13:14:51,359 [INFO] Probe models… 172/175 • ok:33 fail:58 skip:81 • google/models/gemini-2.0-flash-live-001
+2025-08-19 13:14:51,359 [INFO] Probe models… 173/175 • ok:33 fail:58 skip:82 • google/models/gemini-live-2.5-flash-preview
+2025-08-19 13:14:51,359 [INFO] Probe models… 174/175 • ok:33 fail:58 skip:83 • google/models/gemini-2.5-flash-live-preview
+2025-08-19 13:14:51,359 [INFO] Probe models… 175/175 • ok:33 fail:58 skip:84 • deepseek/deepseek-chat
+2025-08-19 13:14:51,944 [INFO] Probe models completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_probe_models.py_20250819_131310.log
+2025-08-19 13:15:11,127 [INFO] Check API keys running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_api_keys.py_20250819_131511.log)
+2025-08-19 13:15:11,216 [INFO] Check API keys completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_api_keys.py_20250819_131511.log
+2025-08-19 13:45:15,976 [INFO] META tools_tab.py: lines=451 functions=25
+2025-08-19 13:45:28,207 [INFO] AI Models: fetch (RAW) running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_134528.log)
+2025-08-19 13:45:33,905 [INFO] AI Models: fetch (RAW) completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_134528.log
+2025-08-19 13:45:40,876 [INFO] AI Models: enrich/merge running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_134540.log)
+2025-08-19 13:45:42,416 [INFO] AI Models: enrich/merge completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_134540.log
+2025-08-19 13:45:45,681 [INFO] AI Models: final check running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_134545.log)
+2025-08-19 13:45:45,953 [INFO] AI Models: final check completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_134545.log
+2025-08-19 13:46:02,089 [INFO] Probe models running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_probe_models.py_20250819_134602.log)
+2025-08-19 13:46:04,084 [INFO] Probe models… 1/175 • ok:1 fail:0 skip:0 • openai/gpt-4-0613
+2025-08-19 13:46:05,441 [INFO] Probe models… 2/175 • ok:2 fail:0 skip:0 • openai/gpt-4
+2025-08-19 13:46:06,166 [INFO] Probe models… 3/175 • ok:3 fail:0 skip:0 • openai/gpt-3.5-turbo
+2025-08-19 13:46:06,167 [INFO] Probe models… 4/175 • ok:3 fail:0 skip:1 • openai/gpt-5-nano
+2025-08-19 13:46:06,167 [INFO] Probe models… 5/175 • ok:3 fail:0 skip:2 • openai/gpt-5
+2025-08-19 13:46:06,167 [INFO] Probe models… 6/175 • ok:3 fail:0 skip:3 • openai/gpt-5-mini-2025-08-07
+2025-08-19 13:46:06,168 [INFO] Probe models… 7/175 • ok:3 fail:0 skip:4 • openai/gpt-5-mini
+2025-08-19 13:46:06,168 [INFO] Probe models… 8/175 • ok:3 fail:0 skip:5 • openai/gpt-5-nano-2025-08-07
+2025-08-19 13:46:06,168 [INFO] Probe models… 9/175 • ok:3 fail:0 skip:6 • openai/davinci-002
+2025-08-19 13:46:06,169 [INFO] Probe models… 10/175 • ok:3 fail:0 skip:7 • openai/babbage-002
+2025-08-19 13:46:06,691 [INFO] Probe models… 11/175 • ok:3 fail:1 skip:7 • openai/gpt-3.5-turbo-instruct
+2025-08-19 13:46:07,198 [INFO] Probe models… 12/175 • ok:3 fail:2 skip:7 • openai/gpt-3.5-turbo-instruct-0914
+2025-08-19 13:46:07,198 [INFO] Probe models… 13/175 • ok:3 fail:2 skip:8 • openai/dall-e-3
+2025-08-19 13:46:07,199 [INFO] Probe models… 14/175 • ok:3 fail:2 skip:9 • openai/dall-e-2
+2025-08-19 13:46:08,587 [INFO] Probe models… 15/175 • ok:4 fail:2 skip:9 • openai/gpt-4-1106-preview
+2025-08-19 13:46:09,621 [INFO] Probe models… 16/175 • ok:5 fail:2 skip:9 • openai/gpt-3.5-turbo-1106
+2025-08-19 13:46:09,622 [INFO] Probe models… 17/175 • ok:5 fail:2 skip:10 • openai/tts-1-hd
+2025-08-19 13:46:09,622 [INFO] Probe models… 18/175 • ok:5 fail:2 skip:11 • openai/tts-1-1106
+2025-08-19 13:46:09,622 [INFO] Probe models… 19/175 • ok:5 fail:2 skip:12 • openai/tts-1-hd-1106
+2025-08-19 13:46:09,623 [INFO] Probe models… 20/175 • ok:5 fail:2 skip:13 • openai/text-embedding-3-small
+2025-08-19 13:46:09,623 [INFO] Probe models… 21/175 • ok:5 fail:2 skip:14 • openai/text-embedding-3-large
+2025-08-19 13:46:10,680 [INFO] Probe models… 22/175 • ok:6 fail:2 skip:14 • openai/gpt-4-0125-preview
+2025-08-19 13:46:11,996 [INFO] Probe models… 23/175 • ok:7 fail:2 skip:14 • openai/gpt-4-turbo-preview
+2025-08-19 13:46:12,770 [INFO] Probe models… 24/175 • ok:8 fail:2 skip:14 • openai/gpt-3.5-turbo-0125
+2025-08-19 13:46:13,743 [INFO] Probe models… 25/175 • ok:9 fail:2 skip:14 • openai/gpt-4-turbo
+2025-08-19 13:46:15,036 [INFO] Probe models… 26/175 • ok:10 fail:2 skip:14 • openai/gpt-4-turbo-2024-04-09
+2025-08-19 13:46:15,775 [INFO] Probe models… 27/175 • ok:11 fail:2 skip:14 • openai/gpt-4o
+2025-08-19 13:46:16,528 [INFO] Probe models… 28/175 • ok:12 fail:2 skip:14 • openai/gpt-4o-2024-05-13
+2025-08-19 13:46:17,366 [INFO] Probe models… 29/175 • ok:13 fail:2 skip:14 • openai/gpt-4o-mini-2024-07-18
+2025-08-19 13:46:18,317 [INFO] Probe models… 30/175 • ok:14 fail:2 skip:14 • openai/gpt-4o-mini
+2025-08-19 13:46:19,167 [INFO] Probe models… 31/175 • ok:15 fail:2 skip:14 • openai/gpt-4o-2024-08-06
+2025-08-19 13:46:20,296 [INFO] Probe models… 32/175 • ok:16 fail:2 skip:14 • openai/chatgpt-4o-latest
+2025-08-19 13:46:21,517 [INFO] Probe models… 33/175 • ok:16 fail:3 skip:14 • openai/o1-mini-2024-09-12
+2025-08-19 13:46:21,987 [INFO] Probe models… 34/175 • ok:16 fail:4 skip:14 • openai/o1-mini
+2025-08-19 13:46:22,697 [INFO] Probe models… 35/175 • ok:16 fail:5 skip:14 • openai/gpt-4o-realtime-preview-2024-10-01
+2025-08-19 13:46:23,201 [INFO] Probe models… 36/175 • ok:16 fail:6 skip:14 • openai/gpt-4o-audio-preview-2024-10-01
+2025-08-19 13:46:23,703 [INFO] Probe models… 37/175 • ok:16 fail:7 skip:14 • openai/gpt-4o-audio-preview
+2025-08-19 13:46:24,403 [INFO] Probe models… 38/175 • ok:16 fail:8 skip:14 • openai/gpt-4o-realtime-preview
+2025-08-19 13:46:24,404 [INFO] Probe models… 39/175 • ok:16 fail:8 skip:15 • openai/omni-moderation-latest
+2025-08-19 13:46:24,404 [INFO] Probe models… 40/175 • ok:16 fail:8 skip:16 • openai/omni-moderation-2024-09-26
+2025-08-19 13:46:25,087 [INFO] Probe models… 41/175 • ok:16 fail:9 skip:16 • openai/gpt-4o-realtime-preview-2024-12-17
+2025-08-19 13:46:25,632 [INFO] Probe models… 42/175 • ok:16 fail:10 skip:16 • openai/gpt-4o-audio-preview-2024-12-17
+2025-08-19 13:46:26,265 [INFO] Probe models… 43/175 • ok:16 fail:11 skip:16 • openai/gpt-4o-mini-realtime-preview-2024-12-17
+2025-08-19 13:46:26,787 [INFO] Probe models… 44/175 • ok:16 fail:12 skip:16 • openai/gpt-4o-mini-audio-preview-2024-12-17
+2025-08-19 13:46:27,483 [INFO] Probe models… 45/175 • ok:16 fail:13 skip:16 • openai/o1-2024-12-17
+2025-08-19 13:46:28,225 [INFO] Probe models… 46/175 • ok:16 fail:14 skip:16 • openai/o1
+2025-08-19 13:46:28,714 [INFO] Probe models… 47/175 • ok:16 fail:15 skip:16 • openai/gpt-4o-mini-realtime-preview
+2025-08-19 13:46:29,239 [INFO] Probe models… 48/175 • ok:16 fail:16 skip:16 • openai/gpt-4o-mini-audio-preview
+2025-08-19 13:46:29,989 [INFO] Probe models… 49/175 • ok:16 fail:17 skip:16 • openai/o3-mini
+2025-08-19 13:46:30,892 [INFO] Probe models… 50/175 • ok:16 fail:18 skip:16 • openai/o3-mini-2025-01-31
+2025-08-19 13:46:31,823 [INFO] Probe models… 51/175 • ok:17 fail:18 skip:16 • openai/gpt-4o-2024-11-20
+2025-08-19 13:46:32,320 [INFO] Probe models… 52/175 • ok:17 fail:19 skip:16 • openai/gpt-4o-search-preview-2025-03-11
+2025-08-19 13:46:32,783 [INFO] Probe models… 53/175 • ok:17 fail:20 skip:16 • openai/gpt-4o-search-preview
+2025-08-19 13:46:33,271 [INFO] Probe models… 54/175 • ok:17 fail:21 skip:16 • openai/gpt-4o-mini-search-preview-2025-03-11
+2025-08-19 13:46:34,032 [INFO] Probe models… 55/175 • ok:17 fail:22 skip:16 • openai/gpt-4o-mini-search-preview
+2025-08-19 13:46:34,605 [INFO] Probe models… 56/175 • ok:17 fail:23 skip:16 • openai/gpt-4o-transcribe
+2025-08-19 13:46:35,088 [INFO] Probe models… 57/175 • ok:17 fail:24 skip:16 • openai/gpt-4o-mini-transcribe
+2025-08-19 13:46:35,909 [INFO] Probe models… 58/175 • ok:17 fail:25 skip:16 • openai/o1-pro-2025-03-19
+2025-08-19 13:46:37,862 [INFO] Probe models… 59/175 • ok:17 fail:26 skip:16 • openai/o1-pro
+2025-08-19 13:46:38,335 [INFO] Probe models… 60/175 • ok:17 fail:27 skip:16 • openai/gpt-4o-mini-tts
+2025-08-19 13:46:38,811 [INFO] Probe models… 61/175 • ok:17 fail:28 skip:16 • openai/o3-2025-04-16
+2025-08-19 13:46:39,284 [INFO] Probe models… 62/175 • ok:17 fail:29 skip:16 • openai/o4-mini-2025-04-16
+2025-08-19 13:46:39,758 [INFO] Probe models… 63/175 • ok:17 fail:30 skip:16 • openai/o3
+2025-08-19 13:46:40,232 [INFO] Probe models… 64/175 • ok:17 fail:31 skip:16 • openai/o4-mini
+2025-08-19 13:46:41,171 [INFO] Probe models… 65/175 • ok:18 fail:31 skip:16 • openai/gpt-4.1-2025-04-14
+2025-08-19 13:46:42,150 [INFO] Probe models… 66/175 • ok:19 fail:31 skip:16 • openai/gpt-4.1
+2025-08-19 13:46:43,159 [INFO] Probe models… 67/175 • ok:20 fail:31 skip:16 • openai/gpt-4.1-mini-2025-04-14
+2025-08-19 13:46:43,965 [INFO] Probe models… 68/175 • ok:21 fail:31 skip:16 • openai/gpt-4.1-mini
+2025-08-19 13:46:45,040 [INFO] Probe models… 69/175 • ok:22 fail:31 skip:16 • openai/gpt-4.1-nano-2025-04-14
+2025-08-19 13:46:45,752 [INFO] Probe models… 70/175 • ok:23 fail:31 skip:16 • openai/gpt-4.1-nano
+2025-08-19 13:46:45,752 [INFO] Probe models… 71/175 • ok:23 fail:31 skip:17 • openai/gpt-image-1
+2025-08-19 13:46:45,752 [INFO] Probe models… 72/175 • ok:23 fail:31 skip:18 • openai/codex-mini-latest
+2025-08-19 13:46:46,458 [INFO] Probe models… 73/175 • ok:23 fail:32 skip:18 • openai/gpt-4o-realtime-preview-2025-06-03
+2025-08-19 13:46:46,948 [INFO] Probe models… 74/175 • ok:23 fail:33 skip:18 • openai/gpt-4o-audio-preview-2025-06-03
+2025-08-19 13:46:47,416 [INFO] Probe models… 75/175 • ok:23 fail:34 skip:18 • openai/o4-mini-deep-research
+2025-08-19 13:46:47,925 [INFO] Probe models… 76/175 • ok:23 fail:35 skip:18 • openai/o4-mini-deep-research-2025-06-26
+2025-08-19 13:46:47,925 [INFO] Probe models… 77/175 • ok:23 fail:35 skip:19 • openai/gpt-5-chat-latest
+2025-08-19 13:46:47,925 [INFO] Probe models… 78/175 • ok:23 fail:35 skip:20 • openai/gpt-5-2025-08-07
+2025-08-19 13:46:48,635 [INFO] Probe models… 79/175 • ok:24 fail:35 skip:20 • openai/gpt-3.5-turbo-16k
+2025-08-19 13:46:48,636 [INFO] Probe models… 80/175 • ok:24 fail:35 skip:21 • openai/tts-1
+2025-08-19 13:46:48,636 [INFO] Probe models… 81/175 • ok:24 fail:35 skip:22 • openai/whisper-1
+2025-08-19 13:46:48,636 [INFO] Probe models… 82/175 • ok:24 fail:35 skip:23 • openai/text-embedding-ada-002
+2025-08-19 13:46:57,981 [INFO] Probe models… 83/175 • ok:25 fail:35 skip:23 • anthropic/claude-opus-4-1-20250805
+2025-08-19 13:47:00,119 [INFO] Probe models… 84/175 • ok:26 fail:35 skip:23 • anthropic/claude-opus-4-20250514
+2025-08-19 13:47:02,735 [INFO] Probe models… 85/175 • ok:27 fail:35 skip:23 • anthropic/claude-sonnet-4-20250514
+2025-08-19 13:47:04,463 [INFO] Probe models… 86/175 • ok:28 fail:35 skip:23 • anthropic/claude-3-7-sonnet-20250219
+2025-08-19 13:47:07,207 [INFO] Probe models… 87/175 • ok:29 fail:35 skip:23 • anthropic/claude-3-5-sonnet-20241022
+2025-08-19 13:47:08,150 [INFO] Probe models… 88/175 • ok:30 fail:35 skip:23 • anthropic/claude-3-5-haiku-20241022
+2025-08-19 13:47:09,185 [INFO] Probe models… 89/175 • ok:31 fail:35 skip:23 • anthropic/claude-3-5-sonnet-20240620
+2025-08-19 13:47:09,896 [INFO] Probe models… 90/175 • ok:32 fail:35 skip:23 • anthropic/claude-3-haiku-20240307
+2025-08-19 13:47:11,332 [INFO] Probe models… 91/175 • ok:33 fail:35 skip:23 • anthropic/claude-3-opus-20240229
+2025-08-19 13:47:11,332 [INFO] Probe models… 92/175 • ok:33 fail:35 skip:24 • groq/whisper-large-v3-turbo
+2025-08-19 13:47:11,332 [INFO] Probe models… 93/175 • ok:33 fail:35 skip:25 • groq/openai/gpt-oss-120b
+2025-08-19 13:47:11,333 [INFO] Probe models… 94/175 • ok:33 fail:35 skip:26 • groq/meta-llama/llama-4-scout-17b-16e-instruct
+2025-08-19 13:47:11,333 [INFO] Probe models… 95/175 • ok:33 fail:35 skip:27 • groq/meta-llama/llama-4-maverick-17b-128e-instruct
+2025-08-19 13:47:11,334 [INFO] Probe models… 96/175 • ok:33 fail:35 skip:28 • groq/openai/gpt-oss-20b
+2025-08-19 13:47:11,334 [INFO] Probe models… 97/175 • ok:33 fail:35 skip:29 • groq/meta-llama/llama-prompt-guard-2-86m
+2025-08-19 13:47:11,334 [INFO] Probe models… 98/175 • ok:33 fail:35 skip:30 • groq/gemma2-9b-it
+2025-08-19 13:47:11,335 [INFO] Probe models… 99/175 • ok:33 fail:35 skip:31 • groq/compound-beta-mini
+2025-08-19 13:47:11,335 [INFO] Probe models… 100/175 • ok:33 fail:35 skip:32 • groq/qwen/qwen3-32b
+2025-08-19 13:47:11,336 [INFO] Probe models… 101/175 • ok:33 fail:35 skip:33 • groq/llama3-70b-8192
+2025-08-19 13:47:11,336 [INFO] Probe models… 102/175 • ok:33 fail:35 skip:34 • groq/distil-whisper-large-v3-en
+2025-08-19 13:47:11,336 [INFO] Probe models… 103/175 • ok:33 fail:35 skip:35 • groq/llama-3.1-8b-instant
+2025-08-19 13:47:11,336 [INFO] Probe models… 104/175 • ok:33 fail:35 skip:36 • groq/meta-llama/llama-prompt-guard-2-22m
+2025-08-19 13:47:11,337 [INFO] Probe models… 105/175 • ok:33 fail:35 skip:37 • groq/llama-3.3-70b-versatile
+2025-08-19 13:47:11,337 [INFO] Probe models… 106/175 • ok:33 fail:35 skip:38 • groq/compound-beta
+2025-08-19 13:47:11,337 [INFO] Probe models… 107/175 • ok:33 fail:35 skip:39 • groq/whisper-large-v3
+2025-08-19 13:47:11,338 [INFO] Probe models… 108/175 • ok:33 fail:35 skip:40 • groq/meta-llama/llama-guard-4-12b
+2025-08-19 13:47:11,338 [INFO] Probe models… 109/175 • ok:33 fail:35 skip:41 • groq/playai-tts-arabic
+2025-08-19 13:47:11,338 [INFO] Probe models… 110/175 • ok:33 fail:35 skip:42 • groq/moonshotai/kimi-k2-instruct
+2025-08-19 13:47:11,338 [INFO] Probe models… 111/175 • ok:33 fail:35 skip:43 • groq/llama3-8b-8192
+2025-08-19 13:47:11,339 [INFO] Probe models… 112/175 • ok:33 fail:35 skip:44 • groq/deepseek-r1-distill-llama-70b
+2025-08-19 13:47:11,339 [INFO] Probe models… 113/175 • ok:33 fail:35 skip:45 • groq/playai-tts
+2025-08-19 13:47:11,339 [INFO] Probe models… 114/175 • ok:33 fail:35 skip:46 • groq/allam-2-7b
+2025-08-19 13:47:11,340 [INFO] Probe models… 115/175 • ok:33 fail:35 skip:47 • google/models/embedding-gecko-001
+2025-08-19 13:47:11,340 [INFO] Probe models… 116/175 • ok:33 fail:35 skip:48 • google/models/gemini-1.5-pro-latest
+2025-08-19 13:47:11,340 [INFO] Probe models… 117/175 • ok:33 fail:35 skip:49 • google/models/gemini-1.5-pro-002
+2025-08-19 13:47:11,341 [INFO] Probe models… 118/175 • ok:33 fail:35 skip:50 • google/models/gemini-1.5-pro
+2025-08-19 13:47:11,341 [INFO] Probe models… 119/175 • ok:33 fail:35 skip:51 • google/models/gemini-1.5-flash-latest
+2025-08-19 13:47:11,341 [INFO] Probe models… 120/175 • ok:33 fail:35 skip:52 • google/models/gemini-1.5-flash
+2025-08-19 13:47:11,341 [INFO] Probe models… 121/175 • ok:33 fail:35 skip:53 • google/models/gemini-1.5-flash-002
+2025-08-19 13:47:11,342 [INFO] Probe models… 122/175 • ok:33 fail:35 skip:54 • google/models/gemini-1.5-flash-8b
+2025-08-19 13:47:11,342 [INFO] Probe models… 123/175 • ok:33 fail:35 skip:55 • google/models/gemini-1.5-flash-8b-001
+2025-08-19 13:47:11,343 [INFO] Probe models… 124/175 • ok:33 fail:35 skip:56 • google/models/gemini-1.5-flash-8b-latest
+2025-08-19 13:47:11,343 [INFO] Probe models… 125/175 • ok:33 fail:35 skip:57 • google/models/gemini-2.5-pro-preview-03-25
+2025-08-19 13:47:11,343 [INFO] Probe models… 126/175 • ok:33 fail:35 skip:58 • google/models/gemini-2.5-flash-preview-05-20
+2025-08-19 13:47:11,343 [INFO] Probe models… 127/175 • ok:33 fail:35 skip:59 • google/models/gemini-2.5-flash
+2025-08-19 13:47:11,344 [INFO] Probe models… 128/175 • ok:33 fail:35 skip:60 • google/models/gemini-2.5-flash-lite-preview-06-17
+2025-08-19 13:47:11,344 [INFO] Probe models… 129/175 • ok:33 fail:35 skip:61 • google/models/gemini-2.5-pro-preview-05-06
+2025-08-19 13:47:11,344 [INFO] Probe models… 130/175 • ok:33 fail:35 skip:62 • google/models/gemini-2.5-pro-preview-06-05
+2025-08-19 13:47:11,345 [INFO] Probe models… 131/175 • ok:33 fail:35 skip:63 • google/models/gemini-2.5-pro
+2025-08-19 13:47:11,345 [INFO] Probe models… 132/175 • ok:33 fail:35 skip:64 • google/models/gemini-2.0-flash-exp
+2025-08-19 13:47:11,345 [INFO] Probe models… 133/175 • ok:33 fail:35 skip:65 • google/models/gemini-2.0-flash
+2025-08-19 13:47:11,346 [INFO] Probe models… 134/175 • ok:33 fail:35 skip:66 • google/models/gemini-2.0-flash-001
+2025-08-19 13:47:11,346 [INFO] Probe models… 135/175 • ok:33 fail:35 skip:67 • google/models/gemini-2.0-flash-lite-001
+2025-08-19 13:47:11,346 [INFO] Probe models… 136/175 • ok:33 fail:35 skip:68 • google/models/gemini-2.0-flash-lite
+2025-08-19 13:47:11,347 [INFO] Probe models… 137/175 • ok:33 fail:35 skip:69 • google/models/gemini-2.0-flash-lite-preview-02-05
+2025-08-19 13:47:11,347 [INFO] Probe models… 138/175 • ok:33 fail:35 skip:70 • google/models/gemini-2.0-flash-lite-preview
+2025-08-19 13:47:11,347 [INFO] Probe models… 139/175 • ok:33 fail:35 skip:71 • google/models/gemini-2.0-pro-exp
+2025-08-19 13:47:11,347 [INFO] Probe models… 140/175 • ok:33 fail:35 skip:72 • google/models/gemini-2.0-pro-exp-02-05
+2025-08-19 13:47:11,348 [INFO] Probe models… 141/175 • ok:33 fail:35 skip:73 • google/models/gemini-exp-1206
+2025-08-19 13:47:11,348 [INFO] Probe models… 142/175 • ok:33 fail:35 skip:74 • google/models/gemini-2.0-flash-thinking-exp-01-21
+2025-08-19 13:47:11,348 [INFO] Probe models… 143/175 • ok:33 fail:35 skip:75 • google/models/gemini-2.0-flash-thinking-exp
+2025-08-19 13:47:11,349 [INFO] Probe models… 144/175 • ok:33 fail:35 skip:76 • google/models/gemini-2.0-flash-thinking-exp-1219
+2025-08-19 13:47:11,349 [INFO] Probe models… 145/175 • ok:33 fail:35 skip:77 • google/models/gemini-2.5-flash-preview-tts
+2025-08-19 13:47:11,349 [INFO] Probe models… 146/175 • ok:33 fail:35 skip:78 • google/models/gemini-2.5-pro-preview-tts
+2025-08-19 13:47:11,349 [INFO] Probe models… 147/175 • ok:33 fail:35 skip:79 • google/models/learnlm-2.0-flash-experimental
+2025-08-19 13:47:11,350 [INFO] Probe models… 148/175 • ok:33 fail:35 skip:80 • google/models/gemma-3-1b-it
+2025-08-19 13:47:11,350 [INFO] Probe models… 149/175 • ok:33 fail:35 skip:81 • google/models/gemma-3-4b-it
+2025-08-19 13:47:11,350 [INFO] Probe models… 150/175 • ok:33 fail:35 skip:82 • google/models/gemma-3-12b-it
+2025-08-19 13:47:11,351 [INFO] Probe models… 151/175 • ok:33 fail:35 skip:83 • google/models/gemma-3-27b-it
+2025-08-19 13:47:11,351 [INFO] Probe models… 152/175 • ok:33 fail:35 skip:84 • google/models/gemma-3n-e4b-it
+2025-08-19 13:47:11,351 [INFO] Probe models… 153/175 • ok:33 fail:35 skip:85 • google/models/gemma-3n-e2b-it
+2025-08-19 13:47:11,352 [INFO] Probe models… 154/175 • ok:33 fail:35 skip:86 • google/models/gemini-2.5-flash-lite
+2025-08-19 13:47:11,352 [INFO] Probe models… 155/175 • ok:33 fail:35 skip:87 • google/models/embedding-001
+2025-08-19 13:47:11,352 [INFO] Probe models… 156/175 • ok:33 fail:35 skip:88 • google/models/text-embedding-004
+2025-08-19 13:47:11,353 [INFO] Probe models… 157/175 • ok:33 fail:35 skip:89 • google/models/gemini-embedding-exp-03-07
+2025-08-19 13:47:11,353 [INFO] Probe models… 158/175 • ok:33 fail:35 skip:90 • google/models/gemini-embedding-exp
+2025-08-19 13:47:11,353 [INFO] Probe models… 159/175 • ok:33 fail:35 skip:91 • google/models/gemini-embedding-001
+2025-08-19 13:47:11,353 [INFO] Probe models… 160/175 • ok:33 fail:35 skip:92 • google/models/aqa
+2025-08-19 13:47:11,354 [INFO] Probe models… 161/175 • ok:33 fail:35 skip:93 • google/models/imagen-3.0-generate-002
+2025-08-19 13:47:11,354 [INFO] Probe models… 162/175 • ok:33 fail:35 skip:94 • google/models/imagen-4.0-generate-preview-06-06
+2025-08-19 13:47:11,354 [INFO] Probe models… 163/175 • ok:33 fail:35 skip:95 • google/models/imagen-4.0-ultra-generate-preview-06-06
+2025-08-19 13:47:11,355 [INFO] Probe models… 164/175 • ok:33 fail:35 skip:96 • google/models/imagen-4.0-generate-001
+2025-08-19 13:47:11,355 [INFO] Probe models… 165/175 • ok:33 fail:35 skip:97 • google/models/imagen-4.0-ultra-generate-001
+2025-08-19 13:47:11,355 [INFO] Probe models… 166/175 • ok:33 fail:35 skip:98 • google/models/imagen-4.0-fast-generate-001
+2025-08-19 13:47:11,356 [INFO] Probe models… 167/175 • ok:33 fail:35 skip:99 • google/models/veo-2.0-generate-001
+2025-08-19 13:47:11,356 [INFO] Probe models… 168/175 • ok:33 fail:35 skip:100 • google/models/veo-3.0-generate-preview
+2025-08-19 13:47:11,356 [INFO] Probe models… 169/175 • ok:33 fail:35 skip:101 • google/models/veo-3.0-fast-generate-preview
+2025-08-19 13:47:11,357 [INFO] Probe models… 170/175 • ok:33 fail:35 skip:102 • google/models/gemini-2.5-flash-preview-native-audio-dialog
+2025-08-19 13:47:11,357 [INFO] Probe models… 171/175 • ok:33 fail:35 skip:103 • google/models/gemini-2.5-flash-exp-native-audio-thinking-dialog
+2025-08-19 13:47:11,357 [INFO] Probe models… 172/175 • ok:33 fail:35 skip:104 • google/models/gemini-2.0-flash-live-001
+2025-08-19 13:47:11,357 [INFO] Probe models… 173/175 • ok:33 fail:35 skip:105 • google/models/gemini-live-2.5-flash-preview
+2025-08-19 13:47:11,358 [INFO] Probe models… 174/175 • ok:33 fail:35 skip:106 • google/models/gemini-2.5-flash-live-preview
+2025-08-19 13:47:11,358 [INFO] Probe models… 175/175 • ok:33 fail:35 skip:107 • deepseek/deepseek-chat
+2025-08-19 13:47:11,688 [INFO] Probe models completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_probe_models.py_20250819_134602.log
+2025-08-19 14:49:42,544 [INFO] META tools_tab.py: lines=451 functions=25
+2025-08-19 14:49:46,153 [INFO] AI Models: fetch (RAW) running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_144946.log)
+2025-08-19 14:49:47,963 [INFO] AI Models: fetch (RAW) completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_fetch_ai_models.py_20250819_144946.log
+2025-08-19 14:49:51,927 [INFO] AI Models: enrich/merge running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_144951.log)
+2025-08-19 14:49:53,793 [INFO] AI Models: enrich/merge completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_update_ai_models.py_20250819_144951.log
+2025-08-19 14:49:55,992 [INFO] AI Models: final check running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_144955.log)
+2025-08-19 14:49:56,089 [INFO] AI Models: final check completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_check_ai_models.py_ai_models.yaml_20250819_144955.log
+2025-08-19 14:49:59,535 [INFO] Probe models running… please wait (see: C:\_Repos\PersistentAssistant\logs\tool_run_tools_probe_models.py_20250819_144959.log)
+2025-08-19 14:50:00,324 [INFO] Probe models completed. Log: C:\_Repos\PersistentAssistant\logs\tool_run_tools_probe_models.py_20250819_144959.log
+2025-08-20 18:38:18,408 [INFO] META tools_tab.py: lines=451 functions=25
+2025-08-22 09:36:16,525 [INFO] META tools_tab.py: lines=451 functions=25
+2025-08-22 10:12:03,917 [INFO] META tools_tab.py: lines=451 functions=25
+2025-08-22 13:37:11,967 [INFO] META tools_tab.py: lines=451 functions=25

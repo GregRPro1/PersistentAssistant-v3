@@ -1,0 +1,7 @@
+SMOKE 20251012_113813
+python_procs=5
+watchdog_head=None css=False
+tracker_endpoint=absent bound_port=None
+logs watchdog=yes cloudflared=yes
+tunnel_url=https://choices-herein-stylus-introduces.trycloudflare.com
+dev_head=200

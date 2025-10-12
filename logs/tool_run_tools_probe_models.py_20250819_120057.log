@@ -1,0 +1,21 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/probe_models.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+META: file=tools/probe_models.py lines=98 functions=5
+RETURNCODE: 0
+
+---- STDOUT ----
+SUMMARY: {"probed":{"openai":{"ok":25,"fail":57},"anthropic":{"ok":9,"fail":0},"groq":{"ok":0,"fail":23},"google":{"ok":0,"fail":60},"deepseek":{"ok":0,"fail":1}},"merged":true}
+
+
+---- STDERR ----
+C:\_Repos\PersistentAssistant\tools\probe_models.py:47: DeprecationWarning: The model 'claude-3-5-sonnet-20241022' is deprecated and will reach end-of-life on October 22, 2025.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  _ = client.messages.create(model=model, max_tokens=8, messages=[{"role":"user","content":"ping"}])
+C:\_Repos\PersistentAssistant\tools\probe_models.py:47: DeprecationWarning: The model 'claude-3-5-sonnet-20240620' is deprecated and will reach end-of-life on October 22, 2025.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  _ = client.messages.create(model=model, max_tokens=8, messages=[{"role":"user","content":"ping"}])
+C:\_Repos\PersistentAssistant\tools\probe_models.py:47: DeprecationWarning: The model 'claude-3-opus-20240229' is deprecated and will reach end-of-life on January 5th, 2026.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  _ = client.messages.create(model=model, max_tokens=8, messages=[{"role":"user","content":"ping"}])
+

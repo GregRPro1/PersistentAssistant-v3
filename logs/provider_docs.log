@@ -1,0 +1,54 @@
+2025-08-19 14:48:37,962 [INFO] provider_docs.py loaded (lines=314, functions=20)
+2025-08-19 14:48:38,310 [WARNING] GET https://openai.com/api/pricing -> HTTP 403
+2025-08-19 14:48:39,532 [WARNING] Dropped openai/gpt-4o: incomplete fields
+2025-08-19 14:48:39,532 [WARNING] Dropped openai/gpt-4o-mini: incomplete fields
+2025-08-19 14:48:39,532 [WARNING] Dropped openai/gpt-4.1: incomplete fields
+2025-08-19 14:48:39,532 [WARNING] Dropped openai/o3: incomplete fields
+2025-08-19 14:48:39,532 [WARNING] Dropped openai/o3-mini: incomplete fields
+2025-08-19 14:48:39,532 [WARNING] Dropped anthropic/claude-opus-4.1: incomplete fields
+2025-08-19 14:48:39,533 [WARNING] Dropped anthropic/claude-sonnet-4: incomplete fields
+2025-08-19 14:48:39,533 [WARNING] Dropped anthropic/claude-haiku-3.5: incomplete fields
+2025-08-19 14:48:39,533 [WARNING] Dropped google/gemini-2.5-pro: incomplete fields
+2025-08-19 14:48:39,533 [WARNING] Dropped google/gemini-2.5-flash: incomplete fields
+2025-08-19 14:48:39,533 [WARNING] Dropped google/gemini-2.5-flash-lite: incomplete fields
+2025-08-19 14:48:49,826 [INFO] provider_docs.py loaded (lines=314, functions=20)
+2025-08-19 14:48:50,184 [WARNING] GET https://openai.com/api/pricing -> HTTP 403
+2025-08-19 14:48:51,387 [WARNING] Dropped openai/gpt-4o: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped openai/gpt-4o-mini: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped openai/gpt-4.1: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped openai/o3: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped openai/o3-mini: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped anthropic/claude-opus-4.1: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped anthropic/claude-sonnet-4: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped anthropic/claude-haiku-3.5: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped google/gemini-2.5-pro: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped google/gemini-2.5-flash: incomplete fields
+2025-08-19 14:48:51,387 [WARNING] Dropped google/gemini-2.5-flash-lite: incomplete fields
+2025-08-19 14:49:52,165 [INFO] provider_docs.py loaded (lines=314, functions=20)
+2025-08-19 14:49:52,520 [WARNING] GET https://openai.com/api/pricing -> HTTP 403
+2025-08-19 14:49:53,648 [WARNING] Dropped openai/gpt-4o: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped openai/gpt-4o-mini: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped openai/gpt-4.1: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped openai/o3: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped openai/o3-mini: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped anthropic/claude-opus-4.1: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped anthropic/claude-sonnet-4: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped anthropic/claude-haiku-3.5: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped google/gemini-2.5-pro: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped google/gemini-2.5-flash: incomplete fields
+2025-08-19 14:49:53,648 [WARNING] Dropped google/gemini-2.5-flash-lite: incomplete fields
+2025-08-19 14:52:08,165 [INFO] provider_docs.py loaded (lines=314, functions=20)
+2025-08-19 14:52:08,533 [WARNING] GET https://openai.com/api/pricing -> HTTP 403
+2025-08-19 14:52:09,778 [WARNING] Dropped openai/gpt-4o: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped openai/gpt-4o-mini: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped openai/gpt-4.1: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped openai/o3: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped openai/o3-mini: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped anthropic/claude-opus-4.1: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped anthropic/claude-sonnet-4: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped anthropic/claude-haiku-3.5: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped google/gemini-2.5-pro: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped google/gemini-2.5-flash: incomplete fields
+2025-08-19 14:52:09,778 [WARNING] Dropped google/gemini-2.5-flash-lite: incomplete fields
+2025-08-19 15:05:22,647 [INFO] provider_docs.py ready (lines=350, functions=23)
+2025-08-19 15:05:23,059 [WARNING] GET https://openai.com/api/pricing -> HTTP 403

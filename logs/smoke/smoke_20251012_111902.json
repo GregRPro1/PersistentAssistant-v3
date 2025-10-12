@@ -1,0 +1,55 @@
+{
+  "ts": "20251012_111902",
+  "utc": "2025-10-12T11:19:02.856435+00:00",
+  "config": {
+    "ports": {
+      "watchdog_ui": 9001,
+      "dev_server": 8787,
+      "tracker": 9002
+    },
+    "paths": {
+      "repo_root": "C:\\_Repos\\PersistentAssistant",
+      "tracker_script": "C:\\_Repos\\PersistentAssistant\\scripts\\tracker\\pal_tracker.py"
+    }
+  },
+  "python_procs": [
+    {
+      "pid": 7896,
+      "exe": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe",
+      "cmd": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe .\\scripts\\smoke\\pal_smoke.py",
+      "start": 1760267942.7236996
+    },
+    {
+      "pid": 16328,
+      "exe": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe",
+      "cmd": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe .\\scripts\\watchdog\\watchdog_ui.py",
+      "start": 1760267674.3182964
+    },
+    {
+      "pid": 34528,
+      "exe": "C:\\Users\\GPRap\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmd": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe .\\scripts\\smoke\\pal_smoke.py",
+      "start": 1760267942.7338915
+    },
+    {
+      "pid": 34600,
+      "exe": "C:\\Users\\GPRap\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmd": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe .\\scripts\\watchdog\\watchdog_ui.py",
+      "start": 1760267674.3234313
+    }
+  ],
+  "watchdog_head": {
+    "status": null,
+    "headers": {
+      "error": "HTTP Error 501: Unsupported method ('HEAD')"
+    }
+  },
+  "watchdog_css_token": false,
+  "tracker_endpoint_json": null,
+  "tracker_script_exists": false,
+  "tracker_bound_port": null,
+  "latest_watchdog_log": "C:\\_Repos\\PersistentAssistant\\logs\\watchdog\\pal-dev-server_20251012_110034.log",
+  "latest_cloudflared_log": "C:\\_Repos\\PersistentAssistant\\logs\\cloudflared\\quick-tunnel_20251012_110036.log",
+  "tunnel_url": "https://choices-herein-stylus-introduces.trycloudflare.com",
+  "dev_head_status": null
+}

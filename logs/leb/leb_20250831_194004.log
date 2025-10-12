@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "feature_id": "STEP-10.3",
+  "dry_run": true,
+  "policy_apply_enabled": false,
+  "really_apply": false,
+  "ts": 1756665604,
+  "results": []
+}

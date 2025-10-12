@@ -1,0 +1,7 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/fetch_ai_models.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+META: file=tools/fetch_ai_models.py lines=177 functions=7
+---- STREAM ----
+OK: wrote RAW catalogue: C:\_Repos\PersistentAssistant\ai_models_raw.yaml
+SUMMARY: {"file":"C:/_Repos/PersistentAssistant/ai_models_raw.yaml","providers":{"openai":82,"anthropic":3,"google":6,"groq":0},"total_models":91,"elapsed_sec":1.17}

@@ -1,0 +1,19 @@
+127.0.0.1 - - [12/Oct/2025 11:09:53] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:09:53] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:10:16] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:10:26] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:10:26] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:10:40] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:10:47] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:10:50] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:11:26] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Oct/2025 11:12:34] "HEAD / HTTP/1.1" 200 -
+
+PAL ─────────────────────────────────────────────────────────────────────
+MasterContext: PAL20251012
+SubContext:    PAL20251012A
+Updated (UTC): 2025-10-12 08:52:53.049902
+PAL ─────────────────────────────────────────────────────────────────────
+
+PAL Dev Server listening on http://127.0.0.1:8787 (version pal-0.1.0)
+BLOCKING: PAL Dev Server is running. Press Ctrl+C to stop. If you stop it, the tunnel and remote access will fail until a web server is listening again on this port.

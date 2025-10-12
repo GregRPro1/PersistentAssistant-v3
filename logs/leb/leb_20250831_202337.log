@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "feature_id": "DEV-DRY-RUN",
+  "dry_run": true,
+  "policy_apply_enabled": false,
+  "really_apply": false,
+  "ts": 1756379153,
+  "results": [
+    {
+      "path": "docs\\USER_GUIDE.md",
+      "ok": true,
+      "reason": "would_apply",
+      "idx": 1,
+      "mode": "append",
+      "before_sha": "e2a0e9b264a81e6152608ce04ec1da3a8fc13f390e4f397b972ac4fc75c6cd39",
+      "exists": true,
+      "have_sha": "e2a0e9b264a81e6152608ce04ec1da3a8fc13f390e4f397b972ac4fc75c6cd39",
+      "bytes": 70
+    }
+  ],
+  "diagnostics": {
+    "proposal_path": "C:\\_Repos\\PersistentAssistant\\tmp\\patches\\proposal_step_10_3.json",
+    "schema": "jsonschema_missing_skipped"
+  }
+}

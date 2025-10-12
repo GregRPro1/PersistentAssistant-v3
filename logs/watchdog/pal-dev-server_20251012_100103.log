@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\_Repos\PersistentAssistant\current\server_wrapper.py", line 9, in <module>
+    print_banner("PAL")
+    ~~~~~~~~~~~~^^^^^^^
+  File "C:\_Repos\PersistentAssistant\utils\context_banner.py", line 25, in print_banner
+    print(banner(prefix))
+    ~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\GPRap\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 6-74: character maps to <undefined>

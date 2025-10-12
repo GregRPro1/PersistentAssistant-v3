@@ -1,0 +1,6 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/check_api_keys.py
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+META: file=tools/check_api_keys.py lines=21 functions=1
+---- STREAM ----
+SUMMARY: {"keys":{"openai":"sk-p\u2026absA","anthropic":"sk-a\u20266gAA","groq":"gsk_\u2026YYzr","google":"AIza\u2026Vw2k","deepseek":"sk-2\u2026f683"}}

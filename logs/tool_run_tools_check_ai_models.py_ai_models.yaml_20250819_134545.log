@@ -1,0 +1,7 @@
+CWD: C:\_Repos\PersistentAssistant
+CMD: C:\_Repos\PersistentAssistant\.venv\Scripts\python.exe tools/check_ai_models.py ai_models.yaml
+ENV_KEYS: {'openai': 'sk-p…absA', 'anthropic': 'sk-a…6gAA', 'groq': 'gsk_…YYzr', 'google': 'AIza…Vw2k', 'deepseek': 'sk-2…f683'}
+META: file=tools/check_ai_models.py lines=146 functions=6
+---- STREAM ----
+OK: ai_models.yaml is valid
+SUMMARY: {"valid":true,"error_count":0,"errors":[],"counts":{"providers":5,"models":175},"meta":{"timestamp":"2025-08-19T12:45:45.923555+00:00","file":"C:/_Repos/PersistentAssistant/tools/check_ai_models.py","lines":146,"functions":6},"target":"ai_models.yaml"}
