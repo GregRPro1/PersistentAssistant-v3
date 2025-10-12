@@ -1,0 +1,73 @@
+{
+  "ts": "20251012_113851",
+  "utc": "2025-10-12T11:38:51.277183+00:00",
+  "config": {
+    "ports": {
+      "watchdog_ui": 9001,
+      "dev_server": 8787,
+      "tracker": 9002
+    },
+    "paths": {
+      "repo_root": "C:\\_Repos\\PersistentAssistant",
+      "tracker_script": "C:\\_Repos\\PersistentAssistant\\scripts\\tracker\\pal_tracker.py"
+    },
+    "lifecycle": {
+      "check_interval_sec": 30,
+      "restart_limit_count": 3,
+      "restart_limit_window_sec": 300,
+      "backoff_sec": 120,
+      "auto_run_smoke": true,
+      "auto_git_push": true
+    },
+    "autostart": {
+      "enabled": false,
+      "task_name": "PAL_Watchdog"
+    }
+  },
+  "python_procs": [
+    {
+      "pid": 1592,
+      "exe": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe",
+      "cmd": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe .\\scripts\\watchdog\\watchdog_ui.py",
+      "start": 1760269090.254272
+    },
+    {
+      "pid": 4240,
+      "exe": "C:\\Users\\GPRap\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmd": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe .\\scripts\\watchdog\\watchdog_ui.py",
+      "start": 1760269090.265874
+    },
+    {
+      "pid": 8068,
+      "exe": "C:\\Users\\GPRap\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmd": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe C:\\_Repos\\PersistentAssistant\\scripts\\smoke\\pal_smoke.py",
+      "start": 1760269131.1566486
+    },
+    {
+      "pid": 17316,
+      "exe": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe",
+      "cmd": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe C:\\_Repos\\PersistentAssistant\\scripts\\smoke\\pal_smoke.py",
+      "start": 1760269131.1497097
+    },
+    {
+      "pid": 27520,
+      "exe": "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe",
+      "cmd": "python current/server_wrapper.py",
+      "start": 1760269093.2111747
+    }
+  ],
+  "watchdog_head": {
+    "status": null,
+    "headers": {
+      "error": "HTTP Error 501: Unsupported method ('HEAD')"
+    }
+  },
+  "watchdog_css_token": false,
+  "tracker_endpoint_json": null,
+  "tracker_script_exists": false,
+  "tracker_bound_port": null,
+  "latest_watchdog_log": "C:\\_Repos\\PersistentAssistant\\logs\\watchdog\\pal-dev-server_20251012_113813.log",
+  "latest_cloudflared_log": "C:\\_Repos\\PersistentAssistant\\logs\\cloudflared\\quick-tunnel_20251012_110036.log",
+  "tunnel_url": "https://choices-herein-stylus-introduces.trycloudflare.com",
+  "dev_head_status": 200
+}
