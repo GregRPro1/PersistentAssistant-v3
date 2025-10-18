@@ -1,48 +1,65 @@
 param(
-  [string]$Url = "http://127.0.0.1:8776",
-  [switch]$Http2
+  [string]$Bind = "http://127.0.0.1:8776",
+  [string]$LogDir = (Join-Path $PSScriptRoot '..\..\tmp\logs')
 )
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
-function Resolve-Cloudflared {
-  $cands = @(
-    $env:CLOUDFLARED_EXE,
-    "C:\Program Files\Cloudflare\cloudflared\cloudflared.exe",
-    "C:\Program Files (x86)\Cloudflare\cloudflared\cloudflared.exe",
-    (Get-Command cloudflared.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source),
-    (Join-Path $PSScriptRoot "..\bin\cloudflared.exe"),
-    (Join-Path (Get-Location) "tools\bin\cloudflared.exe")
-  ) | Where-Object { $_ } | Select-Object -Unique
-  foreach($p in $cands){ if(Test-Path $p){ return (Resolve-Path $p).Path } }
-  return $null
+function Ensure-Dir([string]$p){ if (-not (Test-Path $p)) { New-Item -ItemType Directory -Force -Path $p | Out-Null } }
+Ensure-Dir $LogDir
+Ensure-Dir (Join-Path $PSScriptRoot '..\..\reports\ops')
+
+# Verify cloudflared
+$exe = (Get-Command cloudflared -ErrorAction SilentlyContinue)
+if (-not $exe) {
+  $bin = Join-Path (Join-Path $PSScriptRoot '..\bin') 'cloudflared.exe'
+  if (Test-Path $bin) { $exe = @{ Source = $bin } }
+}
+if (-not $exe) { Write-Warning "[CF] cloudflared not available; skipping tunnel."; exit 0 }
+
+$ts = (Get-Date).ToString('yyyyMMdd_HHmmss')
+$logFile = Join-Path $LogDir ("cloudflared_" + $ts + ".log")
+$tunnelFile = Join-Path (Join-Path $PSScriptRoot '..\..\reports\ops') 'tunnel_url.txt'
+
+# Start cloudflared as a background process with redirected output
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = $exe.Source
+$psi.ArgumentList.AddRange(@('tunnel','--no-autoupdate','--url', $Bind))
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError  = $true
+$psi.UseShellExecute = $false
+$psi.CreateNoWindow = $true
+
+$p = New-Object System.Diagnostics.Process
+$p.StartInfo = $psi
+[void]$p.Start()
+
+# Read lines asynchronously for up to 25 seconds to capture the public URL
+$deadline = (Get-Date).AddSeconds(25)
+$url = $null
+$sw = New-Object System.IO.StreamWriter($logFile, $false, [System.Text.Encoding]::UTF8)
+try {
+  while (-not $p.HasExited) {
+    if ((Get-Date) -gt $deadline) { break }
+    while (($line = $p.StandardOutput.ReadLine()) -ne $null) {
+      $sw.WriteLine($line)
+      if (-not $url) {
+        $m = [regex]::Match($line, 'https?://[^\s]+trycloudflare\.com')
+        if ($m.Success) { $url = $m.Value }
+      }
+    }
+    Start-Sleep -Milliseconds 100
+  }
+  # Also drain stderr
+  while (($eline = $p.StandardError.ReadLine()) -ne $null) { $sw.WriteLine($eline) }
+} finally {
+  $sw.Flush(); $sw.Close()
 }
 
-$cf = Resolve-Cloudflared
-if(-not $cf){
-  Write-Host "[CF] cloudflared not found; running installer…" -ForegroundColor Yellow
-  try { pwsh tools\ps1\install_cloudflared.ps1 | Out-Null } catch {}
-  $cf = Resolve-Cloudflared
+if ($url) {
+  Set-Content -Encoding UTF8 -Path $tunnelFile -Value $url
+  Write-Host ("Tunnel URL: " + $url)
+} else {
+  Write-Warning "[CF] Tunnel URL not detected in time. Check log: $logFile"
 }
-if(-not $cf){
-  Write-Error "[CF] cloudflared.exe not found after install. Set `$env:CLOUDFLARED_EXE or install Cloudflare Tunnel."
-  exit 1
-}
-$env:CLOUDFLARED_EXE = $cf
-
-# Stop any old instances quietly
-Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-
-# Ensure logs
-New-Item -ItemType Directory -Force (Join-Path $PSScriptRoot "..\..\tmp\logs") | Out-Null
-$logDir = (Resolve-Path (Join-Path $PSScriptRoot "..\..\tmp\logs")).Path
-$logOut = Join-Path $logDir "cloudflared.out.log"
-$logErr = Join-Path $logDir "cloudflared.err.log"
-Remove-Item $logOut,$logErr -Force -ErrorAction SilentlyContinue
-
-# Build args cleanly (no AddRange)
-$args = @('tunnel','--no-autoupdate')
-if($Http2){ $args += @('--protocol','http2') }
-$args += @('--url', $Url)
-
-Write-Host "[CF] Launching: $cf $($args -join ' ')"
-Start-Process -FilePath $cf -ArgumentList $args -RedirectStandardOutput $logOut -RedirectStandardError $logErr -WindowStyle Hidden
-Write-Host "[CF] Started. Logs -> $logOut / $logErr"
+exit 0

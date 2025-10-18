@@ -1,0 +1,5 @@
+watchdog start
+watchdog stop
+watchdog restart
+watchdog refresh
+watchdog tail

@@ -1,33 +1,12 @@
-plan_id: PAL20251012
-title: PAL: Tunnel + Watchdog + Full Tracker
-last_updated_utc: 2025-10-12T10:49:54.999604
-phases:
-  - id: P2
-    title: Quick Tunnel Smoke (no login)
-    status: InProgress
-    tasks:
-      - id: P2.T1
-        desc: Local dev server healthy on 127.0.0.1:8787
-        status: Done
-      - id: P2.T2
-        desc: Start Quick Tunnel (URL detected)
-        status: InProgress
-      - id: P2.T3
-        desc: Remote HEAD on trycloudflare URL returns 200
-        status: NotStarted
-  - id: P7
-    title: Watchdog + Full Tracker + Sharing
-    status: InProgress
-    tasks:
-      - id: P7.T1
-        desc: Integrate pal_tracker.py (start from watchdog, open tab, auto-refresh)
-        status: InProgress
-      - id: P7.T2
-        desc: WhatsApp share button sends current tunnel URL via wa.me
-        status: InProgress
-      - id: P7.T3
-        desc: Commit logs flow from watchdog
-        status: InProgress
-notes:
-  - Tracker config is in watchdog\watchdog.json (tracker_script_path, tracker_port).
-  - Share uses https://wa.me/?text= prefilled message (WhatsApp Web).
+phase: Phase-R1
+tasks:
+  - id: 13A
+    title: Extraction & watchdog applier
+    status: complete
+  - id: 13B
+    title: Tracker & Bridge UI
+    status: complete
+  - id: 13C
+    title: Supervisor Consolidation
+    status: active
+next_phase_target: Simplified single-command launch

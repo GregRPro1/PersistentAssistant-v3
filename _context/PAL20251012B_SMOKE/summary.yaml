@@ -1,0 +1,11 @@
+master_id: PAL20251012
+child_id: PAL20251012B_SMOKE
+timestamp: 2025-10-12 16:01:06
+repo_root: C:\_Repos\PersistentAssistant
+git_branch: step/PAL20251012B_context_integration
+git_commit: 84af29a
+settings_path: C:\_Repos\PersistentAssistant\config\pal_settings.yaml
+lessons: |
+  SMOKE TEST
+  SMOKE CLOSED
+  --- closed at 2025-10-12 16:01:07

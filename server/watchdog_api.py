@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 import os, json, hmac, hashlib, subprocess, time
 
-bp = Blueprint("watchdog_api", __name__, url_prefix="/api")
+bp = Blueprint('watchdog_api', __name__)
 
 STATUS_PATH = os.path.join('reports', 'ops', 'watchdog_status.json')
 PID_FILE    = os.path.join('tmp','pid','watchdog.pid')
@@ -47,7 +47,7 @@ def _taskkill(pid: int):
     except Exception:
         return False
 
-@bp.get('/watchdog')
+@bp.get('/api/watchdog')
 def watchdog_root():
     st = _load_status()
     try:
@@ -58,7 +58,7 @@ def watchdog_root():
         pass
     return jsonify(st)
 
-@bp.get('/watchdog/<name>')
+@bp.get('/api/watchdog/<name>')
 def watchdog_proc(name):
     st = _load_status()
     p = (st.get('processes') or {}).get(name)
@@ -67,7 +67,7 @@ def watchdog_proc(name):
     p['_file_age_s'] = st.get('_file_age_s')
     return jsonify({"ok": True, "process": p})
 
-@bp.post('/watchdog/<name>/restart')
+@bp.post('/api/watchdog/<name>/restart')
 def watchdog_restart(name):
     body = request.get_data() or b''
     if not _require_auth(body):
@@ -79,7 +79,7 @@ def watchdog_restart(name):
     ok = _taskkill(p['pid'])
     return jsonify({"ok": ok, "name": name, "action": "restart_via_kill"})
 
-@bp.get('/watchdog/logs/<name>')
+@bp.get('/api/watchdog/logs/<name>')
 def watchdog_logs(name):
     st = _load_status()
     p = (st.get('processes') or {}).get(name)
@@ -93,7 +93,7 @@ def watchdog_logs(name):
     err = _tail(p.get('stderr'), n)
     return jsonify({"ok": True, "stdout_tail": out, "stderr_tail": err})
 
-@bp.post('/watchdog/exit')
+@bp.post('/api/watchdog/exit')
 def watchdog_exit():
     body = request.get_data() or b''
     if not _require_auth(body):
@@ -105,9 +105,3 @@ def watchdog_exit():
         return jsonify({"ok": False, "error": "no_pid"}), 400
     ok = _taskkill(pid)
     return jsonify({"ok": ok, "action": "exit_watchdog"})
-
-
-
-
-
-

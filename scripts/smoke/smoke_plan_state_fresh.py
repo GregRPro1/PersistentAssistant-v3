@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Any, Optional
 
 ROOT = Path(__file__).resolve().parents[2]
-STATUS_P = ROOT / "reports" / "ops" / "ops_status.json"
-GREEN_S = 30
-WARN_S = 90
+STATE_P = ROOT / "_state" / "plan_status.json"
+GREEN_S = 15
+WARN_S = 60
 
 def read_json(p: Path) -> Optional[dict[str, Any]]:
     try:
@@ -17,46 +17,41 @@ def read_json(p: Path) -> Optional[dict[str, Any]]:
         return None
 
 def extract_ts(d: dict[str, Any]) -> Optional[float]:
-    for k in ["last_heartbeat_ts", "updated_ts", "updated_at", "heartbeat_ts"]:
+    for k in ["updated_ts", "last_update_ts", "last_heartbeat_ts"]:
         if k in d:
             v = d[k]
-            if isinstance(v, (int, float)):
+            if isinstance(v, (int,float)):
                 return float(v)
-            if isinstance(v, str):
-                import re
-                m = re.search(r"(\d{10,})", v)
-                if m:
-                    return float(m.group(1))
     return None
 
 def age_seconds(ts: Optional[float], p: Path) -> float:
     now = time.time()
-    if ts is not None and ts > 0 and ts < now + 86400*365:
+    if ts is not None and 0 < ts < now + 86400*365:
         return max(0.0, now - ts)
     try:
         return max(0.0, now - p.stat().st_mtime)
     except Exception:
-        return float("inf")
+        return float('inf')
 
 def main() -> int:
-    if not STATUS_P.exists():
-        print(f"[FAIL] Missing {STATUS_P}")
+    if not STATE_P.exists():
+        print(f"[FAIL] Missing {STATE_P}")
         return 2
-    data = read_json(STATUS_P)
+    data = read_json(STATE_P)
     if data is None:
-        print(f"[FAIL] Cannot parse JSON: {STATUS_P}")
+        print(f"[FAIL] Cannot parse JSON: {STATE_P}")
         return 3
     ts = extract_ts(data)
-    age = age_seconds(ts, STATUS_P)
+    age = age_seconds(ts, STATE_P)
 
     if age <= GREEN_S:
-        print("[OK] bridge status fresh")
+        print("[OK] plan_status fresh")
         return 0
     elif age <= WARN_S:
-        print(f"[WARN] bridge status stale: age={age:.1f}s")
+        print(f"[WARN] plan_status stale: age={age:.1f}s")
         return 0
     else:
-        print(f"[FAIL] bridge status too old: age={age:.1f}s (> {WARN_S}s)")
+        print(f"[FAIL] plan_status too old: age={age:.1f}s (> {WARN_S}s)")
         return 4
 
 if __name__ == "__main__":

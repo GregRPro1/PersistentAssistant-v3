@@ -1,0 +1,9 @@
+master_id: PAL20251013
+child_id: PAL20251013A
+timestamp: 2025-10-12 19:03:28
+repo_root: C:\_Repos\PersistentAssistant
+git_branch: step/PAL20251013A_plan_status_sidecar
+git_commit: e3f4168
+settings_path: C:\_Repos\PersistentAssistant\config\pal_settings.yaml
+lessons: |
+  Plan promotion via sidecar; watchdog OK; ready to wire tracker UI to plan + bridge.

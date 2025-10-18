@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+"""
+Smoke: Bridge status JSON exists, parses, and is fresh enough.
+- Primary: reports/ops/ops_status.json
+- Freshness: green <= 30s, warn <= 90s, fail > 90s
+- Uses JSON ts fields if present; falls back to file mtime.
+"""
 from __future__ import annotations
 import json, sys, time
 from pathlib import Path
 from typing import Any, Optional
 
 ROOT = Path(__file__).resolve().parents[2]
-CANDIDATES = [
-    ROOT / "reports" / "ops" / "heartbeat.json",
-    ROOT / "reports" / "ops" / "ops_status.json",
-    ROOT / "_state" / "bridge_heartbeat.json",
-]
+STATUS_P = ROOT / "reports" / "ops" / "ops_status.json"
 GREEN_S = 30
 WARN_S = 90
 
@@ -21,7 +23,11 @@ def read_json(p: Path) -> Optional[dict[str, Any]]:
         return None
 
 def extract_ts(d: dict[str, Any]) -> Optional[float]:
-    for k in ["last_heartbeat_ts", "heartbeat_ts", "updated_ts", "updated_at"]:
+    """
+    Try multiple keys; accept epoch seconds or ISO-like strings containing digits.
+    """
+    candidates = ["last_heartbeat_ts", "updated_ts", "updated_at", "heartbeat_ts"]
+    for k in candidates:
         if k in d:
             v = d[k]
             if isinstance(v, (int, float)):
@@ -35,42 +41,33 @@ def extract_ts(d: dict[str, Any]) -> Optional[float]:
 
 def age_seconds(ts: Optional[float], p: Path) -> float:
     now = time.time()
-    if ts is not None and 0 < ts < now + 86400*365:
+    if ts is not None and ts > 0 and ts < now + 86400*365:
         return max(0.0, now - ts)
+    # fallback on file mtime
     try:
         return max(0.0, now - p.stat().st_mtime)
     except Exception:
         return float("inf")
 
 def main() -> int:
-    found = None
-    data = None
-    for p in CANDIDATES:
-        if p.exists():
-            found = p
-            data = read_json(p)
-            if data is not None:
-                break
-    if found is None:
-        print("[FAIL] No heartbeat/status JSON found in candidates.")
-        for p in CANDIDATES:
-            print(f" - {p}")
+    if not STATUS_P.exists():
+        print(f"[FAIL] Missing {STATUS_P}")
         return 2
+    data = read_json(STATUS_P)
     if data is None:
-        print(f"[FAIL] Cannot parse JSON in {found}")
+        print(f"[FAIL] Cannot parse JSON: {STATUS_P}")
         return 3
-
     ts = extract_ts(data)
-    age = age_seconds(ts, found)
+    age = age_seconds(ts, STATUS_P)
 
     if age <= GREEN_S:
-        print("[OK] heartbeat fresh")
+        print("[OK] bridge status fresh")
         return 0
     elif age <= WARN_S:
-        print(f"[WARN] heartbeat stale: age={age:.1f}s")
+        print(f"[WARN] bridge status stale: age={age:.1f}s")
         return 0
     else:
-        print(f"[FAIL] heartbeat too old: age={age:.1f}s (> {WARN_S}s) [{found.name}]")
+        print(f"[FAIL] bridge status too old: age={age:.1f}s (> {WARN_S}s)")
         return 4
 
 if __name__ == "__main__":

@@ -1,0 +1,3 @@
+ID: PAL20251013A_consolidated_learnings_pack.zip
+TIMESTAMP: 2025-10-12 18:18:19
+DESC: Consolidated learnings for PAL20251013A (merged A + A-EXT).

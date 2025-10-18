@@ -1,6 +1,6 @@
 from flask import Blueprint, Response
 
-bp = Blueprint("watchdog_ui", __name__, url_prefix="/app")
+bp = Blueprint('watchdog_ui', __name__)
 
 _HTML = r"""<!doctype html>
 <html>
@@ -74,7 +74,7 @@ function render(st){
     const btnR = el('button','', 'Restart');
     btnR.onclick = async ()=>{
       btnR.disabled=true; btnR.textContent='Restarting…';
-      try { await api(`/watchdog/${name}/restart`, {method:'POST'}); } catch(e){ console.error(e); }
+      try { await api(`/api/watchdog/${name}/restart`, {method:'POST'}); } catch(e){ console.error(e); }
       finally { setTimeout(()=>{ btnR.disabled=false; btnR.textContent='Restart'; },1200); }
     };
     actions.appendChild(btnR);
@@ -108,15 +108,6 @@ document.body.appendChild(exitBtn);
 </body>
 </html>"""
 
-@bp.get("/watchdog")
+@bp.get('/app/watchdog')
 def watchdog_page():
     return Response(_HTML, mimetype='text/html')
-
-
-
-
-
-
-
-
-

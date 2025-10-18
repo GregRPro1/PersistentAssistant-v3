@@ -17,41 +17,72 @@
       "grace": 10
     }
   },
-  "processes": {
-    "tunnel": {
-      "name": "tunnel",
-      "logs": {
-        "stderr": "tmp\\logs\\cloudflared.err.log",
-        "stdout": "tmp\\logs\\cloudflared.out.log"
+  "processes": [
+    {
+      "name": "server",
+      "cmd": [
+        "pwsh",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools\\ps1\\run_control_server_lan.ps1"
+      ],
+      "cwd": ".",
+      "health": {
+        "http": {
+          "url": "http://127.0.0.1:8776/healthz",
+          "expect_status": 200
+        }
       },
+      "logs": {
+        "stdout": "tmp\\logs\\server.out.log",
+        "stderr": "tmp\\logs\\server.err.log"
+      },
+      "restart": {
+        "policy": "always",
+        "backoff": {
+          "initial": 1,
+          "factor": 1.5,
+          "max": 60
+        },
+        "max_restarts": 10,
+        "window": 300
+      }
+    },
+    {
+      "name": "tunnel",
+      "depends_on": [
+        "server"
+      ],
+      "cmd": [
+        "cloudflared",
+        "tunnel",
+        "--no-autoupdate",
+        "--url",
+        "http://127.0.0.1:8776"
+      ],
+      "cwd": ".",
       "health": {
         "log_regex": "https?://\\S*trycloudflare\\.com",
         "publish": {
           "file": "reports\\ops\\tunnel_url.txt"
         }
       },
-      "depends_on": [
-        "server"
-      ],
-      "restart": {
-        "policy": "on-failure"
+      "logs": {
+        "stdout": "tmp\\logs\\cloudflared.out.log",
+        "stderr": "tmp\\logs\\cloudflared.err.log"
       },
-      "cmd": [
-        "C:\\Program Files\\Cloudflare\\cloudflared\\cloudflared.exe",
-        "tunnel",
-        "--no-autoupdate",
-        "--url",
-        "http://127.0.0.1:8776"
-      ]
-    },
-    "server": {
-      "cmd": [
-        "C:\\_Repos\\PersistentAssistant\\.venv\\Scripts\\python.exe",
-        "-u",
-        "-m",
-        "server.bootstrap_mounts"
-      ],
-      "name": "server"
+      "restart": {
+        "policy": "on-failure",
+        "backoff": {
+          "initial": 2,
+          "factor": 1.5,
+          "max": 120
+        },
+        "max_restarts": 5,
+        "window": 600
+      }
     }
-  }
+  ]
 }

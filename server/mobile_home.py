@@ -87,4 +87,3 @@ def _page():
 @bp.get('/')
 def home():
     return Response(_page(), mimetype='text/html')
-

@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+Smoke: Some heartbeat JSON exists and is fresh.
+Search order:
+- reports/ops/heartbeat.json
+- reports/ops/ops_status.json
+- _state/bridge_heartbeat.json
+Freshness thresholds: green <= 30s, warn <= 90s, fail > 90s
+"""
 from __future__ import annotations
 import json, sys, time
 from pathlib import Path

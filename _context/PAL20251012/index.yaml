@@ -1,0 +1,6 @@
+master_id: PAL20251012
+created: 2025-10-12 15:34:53
+children:
+  - PAL20251012A
+  - PAL20251012B_SMOKE
+last_child: PAL20251012B_SMOKE
