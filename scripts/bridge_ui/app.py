@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STATE_P = ROOT / "_state" / "plan_status.json"
 OPS_STATUS_P = ROOT / "reports" / "ops" / "ops_status.json"
 LOG_P = ROOT / "tmp" / "bridge_tracker.log"
-POLL_SEC = 5
+POLL_SEC = 2
 STALE_AMBER = 15.0
 STALE_RED = 60.0
 CTRL_URL = "http://127.0.0.1:6060/control"
@@ -42,6 +42,7 @@ TEMPLATE = """<!doctype html><html><head>
       <button onclick="fetch('{{ ctrl }}?service=heartbeat&action=restart',{method:'POST'})">Restart Heartbeat</button>
       <button onclick="fetch('{{ ctrl }}?service=planrefresher&action=restart',{method:'POST'})">Restart Plan</button>
       <button onclick="fetch('{{ ctrl }}?service=bridgeui&action=restart',{method:'POST'})">Restart UI</button>
+      <button onclick="fetch('{{ ctrl }}?service=all&action=restart',{method:'POST'})">Restart All</button>
     </div>
   </div>
   <div class='muted' style='margin-top:16px;'>Auto-refreshes every {{ poll_sec }}s. Staleness: ≤{{ amber }}s OK, ≤{{ red }}s AMBER, >{{ red }}s RED.</div>

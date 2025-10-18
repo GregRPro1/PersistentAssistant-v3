@@ -1,23 +1,14 @@
-# PAL central settings (augment as needed)
-ports:
-  watchdog_ui: 9001
-  dev_server: 8787
-  tracker: 9002
-
-paths:
-  repo_root: C:\_Repos\PersistentAssistant
-  # Set this to the *exact* location of pal_tracker.py in your repo.
-  tracker_script: C:\_Repos\PersistentAssistant\scripts\tracker\pal_tracker.py
-
-whatsapp:
-  # If you just want WhatsApp Web, set 'number' to your phone number (E.164, e.g., 447700900123).
-  number: ""
-  # Optional: Meta WhatsApp Cloud API settings — ONLY if you already use it.
-  cloud_api_enabled: false
-  cloud_access_token: ""
-  cloud_phone_number_id: ""
-  cloud_to_number: ""   # recipient in E.164
-
-lifecycle:
-  # (unused in this basic pack; kept for compatibility)
-  check_interval_sec: 30
+# Supervisor runtime configuration
+supervisor:
+  check_interval: 5
+  stale_ops: 30
+  stale_plan: 60
+  max_misses: 3
+  log_rotate_mb: 5
+  log_keep: 7
+  flap_window: 180
+  flap_limit: 5
+  cooldown_sec: 60
+  ctrl_host: "127.0.0.1"
+  ctrl_port: 6060
+  ui_port: 5070
