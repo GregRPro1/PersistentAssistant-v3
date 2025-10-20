@@ -1,0 +1,9 @@
+{
+  "scanned_files": 437,
+  "archive_count": 238,
+  "kept_count": 199,
+  "linked_to_supervisor_modules": 6,
+  "linked_to_extra_entry_modules": 0,
+  "stale_days_threshold": 45,
+  "aggressive": true
+}

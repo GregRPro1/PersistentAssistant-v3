@@ -1,0 +1,298 @@
+{
+  "rows": [
+    {
+      "path": ".gitattributes",
+      "size": 731,
+      "mtime_utc": "2025-10-11 08:43:27",
+      "decision": "keep"
+    },
+    {
+      "path": ".gitignore",
+      "size": 377,
+      "mtime_utc": "2025-08-28 11:36:54",
+      "decision": "keep"
+    },
+    {
+      "path": ".keep",
+      "size": 0,
+      "mtime_utc": "2025-09-30 18:36:22",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "ai_models.bak.yaml",
+      "size": 146,
+      "mtime_utc": "2025-08-19 13:52:09",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "ai_models.yaml",
+      "size": 5462,
+      "mtime_utc": "2025-08-19 14:05:24",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "ai_models_enrichment.yaml",
+      "size": 52900,
+      "mtime_utc": "2025-08-19 12:45:41",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "ai_models_health.yaml",
+      "size": 64,
+      "mtime_utc": "2025-08-19 13:50:00",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "ai_models_raw.yaml",
+      "size": 16242,
+      "mtime_utc": "2025-08-19 13:51:44",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "apply_combined_pack.ps1",
+      "size": 6047,
+      "mtime_utc": "2025-09-27 10:12:11",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "apply_packs_only.ps1",
+      "size": 3565,
+      "mtime_utc": "2025-09-27 10:13:25",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "auto_next.patch",
+      "size": 1466,
+      "mtime_utc": "2025-09-07 19:53:34",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "chdog_api_fallback.py",
+      "size": 274,
+      "mtime_utc": "2025-10-02 05:13:16",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "chdog_ui_fallback.py",
+      "size": 420,
+      "mtime_utc": "2025-10-02 05:13:16",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "Daily dev loop (fast).md",
+      "size": 502,
+      "mtime_utc": "2025-08-28 08:18:46",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "last_summary.txt",
+      "size": 733,
+      "mtime_utc": "2025-09-14 07:02:36",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "main.py",
+      "size": 1054,
+      "mtime_utc": "2025-08-18 20:56:54",
+      "decision": "keep"
+    },
+    {
+      "path": "master_project_tracker.yaml",
+      "size": 386,
+      "mtime_utc": "2025-10-18 15:35:30",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "NewChatBrief_V1",
+      "size": 3770,
+      "mtime_utc": "2025-08-26 23:17:27",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "Notes.md",
+      "size": 5323,
+      "mtime_utc": "2025-09-13 09:42:50",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "Notes_git",
+      "size": 852,
+      "mtime_utc": "2025-08-28 11:06:17",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "OpenAI_Interaction.md",
+      "size": 5053,
+      "mtime_utc": "2025-08-26 16:22:51",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "PA_CONSTITUTION.md",
+      "size": 523,
+      "mtime_utc": "2025-10-11 06:49:20",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "PAL_plan_bundle_20251019-093600.zip",
+      "size": 201795,
+      "mtime_utc": "2025-10-19 08:36:02",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "pal_project_plan.yaml",
+      "size": 443,
+      "mtime_utc": "2025-10-18 15:35:30",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "payload_placeholder.txt",
+      "size": 11,
+      "mtime_utc": "2025-10-11 11:19:04",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "persistentAssistyant_202509082248.zip",
+      "size": 46275337,
+      "mtime_utc": "2025-09-08 21:48:33",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "plan_append.yaml",
+      "size": 6046,
+      "mtime_utc": "2025-10-01 04:38:30",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "project_index.yaml",
+      "size": 859,
+      "mtime_utc": "2025-08-20 17:00:48",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "project_session.yaml",
+      "size": 85,
+      "mtime_utc": "2025-08-22 09:15:27",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "pytest.ini",
+      "size": 91,
+      "mtime_utc": "2025-09-30 19:53:50",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README.md",
+      "size": 393,
+      "mtime_utc": "2025-08-23 09:23:56",
+      "decision": "keep"
+    },
+    {
+      "path": "README.txt",
+      "size": 370,
+      "mtime_utc": "2025-10-01 03:21:12",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_APPLY.txt",
+      "size": 462,
+      "mtime_utc": "2025-10-12 07:52:52",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_NORMALIZED_ROADMAP.txt",
+      "size": 464,
+      "mtime_utc": "2025-10-19 10:23:35",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_PAL_CLI.md",
+      "size": 815,
+      "mtime_utc": "2025-10-12 06:36:18",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_PATCH.txt",
+      "size": 320,
+      "mtime_utc": "2025-10-12 06:39:44",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_PHONE_COLLECT.txt",
+      "size": 314,
+      "mtime_utc": "2025-10-19 20:47:49",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_PHONE_REMOTE.txt",
+      "size": 797,
+      "mtime_utc": "2025-10-20 06:51:44",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_ROADMAP.txt",
+      "size": 848,
+      "mtime_utc": "2025-10-19 09:27:50",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_Tunnel_Diagnostics.txt",
+      "size": 688,
+      "mtime_utc": "2025-10-12 06:54:16",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "README_WATCHDOG.txt",
+      "size": 962,
+      "mtime_utc": "2025-10-12 08:04:40",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "requirements.txt",
+      "size": 72,
+      "mtime_utc": "2025-10-12 06:36:18",
+      "decision": "keep"
+    },
+    {
+      "path": "serve_approvals_8778.py",
+      "size": 507,
+      "mtime_utc": "2025-08-23 13:07:48",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "serve_phone.py",
+      "size": 4190,
+      "mtime_utc": "2025-08-23 13:27:33",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "serve_phone_inline.py",
+      "size": 3681,
+      "mtime_utc": "2025-08-23 13:24:48",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "sitecustomize.py",
+      "size": 198,
+      "mtime_utc": "2025-09-03 20:20:45",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "start_pal.ps1",
+      "size": 143,
+      "mtime_utc": "2025-10-18 13:41:27",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "Tasks.md",
+      "size": 544,
+      "mtime_utc": "2025-08-27 23:05:28",
+      "decision": "archive_candidate"
+    },
+    {
+      "path": "tstrap_mounts.py",
+      "size": 5033,
+      "mtime_utc": "2025-10-02 05:13:16",
+      "decision": "archive_candidate"
+    }
+  ]
+}

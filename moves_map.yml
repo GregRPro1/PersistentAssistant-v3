@@ -1,0 +1,45 @@
+moves:
+  - from: tools/tools/tool_catalog.json
+    to:   core/registry/tool_catalog.json
+  - from: tools/tools/tool_catalog.json.refactor.json
+    to:   core/registry/tool_catalog.json.refactor.json
+  - from: tools/tools/tool_catalog.md
+    to:   core/registry/tool_catalog.md
+  - from: tools/tools/tool_catalog.yaml
+    to:   core/registry/tool_catalog.yaml
+  - from: tools/py/agentic/ai_link.py
+    to:   agents/kit/ai_link.py
+  - from: tools/py/agentic/auto_next.py
+    to:   agents/kit/auto_next.py
+  - from: tools/py/agentic/drive_step.py
+    to:   agents/kit/drive_step.py
+  - from: tools/py/agentic/next_steps.py
+    to:   agents/kit/next_steps.py
+  - from: tools/py/agentic/patch_schema.json.refactor.json
+    to:   agents/kit/patch_schema.json.refactor.json
+  - from: tools/py/agentic/pilot.py
+    to:   agents/kit/pilot.py
+  - from: tools/py/agentic/pilot_cli.py
+    to:   agents/kit/pilot_cli.py
+  - from: tools/py/agentic/policy_edit.py
+    to:   agents/kit/policy_edit.py
+  - from: tools/py/agentic/project_config.py
+    to:   agents/kit/project_config.py
+  - from: tools/py/agentic/proposal_types.py
+    to:   agents/kit/proposal_types.py
+  - from: tools/py/agentic/status.py
+    to:   agents/kit/status.py
+  - from: tools/py/registry/add_tool.py.bak.20250827_232611
+    to:   core/registry/add_tool.py.bak.20250827_232611
+  - from: tools/py/registry/add_tool.py.bak.20250827_233022
+    to:   core/registry/add_tool.py.bak.20250827_233022
+  - from: scripts/cloudflared/collect_env.ps1
+    to:   scripts/tunnel/collect_env.ps1
+  - from: scripts/cloudflared/install_or_update_cloudflared.ps1
+    to:   scripts/tunnel/install_or_update_cloudflared.ps1
+  - from: scripts/cloudflared/run_tunnel.ps1
+    to:   scripts/tunnel/run_tunnel.ps1
+  - from: scripts/cloudflared/smoke_test_cloudflared.ps1
+    to:   scripts/tunnel/smoke_test_cloudflared.ps1
+  - from: scripts/cloudflared/teardown.ps1
+    to:   scripts/tunnel/teardown.ps1

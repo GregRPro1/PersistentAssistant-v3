@@ -1,0 +1,6499 @@
+{
+  "gui/main_window.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "MainWindow",
+        "lineno": 38,
+        "doc": "Main window of the Persistent Assistant application.\n\nTabs:\n  - Input\n  - Prompt\n  - Response\n  - Plan\n  - Chat\n  - Tools (external file; preserves previous functionality + new model updater)"
+      }
+    ]
+  },
+  "gui/run_window.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "RunWindow",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 66,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/apply_common.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 3,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "have_git_repo",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "find_repo_root",
+        "lineno": 5,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "resolve_repo_root",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "git",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "slugify_branch",
+        "lineno": 27,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/apply_pack.py": {
+    "doc": "apply_pack.py \u2014 High-verbosity, self-healing applier.\n- Always prints ZIP entries and chosen payload root.\n- Flattens nested 'payload/' correctly.\n- If files land under repo-root 'payload/', auto-rescues into place.\n- Prints per-dir copy counts and final existence checks.",
+    "defs": [
+      {
+        "type": "func",
+        "name": "list_zip",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "detect_payload_root",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "iter_files",
+        "lineno": 36,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "copy_flatten_payload",
+        "lineno": 41,
+        "doc": "Copies files so that 'payload/scripts/x.py' -> 'repo_root/scripts/x.py'.\nIf payload_root itself is .../payload, we strip that level.\nIf payload_root is wrapper (contains 'scripts' but not named 'payload'), we treat it as payload root."
+      },
+      {
+        "type": "func",
+        "name": "rescue_repo_payload",
+        "lineno": 64,
+        "doc": "If repo_root/payload exists, move its contents into place (flatten)."
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 88,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/apply_pack_debug.py": {
+    "doc": "apply_pack_debug.py \u2014 verbose, self-healing ZIP applier for PA\n\nWhat it does (default behavior):\n1) Lists ZIP entries (first 200) so we can see what\u2019s inside.\n2) Extracts to a temp dir.\n3) Detects the true payload root (works with/without wrapper dirs).\n4) Copies files into the repo, flattening any leading 'payload/'.\n5) Auto-rescues any stray 'repo_root/payload/' by moving contents into place.\n6) Prints final existence checks for key targets (or custom ones via --expect).\n\nUsage:\n  python .\\scripts\\apply_pack_debug.py -ZipPath \"C:\\Users\\...\\Downloads\\PACK.zip\"\n\nUseful flags:\n  --list-only            Only list ZIP entries, don\u2019t copy.\n  --rescue-payload       After copy, move repo-root 'payload/' contents into place.\n  --expect REL [--expect REL ...]  Extra post-apply existence checks.",
+    "defs": [
+      {
+        "type": "func",
+        "name": "list_zip",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "detect_payload_root",
+        "lineno": 36,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "iter_files",
+        "lineno": 51,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "copy_flatten_payload",
+        "lineno": 56,
+        "doc": "Ensure output paths are like:\n  payload/scripts/x.py -> repo_root/scripts/x.py\n  scripts/x.py         -> repo_root/scripts/x.py\nIf a file path starts with 'payload/', strip that segment."
+      },
+      {
+        "type": "func",
+        "name": "rescue_repo_payload",
+        "lineno": 78,
+        "doc": "If repo_root/payload exists, move its contents into place (flatten)."
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 102,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/start_pal.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/ai_error_mapper.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_ts",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "summarize",
+        "lineno": 20,
+        "doc": "Returns (summary, detail, meta)\nsummary: short one-liner for the UI (e.g. 'OpenAI 401 \u2013 Invalid API key')\ndetail: full stack trace and raw message\nmeta: provider/status_code/error_code if detected"
+      },
+      {
+        "type": "func",
+        "name": "log_error",
+        "lineno": 78,
+        "doc": null
+      }
+    ]
+  },
+  "tools/apply_and_pack.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "ts",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "file_sha",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "log_replace",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "tidy_tmp",
+        "lineno": 40,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "pack_feedback",
+        "lineno": 62,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 81,
+        "doc": null
+      }
+    ]
+  },
+  "tools/apply_and_pack_preflight.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run_guard",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 25,
+        "doc": null
+      }
+    ]
+  },
+  "tools/apply_simple_patches.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_backup_path",
+        "lineno": 9,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_read_text",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_write_text",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_apply_one",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 90,
+        "doc": null
+      }
+    ]
+  },
+  "tools/audit_inventory.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "should_skip_dir",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "scan_py",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 38,
+        "doc": null
+      }
+    ]
+  },
+  "tools/build_ai_prompt.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "find_plan",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "summarize_plan",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "collect_tools",
+        "lineno": 47,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "collect_approvals",
+        "lineno": 60,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_contract",
+        "lineno": 68,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_prompt",
+        "lineno": 75,
+        "doc": null
+      }
+    ]
+  },
+  "tools/check_ai_models.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_ascii",
+        "lineno": 40,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_load_yaml",
+        "lineno": 43,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_validate_model",
+        "lineno": 47,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "check_file",
+        "lineno": 86,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_meta_stamp",
+        "lineno": 111,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 128,
+        "doc": null
+      }
+    ]
+  },
+  "tools/check_api_keys.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 20,
+        "doc": null
+      }
+    ]
+  },
+  "tools/check_paths.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 11,
+        "doc": null
+      }
+    ]
+  },
+  "tools/check_project_index.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_file",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 20,
+        "doc": null
+      }
+    ]
+  },
+  "tools/check_ui_send_path.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "scan",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 24,
+        "doc": null
+      }
+    ]
+  },
+  "tools/ci_badge_update.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "get_origin",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "parse_owner_repo",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_badge",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 38,
+        "doc": null
+      }
+    ]
+  },
+  "tools/ci_probe.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 10,
+        "doc": null
+      }
+    ]
+  },
+  "tools/ci_run_tests.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/ci_self_check.py": {
+    "doc": null,
+    "defs": [],
+    "error": "ast:unmatched ')' (<unknown>, line 17)"
+  },
+  "tools/ci_smoketest.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 17,
+        "doc": null
+      }
+    ]
+  },
+  "tools/deep_inventory.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_file",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "norm_rel",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "collect_symbols",
+        "lineno": 27,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ast_digest",
+        "lineno": 88,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 97,
+        "doc": null
+      }
+    ]
+  },
+  "tools/export_insights.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "now",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "tail",
+        "lineno": 27,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 31,
+        "doc": null
+      }
+    ]
+  },
+  "tools/fetch_ai_models.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_ascii",
+        "lineno": 54,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_save_yaml",
+        "lineno": 57,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_fetch_openai_ids",
+        "lineno": 65,
+        "doc": "Fetch OpenAI model ids via API (if possible). Falls back gracefully if\nthe SDK is missing or key unavailable. We also add known important ids\nexplicitly so downstream enrichment can merge pricing/limits."
+      },
+      {
+        "type": "func",
+        "name": "_seed_anthropic_ids",
+        "lineno": 96,
+        "doc": "Deterministic ids that match provider_docs.py parsing:\n  - claude-opus-4.1\n  - claude-sonnet-4\n  - claude-haiku-3.5"
+      },
+      {
+        "type": "func",
+        "name": "_seed_google_ids",
+        "lineno": 105,
+        "doc": "Deterministic ids that match provider_docs.py parsing of Gemini pricing page."
+      },
+      {
+        "type": "func",
+        "name": "_seed_groq_ids",
+        "lineno": 118,
+        "doc": "Groq pricing scraper produces slugified names; we skip auto-adding here\nto avoid mismatches. You can add specific Groq ids if you want to track them\nthrough enrichment. For now, leave empty and let enrichment fill only those\npresent in raw (none for Groq) \u2013 or add curated ids later."
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 131,
+        "doc": null
+      }
+    ]
+  },
+  "tools/file_manifest.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_of",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "py_counts",
+        "lineno": 31,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "generic_counts",
+        "lineno": 47,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "collect",
+        "lineno": 55,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save_yaml",
+        "lineno": 89,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 95,
+        "doc": null
+      }
+    ]
+  },
+  "tools/find_callers.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/find_file.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 11,
+        "doc": null
+      }
+    ]
+  },
+  "tools/forbidden_guard.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_extra_skips",
+        "lineno": 31,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_is_texty",
+        "lineno": 55,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_should_skip",
+        "lineno": 61,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "scan",
+        "lineno": 79,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 103,
+        "doc": null
+      }
+    ]
+  },
+  "tools/force_plan_compat.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_of",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "tools/get_expected_sha.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 9,
+        "doc": null
+      }
+    ]
+  },
+  "tools/git_guard.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_log",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_run_git",
+        "lineno": 40,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_parse_porcelain",
+        "lineno": 53,
+        "doc": "Git porcelain format: XY <path>\nX = index status (staged), Y = worktree status (unstaged)\n'??' = untracked"
+      },
+      {
+        "type": "func",
+        "name": "_ahead_behind",
+        "lineno": 73,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_current_branch",
+        "lineno": 94,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_ensure_repo",
+        "lineno": 98,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "git_status",
+        "lineno": 104,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "git_commit",
+        "lineno": 128,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_clean",
+        "lineno": 157,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 171,
+        "doc": null
+      }
+    ]
+  },
+  "tools/inject_plan_tree_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_of",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "tools/install_new.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 4,
+        "doc": null
+      }
+    ]
+  },
+  "tools/interaction_logger.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_ts",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_short",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "log_interaction",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "log_error",
+        "lineno": 64,
+        "doc": "Records an error interaction separately: data/interactions/ERR_*.yaml"
+      }
+    ]
+  },
+  "tools/latest_pack_pointer.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 11,
+        "doc": null
+      }
+    ]
+  },
+  "tools/leb_client.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_get",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_post",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 17,
+        "doc": null
+      }
+    ]
+  },
+  "tools/leb_ensure.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_alive",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 14,
+        "doc": null
+      }
+    ]
+  },
+  "tools/leb_runner.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 11,
+        "doc": null
+      }
+    ]
+  },
+  "tools/leb_server.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_add_log",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ping",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "logs",
+        "lineno": 46,
+        "doc": null
+      }
+    ]
+  },
+  "tools/leb_service.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_load_cfg",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_log",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "Handler",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 84,
+        "doc": null
+      }
+    ]
+  },
+  "tools/leb_smoketest.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 13,
+        "doc": null
+      }
+    ]
+  },
+  "tools/leb_verify.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 8,
+        "doc": null
+      }
+    ]
+  },
+  "tools/make_main_window_candidate.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_of",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "tools/make_summary.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "tail",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 30,
+        "doc": null
+      }
+    ]
+  },
+  "tools/manifest_query.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_log",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_sha256",
+        "lineno": 41,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_load_yaml",
+        "lineno": 48,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_find_entries",
+        "lineno": 55,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_emit_header",
+        "lineno": 66,
+        "doc": "Produces comment header lines that can be pasted at the top of a replacement file,\ndocumenting the expected SHA256/lines/functions of the CURRENT on-disk file."
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 84,
+        "doc": null
+      }
+    ]
+  },
+  "tools/mark_29_done.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/memory_force_stub.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/memory_list.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_normalize_summary",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_summaries",
+        "lineno": 32,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 55,
+        "doc": null
+      }
+    ]
+  },
+  "tools/memory_rollup.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_ts",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_short",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_topic_guess",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 35,
+        "doc": null
+      }
+    ]
+  },
+  "tools/memory_sanitize.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "normalize",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 22,
+        "doc": null
+      }
+    ]
+  },
+  "tools/model_classifier.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "classify",
+        "lineno": 25,
+        "doc": null
+      }
+    ]
+  },
+  "tools/model_loader.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_infer_caps",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_normalize_models",
+        "lineno": 34,
+        "doc": "Expected output:\n{\n  providers: {\n    openai: {\n      models: {\n        gpt-4o-mini: {\n          capabilities: [...],\n          input_cost_per_1k: float|None,\n          output_cost_per_1k: float|None,\n        }, ...\n      }\n    }, ...\n  }\n}"
+      },
+      {
+        "type": "func",
+        "name": "load_ai_models",
+        "lineno": 63,
+        "doc": null
+      }
+    ]
+  },
+  "tools/model_ping.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "now_iso",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_dirs",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_models",
+        "lineno": 30,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "try_openai_ping",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 42,
+        "doc": null
+      }
+    ]
+  },
+  "tools/model_summary_line.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 13,
+        "doc": null
+      }
+    ]
+  },
+  "tools/mw_force_plan_compat.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_of",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "tools/path_utils.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "project_root",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "abspath",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "norm",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_dirs",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "chdir_root",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "py",
+        "lineno": 31,
+        "doc": null
+      }
+    ]
+  },
+  "tools/phase4_reorder.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "norm_key",
+        "lineno": 11,
+        "doc": "Normalize '4.1.3b' -> [(4,''),(1,''),(3,'b')]\nNormalize '4.2'    -> [(4,''),(2,'')]\nOnly (int,str) tuples so comparisons never mix int<->str directly."
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 29,
+        "doc": null
+      }
+    ]
+  },
+  "tools/phone_cfg_dump.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/phone_digest.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/phone_listener.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "log",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run_cmd",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "handle",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 32,
+        "doc": null
+      }
+    ]
+  },
+  "tools/phone_preview.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_cfg",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "make_preview",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "authorized",
+        "lineno": 43,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "create_app",
+        "lineno": 47,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_latest_pack_path",
+        "lineno": 119,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_config_token",
+        "lineno": 130,
+        "doc": null
+      }
+    ]
+  },
+  "tools/phone_pwa_patch.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_load_text",
+        "lineno": 16,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_save_text",
+        "lineno": 23,
+        "doc": null
+      }
+    ]
+  },
+  "tools/phone_pwa_upgrade.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_read",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_write",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_json",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_get_token",
+        "lineno": 28,
+        "doc": null
+      }
+    ]
+  },
+  "tools/plan_41_parallel.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_add_210_dunder.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_add_413b_paths.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_add_413c_runner.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_add_413d_ui.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_add_413_capture.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_add_414_traffic.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_add_415_toggle.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_add_64_ci.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "ensure_phase_64",
+        "lineno": 4,
+        "doc": null
+      }
+    ]
+  },
+  "tools/plan_add_phone_73.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "find_phase",
+        "lineno": 9,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "add_step",
+        "lineno": 27,
+        "doc": null
+      }
+    ]
+  },
+  "tools/plan_fix_current_next.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "step_key",
+        "lineno": 11,
+        "doc": null
+      }
+    ]
+  },
+  "tools/plan_insert_40R.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_insert_audit_steps.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "ensure_steps",
+        "lineno": 31,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 63,
+        "doc": null
+      }
+    ]
+  },
+  "tools/plan_insert_phase7.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_mark_51_52.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_mark_52_done.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_mark_52_ip.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_mark_53_done.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_mark_63c.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_mark_63c_done.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_mark_63_ip.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/plan_mark_64_ip.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/preflight_no_heredoc.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/preflight_parser.py": {
+    "doc": "preflight_parser v1.1: lint & lightly fix common PowerShell paste hazards.",
+    "defs": [
+      {
+        "type": "func",
+        "name": "load",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save",
+        "lineno": 5,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "fix_pid_loop",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "flag_inline_try_if",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "fix_compress_archive_args",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 24,
+        "doc": null
+      }
+    ]
+  },
+  "tools/probe_models.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_load_yaml",
+        "lineno": 30,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_save_yaml",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_probe_openai_chat",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_probe_openai_responses",
+        "lineno": 55,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_probe_anthropic_chat",
+        "lineno": 69,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 81,
+        "doc": null
+      }
+    ]
+  },
+  "tools/provider_docs.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_file_stats",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_bucket_long_context",
+        "lineno": 60,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_is_multimodal",
+        "lineno": 68,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_speed_from_in_price_per_million",
+        "lineno": 72,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_tier_from_name",
+        "lineno": 81,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_capabilities",
+        "lineno": 97,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_per_token",
+        "lineno": 107,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_load_overrides",
+        "lineno": 111,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_get",
+        "lineno": 151,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_scrape_openai",
+        "lineno": 164,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_scrape_anthropic",
+        "lineno": 194,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_scrape_google",
+        "lineno": 215,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_complete",
+        "lineno": 258,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_node_from_parts",
+        "lineno": 270,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_from_overrides",
+        "lineno": 286,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_from_scrape",
+        "lineno": 299,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_from_baseline",
+        "lineno": 321,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "fetch_curated_dynamic",
+        "lineno": 332,
+        "doc": "Returns: { provider: {\"models\": {model_id: node}} } using:\n  1) overrides \u2192 2) scrape \u2192 3) baseline. Drops incomplete and logs reasons."
+      }
+    ]
+  },
+  "tools/ps_write_temp_py.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "random_tag",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_temp_py",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run_temp_py",
+        "lineno": 19,
+        "doc": null
+      }
+    ]
+  },
+  "tools/reflection_gate.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_inventory_paths",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "glob_fs_paths",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read",
+        "lineno": 44,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "parse_gui_info",
+        "lineno": 51,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 92,
+        "doc": null
+      }
+    ]
+  },
+  "tools/report_active_costs.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/role_context.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "get_role_system_text",
+        "lineno": 13,
+        "doc": null
+      }
+    ]
+  },
+  "tools/run_tests.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/run_with_capture.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "now",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_parent",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "exe",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "parse_cmd",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "append_capture_record",
+        "lineno": 71,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 84,
+        "doc": null
+      }
+    ]
+  },
+  "tools/safe_replace.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_of",
+        "lineno": 10,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 17,
+        "doc": null
+      }
+    ]
+  },
+  "tools/sanitize_project_yaml.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "quote_if_unquoted",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 22,
+        "doc": null
+      }
+    ]
+  },
+  "tools/sanitize_yaml_generic.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "is_quoted",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "quote",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "looks_dangerous",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "sanitize_lines",
+        "lineno": 48,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 70,
+        "doc": null
+      }
+    ]
+  },
+  "tools/self_check.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 29,
+        "doc": null
+      }
+    ]
+  },
+  "tools/send_with_memory.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_get_key",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 25,
+        "doc": null
+      }
+    ]
+  },
+  "tools/session_store.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_load",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "get",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "set",
+        "lineno": 32,
+        "doc": null
+      }
+    ]
+  },
+  "tools/set_config_memory_toggle.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/show_next_step.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_plan",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "flatten",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_key",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 33,
+        "doc": null
+      }
+    ]
+  },
+  "tools/snippet_pack.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "write",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "tools/structure_sync.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "resolve_project_root",
+        "lineno": 37,
+        "doc": "Try to read config/project_config.yaml to get root_path, otherwise\nfall back to the parent of this script (../)."
+      },
+      {
+        "type": "func",
+        "name": "extract_header_comment",
+        "lineno": 58,
+        "doc": "Extract the leading contiguous comment block (file header)."
+      },
+      {
+        "type": "func",
+        "name": "nonblank_sloc",
+        "lineno": 77,
+        "doc": "Count non-blank, non-comment lines."
+      },
+      {
+        "type": "func",
+        "name": "sha1_hex",
+        "lineno": 87,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "safe_unparse",
+        "lineno": 90,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "format_args",
+        "lineno": 96,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "doc_first_line",
+        "lineno": 132,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "parse_python_ast",
+        "lineno": 139,
+        "doc": "Parse Python for module docstring, imports, classes (with method signatures),\nand top-level functions (with signatures)."
+      },
+      {
+        "type": "func",
+        "name": "snapshot_file",
+        "lineno": 216,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run_snapshot",
+        "lineno": 263,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 289,
+        "doc": null
+      }
+    ]
+  },
+  "tools/update_ai_models.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_file_stats",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_ascii_print",
+        "lineno": 41,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_load_probe_health",
+        "lineno": 45,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_merge_health",
+        "lineno": 54,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_save_yaml",
+        "lineno": 63,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_check_schema",
+        "lineno": 67,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_final",
+        "lineno": 78,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 93,
+        "doc": null
+      }
+    ]
+  },
+  "tools/update_index_sha.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 11,
+        "doc": null
+      }
+    ]
+  },
+  "tools/verify_against_manifest.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_of",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 27,
+        "doc": null
+      }
+    ]
+  },
+  "tools/verify_plan_compat.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/verify_plan_tree.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/_env.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_read_yaml_keys",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_first_non_empty",
+        "lineno": 40,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_keys",
+        "lineno": 46,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_env",
+        "lineno": 62,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "mask_key",
+        "lineno": 72,
+        "doc": null
+      }
+    ]
+  },
+  "tools/__init__.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/py/apply_common.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "have_git_repo",
+        "lineno": 2,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "find_repo_root",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "resolve_repo_root",
+        "lineno": 11,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/auto_fix_main_if_block.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "backup",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "needs_pass",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 30,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/cloudflared_parse.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "extract_url",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_status",
+        "lineno": 8,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/control_server.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_try_mount",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_repo_root",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_write_routes_dump",
+        "lineno": 41,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "root",
+        "lineno": 53,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "healthz",
+        "lineno": 60,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "debug",
+        "lineno": 65,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/devstep_catalog.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "collect",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_reports",
+        "lineno": 35,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 55,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/doc_inventory.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "collect",
+        "lineno": 3,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 12,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/email_watcher.py": {
+    "doc": "PersistentAssistant: Email watcher (IMAP) \u2014 stable version",
+    "defs": [
+      {
+        "type": "func",
+        "name": "_log_path",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "log_write",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "WatchCfg",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "resolve_repo_root",
+        "lineno": 54,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_ssl_context",
+        "lineno": 74,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "imap_connect",
+        "lineno": 84,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "imap_login",
+        "lineno": 91,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "imap_select",
+        "lineno": 96,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_normalize_addr",
+        "lineno": 101,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_message_matches",
+        "lineno": 109,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_iter_candidate_uids",
+        "lineno": 119,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "download_zip_attachments",
+        "lineno": 128,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "process_local",
+        "lineno": 167,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 192,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/email_watcher_graph.py": {
+    "doc": null,
+    "defs": [],
+    "error": "ast:invalid syntax (<unknown>, line 122)"
+  },
+  "tools/py/file_usage_analyzer.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "find_py_files",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "analyze",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 28,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/file_usage_report.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "find_py_files",
+        "lineno": 3,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_import_index",
+        "lineno": 5,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 19,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/imap_probe.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_cfg",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "make_ctx",
+        "lineno": 16,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 21,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/intake_new.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "new_intake",
+        "lineno": 3,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/intake_submit.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "submit",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 12,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/intake_to_devstep.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "promote",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 15,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/lan_control_server.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_maybe_register",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "create_app",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 55,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/mvp_smoke.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "probe",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 26,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/ops_status_html.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "tail",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 12,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pack_fetcher.py": {
+    "doc": "Pack Fetcher (GitHub/URL) for PersistentAssistant\n- Polls GitHub Releases OR uses control/next_pack.json with a direct URL or tag\n- Downloads latest pack zip (+ optional .sha256), verifies\n- Saves to _inbox, optionally runs tools/ps1/apply_inbox.ps1, archives processed\n- Logs to reports/ops/pack_fetcher.log",
+    "defs": [
+      {
+        "type": "func",
+        "name": "_log_path",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "log",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "resolve_repo_root",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 56,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "sha256_file",
+        "lineno": 69,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_bytes",
+        "lineno": 76,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "http_get",
+        "lineno": 82,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "gh_headers",
+        "lineno": 92,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "gh_latest_release",
+        "lineno": 98,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "gh_release_by_tag",
+        "lineno": 103,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "download_to",
+        "lineno": 109,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "get_cfg",
+        "lineno": 120,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_control",
+        "lineno": 126,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 135,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pack_inbox_watcher.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "scan_once",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 9,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/patch_unified_add_control.py": {
+    "doc": "# tools/py/patch_unified_add_control.py\n# Add 'server.control_console' into config/unified_server.yaml candidates without requiring PyYAML.\nimport re\nfrom pathlib import Path\n\nTARGET = 'server.control_console'\n\ndef find_root(seed: Path) -> Path:\n    p = seed\n    for _ in range(12):\n        if (p/'.git').exists(): return p\n        if p.parent==p: break\n        p = p.parent\n    return seed\n\ndef ensure_candidate(txt: str) -> str:\n    if TARGET in txt:\n        return txt\n    # If there's a candidates: YAML list, insert '- server.control_console' after it.\n    m = re.search(r'(?m)^(?P<indent>\\s*)candidates\\s*:\\s*(?:#.*)?$', txt)\n    if m:\n        indent = m.group('indent')\n        # Find where the list ends (next non-indented key or end of file)\n        start = m.end()\n        # Look ahead for the next top-level key (same or less indent and ends with ':')\n        tail = txt[start:]\n        lines = tail.splitlines(True)\n        insert_pos = start\n        for i, line in enumerate(lines):\n            if re.match(rf'(?m)^[^\\S\\r\\n]*\\S', line) and not line.startswith(indent + '  -'):\n                # If this looks like a new key at same or less indent, stop\n                if re.match(rf'^{indent}\\S.*:\\s*', line):\n                    break\n            insert_pos += len(line)\n        insertion = f'\\n{indent}  - {TARGET}\\n'\n        return txt[:start] + insertion + txt[start:]\n    # If no candidates block, create one at end\n    add = f'\\n# added by patch_unified_add_control.py\\ncandidates:\\n  - {TARGET}\\n'\n    return txt + add\n\ndef main():\n    root = find_root(Path(__file__).resolve())\n    cfg = root/'config'/'unified_server.yaml'\n    if not cfg.exists():\n        return\n    txt = cfg.read_text(encoding='utf-8')\n    new = ensure_candidate(txt)\n    if new != txt:\n        cfg.write_text(new, encoding='utf-8')\n\nif __name__=='__main__':\n    main()",
+    "defs": []
+  },
+  "tools/py/pa_agent_bringup.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_netstat_pids_listening_on",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_kill_port_windows",
+        "lineno": 31,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_dirs",
+        "lineno": 42,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "port_free",
+        "lineno": 45,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "http_get",
+        "lineno": 50,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 64,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pa_bootstrap.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 9,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pa_diag_runner.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "ensure_dir",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_show_step",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "py_compile_files",
+        "lineno": 37,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "env_versions",
+        "lineno": 50,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "latest_matching",
+        "lineno": 64,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "netstat_snapshot",
+        "lineno": 72,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "pack_make",
+        "lineno": 76,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 84,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pa_project_snapshot.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "now_ts",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_dirs",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_text",
+        "lineno": 29,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_json",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run_proc",
+        "lineno": 36,
+        "doc": "Run a subprocess, capture stdout/stderr/rc. Never throws."
+      },
+      {
+        "type": "func",
+        "name": "which_powershell",
+        "lineno": 62,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "zip_dir",
+        "lineno": 70,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_env",
+        "lineno": 82,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_structure",
+        "lineno": 97,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_plan",
+        "lineno": 116,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_compile_stage",
+        "lineno": 125,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_import_wrapper",
+        "lineno": 141,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_auto_health",
+        "lineno": 183,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_netstat_and_logs",
+        "lineno": 206,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step_repo_manifest",
+        "lineno": 229,
+        "doc": "Simple manifest of files (skip tmp/.venv/.git) so we don't drift on reality."
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 256,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pa_std_summary.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "step",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 18,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/plan_merge.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "dump_yaml",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "merge_steps",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 30,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/plan_step_add.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "ts",
+        "lineno": 27,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_text",
+        "lineno": 30,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_text",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 37,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "dump_yaml",
+        "lineno": 40,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "walk",
+        "lineno": 44,
+        "doc": "Yield (path, node) pairs for dicts/lists scalars."
+      },
+      {
+        "type": "func",
+        "name": "find_all_step_lists",
+        "lineno": 56,
+        "doc": "Return lists that *look like* step collections: list of dicts each with 'id'.\nAlso return their parent dict (if any) to allow setting children etc."
+      },
+      {
+        "type": "func",
+        "name": "get_by_path",
+        "lineno": 74,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "find_container_for_id",
+        "lineno": 87,
+        "doc": "Prefer the list that already contains siblings with same major prefix (e.g., '6.4.').\nElse fall back to the first step-like list."
+      },
+      {
+        "type": "func",
+        "name": "find_in_list_by_id",
+        "lineno": 116,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "normalize_status",
+        "lineno": 122,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "sort_by_id",
+        "lineno": 130,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run_show_next",
+        "lineno": 144,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 156,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/plan_step_update.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 32,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/repair_server_syntax.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "strip_nonprintable",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "fix_micro_approvals",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "process_file",
+        "lineno": 27,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "import_wrapper",
+        "lineno": 50,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 62,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/sha256sum.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_file",
+        "lineno": 3,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 9,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/smoke_aggregate.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "find_latest_junit",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "parse_junit",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "aggregate",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_outputs",
+        "lineno": 35,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 43,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/smoke_summary_cli.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "parse_junit",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "collect",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ascii_table",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_html",
+        "lineno": 27,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 39,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/unified_server.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_cfg",
+        "lineno": 30,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_default_config",
+        "lineno": 47,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "find_repo_root",
+        "lineno": 75,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "as_wsgi",
+        "lineno": 83,
+        "doc": "Accepts modules that expose one of:\n    - app (Flask)\n    - create_app() -> Flask\n    - bp (Blueprint)\nReturns: (wsgi_app, how) or (None, reason)"
+      },
+      {
+        "type": "func",
+        "name": "make_index_app",
+        "lineno": 111,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "auth_middleware",
+        "lineno": 138,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 153,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/web_mobile_inventory.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "scan_py",
+        "lineno": 5,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 24,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/web_mobile_shortlist.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "score",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 15,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/which_email_module.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/py/__init__.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/reply_contract/validator.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_lines",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "validate_text",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "validate_json",
+        "lineno": 46,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "rewrite_to_schema",
+        "lineno": 64,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/ai_link.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_http_post_json",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "compose_proposal",
+        "lineno": 13,
+        "doc": "Return path to a JSON proposal. Try local agent HTTP if AGENT_BASE_URL is set; else write a stub."
+      }
+    ]
+  },
+  "tools/py/agentic/auto_next.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "build_parser",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_mark_status",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 33,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/context_pack.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256_hex",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "add_file",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_pack",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 46,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/drive_step.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "build_parser",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_run_pytest_subprocess",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_run_patch_apply_inline",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "leb_run",
+        "lineno": 43,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "propose_step",
+        "lineno": 52,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_load_tracker",
+        "lineno": 58,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_resolve_iters",
+        "lineno": 68,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "drive",
+        "lineno": 82,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 111,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/next_steps.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "select_next_step",
+        "lineno": 10,
+        "doc": "Return the id of the 'next' step from plan_path by:\n  - filtering to 'statuses'\n  - choosing the lowest numeric 'priority' (default very large if missing)\n  - stable tie-break by input order\nReturns None if no match or YAML unavailable."
+      }
+    ]
+  },
+  "tools/py/agentic/patch_apply.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_json",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "soft_validate_schema",
+        "lineno": 25,
+        "doc": "Soft schema validation: never block dry-run; in apply mode block on validation failure."
+      },
+      {
+        "type": "func",
+        "name": "normalize_repo_path",
+        "lineno": 40,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_safe_yaml_load",
+        "lineno": 48,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_policy",
+        "lineno": 57,
+        "doc": "Returns (effective_policy, diag)\neffective_policy keys:\n  enabled, require_feature_id, require_before_sha, allow_globs, deny_globs, backups{enabled,dir}\ndiag includes paths tried and used_path."
+      },
+      {
+        "type": "func",
+        "name": "path_is_allowed",
+        "lineno": 113,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "diag_result",
+        "lineno": 124,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "backup_file",
+        "lineno": 134,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 146,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/patch_debug.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 14,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/patch_utils.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "ensure_dir",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "sha256_hex",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "path_allowed",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "make_backup",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "apply_append",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "apply_replace",
+        "lineno": 41,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "apply_unified_diff",
+        "lineno": 45,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/pilot.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run_once",
+        "lineno": 9,
+        "doc": "Semi-automatic loop: propose -> test (leb_run) -> repeat up to iters.\n- Writes status JSON each attempt (phase: propose, test).\n- On failure, next proposal receives context['last_error'] with rc/stdout/stderr.\nReturns: { ok: bool, rc: int, attempts: int, last_proposal: str }"
+      }
+    ]
+  },
+  "tools/py/agentic/pilot_cli.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "build_parser",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run_cli",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 34,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/policy_debug.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/policy_edit.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_read",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_write",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_allow",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 46,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/policy_utils.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_norm",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_try_paths",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_policy",
+        "lineno": 29,
+        "doc": "Returns (effective, diagnostics)\n- effective: normalized, minimal policy the executors care about\n- diagnostics: exhaustive info (paths tried, used, parse errors, raw keys, etc.)"
+      },
+      {
+        "type": "func",
+        "name": "match_globs",
+        "lineno": 96,
+        "doc": "Report exactly which patterns match (proves allow/deny behavior)."
+      }
+    ]
+  },
+  "tools/py/agentic/project_config.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_tracker_path",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_read_yaml_or_json",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_ensure_nested",
+        "lineno": 32,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_normalize_auto_revise",
+        "lineno": 36,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_tracker",
+        "lineno": 51,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save_tracker",
+        "lineno": 60,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "get_auto_revise_limits",
+        "lineno": 70,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "set_auto_revise",
+        "lineno": 75,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/proposal_types.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "Patch",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "Proposal",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "proposal_minimal_dict",
+        "lineno": 19,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/propose_for_step.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "now_iso",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "sha256_of_text",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_proposal",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 54,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/sample_proposal.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "pick_target",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 30,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/status.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "write_status",
+        "lineno": 9,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/agentic/__init__.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/py/ci/ci_check.py": {
+    "doc": "PA CI gate \u2014 local + GitHub Actions\nRuns (in order):\n  1) reply_lint on markdown (prefers selective helper to skip tmp/ etc.)\n  2) duplicate-guard test for add_tool (if present)\n  3) pa_std_summary --level standard\n  4) pack/enrich_pack.py\n  5) pack/verify_pack.py --include-meta --check-insights\n\nExit non-zero on first failure.",
+    "defs": [
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 28,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/ci/patch_workflows.py": {
+    "doc": "Normalize GitHub Actions workflows:\n- Ensure pa-ci.yml and pa-quality-gate.yml install deps and run our ci_check.py.\n- Disable any other legacy workflows by renaming to *.disabled.",
+    "defs": [
+      {
+        "type": "func",
+        "name": "write",
+        "lineno": 82,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 86,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/ci/pre_push.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 9,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 13,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/ci/reply_lint_selected.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "is_excluded",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 18,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/context/analyze_repo.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "read",
+        "lineno": 10,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "py_imports",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "scan",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_graph",
+        "lineno": 43,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "arch_candidates",
+        "lineno": 59,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_csv",
+        "lineno": 85,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_dot",
+        "lineno": 93,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 101,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/context/build_context_bundle.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "parse_args",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "should_scan",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "detect_header",
+        "lineno": 32,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ast_summary",
+        "lineno": 42,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "status_heuristic",
+        "lineno": 56,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 66,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/daily/daily_dev_loop.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "latest_pack",
+        "lineno": 32,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_json",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 43,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/dev/verify_core_import.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/py/executor/leb_executor.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "LEBExecutor",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/executor/patch_apply.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_ensure_parent",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "apply_proposal",
+        "lineno": 9,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_build_parser",
+        "lineno": 56,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 63,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/executor/__init__.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/py/inventory/report_headers.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_manifest",
+        "lineno": 16,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "extract_header_comment",
+        "lineno": 36,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "md_top_headings",
+        "lineno": 51,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_text",
+        "lineno": 60,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 66,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/inventory/report_index.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_manifest",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 35,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/leb/leb_ensure.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/py/leb/leb_runner.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/py/leb/leb_verify.py": {
+    "doc": null,
+    "defs": []
+  },
+  "tools/py/lint/find_bad_escapes.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "is_raw_prefix",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "iter_py_files",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "find_issues",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "apply_fix",
+        "lineno": 44,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 60,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/lint/reply_lint.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "scan_file",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 35,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/maintenance/tmp_prune.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "iter_files",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "prune",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 33,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/net/port_kill.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_netstat_lines",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "pids_listening_on",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "kill_pid",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 30,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/net/port_probe.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "get",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "has_daily",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 25,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pack/ast_indexer.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "read_text",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "annotate_parents",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_index",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "discover_roots",
+        "lineno": 46,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 60,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pack/enrich_pack.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "need_tool_catalog",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_catalog",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_latest_pack",
+        "lineno": 29,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_posix",
+        "lineno": 37,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_add_file",
+        "lineno": 40,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 57,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pack/make_support_bundle.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_norm_rel",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_ensure_dir",
+        "lineno": 16,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_glob_logs",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "capture_http",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "capture_cmd",
+        "lineno": 42,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "parse_label_pair",
+        "lineno": 57,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_arg_parser",
+        "lineno": 64,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 74,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pack/repo_tidy_classifier.py": {
+    "doc": "Repo tidy classifier (read-only)\n- Ingests an AST index JSON (from tools\\py\\pack\u0007st_indexer.py) and classifies *all* files.\n- Uses only stdlib; no destructive actions. Produces CSV + Markdown + text lists for review.\n\nOutputs (under --outdir):\n  - <name>_tidy_index.csv         : one row per file with features and the predicted category\n  - <name>_tidy_summary.md        : counts, rationale, suggested next steps\n  - <name>_groups\\*.txt           : per-category file lists (for human review / future automation)\n\nRun example:\n  python tools\\py\\pack\repo_tidy_classifier.py ^\n      --ast tmp\\logs\\sb_ast_now_ast_index.json ^\n      --outdir tmp\\diagnostics --name tidy_now",
+    "defs": [
+      {
+        "type": "func",
+        "name": "build_parser",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "repo_root",
+        "lineno": 40,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "norm_rel",
+        "lineno": 47,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "shell_ok",
+        "lineno": 55,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "git_tracked_set",
+        "lineno": 62,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "git_untracked_set",
+        "lineno": 68,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "git_last_commit_epoch",
+        "lineno": 74,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "safe_read_text",
+        "lineno": 83,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_ast_index",
+        "lineno": 91,
+        "doc": "Accepts keys as produced by your ast_indexer (either absolute or relative).\nWe normalize to repo-relative forward-slash paths."
+      },
+      {
+        "type": "func",
+        "name": "starts_with_any",
+        "lineno": 126,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "in_any_dir",
+        "lineno": 129,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "classify_one",
+        "lineno": 133,
+        "doc": "Returns (category, rationale). Categories:\n  core, tests, tooling, docs, workflows, patches, backups, generated, configs, web, data, disabled, large_binary, vendor, unknown"
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 204,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pack/verify_pack.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_latest_pack",
+        "lineno": 31,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 37,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/patches/cleanup_apply_handlers.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 11,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/patches/ensure_applystep_and_listener.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256",
+        "lineno": 5,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/patches/finalize_apply_handlers.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save",
+        "lineno": 29,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "remove_wire_apply_button_func",
+        "lineno": 36,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "remove_wire_apply_button_calls",
+        "lineno": 60,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_apply_listener_once",
+        "lineno": 70,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_apply_function",
+        "lineno": 102,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/patches/finalize_apply_handlers_v2.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256",
+        "lineno": 3,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "find_settings_js",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "remove_func_block",
+        "lineno": 41,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "remove_lines_containing",
+        "lineno": 58,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_apply_listener_once",
+        "lineno": 61,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_apply_function",
+        "lineno": 78,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/patches/fix_settings_apply_ui.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha256",
+        "lineno": 5,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read",
+        "lineno": 9,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "backup",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "find_matching_brace",
+        "lineno": 23,
+        "doc": "Given s and index of first char *after* '{', return index of matching '}'."
+      },
+      {
+        "type": "func",
+        "name": "replace_wire_apply_body",
+        "lineno": 50,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_wire_call",
+        "lineno": 88,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "remove_applyStep_and_listener",
+        "lineno": 100,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_extractor",
+        "lineno": 121,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 149,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/patches/instrument_tabs_fallback.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 35,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/plan/build_plan_texts.py": {
+    "doc": "Builds a consistent \"id -> {title, desc, status}\" map from your plan file.\n\nINPUT (read-only):\n  project\\plans\\project_plan_v3.yaml   (auto-discovered from this script's parents,\n                                        or override with --in)\n\nOUTPUT:\n  web\\pwa\\plan_texts.json              # consumed by the PWA\n  project\\plans\\plan_texts_full.yaml   # normalized + naturally sorted list (for review)",
+    "defs": [
+      {
+        "type": "func",
+        "name": "find_repo_root",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "norm_status",
+        "lineno": 31,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "short",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "first_text",
+        "lineno": 43,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "derive_title",
+        "lineno": 50,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "id_sort_key",
+        "lineno": 59,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "walk",
+        "lineno": 66,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 73,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/plan/normalize_plan_yaml.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "find_repo_root",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "first_sentence",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "natkey",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "normalize_step",
+        "lineno": 32,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "normalize",
+        "lineno": 68,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 83,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/pwa/gui_diag.py": {
+    "doc": "GUI diagnostics for the Agent PWA.\nChecks server health, routes, PWA assets, JS wiring hints, and plan data quality.\nPrints a SHORT summary to stdout; writes a full report to tmp\\diagnostics\\.",
+    "defs": [
+      {
+        "type": "func",
+        "name": "get",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "head",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "safe_json",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "md5",
+        "lineno": 32,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "wfull",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "summarize_plan",
+        "lineno": 37,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 58,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/registry/add_tool.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_overlay",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save_overlay",
+        "lineno": 30,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "norm_id",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 46,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/registry/build_tool_catalog.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "sha1_text",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_text",
+        "lineno": 24,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "header_comment_ps",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "module_docstring_py",
+        "lineno": 49,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "parse_ps_params",
+        "lineno": 56,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "find_scripts",
+        "lineno": 70,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "is_ps1",
+        "lineno": 80,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "is_py",
+        "lineno": 81,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "auto_usage",
+        "lineno": 83,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "tool_id_for",
+        "lineno": 89,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "scrape_file",
+        "lineno": 94,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "fetch_routes",
+        "lineno": 118,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_overlay",
+        "lineno": 146,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "apply_overlay",
+        "lineno": 155,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_outputs",
+        "lineno": 172,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 191,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/registry/dup_guard.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_norm",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_load_overlay",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_unique",
+        "lineno": 26,
+        "doc": "Exit(2) if an entry with same (kind, ref) already exists.\nSupports both:\n  - dict with \"overrides\": {\"py:tools/py/foo.py\": {...}}\n  - list of {kind, ref, ...} (legacy)\nSet PA_ALLOW_TOOL_UPDATE=1 to allow overwriting instead of exiting."
+      }
+    ]
+  },
+  "tools/py/registry/test_add_tool_guard.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 9,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/watchdog/agent.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "http_get",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "start_and_wait",
+        "lineno": 20,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/watchdog/config.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "deep_merge",
+        "lineno": 52,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_config",
+        "lineno": 60,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ensure_dirs",
+        "lineno": 71,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "state_path",
+        "lineno": 75,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_state",
+        "lineno": 78,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save_state",
+        "lineno": 91,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/watchdog/install.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "write_cfg",
+        "lineno": 41,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "schtasks_create",
+        "lineno": 46,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "schtasks_delete",
+        "lineno": 63,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 68,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/watchdog/notify.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_log_local",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "send_notifications",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_email",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_slack",
+        "lineno": 37,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_whatsapp",
+        "lineno": 48,
+        "doc": null
+      }
+    ]
+  },
+  "tools/py/watchdog/watchdog.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 8,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_write_heartbeat",
+        "lineno": 55,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/bridge_ui/app.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_get",
+        "lineno": 16,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_read",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "index",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "api_sup",
+        "lineno": 31,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "api_tunnel",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "api_log",
+        "lineno": 37,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "api_plan",
+        "lineno": 45,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "api_plan_restart",
+        "lineno": 55,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "api_send_now",
+        "lineno": 61,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 71,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/config/pal_settings.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_settings",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "get",
+        "lineno": 38,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/ops/emit_bridge_heartbeat.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "emit_once",
+        "lineno": 9,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 25,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/ops/mark_plan_13C_complete.py": {
+    "doc": null,
+    "defs": []
+  },
+  "scripts/ops/ops_bridge_emit.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "read_text",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 12,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/phone/phone_bridge.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run_cmd",
+        "lineno": 18,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "supervisor_post",
+        "lineno": 26,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_json",
+        "lineno": 32,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_json",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "do_action",
+        "lineno": 44,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "worker",
+        "lineno": 83,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "H",
+        "lineno": 97,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 178,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/phone/watch_tunnel_and_notify.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "read_host",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_last",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_last",
+        "lineno": 25,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "send",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 37,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/phone/whatsapp_notify.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "send_text",
+        "lineno": 13,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/plan/mark_task.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "set_phase",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "set_task",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 12,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/smoke/pal_smoke.py": {
+    "doc": "Non-blocking smoke diagnostics for PAL.\nWrites logs/smoke/smoke_<ts>.json and .txt. Prints concise summary.",
+    "defs": [
+      {
+        "type": "func",
+        "name": "utcnow",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ts",
+        "lineno": 36,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "head",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "get_python_procs",
+        "lineno": 47,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "read_latest",
+        "lineno": 70,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "extract_trycloudflare_url",
+        "lineno": 74,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 78,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/smoke/smoke_bridge_status.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "read_json",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "extract_ts",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "age_seconds",
+        "lineno": 32,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 41,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/smoke/smoke_collect_phone_candidates.py": {
+    "doc": null,
+    "defs": []
+  },
+  "scripts/smoke/smoke_heartbeat_fresh.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "read_json",
+        "lineno": 16,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "extract_ts",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "age_seconds",
+        "lineno": 36,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 45,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/smoke/smoke_paths_check.py": {
+    "doc": null,
+    "defs": []
+  },
+  "scripts/smoke/smoke_plan_13C_done.py": {
+    "doc": null,
+    "defs": []
+  },
+  "scripts/smoke/smoke_plan_promoted.py": {
+    "doc": null,
+    "defs": []
+  },
+  "scripts/smoke/smoke_plan_selected.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "repo",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 13,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/smoke/smoke_plan_state.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "repo",
+        "lineno": 5,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 12,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/smoke/smoke_plan_state_fresh.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "read_json",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "extract_ts",
+        "lineno": 19,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "age_seconds",
+        "lineno": 27,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 36,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/smoke/smoke_quicktunnel.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "latest_log",
+        "lineno": 4,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "extract_url",
+        "lineno": 7,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "head",
+        "lineno": 14,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/smoke/smoke_roadmap_coherence.py": {
+    "doc": null,
+    "defs": []
+  },
+  "scripts/smoke/smoke_supervisor_status.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 8,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/supervisor/supervisor.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "log",
+        "lineno": 16,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save_stats",
+        "lineno": 46,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "spawn",
+        "lineno": 52,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "start",
+        "lineno": 67,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "stop",
+        "lineno": 76,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "restart",
+        "lineno": 83,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "is_alive",
+        "lineno": 87,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "http_ok",
+        "lineno": 92,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "singleton_guard",
+        "lineno": 97,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "H",
+        "lineno": 101,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "http_server_thread",
+        "lineno": 133,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "monitor_thread",
+        "lineno": 140,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 157,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/tools/collect_phone_files.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "iter_repo_files",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 23,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/tools/consolidate_roadmap.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "glob_files",
+        "lineno": 28,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 42,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_json",
+        "lineno": 48,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "norm_title",
+        "lineno": 55,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "pick_status",
+        "lineno": 62,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "extract_items_from_yaml",
+        "lineno": 80,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 148,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/tools/consolidate_roadmap_v2.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "glob_all",
+        "lineno": 30,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_yaml",
+        "lineno": 43,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_json",
+        "lineno": 49,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "norm_title",
+        "lineno": 56,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "pick_status",
+        "lineno": 61,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "extract_nodes",
+        "lineno": 78,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 127,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/tools/scan_and_bundle_plans.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "is_ignored_dir",
+        "lineno": 29,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "walk_patterns",
+        "lineno": 33,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "hash_file",
+        "lineno": 49,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 63,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/tools/scan_plan_schema_compat.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "scan_py",
+        "lineno": 16,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 31,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/tracker/start_pal_tracker.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "is_listening",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_endpoint",
+        "lineno": 21,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 24,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/tracker/start_tracker_with_plan.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_log",
+        "lineno": 13,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_sidecar_writer",
+        "lineno": 18,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/utils/http_post.py": {
+    "doc": null,
+    "defs": []
+  },
+  "scripts/utils/plan_refresher.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_plan",
+        "lineno": 14,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "build_tasks",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "write_state",
+        "lineno": 42,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 62,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/git_ops.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "run",
+        "lineno": 5,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "commit_and_push",
+        "lineno": 8,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/watchdog.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "log",
+        "lineno": 10,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "load_config",
+        "lineno": 17,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "listeners",
+        "lineno": 23,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "stop_by_port",
+        "lineno": 44,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "http_head",
+        "lineno": 57,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "svc_ports",
+        "lineno": 79,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "start_proc",
+        "lineno": 82,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "action_killports",
+        "lineno": 87,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "action_start",
+        "lineno": 94,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "action_stop",
+        "lineno": 101,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "action_restart",
+        "lineno": 108,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "action_status",
+        "lineno": 114,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "action_run",
+        "lineno": 122,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 135,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/watchdog_core.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_ts",
+        "lineno": 27,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_child_env",
+        "lineno": 29,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_log_path",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_save_state",
+        "lineno": 39,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_head_ok",
+        "lineno": 52,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_tunnel_ok",
+        "lineno": 60,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "start",
+        "lineno": 70,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "stop",
+        "lineno": 83,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "healthy",
+        "lineno": 97,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "restart",
+        "lineno": 113,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "initialize_all",
+        "lineno": 117,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "run_smoke_and_commit",
+        "lineno": 134,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "loop",
+        "lineno": 150,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/watchdog_ui.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "page",
+        "lineno": 29,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "H",
+        "lineno": 63,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 106,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/watchdog_ui_basic.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_settings",
+        "lineno": 10,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "save_settings_number_and_tracker",
+        "lineno": 34,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_env_utf8",
+        "lineno": 80,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "head_ok",
+        "lineno": 87,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "start_dev_bg",
+        "lineno": 98,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "stop_dev_bg",
+        "lineno": 105,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "dev_health",
+        "lineno": 112,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_extract_url",
+        "lineno": 118,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "refresh_urls",
+        "lineno": 123,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_start_tunnel_async",
+        "lineno": 127,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_stop_tunnel",
+        "lineno": 142,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "start_tracker_bg",
+        "lineno": 154,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "stop_tracker_bg",
+        "lineno": 162,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "tracker_health",
+        "lineno": 169,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "wa_link",
+        "lineno": 173,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "tag",
+        "lineno": 182,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "ago",
+        "lineno": 183,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "pill",
+        "lineno": 186,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "settings_page",
+        "lineno": 190,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "page",
+        "lineno": 207,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "H",
+        "lineno": 256,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "main",
+        "lineno": 301,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/whatsapp_send.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "load_yaml_map",
+        "lineno": 7,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/_bridge_panel.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_repo",
+        "lineno": 9,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_load_json",
+        "lineno": 15,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_tail",
+        "lineno": 22,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "panel",
+        "lineno": 31,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "poll",
+        "lineno": 40,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/_ctx_panel.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_repo_root",
+        "lineno": 6,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_tool",
+        "lineno": 9,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "_run_ps",
+        "lineno": 12,
+        "doc": null
+      },
+      {
+        "type": "func",
+        "name": "register_ctx_panel",
+        "lineno": 20,
+        "doc": null
+      }
+    ]
+  },
+  "scripts/watchdog/_ux_inject.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "install_ux",
+        "lineno": 28,
+        "doc": null
+      }
+    ]
+  },
+  "gui/dialogs/project_selector.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "ProjectSelectorDialog",
+        "lineno": 16,
+        "doc": "Minimal project selector dialog."
+      }
+    ]
+  },
+  "gui/tabs/chat_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "ChatTab",
+        "lineno": 7,
+        "doc": "Embedded ChatGPT browser + API send.\nAdds a Role selector (Architect / CodeGen / Reviewer) for API sends."
+      }
+    ]
+  },
+  "gui/tabs/input_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "InputTab",
+        "lineno": 14,
+        "doc": "A Qt tab that provides a multiline text editor for raw user input.\n\nThis input can later be used to generate AI prompts or be directly submitted."
+      }
+    ]
+  },
+  "gui/tabs/plan_tracker_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "list_summaries_json",
+        "lineno": 11,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "PlanTrackerTab",
+        "lineno": 24,
+        "doc": "Plan tracker with Memory Viewer (read-only).\nNOTE: This is a candidate full-file; guarded replace via safe_replace.py is recommended."
+      }
+    ]
+  },
+  "gui/tabs/plan_tracker_tab_compat.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "PlanTrackerTab",
+        "lineno": 8,
+        "doc": "Compat wrapper: accept optional `plan_path` without breaking the base signature.\nIf the base exposes set_plan_path(), call it; otherwise stash as attribute."
+      }
+    ]
+  },
+  "gui/tabs/plan_tree_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "func",
+        "name": "_status_color",
+        "lineno": 20,
+        "doc": null
+      },
+      {
+        "type": "class",
+        "name": "PlanTreeTab",
+        "lineno": 23,
+        "doc": "Read-only tree/list view of plan phases/steps with a detail pane."
+      }
+    ]
+  },
+  "gui/tabs/prompt_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "PromptTab",
+        "lineno": 7,
+        "doc": "Prompt editor with direct API send.\nAdds: 'Send (API + Memory)' -> AIClient.send(include_memory=True)"
+      }
+    ]
+  },
+  "gui/tabs/response_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "ResponseTab",
+        "lineno": 20,
+        "doc": "A Qt tab that displays the AI-generated response.\n\nFor now, this is a read-only text area to display mock or pasted responses."
+      }
+    ]
+  },
+  "gui/tabs/run_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "RunTab",
+        "lineno": 7,
+        "doc": "Minimal Run tab (v1):\n  - Task selector (predefined safe tasks)\n  - Run/Stop buttons\n  - Log viewer (polls latest logs/leb/run_*.log)"
+      }
+    ]
+  },
+  "gui/tabs/tools_tab.py": {
+    "doc": null,
+    "defs": [
+      {
+        "type": "class",
+        "name": "ToolsTab",
+        "lineno": 45,
+        "doc": "Operational tools tab that runs project tools asynchronously via QProcess.\n\nFeatures:\n  - Live, non-blocking execution with \u201crunning\u2026/completed\u201d status.\n  - Status mirrored to the main window status bar.\n  - Buttons disabled during runs and re-enabled on completion.\n  - Per-run log file for every execution under logs/.\n  - Streaming parsing of lines:\n      * PROGRESS: {\"n\":1,\"m\":10,\"ok\":1,\"fail\":0,\"skipped\":0,\"label\":\"openai/gpt-4o-mini\"}\n      * SUMMARY:  {...final machine-readable summary...}"
+      }
+    ]
+  }
+}
