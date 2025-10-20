@@ -1,0 +1,344 @@
+# Roadmap Report
+
+Generated: 2025-10-19T09:54:18Z
+Active: 13D
+
+## Totals
+- complete: 160
+- in-progress: 0
+- active: 0
+- pending: 160
+- deferred: 0
+- blocked: 0
+
+## Active / In-Progress
+
+## Completed
+- 0.2.a: .gitignore and README present
+- 0.1: 0.1
+- 0.2: 0.2
+- 0.3: 0.3
+- 1.1: 1.1
+- 1.10: 1.10
+- 1.11: 1.11
+- 1.12: 1.12
+- 1.13: 1.13
+- 1.14: 1.14
+- 1.15: 1.15
+- 1.16: 1.16
+- 1.17: 1.17
+- 1.2: 1.2
+- 1.3: 1.3
+- 1.4: 1.4
+- 1.5: 1.5
+- 1.6: 1.6
+- 1.7: 1.7
+- 1.8: 1.8
+- 1.9: 1.9
+- 2.1: 2.1
+- 2.2: 2.2
+- 2.3: 2.3
+- 2.8: 2.8
+- 2.9: 2.9
+- 3.1: 3.1
+- 3.2: 3.2
+- 3.3: 3.3
+- 3.4: 3.4
+- 3.5: 3.5
+- 3.6: 3.6
+- 3.7: 3.7
+- 4.0R: 4.0R
+- 4.1.3: 4.1.3
+- 4.1.3b: 4.1.3b
+- 4.1.3c: 4.1.3c
+- 4.1.3d: 4.1.3d
+- 4.1.5: 4.1.5
+- 4.2: 4.2
+- 4.3: 4.3
+- 4.4: 4.4
+- 4.5: 4.5
+- 5.1: 5.1
+- 5.2: 5.2
+- 5.3: 5.3
+- 6.1: 6.1
+- 6.3: 6.3
+- 6.3.c: 6.3.c
+- 8.1: 8.1
+- 1.8: Add visual confirmation (status label) for saves/copies
+- 9.4: Agent UI extension
+- 9.5d: Agent UI wiring test (wiretest v1/v2)
+- 8.1: Agent console base
+- 7.1: Agent endpoints up (fallback acceptable)
+- 1.1.a: App boots
+- 7.9: Approvals watchdog for 8781/8770 (LAN bind recovery)
+- 4.3: Auto-log token usage and cost to interaction YAML
+- 9.3: Auto-poll + counts
+- 1.7.a: Auto-write to data/interactions/
+- 7.5: CI + Pack completeness
+- 4.1.3: Centralized error-capture runner integrated into inventory/reflection/model probe pipeline
+- 8.1: ChatGPT Agent for multistep non-code tasks (report/notes assembly)
+- 0.1.b: Confirm Windows + VSCode env
+- 0.1.a: Confirm base folders created
+- 1.12: Copy All as YAML (Input+Prompt+Response)
+- 1.3.a: Copy to clipboard works
+- 1.5: Create chat_tab
+- 1.10: Create core/prompt_formatter
+- 1.3: Create input_tab
+- 1.1: Create main
+- 1.2: Create main_window
+- 1.4: Create prompt_tab
+- 1.6: Create response_tab
+- 0.3: Create venv, requirements, and lock PyQt6 environment
+- 2.8: Deep inventory + dependency audit in place
+- 0.1: Define root project directory layout (C:\_Repos\PersistentAssistant)
+- 7.5c: Diagnostics page
+- 1.11.a: Dummy response writer working
+- 6.1: Enable Role GPTs (Architect / CodeGen / Reviewer) with pinned policies
+- 1.9: Enforce file headers and docstrings
+- 3.2: Fetch raw provider models
+- 6.3: GUI Run tab wired to LEB with live logs and status
+- 3.7: GUI tools tab: busy cursor, per-run logs, summaries
+- 4.1.3c: Hardened runner with robust argv parsing + insights export
+- 1.9.a: Headers present in all GUI/core files
+- 1.14.b: Immediate UI refresh
+- 1.7: Implement autosave on paste to YAML
+- 0.2: Initialize new Git repository and first commit
+- 3.1: Keys loader + sanity checks
+- 7.10: LAN bind + watchdog
+- 2.2: Load project metadata (paths, plan path) from simple YAML
+- 1.5.a: Loads chat.openai.com (manual login)
+- 7.2: MVP Smoke Test tool
+- 1.6.b: Manual log to YAML works
+- 5.3: Memory viewer in Plan tab (read-only first)
+- 1.10.a: Minimal structured prompt wrapper
+- 7.8: PWA Diagnostics v2 (secure, token prompt, buttons)
+- 1.6.a: Paste from clipboard works
+- 4.1.3b: Path normalization + cwd-agnostic execution across runner/probe
+- 3.7.b: Per-run logs logs/tool_run_*.log
+- 2.1.a: Persist last project choice
+- 5.1: Persistent memory (summarize interactions → memory store)
+- 7.5: Phone approvals + diagnostics
+- 1.14: Plan controls (Advance / Rollback)
+- 1.13: Plan tab (read-only) loads plan YAML and shows current
+- 7.7: Preflight parser/runner
+- 7.10: Preflight runner uplift (countdowns, bind assert)
+- 3.6: Probe models (ping) and mark health
+- 2.1: Project selector at startup (multi-project support)
+- 2.3: Project switching entry point (menu)
+- 2.3.a: Project → Switch… menu opens selector and persists session
+- 3.4: Provider docs + curated pricing/caps (override/scrape/baseline)
+- 0.3.a: PyQt6 + PyQt6-WebEngine installed
+- 9.1: Recent panel
+- 4.0R: Reflection Gate: verify existing GUI capability and handlers before any UI change
+- 2.8.b: Reports present: deep_inventory, deep_calls, docstring, imports, duplication
+- 5.2: Retrieve memory into prompt_formatter context window
+- 4.4: Robust error surfacing (keys/quota/4xx/5xx) with succinct user summary
+- PAL-100: Scaffold release layout + symlinked 'current'
+- 3.3: Schema validator with JSON SUMMARY
+- 7.5b: Secure HTTP approvals
+- 1.17: Self-Development Loop v1 (open improvement tasks)
+- 1.16: Self-Introspection v1 (write insights report from snapshot)
+- 1.15.a: Show file counts and link to snapshot
+- 1.13.a: Show phases/steps with statuses
+- 1.13.b: Show progress string (Phase/Step/Items)
+- 2.2.a: Show project name/path in status bar
+- 1.11: Simulate AI send (Prompt → Response)
+- 2.9: Snapshot-aware safe replace (use existing tools/safe_replace
+- 6.4.f: Standardize project summary pipeline
+- 1.15: Structure Runner (launch tools/structure_sync
+- Supervisor Consolidation: Supervisor Consolidation
+- 1.2.a: Tabs mount without errors
+- 1.8.a: Timed status messages visible
+- Tracker Plan Selector & Bridge UI: Tracker Plan Selector & Bridge UI
+- 4.1.3d: UI traffic-light models safe-replaced; SKIP logging explicit
+- 7.3: UI: Plan viewer reachable
+- 4.5: Unit tests for ai_client pricing and selection
+- 3.5: Update & promote models safely
+- 1.14.a: Update plan YAML in place
+- 3.7.a: Update/Probe/Check Keys buttons wired
+- 4.1.5: Wire Browser/API toggle; persist provider/model/mode to project_session
+- 6.3.c: Wire Run tab to LEB (GUI verified)
+- 4.2: Wire ai_client to 'Send to AI (API)' button
+- 9.2: Worker + plan endpoints
+- 1.12.a: Writes combined YAML and copies to clipboard
+- 1.16.a: data/insights/introspection_report.yaml
+- 1.17.a: data/tickets/task_*.yaml (created via UI)
+- 4.0R.a: deep_inventory refreshed
+- 4.0R.c: pack_reflection created
+- 4.0R.b: reflection_report.yaml created
+- 3.1.a: tools/_env.py + tools/check_api_keys.py
+- 3.3.a: tools/check_ai_models.py validates ai_models.yaml
+- 2.8.a: tools/deep_inventory.py generates reports
+- 3.2.a: tools/fetch_ai_models.py → ai_models_raw.yaml
+- 2.9.a: tools/get_expected_sha.py created
+- 3.6.a: tools/probe_models.py → data/insights/probe_report.json
+- 3.4.a: tools/provider_docs.py produces curated dynamic entries
+- 3.5.a: tools/update_ai_models.py → ai_models_tmp.yaml → ai_models.yaml
+
+## Pending
+- TRACKER.1: Generate project plan from tracker file
+- PLAN.1: Load and display a stepwise project plan in GUI
+- AI.1: Connect to ChatGPT (initially via embedded browser)
+- GUI.1: Create minimal Qt GUI with tabbed input/output interface
+- LOG.1: Persist all interactions (raw input, prompt, response) to disk
+- AI.2: Migrate to OpenAI API after legacy code analysis and memory integration
+- INTROSPECT.1: List files and summarize function inputs/outputs
+- 2.9.b: (optional) git pre-commit regenerates deep inventory
+- .github/workflows/ci.yml mirrors local command: .github/workflows/ci.yml mirrors local command
+- 2.10: 2.10
+- 2.4: 2.4
+- 3.8: 3.8
+- 4.1: 4.1
+- 4.1.1: 4.1.1
+- 4.1.2: 4.1.2
+- 4.1.4: 4.1.4
+- 6.2: 6.2
+- 6.4: 6.4
+- 6.4.a: 6.4.a
+- 6.4.b: 6.4.b
+- 6.4.c: 6.4.c
+- 6.5: 6.5
+- 7.1: 7.1
+- 7.2: 7.2
+- 7.3: 7.3
+- 7.4: 7.4
+- 7.5: 7.5
+- 9.1: 9.1
+- 9.2: 9.2
+- 9.3: 9.3
+- 9.4: 9.4
+- 6.4.c: Add Agent Watchdog + Alerting
+- 6.4.a: Add Windows CI workflow (GitHub Actions)
+- 8.1: Agent Console base + approvals/NEXT wired
+- 9.5e: Agent UI bind fix
+- 9.5: Agent UX harden
+- 9.0: Agent UX/Worker
+- 9.5m: Agent bind appfile v1
+- 9.5m2: Agent bind appfile v2 + plan sync 9.5
+- 9.5j: Agent bind scan v4
+- 9.5f: Agent endpoints hardbind
+- 9.5h: Agent hardensure v3
+- P3: Agentic Execution (Adapters)
+- 9.5q: App registry bind v1 + reverify
+- 4.3.a: Append provider/model/tokens/cost
+- 6.5: Apply patch (local) workflow via LEB using unified diff
+- PAL-106: Approval & ideas endpoints (finish the small bits)
+- Artifacts: logs, JUnit XML, coverage HTML: Artifacts: logs, JUnit XML, coverage HTML
+- PAL-012: AuthN/AuthZ (GitHub OAuth or signed links)
+- 9.5b: Auto-process cadence toggle
+- 6.4.g: CI gate + verify in Actions
+- 9.1.b: CI must pass
+- 6.4: CI parity (GitHub Actions on windows-latest)
+- 4.1.2: Capability cataloging: record model capability tags after successful ping
+- 9.6-P4: Centralize plan path (remove hard-coded references)
+- 9.1: Codex Agent for repo edits/tests/PRs (human approval required)
+- PAL-010: Color-coded task tree; status transitions; notes
+- 5.2.a: Configurable include rules
+- 6.4.e: Consolidate inventory/report tools
+- PAL-003: Constitution checks in CI (headers/tests/lint/format)
+- PAL-030: Cost/time logger (per task/PR)
+- P1: Cutover & SSOT Hardening
+- 2.10: Deep inventory includes dunder files (e
+- PAL-002: Define YAML schemas + Pydantic models
+- P6: Desktop Base App (Optional)
+- PAL-020: Doc->YAML converter (ChatGPT-5 adapter)
+- 9.6-P1: Docs (TOOLS.md, PROCESS.md)
+- PAL-021: Execute work items via Claude Code 4.5
+- PAL-040: Export YAML -> Spec-Kit MD
+- 2.4: File-integrity protocol (manifest + safe replace + drift verify)
+- 4.1.a: Filter to chat-capable & healthy models
+- 9.5k: Flask monkeypatch bind v1
+- 8.1.a: Guarded by project autonomy policy
+- PAL-031: Harvest stable utilities from legacy
+- 6.1.b: Headers with Feature-ID enforced in outputs
+- PAL-105: Health & rollback E2E tests (CI)
+- PAL-022: Implement wrapper (validate -> approve -> PR)
+- PAL-041: Import Spec-Kit MD -> YAML
+- 9.8: Inbound AI processing pipeline v1
+- 7.6: LLM provider adapter (stub→API by config)
+- 9.7: Lessons loop and schema modification process
+- 5.3.a: List & open summaries
+- 6.2: Local Exec Bridge (LEB) service for local run & safe patch apply
+- 9.12: MVP alignment checkpoint
+- 7.0: MVP v0.1 Sprint
+- PAL-103: Minimal desktop launcher (tray/window)
+- 4.1: Model & Mode UI (OpenAI-only now): provider lock, model dropdown from ai_models
+- 4.1.1: Model probe matrix (parallel): ping status per model; summarize failures for parallel fixes
+- 7.1.a: No full-document storage
+- PAL-011: Offline-safe idea capture -> promote-to-task flow
+- 6.3.a: One-click local test; red/green badge
+- 4.4.a: One-line UI summary + detailed log file
+- 4.2.b: OpenAI-only gate via UI toggle
+- 3.8: Optional pricing overrides file
+- 9.11: Outbound prompt contractor v2
+- PAL-101: PAL-Web FastAPI + WS endpoints
+- 9.1.a: PR template with Feature-ID and checklist
+- 6.5.a: Parse diff → per-file expected SHA → safe replace
+- 9.5g: Parser deferred attach (agent actions + parser v1.1)
+- 4.1.b: Persist selection in project_session.yaml
+- Persistent Assistant Lite: Persistent Assistant Lite
+- Phase 0: Foundation Setup: Phase 0: Foundation Setup
+- Phase 1: MVP Interface Foundations: Phase 1: MVP Interface Foundations
+- Phase 2: Project Context + Selection: Phase 2: Project Context + Selection
+- Phase 3: Model Catalogue & Providers: Phase 3: Model Catalogue & Providers
+- Phase 4: OpenAI-first API Send Path: Phase 4: OpenAI-first API Send Path
+- Phase 5: Memory & Persistence: Phase 5: Memory & Persistence
+- Phase 6: Orchestration Roles & Local Execution: Phase 6: Orchestration Roles & Local Execution
+- Phase 7: Research & Registry (Enable later): Phase 7: Research & Registry (Enable later)
+- Phase 8: Agentic Automation (Non-code chores): Phase 8: Agentic Automation (Non-code chores)
+- Phase 9: Repo-aware PR Flow: Phase 9: Repo-aware PR Flow
+- 7.8: Phone approvals E2E hook
+- PAL-13D: Phone auth + unified launcher
+- Phone authentication + unified launcher: Phone authentication + unified launcher
+- M0: Phone/Web Link Reliability (Unbreakable)
+- P2: Phone/Web UX & Workflow
+- 9.5c: Plan counts + foldable tree
+- 13.0: Project: BarSim
+- 14.0: Project: Cooling Optimization
+- 12.0: Project: Suspension Optimization
+- 7.7: Promote server package
+- PAL-050: Qt base shell integrating phone UI and logs
+- PAL-001: Quarantine legacy tree and create PAL skeleton
+- 9.6-P0: Registry + Gate + Pack discipline
+- 9.6-P3: Reply enforcement (assistant_reply_v2 director)
+- 4.2.a: Reply → Response tab; errors → Tools status/log
+- 6.4.b: Run CI smoke (tests minimal) and upload logs
+- P5: Spec-Kit Bridge (Optional)
+- 9.5a: Status lights + thinking timer
+- P4: Telemetry & Harvest
+- 6.2.b: Token auth; localhost bind only
+- 9.6: Tooling and process hardening
+- 9.10: Tooling consolidation policy (Python primary)
+- 9.6-P2: UI Tools panel
+- 9.8.7: UI endpoint tests + health
+- 9.4: UI extension + endpoints live
+- 9.8.1: UI notify start (desktop+phone)
+- 4.1.4: UI shows traffic-light status for models from probe matrix
+- 9.9: UI signals and traffic lights
+- PAL-104: Watchdog + scheduled task + rollback
+- 7.4: Watchdog schedule + backoff
+- 7.2.a: Wire ingest to registry entries
+- 9.5n: Wrapper bind appvars v1 + full wiretest
+- PAL-102: YAML SSOT atomic IO (pydantic + atomic writes)
+- 9.7.2: assistant_reply_contract lessons
+- 9.10.2: avoid duplicates enforcement
+- 9.8.6: code tests/smoke where applicable
+- 3.8.a: config/provider_pricing_overrides.yaml supported
+- 6.1.a: docs/gpt/architect.md, codegen.md, reviewer.md created
+- 9.7.3: gate prehook linter
+- 6.2.a: leb/main.py FastAPI: /run-tests, /apply-patch
+- 5.1.a: memory/summary_*.yaml
+- 9.8.3: pre-exec parser for fixable errors
+- 9.8.2: schema update + lessons apply
+- 9.8.8: schema-compliant summary + push to UIs
+- 9.7.1: schemas_current lessons+process
+- 9.8.4: script run (non-interactive)
+- string: string
+- 9.8.5: system diagnostics + logs pack
+- 4.5.a: tests/test_ai_client_costs.py
+- 9.10.1: tool registry and discovery
+- 2.4.a: tools/file_manifest.py → project/structure/file_manifest.yaml
+- 2.4.b: tools/safe_replace.py gated by expected sha256
+- 2.4.c: tools/verify_against_manifest.py drift checker
+
+## Deferred/Blocked

@@ -1,8 +1,10 @@
 {
   "restart_counts": {
-    "heartbeat": 4,
-    "planrefresher": 4,
-    "bridgeui": 4
+    "heartbeat": 1,
+    "planrefresher": 1,
+    "bridgeui": 1,
+    "phonesvc": 1,
+    "tunnelsvc": 1
   },
-  "updated_ts": 1760801573.0908697
+  "updated_ts": 1760962190.465248
 }

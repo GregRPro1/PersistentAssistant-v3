@@ -1,0 +1,44 @@
+<!doctype html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PAL Phone Control</title>
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 12px; }
+  h1 { font-size: 18px; margin-bottom: 8px; }
+  .grid { display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr); }
+  button, input { padding: 12px; font-size: 16px; border-radius: 10px; border: 1px solid #ccc; }
+  .full { grid-column: 1 / -1; }
+  #out { white-space: pre-wrap; background: #f7f7f7; padding: 8px; border-radius: 8px; min-height: 64px; }
+</style>
+<h1>PAL Phone Control</h1>
+<div class="grid">
+  <button onclick="call('/queue', {cmd:'restart:heartbeat'})">Restart Heartbeat</button>
+  <button onclick="call('/queue', {cmd:'restart:planrefresher'})">Restart Plan</button>
+  <button onclick="call('/queue', {cmd:'restart:bridgeui'})">Restart UI</button>
+  <button onclick="call('/queue', {cmd:'restart:all'})">Restart All</button>
+
+  <input id="planId" placeholder="Plan ID (e.g., 13D)" />
+  <button onclick="call('/plan/select', {id:document.getElementById('planId').value})">Select Plan</button>
+
+  <input id="zipPath" class="full" placeholder='Zip Path (e.g., C:\\Users\\me\\Downloads\\pack.zip)' />
+  <button class="full" onclick="call('/apply-pack', {zip_path:document.getElementById('zipPath').value})">Apply Pack</button>
+
+  <input id="gitMsg" class="full" placeholder='Commit message' />
+  <button onclick="call('/git', {action:'status'})">Git Status</button>
+  <button onclick="call('/git', {action:'addall'})">Git Add All</button>
+  <button onclick="call('/git', {action:'commit', message:document.getElementById('gitMsg').value})">Git Commit</button>
+  <button onclick="call('/git', {action:'push'})">Git Push</button>
+
+  <button class="full" onclick="getHealth()">Health</button>
+  <div id="out" class="full"></div>
+</div>
+<script>
+const TOKEN = localStorage.getItem('PAL_TOKEN') || '';
+async function call(path, body) {
+  const r = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json', ...(TOKEN?{'Authorization':'Bearer '+TOKEN}:{})}, body:JSON.stringify(body||{})});
+  document.getElementById('out').textContent = JSON.stringify(await r.json(), null, 2);
+}
+async function getHealth() {
+  const r = await fetch('/health', {headers: {...(TOKEN?{'Authorization':'Bearer '+TOKEN}:{})}});
+  document.getElementById('out').textContent = JSON.stringify(await r.json(), null, 2);
+}
+</script>

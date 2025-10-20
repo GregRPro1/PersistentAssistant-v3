@@ -1,49 +1,37 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse, json, os, time
+import time, json, argparse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OPS_DIR = ROOT / "reports" / "ops"
-OPS_STATUS = OPS_DIR / "ops_status.json"
-HEARTBEAT = OPS_DIR / "heartbeat.json"
+OPS = ROOT / "reports" / "ops" / "ops_status.json"
 
-def now_payload():
-    ts = time.time()
-    return {
+def emit_once(status: str = "ok"):
+    OPS.parent.mkdir(parents=True, exist_ok=True)
+    now = time.time()
+    payload = {
         "component": "bridge",
-        "status": "ok",
-        "last_heartbeat_ts": ts,
-        "updated_ts": ts,
-        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ts)),
+        "status": status,
+        "healthy": (status == "ok"),
+        "updated_ts": now,
+        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)),
+        "heartbeat_ts": now,
     }
-
-def write_json(p: Path, data):
-    p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_suffix(p.suffix + ".tmp")
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, p)
-
-def emit_once():
-    payload = now_payload()
-    write_json(OPS_STATUS, payload)
-    write_json(HEARTBEAT, payload)
-    print(f"[OK] emitted -> {OPS_STATUS}")
+    tmp = OPS.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(OPS)
+    print(f"[OK] emitted -> {OPS}")
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--loop", type=int, default=0, help="Emit every N seconds")
+    ap.add_argument("--loop", type=int, default=10, help="seconds; 0 = once")
     args = ap.parse_args()
     if args.loop and args.loop > 0:
-        try:
-            while True:
-                emit_once()
-                time.sleep(args.loop)
-        except KeyboardInterrupt:
-            print("[OK] stopped")
+        while True:
+            emit_once("ok")
+            time.sleep(args.loop)
     else:
-        emit_once()
+        emit_once("ok")
 
 if __name__ == "__main__":
     main()

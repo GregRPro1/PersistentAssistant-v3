@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="grid">
+  <div class="card">
+    <div class="card-title">Supervisor Status <span id="supDot" class="health-dot dot-red"></span></div>
+    <div id="services"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Tunnel</div>
+    <div class="mono" id="tunnelHost">—</div>
+    <div class="row"><button class="btn" id="sendNowBtn">Send to phone</button></div>
+    <div class="muted">Requires WhatsApp Cloud API env vars.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Plan</div>
+    <div id="planBlock" class="mono">No plan loaded</div>
+    <div class="row"><button class="btn" id="planRestartBtn">Restart Plan Refresher</button></div>
+  </div>
+  <div class="card span-2">
+    <div class="card-title">Diagnostics</div>
+    <pre id="logTail" class="log"></pre>
+  </div>
+</section>
+{% endblock %}

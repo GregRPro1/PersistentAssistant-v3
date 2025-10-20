@@ -1,0 +1,983 @@
+{
+  "findings": [
+    {
+      "file": "core\\project_session.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "gui\\main_window.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "server\\agent_actions_v5.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "server\\agent_actions_v6.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "server\\agent_actions_v7.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tests\\test_context_pack.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\main_window_fixed.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\main_window_with_tree.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\memory_list_fixed.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\memory_list_v2.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\plan_tracker_tab_fixed.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\check_project_index.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\export_insights.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\mark_29_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\memory_list.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\memory_sanitize.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\phase4_reorder.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\phone_digest.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_41_parallel.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_210_dunder.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_413b_paths.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_413c_runner.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_413d_ui.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_413_capture.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_414_traffic.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_415_toggle.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_64_ci.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_add_phone_73.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_fix_current_next.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_insert_40R.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_insert_audit_steps.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_insert_phase7.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_mark_51_52.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_mark_52_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_mark_52_ip.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_mark_53_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_mark_63c.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_mark_63c_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_mark_63_ip.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\plan_mark_64_ip.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\show_next_step.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\pa_diag_runner.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\plan_merge.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\plan_step_add.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\plan_step_update.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\agentic\\auto_next.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\agentic\\context_pack.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\agentic\\sample_proposal.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\pack\\enrich_pack.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\plan\\build_plan_texts.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tools\\py\\plan\\normalize_plan_yaml.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\run\\catalog_tools.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\run\\merge_plan_governance.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\run\\plan_append_97_912.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\candidates\\main_window_fixed.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\candidates\\main_window_with_tree.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\candidates\\memory_list_fixed.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\candidates\\memory_list_v2.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\candidates\\plan_tracker_tab_fixed.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\tools_staging\\plan_mark_42_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\tools_staging\\plan_mark_43_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\tools_staging\\plan_mark_44_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\tools_staging\\plan_mark_45_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tmp\\archive\\tools_staging\\plan_mark_61_done.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "tests\\smoke\\test_plan_includes_devsteps.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\bridge_ui\\app.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "active_plan",
+          "note": "expects old 'active_plan' key"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\ops\\mark_plan_13C_complete.py",
+      "hits": [
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\plan\\mark_task.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\smoke\\smoke_plan_13C_done.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\smoke\\smoke_plan_promoted.py",
+      "hits": [
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\smoke\\smoke_plan_selected.py",
+      "hits": [
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\smoke\\smoke_roadmap_coherence.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "consolidated_roadmap\\.yaml",
+          "note": "new roadmap file"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\tools\\consolidate_roadmap.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "active_plan",
+          "note": "expects old 'active_plan' key"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        },
+        {
+          "pattern": "consolidated_roadmap\\.yaml",
+          "note": "new roadmap file"
+        },
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\tools\\consolidate_roadmap_v2.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        },
+        {
+          "pattern": "consolidated_roadmap\\.yaml",
+          "note": "new roadmap file"
+        },
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\tools\\scan_and_bundle_plans.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\tools\\scan_plan_schema_compat.py",
+      "hits": [
+        {
+          "pattern": "active_plan",
+          "note": "expects old 'active_plan' key"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\tracker\\start_tracker_with_plan.py",
+      "hits": [
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        }
+      ]
+    },
+    {
+      "file": "scripts\\utils\\plan_refresher.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "active_plan",
+          "note": "expects old 'active_plan' key"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        },
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        }
+      ]
+    },
+    {
+      "file": "pal\\ui\\desktop\\pal_tracker.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "pal\\ui\\desktop\\pal_tracker_plan_loader.py",
+      "hits": [
+        {
+          "pattern": "selected_plan",
+          "note": "uses _state/plan_status.json selected_plan"
+        }
+      ]
+    },
+    {
+      "file": "pal\\scripts\\py\\pal_add_goalposts.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "pal\\scripts\\py\\pal_mark_done.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "pal\\scripts\\py\\pal_mark_status.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "pal\\scripts\\py\\pal_phase_tools.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "pal\\scripts\\py\\pal_update_status_from_smoke.py",
+      "hits": [
+        {
+          "pattern": "pal_project_plan\\.yaml",
+          "note": "hardcoded path to old plan"
+        },
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": "gui\\tabs\\plan_tree_tab.py",
+      "hits": [
+        {
+          "pattern": "\\bplans\\b",
+          "note": "expects 'plans' dict schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\jinja2\\filters.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\jsonschema\\protocols.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\jsonschema\\validators.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\werkzeug\\debug\\repr.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\jsonschema\\benchmarks\\subcomponents.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\jsonschema\\benchmarks\\validator_creation.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\jsonschema\\tests\\test_cli.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\jsonschema\\tests\\test_exceptions.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    },
+    {
+      "file": ".venv\\Lib\\site-packages\\jsonschema\\tests\\test_validators.py",
+      "hits": [
+        {
+          "pattern": "items\\\",?\\s*:",
+          "note": "expects 'items' list schema"
+        }
+      ]
+    }
+  ]
+}

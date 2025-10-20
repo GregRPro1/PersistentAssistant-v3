@@ -1,12 +1,14 @@
-phase: Phase-R1
-tasks:
-  - id: 13A
-    title: Extraction & watchdog applier
+plans:
+  '13B':
+    title: Tracker Plan Selector & Bridge UI
     status: complete
-  - id: 13B
-    title: Tracker & Bridge UI
-    status: complete
-  - id: 13C
+    notes: UI at http://127.0.0.1:5070, auto-refresh 2s, controls wired to 6060
+  '13C':
     title: Supervisor Consolidation
-    status: active
-next_phase_target: Simplified single-command launch
+    status: complete
+    notes: Control API at 6060 (/ /status /health /control), restart-all, rotation, counters
+  '13D':
+    title: Phone authentication + unified launcher
+    status: pending
+    notes: Next target
+active_plan: '13D'

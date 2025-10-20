@@ -1,3 +1,16 @@
-recent_activity:
-  - 2025-10-18: Completed PAL20251013A and 13B (Bridge UI online)
-  - 2025-10-18: Promoted to PAL20251018A – Supervisor Consolidation
+milestones:
+  PAL-13B:
+    name: Tracker Plan Selector & Bridge UI
+    state: done
+    evidence:
+      - ui: http://127.0.0.1:5070
+  PAL-13C:
+    name: Supervisor Consolidation
+    state: done
+    evidence:
+      - control: http://127.0.0.1:6060
+      - endpoints: ["/","/status","/health","/control"]
+  PAL-13D:
+    name: Phone auth + unified launcher
+    state: todo
+current: PAL-13D

@@ -1,0 +1,8 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PAL — Supervisor & Bridge</title><link rel="stylesheet" href="/static/app.css"></head>
+<body>
+<header class="topbar"><div class="title">PAL — Supervisor & Bridge</div><div class="toolbar"><button id="helpBtn" class="btn">Help</button></div></header>
+<main class="container">{% block content %}{% endblock %}</main>
+<div id="helpModal" class="modal hidden"><div class="modal-content"><div class="modal-header"><h3>Window Help</h3><button id="helpClose" class="btn">×</button></div>
+<div class="modal-body"><p>Supervisor, Tunnel, Plan, and Diagnostics panels. Use “Restart Plan Refresher” if the plan stalls.</p></div></div></div>
+<script src="/static/app.js"></script></body></html>

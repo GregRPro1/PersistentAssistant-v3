@@ -1,240 +1,189 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import subprocess, time, json, os, sys, threading, shutil, signal
+import os, sys, time, json, subprocess, threading, signal, urllib.request, traceback, argparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
-from pathlib import Path
-from typing import Dict, List, Optional
 
-ROOT = Path(__file__).resolve().parents[2]
-LOG = ROOT / "reports" / "ops" / "supervisor.log"
-STATUS = ROOT / "reports" / "ops" / "ops_status.json"
-STATS = ROOT / "reports" / "ops" / "supervisor_stats.json"
-CFG = ROOT / "config" / "pal_settings.yaml"
+REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+LOG_DIR = os.path.join(REPO, "reports", "ops")
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG = os.path.join(LOG_DIR, "supervisor.log")
+STATS = os.path.join(LOG_DIR, "supervisor_stats.json")
 
-venv_py = ROOT / ".venv" / "Scripts" / "python.exe"
-PY = str(venv_py) if venv_py.exists() else sys.executable
+CTRL_HOST, CTRL_PORT = "127.0.0.1", 6060
+CHECK_INTERVAL = 5
+PY = sys.executable or "python"
 
-DEFAULTS = {"check_interval":5,"stale_ops":30,"stale_plan":60,"max_misses":3,
-            "log_rotate_mb":5,"log_keep":7,"flap_window":180,"flap_limit":5,"cooldown_sec":60,
-            "ctrl_host":"127.0.0.1","ctrl_port":6060,"ui_port":5070}
-
-def _yaml_load(p: Path) -> dict:
-    try:
-        import yaml
-        with p.open("r", encoding="utf-8") as f:
-            return (yaml.safe_load(f) or {})
-    except Exception:
-        return {}
-
-def load_cfg() -> dict:
-    data = _yaml_load(CFG)
-    sup = (data or {}).get("supervisor", {}) if isinstance(data, dict) else {}
-    cfg = DEFAULTS.copy()
-    if isinstance(sup, dict):
-        for k,v in sup.items():
-            if k in cfg: cfg[k] = v
-    return cfg
-
-CFGV = load_cfg()
-
-def log(msg: str) -> None:
-    LOG.parent.mkdir(parents=True, exist_ok=True)
-    line = time.strftime("%Y-%m-%d %H:%M:%S ") + msg
-    with LOG.open("a", encoding="utf-8") as f: f.write(line + "\n")
+def log(msg):
+    ts = time.strftime("%Y-%m-%d %H:%M:%S"); line = f"{ts} {msg}"
     print(line, flush=True)
-    _rotate_if_needed()
-
-def _rotate_if_needed() -> None:
     try:
-        mx = int(CFGV.get("log_rotate_mb", DEFAULTS["log_rotate_mb"])) * 1024 * 1024
-        if LOG.exists() and LOG.stat().st_size >= mx:
-            ts = time.strftime("%Y%m%d-%H%M%S")
-            dst = LOG.with_name(f"supervisor-{ts}.log")
-            shutil.move(str(LOG), str(dst))
-            keep = int(CFGV.get("log_keep", DEFAULTS["log_keep"]))
-            logs = sorted(LOG.parent.glob("supervisor-*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
-            for old in logs[keep:]:
-                try: old.unlink()
-                except Exception: pass
-    except Exception:
-        pass
+        with open(LOG, "a", encoding="utf-8") as f: f.write(line+"\n")
+    except: pass
 
-SERVICES_CMDS = {
-    "heartbeat": [PY, "scripts/ops/emit_bridge_heartbeat.py", "--loop", "10"],
+# ignore Ctrl+C / console ctrl events
+try: signal.signal(signal.SIGINT, lambda *_: log("[WARN] SIGINT ignored"))
+except: pass
+try:
+    import ctypes
+    from ctypes import wintypes
+    PH = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.DWORD)
+    def _ctrl(t):
+        if t in (0,1): log("[WARN] Console CTRL event ignored"); return True
+        return False
+    ctypes.windll.kernel32.SetConsoleCtrlHandler(PH(_ctrl), True)
+except: pass
+
+ALL_SERVICES = {
+    "heartbeat":     [PY, "scripts/ops/emit_bridge_heartbeat.py", "--loop", "10"],
     "planrefresher": [PY, "scripts/utils/plan_refresher.py", "--loop", "10"],
-    "bridgeui": [PY, "scripts/bridge_ui/app.py", "--host", "0.0.0.0", "--port", str(CFGV.get("ui_port", DEFAULTS["ui_port"]))],
+    "bridgeui":      [PY, "scripts/bridge_ui/app.py", "--host", "0.0.0.0", "--port", "5070"],
+    "phonesvc":      [PY, "scripts/phone/phone_bridge.py"],
+    "tunnelsvc":     ["powershell", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", "scripts/tunnel/run_cloudflared_quick.ps1"],
 }
-HEARTBEAT_FILES = [ROOT / "reports" / "ops" / "ops_status.json", ROOT / "_state" / "plan_status.json"]
 
-class Service:
-    def __init__(self, name: str, cmd: List[str]) -> None:
-        self.name=name; self.cmd=cmd; self.proc: Optional[subprocess.Popen]=None; self.misses=0
-        self.restart_times: List[float] = []
+state, restart_counts = {}, {}
 
-    def start(self) -> None:
-        self.proc = subprocess.Popen(self.cmd, cwd=ROOT)
-        log(f"[START] {self.name} PID={self.proc.pid} CMD={' '.join(self.cmd)}")
-
-    def alive(self) -> bool:
-        return self.proc is not None and self.proc.poll() is None
-
-    def stop(self, timeout: float=5.0) -> None:
-        if self.proc and self.proc.poll() is None:
-            try:
-                self.proc.terminate()
-                try: self.proc.wait(timeout=timeout)
-                except subprocess.TimeoutExpired: self.proc.kill()
-            except Exception: pass
-
-    def restart(self) -> None:
-        now = time.time()
-        self.restart_times = [t for t in self.restart_times if now - t < float(CFGV.get("flap_window", 180))]
-        self.restart_times.append(now)
-        if len(self.restart_times) > int(CFGV.get("flap_limit", 5)):
-            cool = float(CFGV.get("cooldown_sec", 60))
-            log(f"[BACKOFF] {self.name} flapping; cooling {cool:.0f}s")
-            time.sleep(cool)
-        log(f"[RESTART] {self.name}"); self.stop(); self.start()
-        _inc_crash(self.name)
-
-def _fresh(p: Path, secs: float) -> bool:
-    if not p.exists(): return False
-    try: return (time.time() - p.stat().st_mtime) <= secs
-    except Exception: return False
-
-def overall_health() -> bool:
-    return _fresh(HEARTBEAT_FILES[0], float(CFGV.get("stale_ops", 30))) and _fresh(HEARTBEAT_FILES[1], float(CFGV.get("stale_plan", 60)))
-
-def _inc_crash(name: str) -> None:
+def save_stats():
     try:
-        STATS.parent.mkdir(parents=True, exist_ok=True)
-        data = {}
-        if STATS.exists():
-            with STATS.open("r", encoding="utf-8") as f: data = json.load(f)
-        data.setdefault("restart_counts",{})
-        data["restart_counts"][name] = int(data["restart_counts"].get(name, 0)) + 1
-        data["updated_ts"] = time.time()
-        tmp = STATS.with_suffix(".json.tmp")
-        with tmp.open("w", encoding="utf-8") as f: json.dump(data, f, ensure_ascii=False, indent=2)
-        os.replace(tmp, STATS)
-    except Exception:
-        pass
+        with open(STATS,"w",encoding="utf-8") as f:
+            json.dump({"restart_counts": restart_counts, "updated_ts": time.time()}, f, indent=2)
+    except Exception as e: log(f"[ERR] save_stats: {e}")
 
-def write_status(services: Dict[str, 'Service']) -> None:
-    STATUS.parent.mkdir(parents=True, exist_ok=True)
-    data = {"timestamp": time.time(), "healthy": overall_health() and all(s.alive() for s in services.values()),
-            "services": {n: {"pid": (s.proc.pid if s.proc else None), "alive": s.alive(), "misses": s.misses} for n,s in services.items()}}
-    tmp = STATUS.with_suffix(".json.tmp")
-    with tmp.open("w", encoding="utf-8") as f: json.dump(data, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, STATUS)
+def spawn(cmd):
+    try:
+        # CREATE_NO_WINDOW
+        CREATE_NO_WINDOW = 0x08000000
+        si = None
+        if os.name == "nt":
+            si = subprocess.STARTUPINFO()
+            si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            si.wShowWindow = 0
+        return subprocess.Popen(cmd, cwd=REPO, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                creationflags=(CREATE_NO_WINDOW if os.name=="nt" else 0), startupinfo=si)
+    except Exception as e:
+        log(f"[ERR] spawn failed: {' '.join(cmd)} -> {e}")
+        return None
 
-class Supervisor:
-    def __init__(self) -> None:
-        self.services: Dict[str, Service] = {n: Service(n,c) for n,c in SERVICES_CMDS.items()}
-        self.lock = threading.Lock()
-        self._stop = threading.Event()
-    def start_all(self) -> None:
-        for s in self.services.values(): s.start()
-    def restart_all(self) -> None:
-        for s in self.services.values(): s.restart()
-    def loop(self) -> None:
-        check_iv = float(CFGV.get("check_interval", 5))
-        max_misses = int(CFGV.get("max_misses", 3))
-        while not self._stop.is_set():
-            time.sleep(check_iv)
-            healthy = overall_health()
-            with self.lock:
-                for s in self.services.values():
-                    if not s.alive():
-                        log(f"[DOWN] {s.name}"); s.restart(); s.misses = 0
-                    elif not healthy:
-                        s.misses += 1; log(f"[MISS] {s.name} {s.misses}/{max_misses}")
-                        if s.misses >= max_misses: s.restart(); s.misses = 0
-                    else:
-                        s.misses = 0
-                write_status(self.services)
-    def shutdown(self):
-        self._stop.set()
-        for s in self.services.values(): s.stop()
+def start(name, services):
+    if state[name]["alive"]: return
+    p = spawn(services[name])
+    if p and getattr(p, "pid", None):
+        state[name].update(pid=p.pid, alive=True, misses=0)
+        log(f"[START] {name} PID={p.pid} CMD={' '.join(services[name])}")
+    else:
+        state[name].update(pid=None, alive=False); log(f"[DOWN] {name} failed to start")
 
-sup = Supervisor()
+def stop(name):
+    pid = state[name]["pid"]; 
+    if not pid: state[name].update(alive=False); return
+    try: os.kill(pid, signal.SIGTERM)
+    except: pass
+    state[name].update(pid=None, alive=False, misses=0); log(f"[OK] stopped {name}")
 
-class Handler(BaseHTTPRequestHandler):
-    def _cors(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+def restart(name, services):
+    stop(name); time.sleep(0.4); start(name, services)
+    restart_counts[name] = restart_counts.get(name,0)+1; log(f"[RESTART] {name}"); save_stats()
+
+def is_alive(pid):
+    if not pid: return False
+    try: os.kill(pid, 0); return True
+    except: return False
+
+def http_ok(url, timeout=1.0):
+    try:
+        with urllib.request.urlopen(url, timeout=timeout) as r: return 200 <= r.status < 300
+    except: return False
+
+def singleton_guard():
+    if http_ok(f"http://{CTRL_HOST}:{CTRL_PORT}/health"): 
+        log("[WARN] Another supervisor instance active — exiting."); sys.exit(0)
+
+class H(BaseHTTPRequestHandler):
+    def _json(self, code=200, obj=None):
+        b = json.dumps(obj or {}).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type","application/json")
+        self.send_header("Access-Control-Allow-Origin","*")
+        self.send_header("Access-Control-Allow-Methods","GET,POST,OPTIONS")
+        self.end_headers(); self.wfile.write(b)
     def do_OPTIONS(self):
-        self.send_response(200); self._cors(); self.end_headers()
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin","*")
+        self.send_header("Access-Control-Allow-Methods","GET,POST,OPTIONS")
+        self.send_header("Access-Control-Allow-Headers","Content-Type")
+        self.end_headers()
     def do_GET(self):
-        parsed = urlparse(self.path)
-        if parsed.path in ("/",""):
-            write_status(sup.services); body = STATUS.read_text(encoding="utf-8")
-            html = ("<!doctype html><html><head><meta charset='utf-8'><title>PAL Control</title>"
-                    "<style>body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:24px}"
-                    "button{margin-right:8px;padding:6px 10px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer}"
-                    "pre{white-space:pre-wrap;background:#fafafa;border:1px dashed #ddd;padding:8px;border-radius:8px;max-height:260px;overflow:auto}</style>"
-                    "</head><body><h1>PAL Supervisor Control</h1>"
-                    "<p><a href='/status'>/status</a> returns JSON:</p><pre>" + body + "</pre>"
-                    "<div>"
-                    "<button onclick=\"fetch('/control?service=heartbeat&action=restart',{method:'POST'})\">Restart Heartbeat</button>"
-                    "<button onclick=\"fetch('/control?service=planrefresher&action=restart',{method:'POST'})\">Restart Plan</button>"
-                    "<button onclick=\"fetch('/control?service=bridgeui&action=restart',{method:'POST'})\">Restart UI</button>"
-                    "<button onclick=\"fetch('/control?service=all&action=restart',{method:'POST'})\">Restart All</button>"
-                    "</div>"
-                    "<p>UI dashboard: <a href='http://127.0.0.1:" + str(CFGV.get("ui_port", 5070)) + "/' target='_blank'>http://127.0.0.1:" + str(CFGV.get("ui_port", 5070)) + "/</a></p>"
-                    "</body></html>")
-            self.send_response(200); self._cors(); self.send_header("Content-Type","text/html; charset=utf-8"); self.end_headers()
-            self.wfile.write(html.encode("utf-8")); return
-        if parsed.path == "/status":
-            write_status(sup.services); body = STATUS.read_text(encoding="utf-8")
-            self.send_response(200); self._cors(); self.send_header("Content-Type","application/json"); self.end_headers()
-            self.wfile.write(body.encode("utf-8")); return
-        if parsed.path == "/health":
-            ok = overall_health()
-            self.send_response(200 if ok else 503); self._cors(); self.send_header("Content-Type","application/json"); self.end_headers()
-            self.wfile.write(json.dumps({"ok": bool(ok), "ts": time.time()}).encode("utf-8")); return
-        self.send_response(404); self._cors(); self.end_headers()
+        if self.path=="/status": return self._json(200, {"timestamp":time.time(),"healthy":True,"services":state})
+        if self.path=="/health": return self._json(200, {"ok":True,"ts":time.time()})
+        if self.path=="/": 
+            html="<html><body><h3>PAL Supervisor Control</h3><p><a href='/status'>/status</a> | <a href='/health'>/health</a></p></body></html>"
+            self.send_response(200); self.end_headers(); self.wfile.write(html.encode()); return
+        return self._json(404, {"error":"not found"})
     def do_POST(self):
-        parsed = urlparse(self.path)
-        if parsed.path == "/control":
-            qs = parse_qs(parsed.query)
-            svc = qs.get("service", [""])[0]; act = qs.get("action", [""])[0]
-            with sup.lock:
-                if svc == "all" and act in {"restart","stop","start"}:
-                    for s in sup.services.values(): getattr(s, act)()
-                    write_status(sup.services); self.send_response(200); self._cors(); self.end_headers(); return
-                s = sup.services.get(svc)
-                if not s: self.send_response(400); self._cors(); self.end_headers(); return
-                if act == "restart": s.restart()
-                elif act == "stop": s.stop()
-                elif act == "start": s.start()
-                else: self.send_response(400); self._cors(); self.end_headers(); return
-                write_status(sup.services)
-            self.send_response(200); self._cors(); self.end_headers()
-        else:
-            self.send_response(404); self._cors(); self.end_headers()
+        from urllib.parse import urlparse, parse_qs
+        if self.path.startswith("/control"):
+            q = parse_qs(urlparse(self.path).query)
+            svc=(q.get("service") or [""])[0]; act=(q.get("action") or [""])[0]
+            if svc=="all" and act=="restart": 
+                [restart(n,SERVICES_ACTIVE) for n in list(state.keys())]; return self._json(200, {"ok":True})
+            if svc in state and act=="restart": restart(svc,SERVICES_ACTIVE); return self._json(200, {"ok":True})
+            return self._json(400, {"error":"bad request"})
+        return self._json(404, {"error":"not found"})
 
-def main() -> int:
-    def _sig(*_):
-        log("[STOP] Supervisor stopping"); sup.shutdown(); sys.exit(0)
+def http_server_thread():
     try:
-        signal.signal(signal.SIGINT, _sig)
-        signal.signal(signal.SIGTERM, _sig)
-    except Exception:
-        pass
-    sup.start_all()
-    threading.Thread(target=sup.loop, daemon=True).start()
-    httpd = HTTPServer((str(CFGV.get("ctrl_host","127.0.0.1")), int(CFGV.get("ctrl_port",6060))), Handler)
-    log(f"[CTRL] Listening on http://{CFGV.get('ctrl_host','127.0.0.1')}:{CFGV.get('ctrl_port',6060)}")
+        httpd = HTTPServer((CTRL_HOST, CTRL_PORT), H)
+        log(f"[CTRL] Listening on http://{CTRL_HOST}:{CTRL_PORT}"); httpd.serve_forever()
+    except Exception as e:
+        log(f"[ERR] control server thread: {e}\n{traceback.format_exc()}")
+
+def monitor_thread():
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        log("[STOP] Supervisor stopping")
-    finally:
-        sup.shutdown()
-    return 0
+        for n in SERVICES_ACTIVE: start(n, SERVICES_ACTIVE)
+        while True:
+            try:
+                for n in list(SERVICES_ACTIVE.keys()):
+                    pid = state[n]["pid"]; alive = is_alive(pid)
+                    if not alive:
+                        if state[n]["alive"]: log(f"[DOWN] {n}")
+                        state[n]["alive"] = False; restart(n, SERVICES_ACTIVE); continue
+                    state[n]["alive"] = True
+                time.sleep(CHECK_INTERVAL)
+            except Exception as e:
+                log(f"[ERR] monitor loop: {e}\n{traceback.format_exc()}"); time.sleep(1.0)
+    except Exception as e:
+        log(f"[FATAL] monitor thread: {e}\n{traceback.format_exc()}")
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--skip-ui", action="store_true")
+    ap.add_argument("--skip-phone", action="store_true")
+    ap.add_argument("--skip-tunnel", action="store_true")
+    args = ap.parse_args()
+    global SERVICES_ACTIVE, state, restart_counts
+    SERVICES_ACTIVE = dict(ALL_SERVICES)
+    if args.skip_ui: SERVICES_ACTIVE.pop("bridgeui", None)
+    if args.skip_phone: SERVICES_ACTIVE.pop("phonesvc", None)
+    if args.skip_tunnel: SERVICES_ACTIVE.pop("tunnelsvc", None)
+    state = {n: {"pid":None,"alive":False,"misses":0} for n in SERVICES_ACTIVE}
+    restart_counts = {n:0 for n in SERVICES_ACTIVE}
+    singleton_guard()
+    t_http = threading.Thread(target=http_server_thread, name="ctrl", daemon=True)
+    t_mon  = threading.Thread(target=monitor_thread, name="mon", daemon=True)
+    t_http.start(); t_mon.start()
+    while True:
+        try:
+            if not t_http.is_alive():
+                log("[WARN] control thread died; restarting"); time.sleep(1.0)
+                t_http = threading.Thread(target=http_server_thread, name="ctrl", daemon=True); t_http.start()
+            if not t_mon.is_alive():
+                log("[WARN] monitor thread died; restarting"); time.sleep(1.0)
+                t_mon = threading.Thread(target=monitor_thread, name="mon", daemon=True); t_mon.start()
+            time.sleep(1.0)
+        except KeyboardInterrupt:
+            log("[WARN] KeyboardInterrupt trapped — continuing")
+        except Exception as e:
+            log(f"[ERR] main loop: {e}\n{traceback.format_exc()}"); time.sleep(1.0)
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

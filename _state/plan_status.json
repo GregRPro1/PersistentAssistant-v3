@@ -1,9 +1,9 @@
 {
-  "selected_plan": "Phase-R1",
-  "updated_ts": 1760801594.2194679,
+  "selected_plan": "13D",
+  "updated_ts": 1760968472.9049628,
   "tasks": [
-    "13A – Extraction & watchdog applier ✅",
-    "13B – Tracker & Bridge UI ✅",
-    "13C – Supervisor Consolidation ▶️"
+    "13B – Tracker Plan Selector & Bridge UI ✅",
+    "13C – Supervisor Consolidation ✅",
+    "13D – Phone authentication + unified launcher ▶"
   ]
 }

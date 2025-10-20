@@ -1,0 +1,398 @@
+{
+  "generated_at": 1760862962.4231772,
+  "root": "C:\\_Repos\\PersistentAssistant",
+  "count": 63,
+  "patterns": [
+    "*plan*.yaml",
+    "*plans*.yaml",
+    "project_plan*.yaml",
+    "pal_project_plan.yaml",
+    "master_project_tracker.yaml",
+    "*tracker*.yaml",
+    "_state/plan_status.json",
+    "reports/ops/ops_status.json",
+    "_context/**/bootstrap.md"
+  ],
+  "extra": [],
+  "include_state": true,
+  "files": [
+    {
+      "path": "pal_project_plan.yaml",
+      "size": 443,
+      "mtime": 1760801730.7229235,
+      "sha256": "1b93b1e0ce390c4345988b248187401889ecabd4b76b5693ff2db73d188c8c08"
+    },
+    {
+      "path": "plan_append.yaml",
+      "size": 6046,
+      "mtime": 1759293510.0,
+      "sha256": "73a1ff2decb3d2a23bfdc5f01db65c4b33ed2a3d2d61e79bfc75a00e0172646f"
+    },
+    {
+      "path": "config\\project_plan.yaml",
+      "size": 1003,
+      "mtime": 1755512432.4763887,
+      "sha256": "552c73b07617dd298b8621b53365f000d20510836979fb7a51c2148341f69885"
+    },
+    {
+      "path": "config\\reliability_plan.yaml",
+      "size": 683,
+      "mtime": 1760290750.2090476,
+      "sha256": "c162d61c0a6d748978eb5c97e811e97d1ba244e436549117d7c773cb0ae76354"
+    },
+    {
+      "path": "tmp\\plan_min.yaml",
+      "size": 85,
+      "mtime": 1757279082.2519624,
+      "sha256": "925bc8b1c85366f10cd4ff7318e1ea895512833c7b1cf8b6d8a09c1e97eaf1e2"
+    },
+    {
+      "path": "tmp\\backup\\project_plan_v3_20250826_074416.bak.yaml",
+      "size": 15518,
+      "mtime": 1756138281.706768,
+      "sha256": "1363997dc41f5b163ae0881f0ff304bcb1499c9cead7ed9524a8b8a37ec8e06f"
+    },
+    {
+      "path": "tmp\\backup\\project_plan_v3_before_history_20250826_075259.bak.yaml",
+      "size": 20438,
+      "mtime": 1756190657.1468503,
+      "sha256": "b95ff7a89b3ebc6421ec71fd8f7b4c6ff50a0ad0bed4e65c2e8f20923a139b6f"
+    },
+    {
+      "path": "tmp\\feedback\\plan_snapshot_20250826_074416.yaml",
+      "size": 20483,
+      "mtime": 1756190657.1768503,
+      "sha256": "4495c94ac630288e637ae2271e99b717d7b6a82cc45bd45b7f852c0cceb5d1b3"
+    },
+    {
+      "path": "tmp\\feedback\\plan_snapshot_history_20250826_075259.yaml",
+      "size": 23629,
+      "mtime": 1756191179.4124942,
+      "sha256": "6ef6e324fa0f489ab97a6c2f466bcd8bd6dbd4150c4eb62b167032d2621425ce"
+    },
+    {
+      "path": "tmp\\feedback\\project_plan_v3_20250826_074416.yaml",
+      "size": 20438,
+      "mtime": 1756190657.1468503,
+      "sha256": "b95ff7a89b3ebc6421ec71fd8f7b4c6ff50a0ad0bed4e65c2e8f20923a139b6f"
+    },
+    {
+      "path": "tmp\\feedback\\project_plan_v3_after_history_20250826_075259.yaml",
+      "size": 23584,
+      "mtime": 1756191179.382501,
+      "sha256": "444cbdbe4878e6a7cd84f9989b04c4ccb7f8c81dae2fb19a00421eedd1f1b654"
+    },
+    {
+      "path": "tmp\\feedback\\pack_6.4.a_20250826_221617.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_6.4.a_20250826_233541.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_agent_quickdiag_20250827_095151.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_diag_20250827_001811.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_diag_20250827_002009.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_diag_20250827_002357.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_diag_20250827_004116.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_diag_20250827_004506.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_diag_20250827_095151.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "tmp\\feedback\\pack_parse_health_20250827_010046.staging\\plan_snapshot.yaml",
+      "size": 26188,
+      "mtime": 1756235299.6171894,
+      "sha256": "492836cd22637980f26f56fe5bb952df48fdd1d30da3872d7de8b09d88d1a918"
+    },
+    {
+      "path": "project\\plans\\plan_texts_full.yaml",
+      "size": 23698,
+      "mtime": 1756495369.5630083,
+      "sha256": "d92e9fb5c7f62246cc5db7f7e3a4192eff7c304dbc6bae8a657435d615eb697d"
+    },
+    {
+      "path": "project\\plans\\project_plan_v3 - 202508191814.yaml",
+      "size": 9908,
+      "mtime": 1755623087.6762023,
+      "sha256": "4f7ae109adfda5559dcd90be842371eb419d15c5a4d7f3482de0ade77967e4a7"
+    },
+    {
+      "path": "project\\plans\\project_plan_v3 - 202508230651.yaml",
+      "size": 14913,
+      "mtime": 1755926793.8849223,
+      "sha256": "58ae62e028e46513503c70f2c1703c3e0d66cd2dcee625ad1d7d49e4f28017d2"
+    },
+    {
+      "path": "project\\plans\\project_plan_v3 - 202508260736.yaml",
+      "size": 15518,
+      "mtime": 1756138281.706768,
+      "sha256": "1363997dc41f5b163ae0881f0ff304bcb1499c9cead7ed9524a8b8a37ec8e06f"
+    },
+    {
+      "path": "project\\plans\\project_plan_v3 - 202508260753.yaml",
+      "size": 23584,
+      "mtime": 1756191179.382501,
+      "sha256": "444cbdbe4878e6a7cd84f9989b04c4ccb7f8c81dae2fb19a00421eedd1f1b654"
+    },
+    {
+      "path": "project\\plans\\project_plan_v3.normalized.yaml",
+      "size": 31312,
+      "mtime": 1756495369.7894242,
+      "sha256": "c6b62488647d64a98404435bc4263e15c7b220ca4c79cc770274462218e805f3"
+    },
+    {
+      "path": "project\\plans\\project_plan_v3.pre_normalized.yaml",
+      "size": 28420,
+      "mtime": 1756369724.0124404,
+      "sha256": "e2823640edd454afe1bc6500da50dc91e347adc5fbe2c645a75d5169cd2391f1"
+    },
+    {
+      "path": "project\\plans\\project_plan_v3.yaml",
+      "size": 93152,
+      "mtime": 1760185247.143025,
+      "sha256": "9d6e726bb01ec1042bf9836999c45bddbfadeb5fed26021d4ee8e65d1db645ca"
+    },
+    {
+      "path": "pal\\plan\\pal_project_plan.yaml",
+      "size": 6681,
+      "mtime": 1760220795.1234796,
+      "sha256": "f53a9145bfe667226dbe36462a5d30c5eba8d86f398873751ffc397b4d49c3b7"
+    },
+    {
+      "path": "dev_steps\\PA-102\\plan_steps_to_add.yaml",
+      "size": 3840,
+      "mtime": 1758967238.0,
+      "sha256": "baafa45c10fca1516df83b378de0ce3518e03f1ccff054211ea7171826b302c5"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_256125_plan_tracker_tab_missing_module_docstring.yaml",
+      "size": 516,
+      "mtime": 1755545218.2569616,
+      "sha256": "3a5c6b3e51eaa0070a64e13dd9465f8740a7e5e2e3b5fe89176fa0e31b23ada0"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_257328_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 537,
+      "mtime": 1755545218.257961,
+      "sha256": "f789bdf66473190448c62240c875567d4392cc81e80dbb26ecf40511112eccdf"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_258392_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 537,
+      "mtime": 1755545218.258961,
+      "sha256": "0b007289a22c2c230e568bfc5e10b4da30d6ae37e11443f3dd81f4024b8ddf83"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_259580_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 541,
+      "mtime": 1755545218.259961,
+      "sha256": "e9b045e66ab500614ca3796b9a33a34c39a32f7143d7e9d98525081ddb07abd3"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_260641_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 543,
+      "mtime": 1755545218.2608647,
+      "sha256": "6eb2aa6ef4feb50fc755a10bfb09019e312e582159294867c72dbc7a594b4e70"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_261826_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 545,
+      "mtime": 1755545218.2618701,
+      "sha256": "4a15bf4b55d33a77658c7bf446fe523b46b588244b70e191aef7ca6a6168139c"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_263007_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 549,
+      "mtime": 1755545218.2638698,
+      "sha256": "bb61de0c60365b84edec110f34b15a8a7dd378d45cf18bdf3b7b2530fc827227"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_264089_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 545,
+      "mtime": 1755545218.2648704,
+      "sha256": "123af43fb461bf085e2ff9458c46e26a07433956c455f0241e46172dc92b2f12"
+    },
+    {
+      "path": "data\\tickets\\task_20250818_202658_265144_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 547,
+      "mtime": 1755545218.2658703,
+      "sha256": "e86568c7b32f54f056a154c98f248d9560eacfbc41c8ff33bb1e127c9cb2a63d"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_979707_plan_tracker_tab_missing_module_docstring.yaml",
+      "size": 516,
+      "mtime": 1755587512.9797316,
+      "sha256": "5e0152b54371a7ff24ce49f675c0bf62c0c24b2afa291dc510cbaa1ffde94a8c"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_980923_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 537,
+      "mtime": 1755587512.9812088,
+      "sha256": "4ae935f0ba692f8bac3043de210c80e86cc32efb307842adf47561a7bebb068c"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_982168_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 537,
+      "mtime": 1755587512.9824033,
+      "sha256": "55808610ce072af42028fcd1d0cca2c3a3291fc2bd5506d88787fde62ea617d8"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_983370_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 541,
+      "mtime": 1755587512.9834085,
+      "sha256": "e519b277a662cd4e28d0315788220b52a8ab161d2b51044c07f9688ca2fadffc"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_984545_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 543,
+      "mtime": 1755587512.9854088,
+      "sha256": "bfc021e70c8b16b1e490ec90c284adb6057f8f953388d3a05c51ba4a03b60504"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_985737_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 545,
+      "mtime": 1755587512.986411,
+      "sha256": "7ab27296b243ced10ce94b714454e1680ca46fe8b7e17451ac612e5f049fc579"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_987030_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 549,
+      "mtime": 1755587512.9874098,
+      "sha256": "d083fb94502f1eeb5259e980f42851b219e74b28d56526c28b5f7164d76390e9"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_988198_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 545,
+      "mtime": 1755587512.98841,
+      "sha256": "741bcdc1209f2e852b5df312b5b448f3df94f3979bf41ad665336c24e9e174a9"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_081152_989297_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 547,
+      "mtime": 1755587512.9894094,
+      "sha256": "ad7170bac2ef0b5823a4d6257cccdc91d260aaf251f3ae1a8e204affb22a0422"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_880372_plan_tracker_tab_missing_module_docstring.yaml",
+      "size": 516,
+      "mtime": 1755589786.880736,
+      "sha256": "dd690c2a3bf0ea368564d567d70167e705f7a91b06b8d04108787fb7dc6e5aa5"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_881479_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 537,
+      "mtime": 1755589786.8817358,
+      "sha256": "021a6867363b441394481226a80c5ef0afd50145631fc312fa09b302fb3c096f"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_882604_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 537,
+      "mtime": 1755589786.8827376,
+      "sha256": "262786e6de7f818d2c9b6577c3620b679b275f18283f85a423d80170e30ae0a8"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_883701_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 541,
+      "mtime": 1755589786.8837383,
+      "sha256": "cae641cc7efe5c99defaa7c28c58022d243b6a857590953041042a3a316ec9c4"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_884872_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 543,
+      "mtime": 1755589786.885736,
+      "sha256": "298f3bf7182f46c653ed535a1715ff046fddde7bf0aa771ba3d4d68acc610fe3"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_885980_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 545,
+      "mtime": 1755589786.8867373,
+      "sha256": "81c6310de24d67ff351d2f75d8f5dff34a032bbefc87a1bbcd179d284fcd01ed"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_887299_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 549,
+      "mtime": 1755589786.887738,
+      "sha256": "792a43b5cb44688e9800ad22196a1c1d869b0482d1b7c1aeb61fdca4ec0942bd"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_888440_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 545,
+      "mtime": 1755589786.8887365,
+      "sha256": "3d2c964b9f08fa22ebfc4183a41365f750fe1fa113d460bcb66207c0f5aef618"
+    },
+    {
+      "path": "data\\tickets\\task_20250819_084946_889827_plan_tracker_tab_method_missing_doc.yaml",
+      "size": 547,
+      "mtime": 1755589786.8897371,
+      "sha256": "815c5af8e04b817d221d0c5db518e58f5814a27282acc6a535af0d08d9a0623e"
+    },
+    {
+      "path": "master_project_tracker.yaml",
+      "size": 386,
+      "mtime": 1760801730.7239244,
+      "sha256": "f0c7d49f205c8d505cab7a205b249618b794d7e4dda7848a80e8fd66f0cffdf6"
+    },
+    {
+      "path": "config\\master_project_tracker.yaml",
+      "size": 1383,
+      "mtime": 1755512465.4455884,
+      "sha256": "4f804fa4e20a88cdb501636633fd84aa9c4a3ba738522f63546ae72835564a46"
+    },
+    {
+      "path": "project\\tracker.yaml",
+      "size": 98,
+      "mtime": 1757265621.4548838,
+      "sha256": "ddc37426730be955426e1c4f81e67c73abc9933669ee284fa8c790e7449fc659"
+    },
+    {
+      "path": "_state\\plan_status.json",
+      "size": 250,
+      "mtime": 1760862952.6859396,
+      "sha256": "e063b0fa5f604db5f5f23698a2f26c1c59451a4b0f6b385bb165e3812b227c60"
+    },
+    {
+      "path": "reports\\ops\\ops_status.json",
+      "size": 183,
+      "mtime": 1760862952.5443163,
+      "sha256": "a6162373fe137175af03127ed83c0df6bf97f53106608148e786fe162f83a79c"
+    }
+  ]
+}
